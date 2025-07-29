@@ -8,7 +8,7 @@ DECIMAL_DECIMAL_PLACES = 2
 # Enum char field length
 # ======================
 ENUM_LENGTH = {
-    "DEFAULT": 1
+    "DEFAULT": 2
 }
 
 # ======================

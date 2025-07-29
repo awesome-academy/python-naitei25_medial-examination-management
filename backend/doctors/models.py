@@ -28,7 +28,7 @@ class Doctor(BaseModel):
     identity_number = models.CharField(max_length=PATIENT_LENGTH["IDENTITY"], unique=True)
     first_name = models.CharField(max_length=COMMON_LENGTH["NAME"])
     last_name = models.CharField(max_length=COMMON_LENGTH["NAME"])
-    birthday = models.DateField()
+    birthday = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=ENUM_LENGTH["DEFAULT"], choices=[(g.value, g.name) for g in Gender])
     address = models.CharField(max_length=COMMON_LENGTH["ADDRESS"], blank=True, null=True)
     academic_degree = models.CharField(

@@ -1,3 +1,4 @@
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     DepartmentViewSet,
@@ -12,4 +13,6 @@ router.register(r'examination-rooms', ExaminationRoomViewSet, basename='examinat
 router.register(r'doctors', DoctorViewSet, basename='doctor')
 router.register(r'schedules', ScheduleViewSet, basename='schedule')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+]
