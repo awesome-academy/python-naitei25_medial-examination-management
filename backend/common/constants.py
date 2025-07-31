@@ -3,6 +3,7 @@
 # ======================
 DECIMAL_MAX_DIGITS = 10
 DECIMAL_DECIMAL_PLACES = 2
+DECIMAL_DEFAULT = 0
 
 # ======================
 # Enum char field length
@@ -66,6 +67,7 @@ SERVICE_LENGTH = {
 # ======================
 PAYMENT_LENGTH = {
     "ITEM_TYPE": 20,
+    "STATUS": 2,
 }
 
 # ======================

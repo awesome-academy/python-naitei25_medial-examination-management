@@ -131,13 +131,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'vi'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = True
+
+USE_L10N = True
+
+LANGUAGES = [
+    ('vi', 'Vietnamese'),
+    ('en', 'English'),
+]
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -158,4 +168,16 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
+}
+
+PAYOS = {
+    'client_id': config('PAYOS_CLIENT_ID'),
+    'api_key': config('PAYOS_API_KEY'),
+    'checksum_key': config('PAYOS_CHECKSUM_KEY'),
+}
+
+CLOUDINARY = {
+    'cloud_name': config('CLOUDINARY_CLOUD_NAME'),
+    'api_key': config('CLOUDINARY_API_KEY'),
+    'api_secret': config('CLOUDINARY_API_SECRET'),
 }
