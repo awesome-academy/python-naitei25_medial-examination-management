@@ -1,24 +1,29 @@
-
 from django.conf import settings
 import payos
 from .models import Bill, BillDetail, Transaction
-from common.enums import PaymentStatus, TransactionStatus, ServiceType, PaymentMethod
 from .serializers import TransactionDTOSerializer
-from django.core.exceptions import ObjectDoesNotExist
+from common.enums import PaymentStatus, TransactionStatus, ServiceType, PaymentMethod
 from django.http import Http404
 from django.db import transaction as django_transaction
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.shortcuts import get_object_or_404
 from payos import PayOS, ItemData, PaymentData
 import logging
 
 logger = logging.getLogger(__name__)
+
 class BillService:
-    def get_all_bills(self, page, size):
+    def get_all_bills(self, page, size, sort_by='created_at', sort_order='desc'):
         if page <= 0:
-            raise ValueError("Số trang không được nhỏ hơn hoặc bằng 0")
+            raise ValueError(_("Số trang không được nhỏ hơn hoặc bằng 0"))
         if size < 1 or size > 100:
             size = 10
-        return Bill.objects.all()[(page - 1) * size:page * size]
+        valid_sort_fields = ['created_at', 'total_cost', 'amount', 'status']
+        if sort_by not in valid_sort_fields:
+            sort_by = 'created_at'
+        order_prefix = '-' if sort_order.lower() == 'desc' else ''
+        return Bill.objects.all().order_by(f"{order_prefix}{sort_by}")[(page - 1) * size:page * size]
 
     @django_transaction.atomic
     def create_bill(self, data):
@@ -48,7 +53,7 @@ class BillService:
 
     @django_transaction.atomic
     def update_bill(self, id, data):
-        bill = self.get_bill_by_id(id)
+        bill = get_object_or_404(Bill, pk=id)
         for key, value in data.items():
             if value is not None:
                 setattr(bill, key, value)
@@ -56,18 +61,15 @@ class BillService:
         return bill
 
     def get_bill_by_id(self, id):
-        try:
-            return Bill.objects.get(pk=id)
-        except Bill.DoesNotExist:
-            raise Http404
+        return get_object_or_404(Bill, pk=id)
 
     def delete_bill(self, id):
-        bill = self.get_bill_by_id(id)
+        bill = get_object_or_404(Bill, pk=id)
         bill.delete()
 
     @django_transaction.atomic
     def create_bill_detail(self, bill_id, data):
-        bill = self.get_bill_by_id(bill_id)
+        bill = get_object_or_4(Bill, pk=bill_id)
         for detail_data in data:
             detail = BillDetail(
                 bill=bill,
@@ -85,7 +87,7 @@ class BillService:
         return bill
 
     def get_detail_by_bill(self, bill_id):
-        bill = self.get_bill_by_id(bill_id)
+        bill = get_object_or_404(Bill, pk=bill_id)
         return bill.details.all()
 
     def get_bills_by_patient_id(self, patient_id):
@@ -99,22 +101,20 @@ class PayOSService:
                           checksum_key=payos_config['checksum_key'])
 
     def create_payment_link(self, bill_id):
-        bill_id = int(bill_id)  # Ensure bill_id is integer
-        bill = Bill.objects.get(pk=bill_id)
+        bill = get_object_or_404(Bill, pk=bill_id)
         
         if bill.status == PaymentStatus.PAID.value:
-            raise ValueError("Hóa đơn đã được thanh toán")
+            raise ValueError(_("Hóa đơn đã được thanh toán"))
         if not bill.amount or bill.amount <= 0:
-            raise ValueError("Số tiền thanh toán không hợp lệ")
+            raise ValueError(_("Số tiền thanh toán không hợp lệ"))
 
         # Cancel existing pending transaction
         existing_transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
         if existing_transaction and existing_transaction.status == TransactionStatus.PENDING.value:
             try:
-                # Correct method name: cancelPaymentLink
                 self.payos.cancelPaymentLink(orderId=bill_id)
             except Exception as e:
-                print(f"Error canceling old payment link: {str(e)}")
+                logger.error(f"Error canceling old payment link for bill_id={bill_id}: {str(e)}")
             existing_transaction.status = TransactionStatus.FAILED.value
             existing_transaction.save()
 
@@ -131,7 +131,6 @@ class PayOSService:
             items=[item]
         )
 
-        # Correct method name: createPaymentLink
         response = self.payos.createPaymentLink(paymentData=payment_data)
         
         # Create transaction record
@@ -143,13 +142,11 @@ class PayOSService:
             status=TransactionStatus.PENDING.value
         )
         
-        # Return checkout URL (check response structure)
         return response.checkoutUrl
 
     def handle_payment_callback(self, webhook_data):
-        # Correct method name: verifyPaymentWebhookData
         data = self.payos.verifyPaymentWebhookData(webhook_data)
-        bill = Bill.objects.get(pk=data.orderCode)
+        bill = get_object_or_404(Bill, pk=data.orderCode)
         transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
         
         if webhook_data.get('success'):
@@ -176,7 +173,7 @@ class PayOSService:
             return result_dict
         except Exception as e:
             logger.error(f"Error retrieving payment info for order_id {order_id}: {str(e)}")
-            raise ValueError(f"Lỗi khi lấy thông tin thanh toán: {str(e)}")
+            raise ValueError(_("Lỗi khi lấy thông tin thanh toán: {error}").format(error=str(e)))
 
     def cancel_payment(self, order_id):
         try:
@@ -189,7 +186,7 @@ class PayOSService:
             return result_dict
         except Exception as e:
             logger.error(f"Error canceling payment for order_id {order_id}: {str(e)}")
-            raise ValueError(f"Lỗi khi hủy thanh toán: {str(e)}")
+            raise ValueError(_("Lỗi khi hủy thanh toán: {error}").format(error=str(e)))
 
 class TransactionService:
     def create_payment_link(self, bill_id):
@@ -197,29 +194,24 @@ class TransactionService:
 
     @django_transaction.atomic
     def process_cash_payment(self, bill_id):
-        try:
-            bill = Bill.objects.get(pk=bill_id)
-            if bill.status == PaymentStatus.PAID.value:
-                raise ValueError("Hóa đơn đã được thanh toán")
-            
-            transaction = Transaction(
-                bill=bill,
-                amount=bill.amount,
-                payment_method=PaymentMethod.CASH.value,
-                transaction_date=timezone.now(),
-                status=TransactionStatus.SUCCESS.value
-            )
-            transaction.save()
+        bill = get_object_or_404(Bill, pk=bill_id)
+        if bill.status == PaymentStatus.PAID.value:
+            raise ValueError(_("Hóa đơn đã được thanh toán"))
+        
+        transaction = Transaction(
+            bill=bill,
+            amount=bill.amount,
+            payment_method=PaymentMethod.CASH.value,
+            transaction_date=timezone.now(),
+            status=TransactionStatus.SUCCESS.value
+        )
+        transaction.save()
 
-            bill.status = PaymentStatus.PAID.value
-            bill.save()
-        except Bill.DoesNotExist:
-            raise Http404("Không tìm thấy hóa đơn")
-        except Exception as e:
-            raise ValueError(f"Lỗi khi xử lý thanh toán tiền mặt: {str(e)}")
+        bill.status = PaymentStatus.PAID.value
+        bill.save()
 
     def handle_payment_success(self, order_id):
-        bill = Bill.objects.get(pk=order_id)
+        bill = get_object_or_404(Bill, pk=order_id)
         transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
         if transaction and transaction.status == TransactionStatus.PENDING.value:
             bill.status = PaymentStatus.PAID.value
@@ -228,12 +220,29 @@ class TransactionService:
             transaction.save()
 
     def handle_payment_cancel(self, order_id):
-        bill = Bill.objects.get(pk=order_id)
+        bill = get_object_or_404(Bill, pk=order_id)
         transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
         if transaction and transaction.status == TransactionStatus.PENDING.value:
             transaction.status = TransactionStatus.FAILED.value
             transaction.save()
 
-    def get_transactions_by_bill_id(self, bill_id):
-        transactions = Transaction.objects.filter(bill_id=bill_id)
-        return [TransactionDTOSerializer(t).data for t in transactions]
+    def get_transactions_by_bill_id(self, bill_id, sort_by='transaction_date', sort_order='desc'):
+        try:
+            if not Bill.objects.filter(id=bill_id).exists():
+                logger.error(f"Bill not found for bill_id={bill_id}")
+                raise Http404(_("Không tìm thấy hóa đơn"))
+            
+            valid_sort_fields = ['transaction_date', 'amount', 'status', 'created_at', 'updated_at']
+            if sort_by not in valid_sort_fields:
+                sort_by = 'transaction_date'
+            
+            order_prefix = '-' if sort_order.lower() == 'desc' else ''
+            transactions = Transaction.objects.filter(bill_id=bill_id).order_by(f"{order_prefix}{sort_by}")
+            
+            logger.info(f"Retrieved {transactions.count()} transactions for bill_id={bill_id}, sorted by {sort_by} {sort_order}")
+            return [TransactionDTOSerializer(t).data for t in transactions]
+        except Http404:
+            raise
+        except Exception as e:
+            logger.error(f"Error retrieving transactions for bill_id={bill_id}: {str(e)}")
+            raise ValueError(_("Lỗi khi lấy giao dịch: {error}").format(error=str(e)))
