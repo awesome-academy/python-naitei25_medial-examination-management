@@ -159,3 +159,15 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
 }
+
+PAYOS = {
+    'client_id': config('PAYOS_CLIENT_ID'),
+    'api_key': config('PAYOS_API_KEY'),
+    'checksum_key': config('PAYOS_CHECKSUM_KEY'),
+}
+
+CLOUDINARY = {
+    'cloud_name': config('CLOUDINARY_CLOUD_NAME'),
+    'api_key': config('CLOUDINARY_API_KEY'),
+    'api_secret': config('CLOUDINARY_API_SECRET'),
+}
