@@ -18,7 +18,7 @@ class Bill(BaseModel):
 
 
 class BillDetail(BaseModel):
-    bill = models.ForeignKey(Bill, on_delete=models.RESTRICT)
+    bill = models.ForeignKey(Bill, on_delete=models.RESTRICT, related_name='details')
     item_type = models.CharField(max_length=PAYMENT_LENGTH["ITEM_TYPE"])
     quantity = models.IntegerField()
     insurance_discount = models.DecimalField(max_digits=DECIMAL_MAX_DIGITS, decimal_places=DECIMAL_DECIMAL_PLACES, blank=True, null=True)

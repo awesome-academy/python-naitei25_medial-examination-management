@@ -3,6 +3,8 @@
 # ======================
 DECIMAL_MAX_DIGITS = 10
 DECIMAL_DECIMAL_PLACES = 2
+DECIMAL_DEFAULT = 0
+
 PAGE_NO_DEFAULT = 0
 PAGE_SIZE_DEFAULT = 10
 MIN_VALUE = 1
@@ -68,6 +70,7 @@ SERVICE_LENGTH = {
 # ======================
 PAYMENT_LENGTH = {
     "ITEM_TYPE": 20,
+    "STATUS": 2,
 }
 
 # ======================
