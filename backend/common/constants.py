@@ -33,6 +33,15 @@ USER_LENGTH = {
     "PHONE": 20,
 }
 
+ROLE_LENGTH = 1  
+FULL_NAME_LENGTH = 100
+IDENTITY_NUMBER_LENGTH = 20
+INSURANCE_NUMBER_LENGTH = 20
+ADDRESS_LENGTH = 255
+OTP_LENGTH = 6
+TOKEN_LENGTH = 255
+RESET_TOKEN_LENGTH = 6
+
 # ======================
 # Patient domain
 # ======================
