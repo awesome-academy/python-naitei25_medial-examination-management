@@ -5,6 +5,9 @@ DECIMAL_MAX_DIGITS = 10
 DECIMAL_DECIMAL_PLACES = 2
 DECIMAL_DEFAULT = 0
 
+PAGE_NO_DEFAULT = 0
+PAGE_SIZE_DEFAULT = 10
+MIN_VALUE = 1
 # ======================
 # Enum char field length
 # ======================
@@ -81,3 +84,10 @@ PHARMACY_LENGTH = {
     "DURATION": 50,
     "PRESCRIPTION_NOTE": 255,
 }
+
+ALL_SLOTS = [
+    {"slot_start": "08:00", "slot_end": "08:15"},
+    {"slot_start": "08:15", "slot_end": "08:30"},
+    {"slot_start": "08:30", "slot_end": "08:45"},
+    {"slot_start": "08:45", "slot_end": "09:00"},
+]
