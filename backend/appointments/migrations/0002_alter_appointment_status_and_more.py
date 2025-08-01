@@ -24,13 +24,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
-            model_name="appointmentnote",
-            name="noteType",
-            field=models.CharField(
-                choices=[("D", "DOCTOR"), ("P", "PATIENT")], max_length=2
-            ),
-        ),
-        migrations.AlterField(
             model_name="service",
             name="service_type",
             field=models.CharField(
