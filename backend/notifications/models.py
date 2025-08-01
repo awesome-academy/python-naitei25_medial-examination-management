@@ -10,6 +10,8 @@ class Notification(BaseModel):
     message = models.TextField()
     type = models.CharField(max_length=ENUM_LENGTH["DEFAULT"], choices=[(n.value, n.name) for n in NotificationType])
     sent_at = models.DateTimeField(blank=True, null=True)
+    response = models.JSONField(blank=True, null=True)  
+    created_at = models.DateTimeField(auto_now_add=True) 
 
     def __str__(self):
         return self.title
@@ -21,3 +23,4 @@ class Token(BaseModel):
 
     def __str__(self):
         return f"Token {self.pk}"
+
