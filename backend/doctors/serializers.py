@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Doctor, Department, ExaminationRoom, Schedule
 from common.enums import Gender, AcademicDegree, DoctorType
 from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH, USER_LENGTH
-from users.serializers import UserSerializer
+from users.serializers import UserResponseSerializer
 from datetime import datetime
 from django.utils.translation import gettext_lazy as _
 
@@ -71,7 +71,7 @@ class CreateDoctorRequestSerializer(serializers.Serializer):
 
 
 class DoctorSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = UserResponseSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
     created_at = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", read_only=True)
 

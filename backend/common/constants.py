@@ -8,6 +8,15 @@ DECIMAL_DEFAULT = 0
 PAGE_NO_DEFAULT = 0
 PAGE_SIZE_DEFAULT = 10
 MIN_VALUE = 1
+
+# ======================
+# Regex patterns
+# ======================
+REGEX_PATTERNS = {
+    "PHONE": r'^(\+84|0)\d{9,10}$',
+    "IDENTITY_NUMBER": r'^\d{12}$',  
+}
+
 # ======================
 # Enum char field length
 # ======================
@@ -26,6 +35,10 @@ COMMON_LENGTH = {
     "TOKEN": 255,
     "URL": 255,
     "PUBLIC_ID": 100,
+    "IDENTITY_NUMBER": 12, 
+    "INSURANCE_NUMBER": 50,
+    "OTP": 6,
+    "RESET_TOKEN": 6,
 }
 
 # ======================
@@ -35,6 +48,7 @@ USER_LENGTH = {
     "EMAIL": 100,
     "PASSWORD": 255,
     "PHONE": 20,
+    "FULL_NAME": 100,
 }
 
 # ======================
