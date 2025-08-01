@@ -6,14 +6,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("appointments", "0003_merge_20250801_0737"),
+        ("appointments", "0003_merge_20250801_0716"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="appointmentnote",
-            name="noteType",
-        ),
         migrations.AlterField(
             model_name="appointmentnote",
             name="note_type",
