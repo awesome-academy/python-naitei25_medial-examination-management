@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
@@ -10,8 +11,9 @@ from .serializers import (
     PagedResponseSerializer, ChangePasswordRequestSerializer, RegisterRequestSerializer,
     RegisterVerifyRequestSerializer, LoginFlexibleRequestSerializer, 
     ResetPasswordRequestSerializer, ForgotPasswordEmailRequestSerializer,
+    ResendOtpRequestSerializer, VerifyOtpRequestSerializer
 )
-from .services import AuthService, UserService
+from .services import AuthService, UserService, OtpService, ResetTokenService
 from common.enums import UserRole
 from common.constants import PAGE_NO_DEFAULT, PAGE_SIZE_DEFAULT
 
@@ -163,7 +165,7 @@ class AuthViewSet(viewsets.ViewSet):
     def forgot_password_email(self, request):
         serializer = ForgotPasswordEmailRequestSerializer(data=request.data)
         if serializer.is_valid():
-            response = AuthService().send_reset_password_email(serializer.validated_data['email'])
+            response = AuthService().send_reset_password_otp(serializer.validated_data['email'])
             return Response(response)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -173,4 +175,41 @@ class AuthViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             response = AuthService().reset_password(serializer.validated_data)
             return Response(response)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], url_path='register/resend-otp')
+    def resend_otp(self, request):
+        serializer = ResendOtpRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                message = AuthService().resend_otp(email)
+                return Response({"message": _("OTP đã được gửi lại tới %(email)s") % {'email': email}}, 
+                               status=status.HTTP_200_OK)
+            except ValidationError as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], url_path='verify-otp')
+    def verify_otp(self, request):
+        # THAY ĐỔI: Sử dụng VerifyOtpRequestSerializer thay vì RegisterVerifyRequestSerializer
+        serializer = VerifyOtpRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            otp = serializer.validated_data['otp']
+            try:
+                # THAY ĐỔI: Gọi static method đúng cách
+                otp_response = OtpService.validate_otp_by_email(email, otp)
+                if otp_response.get('resetToken') != 'SUCCESS':
+                    return Response({"error": otp_response.get('resetToken')}, status=status.HTTP_400_BAD_REQUEST)
+                
+                user = get_object_or_404(User, email=email, is_deleted=False)
+                reset_token = ResetTokenService.generate_reset_token(user)
+                
+                return Response({
+                    "message": _("Xác minh OTP thành công"), 
+                    "resetToken": reset_token
+                }, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({"error": _("Có lỗi xảy ra, vui lòng thử lại")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -143,6 +143,23 @@ class AuthService:
         
         return {'message': _('Email đặt lại mật khẩu đã được gửi')}
     
+    def send_reset_password_otp(self, email):
+        user = get_object_or_404(User, email=email, is_deleted=False)
+    
+        OtpService.send_otp_to_email(email)
+    
+        return {'message': _('Mã OTP đã được gửi đến email của bạn')}
+    
+    def resend_otp(self, email):
+        self._cleanup_expired_registrations()
+
+        if email not in self.pending_registrations:
+            raise ValidationError(_("Không tìm thấy thông tin đăng ký hoặc đã hết hạn"))
+
+        # Gửi lại OTP
+        OtpService().send_otp_to_email(email)
+        return _("Mã OTP đã được gửi lại đến email của bạn")
+    
     @transaction.atomic
     def reset_password(self, data):
         reset_token = data['resetToken']
@@ -215,6 +232,8 @@ class OtpService:
 
     @staticmethod
     def send_otp_to_email(email):
+        OtpService._cleanup_expired_otps()
+        
         otp = OtpService.generate_otp()
         
         send_mail(
