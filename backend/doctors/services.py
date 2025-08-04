@@ -5,6 +5,8 @@ from .models import Doctor, Department, ExaminationRoom, Schedule
 from appointments.models import Appointment
 from patients.models import Patient
 from users.models import User
+from users.services import UserService
+from common.enums import UserRole
 
 
 class DoctorService:
@@ -17,20 +19,20 @@ class DoctorService:
     def create_doctor(self, data):
         with transaction.atomic():
             user_data = {
-                'email': data['email'],
-                'phone': data['phone'],
-                'password': data['password']
+                'email': data.get('email'),
+                'phone': data.get('phone'),
+                'password': data['password'],
+                'role': UserRole.DOCTOR.value
             }
-            from users.services import UserService
-            user = UserService().create_user(user_data)
-
+            if not user_data['email'] and not user_data['phone']:
+                raise ValueError(_("Email hoặc số điện thoại là bắt buộc"))
+            user = UserService().add_user(user_data)
             doctor = Doctor.objects.create(
-                user=user,
+                user_id=user['userId'],
                 department_id=data['department_id'],
                 identity_number=data['identity_number'],
                 first_name=data['first_name'],
                 last_name=data['last_name'],
-                phone=data.get('phone'),
                 birthday=data['birthday'],
                 gender=data['gender'],
                 address=data.get('address'),
@@ -38,7 +40,6 @@ class DoctorService:
                 specialization=data['specialization'],
                 type=data['type'],
             )
-
         return doctor
 
     def update_doctor(self, doctor_id, data):
