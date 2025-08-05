@@ -45,12 +45,14 @@ class CreateDoctorRequestSerializer(serializers.Serializer):
     specialization = serializers.CharField(max_length=DOCTOR_LENGTH["SPECIALIZATION"], required=True)
     type = serializers.ChoiceField(choices=[(d.value, d.name) for d in DoctorType])
     department_id = serializers.IntegerField(required=True)
+    email = serializers.EmailField(max_length=USER_LENGTH["EMAIL"], required=False)
 
     def validate(self, data):
         required_fields = {
             "password": _("Mật khẩu không được để trống"),
             "identity_number": _("CCCD không được để trống"),
-            "full_name": _("Tên của bác sĩ không được để trống"),
+            "first_name": _("Tên không được để trống"),
+            "last_name": _("Họ không được để trống"),
             "birthday": _("Ngày sinh không được để trống"),
             "gender": _("Giới tính không được để trống"),
             "academic_degree": _("Học vấn không được để trống"),
@@ -63,6 +65,9 @@ class CreateDoctorRequestSerializer(serializers.Serializer):
         for field, message in required_fields.items():
             if not data.get(field):
                 errors[field] = message
+        
+        if not data.get('email') and not data.get('phone'):
+            errors['email_or_phone'] = _("Email hoặc số điện thoại là bắt buộc")
 
         if errors:
             raise serializers.ValidationError(errors)

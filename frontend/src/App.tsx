@@ -1,35 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-
+import React from 'react';
+import { Routes, Route } from "react-router-dom";
+import AuthApp from './features/auth/AuthApp';
+import AdminApp from './features/admin/AdminApp';
+import DoctorApp from './features/doctor/DoctorApp';
+import PatientApp from './features/patient/PatientApp';
+import { AuthProvider } from "./shared/context/AuthContext";
+import { SidebarProvider } from "./shared/context/SidebarContext";
+import ProtectedRoute from './shared/components/ProtectedRoute';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <AuthProvider>
+      <SidebarProvider>
+        <Routes>
+          <Route path="/*" element={<AuthApp />} />
+          <Route path="/login/*" element={<AuthApp />} />
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute requiredRole="A">
+                <AdminApp />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/doctor/*"
+            element={
+              <ProtectedRoute requiredRole="D">
+                <DoctorApp />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/patient/*"
+            element={
+              <ProtectedRoute requiredRole="P">
+                <PatientApp />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<div>404 - Không tìm thấy trang</div>} />
+        </Routes>
+      </SidebarProvider>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

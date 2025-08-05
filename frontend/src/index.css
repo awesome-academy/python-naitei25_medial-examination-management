@@ -1557,21 +1557,25 @@ aside .menu-dropdown-badge-inactive {
   @apply bg-base-50 group-hover:bg-base-100;
 }
 
+/* Đảm bảo text hiển thị đúng font */
 aside .menu-item-text {
   font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   font-weight: 500;
 }
 
+/* Fix cho logo */
 aside img {
   max-width: 100%;
   height: auto;
 }
 
+/* Menu header text */
 aside h2 {
   font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   font-weight: 600;
 }
 
+/* Dark mode support */
 .dark aside .menu-item-inactive {
   @apply text-gray-300 hover:bg-gray-800 group-hover:text-gray-300;
 }
@@ -1582,4 +1586,24 @@ aside h2 {
 
 .dark aside .menu-dropdown-item-inactive {
   @apply text-gray-300 hover:bg-gray-800;
+}
+
+html[lang="ja"] {
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+}
+
+html[lang="vi"] {
+  font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
+}
+
+html[lang="en"] {
+  font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
+}
+
+[dir="rtl"] {
+  text-align: right;
+}
+
+* {
+  transition: font-family 0.2s ease;
 }

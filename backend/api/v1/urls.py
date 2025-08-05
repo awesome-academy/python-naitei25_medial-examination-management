@@ -1,13 +1,13 @@
 from django.urls import path, include
 
 urlpatterns = [
-    path('users/', include('users.urls')),
-    path('patients/', include('patients.urls')),
-    path('doctors/', include('doctors.urls')),
-    path('appointments/', include('appointments.urls')),
-    path('pharmacy/', include('pharmacy.urls')),
-    path('payments/', include('payments.urls')),
-    path('notifications/', include('notifications.urls')),
+    path('', include('users.urls')),
+    path('', include('patients.urls')),
+    path('', include('doctors.urls')),
+    path('', include('appointments.urls')),
+    path('', include('pharmacy.urls')),
+    path('', include('payments.urls')),
+    path('', include('notifications.urls')),
 ]
 
 from rest_framework_simplejwt.views import (
