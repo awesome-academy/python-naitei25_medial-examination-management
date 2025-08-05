@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useTranslation } from "react-i18next"
 import Login from '../../features/auth/pages/Login';
 import PatientLoginForm from './components/PatientLoginForm';
@@ -17,16 +17,19 @@ const AuthApp: React.FC = () => {
   return (
     <RegisterProvider>
       <ErrorBoundary>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="login" element={<Login />} />
-          <Route path="/patient-login" element={<PatientLoginForm />} />
-          <Route path="/register" element={<RegisterCommon />} />
-          <Route path="/register/details" element={<RegisterDetail />} />
-          <Route path="/verify-otp" element={<VerifyOTP />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-        </Routes>
+        <div>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/patient-login" element={<PatientLoginForm />} />
+            <Route path="/register" element={<RegisterCommon />} />
+            <Route path="/register/details" element={<RegisterDetail />} />
+            <Route path="/verify-otp" element={<VerifyOTP />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            {/* Fallback route cho debug */}
+            <Route path="*" element={<div>AuthApp 404 - Path: {location.pathname}</div>} />
+          </Routes>
+        </div>
       </ErrorBoundary>
     </RegisterProvider>
   )

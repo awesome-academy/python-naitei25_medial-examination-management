@@ -70,6 +70,7 @@ DOCTOR_LENGTH = {
     "SPECIALIZATION": 100,
     "ROOM_NOTE": 255,
     "ACADEMIC_DEGREE": 10,
+    "AVATAR": 255,
 }
 
 # ======================

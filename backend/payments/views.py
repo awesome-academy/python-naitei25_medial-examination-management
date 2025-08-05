@@ -136,7 +136,7 @@ class TransactionViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response({"error": -1, "message": str(e), "data": None}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get'], url_path=r'(?P<order_id>\d+)/success')
+    @action(detail=False, methods=['get', 'post'], url_path=r'(?P<order_id>\d+)/success')
     def handle_payment_success(self, request, order_id=None):
         try:
             TransactionService().handle_payment_success(order_id)
@@ -145,7 +145,7 @@ class TransactionViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response({"error": -1, "message": str(e), "status": "error", "order_id": order_id}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get'], url_path=r'(?P<order_id>\d+)/cancel')
+    @action(detail=False, methods=['get', 'post'], url_path=r'(?P<order_id>\d+)/cancel')
     def handle_payment_cancel(self, request, order_id=None):
         try:
             TransactionService().handle_payment_cancel(order_id)

@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import get_object_or_404
 from payos import PayOS, ItemData, PaymentData
+from appointments.serializers import AppointmentSerializer
 import logging
 
 logger = logging.getLogger(__name__)
@@ -49,11 +50,11 @@ class BillService:
         ]
         if bill_details:
             BillDetail.objects.bulk_create(bill_details)
-        bill_details_qs = bill.details.all()
-        bill.total_cost = sum(d.total_price for d in bill_details_qs)
-        bill.insurance_discount = sum(d.insurance_discount or 0 for d in bill_details_qs)
-        bill.amount = bill.total_cost - (bill.insurance_discount or 0)
-        bill.save()
+            bill_details_qs = bill.details.all()
+            bill.total_cost = sum(d.total_price for d in bill_details_qs)
+            bill.insurance_discount = sum(d.insurance_discount or 0 for d in bill_details_qs)
+            bill.amount = bill.total_cost - (bill.insurance_discount or 0)
+            bill.save()
         return bill
 
     @django_transaction.atomic
@@ -156,35 +157,67 @@ class PayOSService:
         return response.checkoutUrl
 
     def handle_payment_callback(self, webhook_data):
-        data = self.payos.verifyPaymentWebhookData(webhook_data)
-        bill = get_object_or_404(Bill, pk=data.orderCode)
-        transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
-        
-        if webhook_data.get('success'):
-            bill.status = PaymentStatus.PAID.value
-            transaction.status = TransactionStatus.SUCCESS.value
-        else:
-            transaction.status = TransactionStatus.FAILED.value
-        
-        bill.save()
-        transaction.save()
-        return data
+        try:
+            data = self.payos.verifyPaymentWebhookData(webhook_data)
+            
+            bill_id = data.orderCode // 1000
+            bill = get_object_or_404(Bill, pk=bill_id)
+            
+            transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
+            
+            logger.info(f"Processing webhook for bill_id: {bill_id}, orderCode: {data.orderCode}")
+            logger.info(f"Webhook success status: {webhook_data.get('success')}")
+            logger.info(f"Data status: {getattr(data, 'status', 'No status')}")
+            
+            is_success = (
+                webhook_data.get('success') == True or 
+                getattr(data, 'status', '') == 'PAID' or
+                webhook_data.get('status') == 'PAID'
+            )
+            
+            if is_success:
+                bill.status = PaymentStatus.PAID.value
+                if transaction:
+                    transaction.status = TransactionStatus.SUCCESS.value
+                
+                logger.info(f"Payment successful - updating bill {bill_id} to PAID")
+            else:
+                if transaction:
+                    transaction.status = TransactionStatus.FAILED.value
+                logger.info(f"Payment failed - updating transaction for bill {bill_id}")
+            
+            bill.save()
+            if transaction:
+                transaction.save()
+                
+            logger.info(f"Bill {bill_id} status after save: {bill.status}")
+            
+            return data
+            
+        except Exception as e:
+            logger.error(f"Error in handle_payment_callback: {str(e)}")
+            raise
 
     def get_payment_info(self, order_id):
-        try:
-            result = self.payos.getPaymentLinkInformation(orderId=order_id)
-            result_dict = {
-                'orderCode': getattr(result, 'orderCode', None),
-                'status': getattr(result, 'status', None),
-                'amount': getattr(result, 'amount', None),
-                'description': getattr(result, 'description', None),
-                'createdAt': getattr(result, 'createdAt', None),
-            }
-            logger.info(f"Payment info retrieved for order_id {order_id}: {result_dict}")
-            return result_dict
-        except Exception as e:
-            logger.error(f"Error retrieving payment info for order_id {order_id}: {str(e)}")
-            raise ValueError(_("Lỗi khi lấy thông tin thanh toán: {error}").format(error=str(e)))
+            try:
+                logger.info(f"Retrieving payment info for order_id {order_id}")
+                result = self.payos.getPaymentLinkInformation(orderId=order_id)
+                bill = get_object_or_404(Bill, id=order_id)  # Giả sử order_id tương ứng với bill_id
+                appointment = Appointment.objects.filter(id=bill.appointment_id).first()
+                
+                result_dict = {
+                    'orderCode': getattr(result, 'orderCode', None),
+                    'status': getattr(result, 'status', None),
+                    'amount': bill.amount,
+                    'description': bill.description,
+                    'createdAt': bill.created_at.isoformat(),
+                    'appointment': AppointmentSerializer(appointment).data if appointment else None
+                }
+                logger.info(f"Payment info retrieved for order_id {order_id}: {result_dict}")
+                return result_dict
+            except Exception as e:
+                logger.error(f"Error retrieving payment info for order_id {order_id}: {str(e)}")
+                raise ValueError(_("Lỗi khi lấy thông tin thanh toán: {error}").format(error=str(e)))
 
     def cancel_payment(self, order_id):
         try:
@@ -222,7 +255,8 @@ class TransactionService:
         bill.save()
 
     def handle_payment_success(self, order_id):
-        bill = get_object_or_404(Bill, pk=order_id)
+        bill_id = int(order_id) // 1000 if int(order_id) > 1000 else int(order_id)
+        bill = get_object_or_404(Bill, pk=bill_id)
         transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
         if transaction and transaction.status == TransactionStatus.PENDING.value:
             bill.status = PaymentStatus.PAID.value

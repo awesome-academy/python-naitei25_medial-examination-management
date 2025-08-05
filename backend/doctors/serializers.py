@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Doctor, Department, ExaminationRoom, Schedule
 from common.enums import Gender, AcademicDegree, DoctorType
-from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH, USER_LENGTH
+from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH, USER_LENGTH, DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES
 from users.serializers import UserResponseSerializer
 from datetime import datetime
 from django.utils.translation import gettext_lazy as _
@@ -46,6 +46,8 @@ class CreateDoctorRequestSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=[(d.value, d.name) for d in DoctorType])
     department_id = serializers.IntegerField(required=True)
     email = serializers.EmailField(max_length=USER_LENGTH["EMAIL"], required=False)
+    avatar = serializers.CharField(max_length=DOCTOR_LENGTH["AVATAR"], required=False, allow_blank=True, allow_null=True)
+    price = serializers.DecimalField(max_digits=DECIMAL_MAX_DIGITS, decimal_places=DECIMAL_DECIMAL_PLACES, required=False, allow_null=True)
 
     def validate(self, data):
         required_fields = {
@@ -79,6 +81,7 @@ class DoctorSerializer(serializers.ModelSerializer):
     user = UserResponseSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
     created_at = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", read_only=True)
+    schedules = ScheduleSerializer(many=True, read_only=True, source='schedule_set')
 
     class Meta:
         model = Doctor

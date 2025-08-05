@@ -10,6 +10,13 @@ export const LocalStorageKeys = {
   DOCTOR_TYPE: 'doctorType',
   LANGUAGE: "language",
   LOCALE: "locale",
+  RECENT_SEARCHES: 'recent_searches',
+  SEARCH_FILTERS: 'search_filters',
+  BOOKING_DATA: 'booking_data',
+  SELECTED_DOCTOR: 'selected_doctor',
+  SELECTED_SERVICE: 'selected_service',
+  NOTIFICATION_SETTINGS: 'notification_settings',
+  UNREAD_NOTIFICATIONS: 'unread_notifications'
 } as const;
 
 export type LocalStorageKey = typeof LocalStorageKeys[keyof typeof LocalStorageKeys];

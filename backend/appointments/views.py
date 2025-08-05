@@ -12,7 +12,8 @@ from .models import (
     Appointment,
     AppointmentNote,
     ServiceOrder,
-    Service
+    Service,
+    Schedule
 )
 from .serializers import (
     AppointmentSerializer,
@@ -28,8 +29,7 @@ from .serializers import (
     ServiceOrderSerializer,
     ServiceSerializer,
     AppointmentFilterSerializer,
-    AppointmentPatientFilterSerializer
-    
+    AppointmentPatientFilterSerializer,
 )
 from .services import (
     AppointmentService,
@@ -98,13 +98,44 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         })
 
 
-    @action(detail=False, methods=['post'], url_path='schedule/available-slots')
+    @action(detail=False, methods=['get'], url_path='schedule/available-slots')
     def available_slots(self, request):
-        serializer = ScheduleTimeSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        schedule_id = serializer.validated_data.get('schedule_id')
-        result = AppointmentService.get_available_time_slots(schedule_id, serializer.validated_data)
-        return Response(result)
+        schedule_id = request.query_params.get('schedule_id')
+        date = request.query_params.get('date')
+        if not schedule_id or not date:
+            return Response({"error": _("Yêu cầu schedule_id và date")}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            schedule = Schedule.objects.get(id=schedule_id, work_date=date)
+        except Schedule.DoesNotExist:
+            return Response({"error": _("Lịch trình không tồn tại")}, status=status.HTTP_404_NOT_FOUND)
+
+        # Tạo slots từ start_time đến end_time (mỗi slot 30 phút)
+        from datetime import datetime, timedelta
+        start_time = datetime.strptime(schedule.start_time.strftime('%H:%M:%S'), '%H:%M:%S')
+        end_time = datetime.strptime(schedule.end_time.strftime('%H:%M:%S'), '%H:%M:%S')
+        slots = []
+        current_time = start_time
+        while current_time < end_time:
+            slot_start = current_time.strftime('%H:%M:%S')
+            slot_end = (current_time + timedelta(minutes=30)).strftime('%H:%M:%S')
+            is_available = not Appointment.objects.filter(
+                schedule_id=schedule_id,
+                slot_start__gte=slot_start,
+                slot_start__lt=slot_end,
+                status__in=['PENDING', 'CONFIRMED']
+            ).exists()
+            slots.append({
+                "time": slot_start,
+                "available": is_available,
+                "scheduleId": schedule.id
+            })
+            current_time += timedelta(minutes=30)
+
+        return Response({
+            "date": date,
+            "timeSlots": slots
+        })
 
     @action(detail=False, methods=['get'], url_path='schedule/(?P<schedule_id>[^/.]+)')
     def get_by_schedule(self, request, schedule_id):
