@@ -13,7 +13,30 @@
     "error": "エラー",
     "success": "成功",
     "tryAgain": "再試行",
-    "goBack": "戻る"
+    "goBack": "戻る",
+    "price": "価格",
+    "loadingDoctors": "医師リストを読み込み中...",
+    "loadingDoctor": "医師情報を読み込み中...",
+    "searchDoctorsPlaceholder": "医師を検索...",
+    "noDoctorsFound": "医師が見つかりません。",
+    "noDoctorsInDepartment": "この部門に医師はいません。",
+    "doctorNotFound": "医師が見つかりません。",
+    "departmentNotFound": "部門が見つかりません。",
+    "specialization": "専門",
+    "academicDegree": "学位",
+    "address": "住所",
+    "email": "メール",
+    "phone": "電話番号",
+    "department": "部門",
+    "type": "タイプ",
+    "bookAppointment": "予約する",
+    "departmentList": "部門リスト",
+    "searchDepartmentsPlaceholder": "部門を検索...",
+    "noDepartmentsFound": "部門が見つかりません。",
+    "noDepartmentsAvailable": "利用可能な部門はありません。",
+    "doctorAvatar": "{{firstName}} {{lastName}} のアバター",
+    "doctorTitle": "医師 {{firstName}} {{lastName}}",
+    "priceNotAvailable": "価格情報がありません"
   },
   "navigation": {
     "home": "ホーム",
@@ -222,7 +245,13 @@
     "workSchedule": "勤務スケジュール",
     "account": "アカウント",
     "new": "新規",
-    "pro": "プロ"
+    "pro": "プロ",
+    "bookAppointment": "予約",
+    "prescriptions": "処方箋",
+    "lookup": "検索", 
+    "drugLookup": "薬検索",
+    "aiDiagnosis": "AI診断",
+    "profile": "プロフィール"
   },
   "layout": {
     "toggleSidebar": "サイドバー切り替え",
@@ -284,8 +313,7 @@
     "otpVerificationFailed": "OTP認証に失敗しました",
     "forgotPasswordFailed": "OTPリクエストに失敗しました",
     "resetPasswordFailed": "パスワードリセットに失敗しました",
-    "resendOtpFailed": "OTP再送信に失敗しました",
-    "fetchWorkSchedules": "勤務スケジュールの取得に失敗しました"
+    "resendOtpFailed": "OTP再送信に失敗しました"
   },
   "api": {
     "loading": "読み込み中...",

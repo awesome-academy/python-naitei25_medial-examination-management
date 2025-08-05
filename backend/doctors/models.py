@@ -2,7 +2,7 @@ from django.db import models
 from core.models import BaseModel
 from users.models import User
 from common.enums import Gender, AcademicDegree, DoctorType, RoomType, Shift
-from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH
+from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH, DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES
 
 class Department(BaseModel):
     department_name = models.CharField(max_length=DOCTOR_LENGTH["DEPARTMENT_NAME"])
@@ -38,6 +38,8 @@ class Doctor(BaseModel):
     specialization = models.CharField(max_length=DOCTOR_LENGTH["SPECIALIZATION"])
     type = models.CharField(max_length=ENUM_LENGTH["DEFAULT"], choices=[(d.value, d.name) for d in DoctorType])
     department = models.ForeignKey(Department, on_delete=models.RESTRICT)
+    avatar = models.CharField(max_length=DOCTOR_LENGTH["AVATAR"], blank=True, null=True)
+    price = models.DecimalField(max_digits=DECIMAL_MAX_DIGITS, decimal_places=DECIMAL_DECIMAL_PLACES, blank=True, null=True)
 
     def __str__(self):
         return f"Dr. {self.first_name} {self.last_name}"

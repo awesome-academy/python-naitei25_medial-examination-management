@@ -39,6 +39,8 @@ class DoctorService:
                 academic_degree=data['academic_degree'],
                 specialization=data['specialization'],
                 type=data['type'],
+                avatar=data.get('avatar'),
+                price=data.get('price')
             )
         return doctor
 
@@ -71,6 +73,20 @@ class DoctorService:
 
     def get_doctor_by_user_id(self, user_id):
         return Doctor.objects.filter(user_id=user_id).first()
+    
+    def upload_avatar(self, doctor, file):
+        upload_result = cloudinary.uploader.upload(file)
+        doctor.avatar = upload_result['secure_url']
+        doctor.save()
+        return doctor
+
+    def delete_avatar(self, doctor):
+        if doctor.avatar:
+            public_id = doctor.avatar.split('/')[-1].split('.')[0]
+            cloudinary.uploader.destroy(public_id)
+            doctor.avatar = None
+            doctor.save()
+        return doctor
 
 
 class DepartmentService:

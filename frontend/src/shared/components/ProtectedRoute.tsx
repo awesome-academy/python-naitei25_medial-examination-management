@@ -1,19 +1,32 @@
-"use client"
+import { useAuth } from "../context/AuthContext";
+import { Navigate, useLocation } from "react-router-dom";
+import React from "react";
 
-import type React from "react"
-import { Navigate } from "react-router-dom"
-import { useTranslation } from "react-i18next"
-import { useAuth } from "../context/AuthContext"
+const ProtectedRoute = ({
+  children,
+  requiredRole,
+}: {
+  children: React.ReactNode;
+  requiredRole: string;
+}) => {
+  const { isAuthenticated, hasRole, isLoading } = useAuth();
+  const location = useLocation();
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole: string }> = ({ children, requiredRole }) => {
-  const { t } = useTranslation()
-  const { isAuthenticated, hasRole } = useAuth()
-
-  if (!isAuthenticated || !hasRole(requiredRole)) {
-    return <Navigate to="/login" replace />
+  if (isLoading) {
+    return <div>Đang xác thực người dùng...</div>;
   }
 
-  return <>{children}</>
-}
+  if (!isAuthenticated || !hasRole(requiredRole)) {
+    return (
+      <Navigate
+        to="/auth/patient-login"
+        replace
+        state={{ from: location.pathname }}
+      />
+    );
+  }
 
-export default ProtectedRoute
+  return <>{children}</>;
+};
+
+export default ProtectedRoute;

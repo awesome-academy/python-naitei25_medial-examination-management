@@ -15,9 +15,20 @@ class PatientViewSet(viewsets.ViewSet):
         return get_object_or_404(Patient, pk=pk)
 
     def list(self, request):
-        patients = Patient.objects.all()
-        serializer = PatientSerializer(patients, many=True)
-        return Response(serializer.data)
+            user_id = request.query_params.get('user_id')
+            if user_id:
+                try:
+                    patient = Patient.objects.get(user_id=user_id)
+                    serializer = PatientSerializer(patient)
+                    return Response(serializer.data)
+                except Patient.DoesNotExist:
+                    return Response(
+                        {"error": _("Không tìm thấy bệnh nhân với user_id này")},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            patients = Patient.objects.all()
+            serializer = PatientSerializer(patients, many=True)
+            return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         patient = self.get_object(pk)

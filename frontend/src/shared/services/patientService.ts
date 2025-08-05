@@ -3,6 +3,38 @@ import { handleApiError } from "../utils/errorHandler"
 import i18n from "../../i18n"
 import type { Patient, PatientDto, EmergencyContact, EmergencyContactDto } from "../types/patient"
 
+  export interface PatientInfo {
+  id: number
+  userId: number
+  fullName: string
+  email?: string
+  phone?: string
+  dateOfBirth: string
+  gender: 'M' | 'F' | 'O'
+  address: string
+  identityNumber: string
+  insuranceNumber?: string
+  avatar?: string
+  emergencyContact?: string
+  allergies?: string
+  medicalHistory?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MedicalRecord {
+  id: number
+  patientId: number
+  doctorId: number
+  appointmentId: number
+  diagnosis: string
+  treatment: string
+  prescription?: string
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
 export const patientService = {
   /** Get all patients */
   async getAllPatients(): Promise<Patient[]> {
@@ -96,6 +128,75 @@ export const patientService = {
       return data
     } catch (error: any) {
       throw new Error(handleApiError(error, false))
+    }
+  },
+  async getCurrentPatient(): Promise<PatientInfo> {
+    try {
+      const response = await api.get<PatientInfo>('/patients/me/')
+      return response.data
+    } catch (error: any) {
+      throw new Error(handleApiError(error, false))
+    }
+  },
+
+  // Update current patient profile
+  async updateProfile(data: Partial<PatientInfo>): Promise<PatientInfo> {
+    try {
+      const response = await api.patch<PatientInfo>('/patients/me/', data)
+      return response.data
+    } catch (error: any) {
+      throw new Error(handleApiError(error, false))
+    }
+  },
+
+  // Upload patient avatar
+  async uploadAvatar(file: File): Promise<{ avatar: string }> {
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      
+      const response = await api.post<{ avatar: string }>('/patients/me/avatar/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      return response.data
+    } catch (error: any) {
+      throw new Error(handleApiError(error, false))
+    }
+  },
+
+  // Get patient's medical records
+  async getMedicalRecords(): Promise<MedicalRecord[]> {
+    try {
+      const response = await api.get<MedicalRecord[]>('/patients/me/medical-records/')
+      return response.data
+    } catch (error: any) {
+      throw new Error(handleApiError(error, false))
+    }
+  },
+
+  // Get specific medical record
+  async getMedicalRecord(recordId: number): Promise<MedicalRecord> {
+    try {
+      const response = await api.get<MedicalRecord>(`/patients/me/medical-records/${recordId}/`)
+      return response.data
+    } catch (error: any) {
+      throw new Error(handleApiError(error, false))
+    }
+  },
+
+  async getPatientByUserId(userId: number): Promise<Patient> {
+    try {
+      const response = await api.get<Patient>(`/patients/?user_id=${userId}`);
+      if (!response.data) {
+        throw new Error(i18n.t("services.patient.patientNotFound"));
+      }
+      // Nếu API trả về danh sách, lấy phần tử đầu tiên
+      const patient = Array.isArray(response.data) ? response.data[0] : response.data;
+      return patient;
+    } catch (error: any) {
+      throw new Error(handleApiError(error, false) || i18n.t("services.patient.patientNotFound"));
     }
   },
 }
