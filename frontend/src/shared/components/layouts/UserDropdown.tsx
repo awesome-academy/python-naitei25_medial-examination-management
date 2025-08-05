@@ -1,53 +1,59 @@
-import { useState, useEffect } from "react";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { Link } from "react-router";
-import { authService } from "../../services/authService";
-import type { AuthUser } from "../../types/user";
+"use client"
+import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import { Link } from "react-router"
+import { Dropdown } from "../ui/dropdown/Dropdown"
+import { authService } from "../../services/authService"
+import type { AuthUser } from "../../types/user"
 
 export default function UserDropdown() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+  const [user, setUser] = useState<AuthUser | null>(null)
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userData = await authService.getCurrentUser();
-        setUser(userData);
+        const userData = await authService.getCurrentUser()
+        setUser(userData)
       } catch (error) {
-        console.error("Lỗi khi lấy thông tin người dùng:", error);
+        console.error("Lỗi khi lấy thông tin người dùng:", error)
       }
-    };
-    fetchUser();
-  }, []);
+    }
+    fetchUser()
+  }, [])
 
   function toggleDropdown() {
-    setIsOpen(!isOpen);
+    setIsOpen(!isOpen)
   }
 
   function closeDropdown() {
-    setIsOpen(false);
+    setIsOpen(false)
   }
+
+  const getRoleText = (role: string) => {
+    switch (role) {
+      case "A":
+        return t("roles.admin")
+      case "D":
+        return t("roles.doctor")
+      case "P":
+        return t("roles.patient")
+      case "RECEPTIONIST":
+        return t("roles.receptionist")
+      default:
+        return t("roles.user")
+    }
+  }
+
   return (
     <div className="relative">
-      <button
-        onClick={toggleDropdown}
-        className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
-      >
+      <button onClick={toggleDropdown} className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400">
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
           <img src="/images/user/owner.jpg" alt="User" />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">
-          {user?.role === "A"
-            ? "Quản trị viên"
-            : user?.role === "D"
-            ? "Bác sĩ"
-            : user?.role === "P"
-            ? "Bệnh nhân"
-            : user?.role === "RECEPTIONIST"
-            ? "Lễ tân"
-            : "Người dùng"}
-        </span>
+        <span className="block mr-1 font-medium text-theme-sm">{getRoleText(user?.role || "")}</span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -75,15 +81,7 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {user?.role === "A"
-              ? "Quản trị viên"
-              : user?.role === "D"
-              ? "Bác sĩ"
-              : user?.role === "P"
-              ? "Bệnh nhân"
-              : user?.role === "RECEPTIONIST"
-              ? "Lễ tân"
-              : "Người dùng"}
+            {getRoleText(user?.role || "")}
           </span>
           <span className="mt-1 block text-theme-xs text-gray-500 dark:text-gray-400">
             {user?.email || "Chưa cập nhật"}
@@ -109,9 +107,9 @@ export default function UserDropdown() {
               fill=""
             />
           </svg>
-          Đăng xuất
+          {t("auth.logout")}
         </Link>
       </Dropdown>
     </div>
-  );
+  )
 }

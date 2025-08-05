@@ -2,6 +2,7 @@ import axios from "axios";
 import { storage } from "../utils/storage";
 import { LocalStorageKeys } from "../constants/storageKeys";
 import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import i18n from "../../i18n"
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/";
 const API_PREFIX = "/api/v1";
@@ -32,6 +33,12 @@ api.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    const language = storage.getRaw(LocalStorageKeys.LANGUAGE) || i18n.language
+    if (config.headers) {
+      config.headers["Accept-Language"] = language
+    }
+    
     return config;
   },
   (error: AxiosError) => Promise.reject(error)

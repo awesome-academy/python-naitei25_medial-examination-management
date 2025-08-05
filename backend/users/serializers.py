@@ -198,6 +198,40 @@ class ForgotPasswordEmailRequestSerializer(serializers.Serializer):
             raise serializers.ValidationError(errors)
         return data
 
+class ResendOtpRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=USER_LENGTH["EMAIL"])
+
+    def validate(self, data):
+        required_fields = ["email"]
+        required_messages = {
+            "email": _("Email không được để trống"),
+        }
+        errors = {}
+        for field in required_fields:
+            if not data.get(field):
+                errors[field] = required_messages[field]
+        if errors:
+            raise serializers.ValidationError(errors)
+        return data
+
+class VerifyOtpRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=USER_LENGTH["EMAIL"])
+    otp = serializers.CharField(max_length=COMMON_LENGTH["OTP"])
+
+    def validate(self, data):
+        required_fields = ["email", "otp"]
+        required_messages = {
+            "email": _("Email không được để trống"),
+            "otp": _("Mã OTP không được để trống"),
+        }
+        errors = {}
+        for field in required_fields:
+            if not data.get(field):
+                errors[field] = required_messages[field]
+        if errors:
+            raise serializers.ValidationError(errors)
+        return data
+
 class LoginResponseSerializer(serializers.Serializer):
     token = serializers.CharField()
 
