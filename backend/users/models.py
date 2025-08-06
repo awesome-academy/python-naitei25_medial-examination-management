@@ -30,6 +30,8 @@ class UserManager(models.Manager):
         if email:
             return email.lower().strip()
         return email
+    def get_by_natural_key(self, username):
+        return self.get(email=username)
 
 class User(BaseModel):
     email = models.EmailField(max_length=USER_LENGTH["EMAIL"], unique=True, null=True, blank=True)

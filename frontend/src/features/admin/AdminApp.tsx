@@ -13,6 +13,8 @@ import Department from "./pages/Departments/Department";
 import InpatientRoom from "./pages/Inpatient/InpatientRoom";
 import MedicalCalendar from "./pages/MedicalExamination/MedicalCalendar";
 import Authorization from "./pages/Authorization/Authorization";
+import DoctorSchedule from "./pages/Doctors/DoctorSchedule";
+import DoctorDetail from "./pages/Doctors/DoctorDetail";
 
 const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -51,6 +53,9 @@ const AdminApp: React.FC = () => {
 
           {/* Doctors Page */}
           <Route path="doctors" element={<Doctor />} />
+
+          <Route path="doctors/schedule/:id" element={<DoctorSchedule />} />
+          <Route path="doctors/detail/:doctorId" element={<DoctorDetail />} />
 
           {/* Medicines Pages */}
           <Route path="medicines" element={<Medicines />} />

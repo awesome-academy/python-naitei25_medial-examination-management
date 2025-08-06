@@ -28,6 +28,7 @@ const AppHeader: React.FC = () => {
   }
 
   const inputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
@@ -94,6 +95,7 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
 
+          {/* Search bar - hidden on mobile, shown on desktop */}
           <div className="hidden lg:block">
             <form>
               <div className="relative">
