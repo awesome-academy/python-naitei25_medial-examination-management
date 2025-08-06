@@ -163,7 +163,11 @@
     "enterAddress": "Enter your address",
     "enterCccd": "Enter ID card number (12 digits)",
     "enterHealthInsurance": "Enter health insurance code (10 characters, e.g., AA12345678)",
-    "enterOtp": "Enter OTP code (6 digits)"
+    "enterOtp": "Enter OTP code (6 digits)",
+    "searchPatient": "Search patient (name, phone, No.)...",
+    "selectWorkingDate": "Select working date",
+    "shift": "Shift",
+    "status": "Status"
   },
   "language": {
     "selectLanguage": "Select Language",
@@ -290,5 +294,63 @@
     "searching": "Searching...",
     "processing": "Processing...",
     "refreshing": "Refreshing..."
+  },
+  "header": {
+    "patientList": "Patient List",
+    "manageAndTrack": "Manage and track patient information",
+    "date": "Date",
+    "shift": "Shift",
+    "patients": "patients"
+  },
+  "table": {
+    "no": "No.",
+    "patient": "Patient",
+    "examinationDate": "Examination Date",
+    "examinationRoom": "Examination Room",
+    "room": "Room",
+    "notAssigned": "Not assigned",
+    "symptoms": "Symptoms",
+    "status": "Status",
+    "actions": "Actions",
+    "viewDetails": "View Details",
+    "noInformation": "No information",
+    "none": "None",
+    "building": "Building",
+    "floor": "Floor"
+  },
+  "buttons": {
+    "clearFilters": "Clear Filters",
+    "today": "Today",
+    "refresh": "Refresh"
+  },
+  "stats": {
+    "totalAppointments": "Total Appointments",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "completed": "Completed"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "inProgress": "In Progress",
+    "pendingTestResult": "Pending Test Result",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "shifts": {
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening"
+  },
+  "empty": {
+    "loading": "Loading...",
+    "noPatientsFound": "No patients found"
+  },
+  "options": {
+    "allShifts": "All shifts",
+    "allStatuses": "All statuses"
+  },
+  "pagination": {
+    "showing": "Showing {{start}}-{{end}} of {{total}} patients"
   }
 }
