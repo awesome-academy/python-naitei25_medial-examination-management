@@ -163,7 +163,11 @@
     "enterAddress": "Nhập địa chỉ của bạn",
     "enterCccd": "Nhập số CCCD (12 chữ số)",
     "enterHealthInsurance": "Nhập mã bảo hiểm y tế (10 ký tự, ví dụ: AA12345678)",
-    "enterOtp": "Nhập mã OTP (6 chữ số)"
+    "enterOtp": "Nhập mã OTP (6 chữ số)",
+    "searchPatient": "Tìm kiếm bệnh nhân (tên, số điện thoại, STT)...",
+    "selectWorkingDate": "Chọn ngày làm việc",
+    "shift": "Ca",
+    "status": "Trạng thái"
   },
   "language": {
     "selectLanguage": "Chọn ngôn ngữ",
@@ -290,5 +294,63 @@
     "searching": "Đang tìm kiếm...",
     "processing": "Đang xử lý...",
     "refreshing": "Đang làm mới..."
+  },
+  "header": {
+    "patientList": "Danh sách bệnh nhân",
+    "manageAndTrack": "Quản lý và theo dõi thông tin bệnh nhân",
+    "date": "Ngày",
+    "shift": "Ca",
+    "patients": "bệnh nhân"
+  },
+  "table": {
+    "no": "STT",
+    "patient": "Bệnh nhân",
+    "examinationDate": "Ngày khám",
+    "examinationRoom": "Phòng khám",
+    "room": "Phòng",
+    "notAssigned": "Chưa phân công",
+    "symptoms": "Triệu chứng",
+    "status": "Trạng thái",
+    "actions": "Hành động",
+    "viewDetails": "Xem chi tiết",
+    "noInformation": "Không có thông tin",
+    "none": "Không có",
+    "building": "Tòa nhà",
+    "floor": "Tầng"
+  },
+  "buttons": {
+    "clearFilters": "Xóa bộ lọc",
+    "today": "Hôm nay",
+    "refresh": "Làm mới"
+  },
+  "stats": {
+    "totalAppointments": "Tổng số cuộc hẹn",
+    "pending": "Chờ xử lý",
+    "confirmed": "Đã xác nhận",
+    "completed": "Đã hoàn thành"
+  },
+  "status": {
+    "pending": "Chờ xử lý",
+    "confirmed": "Đã xác nhận",
+    "inProgress": "Đang tiến hành",
+    "pendingTestResult": "Chờ kết quả xét nghiệm",
+    "completed": "Đã hoàn thành",
+    "cancelled": "Đã hủy"
+  },
+  "shifts": {
+    "morning": "Buổi sáng",
+    "afternoon": "Buổi chiều",
+    "evening": "Buổi tối"
+  },
+  "empty": {
+    "loading": "Đang tải...",
+    "noPatientsFound": "Không tìm thấy bệnh nhân nào"
+  },
+  "options": {
+    "allShifts": "Tất cả các ca",
+    "allStatuses": "Tất cả các trạng thái"
+  },
+  "pagination": {
+    "showing": "Hiển thị từ {{start}} đến {{end}} trong tổng số {{total}} bệnh nhân"
   }
 }

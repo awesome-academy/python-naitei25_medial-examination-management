@@ -163,7 +163,11 @@
     "enterAddress": "住所を入力",
     "enterCccd": "身分証明書番号を入力（12桁）",
     "enterHealthInsurance": "健康保険コードを入力（10文字、例：AA12345678）",
-    "enterOtp": "OTPコードを入力（6桁）"
+    "enterOtp": "OTPコードを入力（6桁）",
+    "searchPatient": "患者を検索（氏名、電話番号、番号など）...",
+    "selectWorkingDate": "勤務日を選択",
+    "shift": "シフト",
+    "status": "ステータス"
   },
   "language": {
     "selectLanguage": "言語を選択",
@@ -290,5 +294,63 @@
     "searching": "検索中...",
     "processing": "処理中...",
     "refreshing": "更新中..."
+  },
+  "header": {
+    "patientList": "患者リスト",
+    "manageAndTrack": "患者情報を管理・追跡する",
+    "date": "日付",
+    "shift": "シフト",
+    "patients": "患者"
+  },
+  "table": {
+    "no": "番号",
+    "patient": "患者",
+    "examinationDate": "診察日",
+    "examinationRoom": "診察室",
+    "room": "部屋",
+    "notAssigned": "未割り当て",
+    "symptoms": "症状",
+    "status": "ステータス",
+    "actions": "操作",
+    "viewDetails": "詳細を見る",
+    "noInformation": "情報なし",
+    "none": "なし",
+    "building": "建物",
+    "floor": "階"
+  },
+  "buttons": {
+    "clearFilters": "フィルターをクリア",
+    "today": "今日",
+    "refresh": "更新"
+  },
+  "stats": {
+    "totalAppointments": "総予約数",
+    "pending": "保留中",
+    "confirmed": "確認済み",
+    "completed": "完了"
+  },
+  "status": {
+    "pending": "保留中",
+    "confirmed": "確認済み",
+    "inProgress": "進行中",
+    "pendingTestResult": "検査結果待ち",
+    "completed": "完了",
+    "cancelled": "キャンセル済み"
+  },
+  "shifts": {
+    "morning": "午前",
+    "afternoon": "午後",
+    "evening": "夕方"
+  },
+  "empty": {
+    "loading": "読み込み中...",
+    "noPatientsFound": "患者が見つかりません"
+  },
+  "options": {
+    "allShifts": "すべてのシフト",
+    "allStatuses": "すべてのステータス"
+  },
+  "pagination": {
+    "showing": "{{total}}人中{{start}}〜{{end}}人を表示中"
   }
 }
