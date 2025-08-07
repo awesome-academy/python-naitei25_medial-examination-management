@@ -105,7 +105,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
                 }
 
                 if (filters.work_date) {
-                    queryParams.work_date = filters.work_date
+                    queryParams.workDate = filters.work_date
                 }
                 if (filters.appointmentStatus && filters.appointmentStatus !== "all") {
                     queryParams.appointmentStatus = filters.appointmentStatus

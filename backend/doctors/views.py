@@ -1,12 +1,16 @@
+import logging
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django.http import Http404
+from django.utils.dateparse import parse_date
 from .models import Doctor, Department, ExaminationRoom, Schedule
 from .serializers import DoctorSerializer, CreateDoctorRequestSerializer, DepartmentSerializer, ExaminationRoomSerializer, ScheduleSerializer
 from .services import DoctorService, DepartmentService, ExaminationRoomService, ScheduleService
+
+logger = logging.getLogger(__name__)
 
 class DoctorViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -182,7 +186,7 @@ class ScheduleViewSet(viewsets.ViewSet):
         shift = request.query_params.get('shift')
         work_date = request.query_params.get('workDate')
         room_id = request.query_params.get('roomId')
-        doctor_id = request.query_params.get('doctor_id')
+        doctor_id = request.query_params.get('doctor_id') # Lấy doctor_id từ query params
         schedules = ScheduleService().get_all_schedules(doctor_id, shift, work_date, room_id)
         serializer = ScheduleSerializer(schedules, many=True)
         return Response(serializer.data)
@@ -193,21 +197,30 @@ class ScheduleViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, doctor_id=None):
+        # Không ép phải có doctor_id nếu đã có doctor trong body
         serializer = ScheduleSerializer(data=request.data)
         if serializer.is_valid():
+            # Nếu doctor_id trên URL, ưu tiên truyền vào service, nếu không thì None
             schedule = ScheduleService().create_schedule(doctor_id, serializer.validated_data)
             return Response(ScheduleSerializer(schedule).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, doctor_id=None, pk=None):
         schedule = self.get_object(pk)
-        serializer = ScheduleSerializer(schedule, data=request.data)
+        if doctor_id is None:
+            doctor_id = request.data.get('doctor_id', schedule.doctor_id)
+
+        serializer = ScheduleSerializer(schedule, data=request.data, partial=True)
         if serializer.is_valid():
             schedule = ScheduleService().update_schedule(doctor_id, pk, serializer.validated_data)
             return Response(ScheduleSerializer(schedule).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, doctor_id=None, pk=None):
+        schedule = self.get_object(pk)
+        if doctor_id is None:
+            doctor_id = schedule.doctor_id
+
         ScheduleService().delete_schedule(doctor_id, pk)
         return Response({"message": "Lịch được xóa thành công"}, status=status.HTTP_200_OK)
 
@@ -221,3 +234,23 @@ class ScheduleViewSet(viewsets.ViewSet):
         schedule_ids = request.data.get('scheduleIds', [])
         schedules = ScheduleService().get_schedules_by_ids(schedule_ids)
         return Response(ScheduleSerializer(schedules, many=True).data)
+
+    @action(detail=False, methods=['get'], url_path='date/(?P<date>[^/.]+)')
+    def get_by_date(self, request, date=None):
+        if not date:
+            return Response({"message": "Ngày không được để trống."}, status=status.HTTP_400_BAD_REQUEST)
+
+        parsed_date = parse_date(date)
+        if not parsed_date:
+            return Response({"message": "Định dạng ngày không hợp lệ. YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+        doctor_id = request.query_params.get('doctor_id')
+
+        schedules = ScheduleService().get_all_schedules(
+            doctor_id=doctor_id,
+            shift=None,
+            work_date=parsed_date,
+            room_id=None
+        )
+        serializer = ScheduleSerializer(schedules, many=True)
+        return Response(serializer.data)

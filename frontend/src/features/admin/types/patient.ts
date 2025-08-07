@@ -1,37 +1,43 @@
-export interface Patient {
-  patientId: number;
-  identityNumber: string;
-  insuranceNumber: string;
-  fullName: string;
-  birthday: string;
-  phone: string;
-  email: string;
-  avatar: string;
-  gender: "MALE" | "FEMALE" | "OTHER";
-  address: string;
-  allergies: string;
-  height: number; // đơn vị: cm
-  weight: number; // đơn vị: kg
-  bloodType: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
-  createdAt: string;
-  contacts?: EmergencyContact[];
+export interface RawPatientFromAPI {
+  id: number;
+  created_at?: string;
+  updated_at?: string;
+  identity_number?: string;
+  insurance_number?: string;
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+  email?: string;
+  birthday?: string;
+  gender: string;
+  address?: string;
+  allergies?: string | null;
+  height?: number | null;
+  weight?: number | null;
+  blood_type?: string | null;
+  user?: number;
+  avatar?: string;
 }
 
-export interface PatientDto {
-  userId: number;
+export interface Patient {
+  patientId: number;
+  userId?: number;
   identityNumber: string;
   insuranceNumber: string;
   fullName: string;
   birthday: string;
   phone: string;
-  email: string;
-  avatar: string;
+  email?: string;
+  avatar?: string;
   gender: "MALE" | "FEMALE" | "OTHER";
   address: string;
-  allergies: string;
-  height: number;
-  weight: number;
-  bloodType: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  allergies?: string;
+  height?: number;
+  weight?: number;
+  bloodType?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  createdAt: string;
+  contacts?: EmergencyContact[];
+  age?: number;
 }
 
 export interface CreatePatientRequest {
@@ -40,7 +46,8 @@ export interface CreatePatientRequest {
   password: string;
   identityNumber: string;
   insuranceNumber: string;
-  fullName: string;
+  first_name: string;
+  last_name: string;
   birthday: string;
   avatar?: string;
   gender?: "MALE" | "FEMALE" | "OTHER";
@@ -51,13 +58,32 @@ export interface CreatePatientRequest {
   bloodType?: string;
   emergencyContactDtos?: EmergencyContactDto[];
 }
+
+export interface PatientUpdateDto {
+  userId?: number;
+  identityNumber?: string;
+  insuranceNumber?: string;
+  first_name?: string;
+  last_name?: string;
+  birthday?: string;
+  phone?: string;
+  email?: string;
+  avatar?: string;
+  gender?: "MALE" | "FEMALE" | "OTHER";
+  address?: string;
+  allergies?: string;
+  height?: number;
+  weight?: number;
+  bloodType?: string;
+}
+
 export interface EmergencyContact {
   contactId: number;
+  patientId: number;
   contactName: string;
   contactPhone: string;
   relationship: "FAMILY" | "FRIEND" | "OTHERS";
   createdAt: string;
-  patientId: number;
 }
 
 export interface EmergencyContactDto {

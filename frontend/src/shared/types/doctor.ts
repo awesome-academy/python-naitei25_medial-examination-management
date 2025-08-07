@@ -1,4 +1,3 @@
-
 export interface Department {
   id: number;
   department_name: string;
@@ -31,6 +30,7 @@ export interface Doctor {
   type: "EXAMINATION" | "SERVICE";
   created_at: string;
   updated_at: string;
+  price?: number; // Đã thêm trường này
 }
 
 export interface DoctorDto {

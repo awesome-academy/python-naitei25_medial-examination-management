@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,15 +10,26 @@ import ErrorMessage from '../../../shared/components/common/ErrorMessage';
 
 const PaymentPage: React.FC = () => {
   console.log('PaymentPage component rendering...');
+  const location = useLocation(); 
+  console.log('Current location object:', location);
+  console.log('Current URL search params:', location.search);
+  const urlParams = new URLSearchParams(location.search);
+  const orderCode = urlParams.get('orderCode');
+  console.log('Extracted orderCode from URL:', orderCode);
   
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { billId } = useParams<{ billId: string }>();
-  const { pathname, search } = useLocation();
   
-  // Kiểm tra URL pattern để xác định trạng thái
-  const isSuccess = pathname.includes('/success');
-  const isCancel = pathname.includes('/cancel');
+  const status = urlParams.get('status'); 
+  const payosCode = urlParams.get('code');
+  const payosId = urlParams.get('id');
+  const cancelFlag = urlParams.get('cancel');
+
+  const derivedBillId = orderCode ? Math.floor(Number(orderCode) / 1000).toString() : null;
+  const billId = derivedBillId; 
+
+  const isSuccessCallback = status === 'PAID' && cancelFlag === 'false';
+  const isCancelCallback = status === 'CANCELLED' || cancelFlag === 'true';
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,33 +37,25 @@ const PaymentPage: React.FC = () => {
   const [appointment, setAppointment] = useState<any>(null);
   const [paymentProcessed, setPaymentProcessed] = useState(false);
 
-  // Parse URL parameters để lấy thông tin từ PayOS callback
-  const urlParams = new URLSearchParams(search);
-  const orderCode = urlParams.get('orderCode');
-  const status = urlParams.get('status');
-  const payosCode = urlParams.get('code');
-  const payosId = urlParams.get('id');
-  const cancelFlag = urlParams.get('cancel');
-
   console.log('PaymentPage loaded with:', {
-    pathname,
-    search,
-    billId,
-    isSuccess,
-    isCancel,
+    pathname: location.pathname,
+    search: location.search,
+    billId, 
     orderCode,
+    isSuccessCallback,
+    isCancelCallback,
     status,
     payosCode,
     payosId,
     cancelFlag
   });
 
-  // Early return nếu không có billId
+  console.log('Checking billId before early return:', billId);
   if (!billId) {
-    console.error('No billId found in params!');
+    console.error('Early return: No billId (derived from orderCode) found in URL params!');
     return (
       <div className="container mx-auto p-4 max-w-3xl">
-        <ErrorMessage message="No billId found in URL params" />
+        <ErrorMessage message={t('payment.missingBillIdOrOrderCode')} /> 
         <Button onClick={() => navigate('/dashboard')} className="mt-4">
           {t('common.goBack')}
         </Button>
@@ -60,120 +63,78 @@ const PaymentPage: React.FC = () => {
     );
   }
 
-    useEffect(() => {
-    console.log('PaymentPage useEffect - fetchBill triggered');
-    const fetchBill = async () => {
-        try {
-        setLoading(true);
-        setError(null);
-        console.log('Fetching bill info for billId:', billId);
-        
-        const response = await paymentService.getPaymentInfo(Number(billId));
-        console.log('Bill info response:', response);
-        
-        if (!response.data) {
-            throw new Error('No data returned from API');
-        }
-        
-        // Gán dữ liệu bill từ response.data
-        setBill({
-            id: billId,
-            amount: response.data.amount,
-            status: response.data.status,
-            created_at: response.data.createdAt,
-            description: response.data.description,
-            orderCode: response.data.orderCode
+  const fetchBillAndProcessCallback = useCallback(async () => {
+    console.log('fetchBillAndProcessCallback started.');
+    try {
+      setLoading(true);
+      setError(null);
+
+      if ((isSuccessCallback || isCancelCallback) && !paymentProcessed && orderCode) { 
+        setPaymentProcessed(true);
+        console.log('Processing payment callback:', { 
+          isSuccessCallback, isCancelCallback, status, orderCode, payosCode, payosId, cancelFlag 
         });
         
-        // Gán appointment (nếu có) hoặc null
-        setAppointment(response.data.appointment || null);
-        } catch (err: any) {
-        console.error('Error fetching bill:', err.response?.data || err.message);
-        setError(err.response?.data?.message || err.message || t('common.error'));
-        } finally {
-        setLoading(false);
+        if (isSuccessCallback) {
+          console.log('Calling updatePaymentStatus for SUCCESS with orderCode:', orderCode);
+          await paymentService.updatePaymentStatus(orderCode, 'success', {
+            orderCode,
+            status,
+            payosCode,
+            payosId
+          });
+          message.success(t('payment.paymentSuccess'));
+        } else if (isCancelCallback) {
+          console.log('Calling updatePaymentStatus for CANCEL with orderCode:', orderCode);
+          await paymentService.updatePaymentStatus(orderCode, 'cancel', {
+            orderCode,
+            status,
+            payosCode,
+            payosId
+          });
+          message.error(t('payment.paymentCancelled'));
         }
-    };
+      } else {
+        console.log('Skipping payment callback processing. Conditions:', {
+          isSuccessCallback, isCancelCallback, paymentProcessed, orderCode
+        });
+      }
 
-    fetchBill();
-    }, [billId, t]);
+      console.log('Fetching bill info for billId:', billId, 'with orderCode:', orderCode);
+      const response = await paymentService.getPaymentInfo(Number(billId), orderCode || undefined); 
+      console.log('Bill info response:', response); 
 
-    useEffect(() => {
-    console.log('PaymentPage useEffect - processPaymentCallback triggered');
-    const processPaymentCallback = async () => {
-        if (billId && (isSuccess || isCancel) && !paymentProcessed) {
-        try {
-            setPaymentProcessed(true);
-            console.log('Processing payment callback:', { 
-            isSuccess, isCancel, status, orderCode, payosCode, payosId, cancelFlag 
-            });
-            
-            if (isSuccess && status === 'PAID' && cancelFlag === 'false') {
-            await paymentService.updatePaymentStatus(Number(billId), 'success', {
-                orderCode,
-                status,
-                payosCode,
-                payosId
-            });
-            message.success(t('payment.paymentSuccess'));
-            } else if (isCancel || cancelFlag === 'true') {
-            await paymentService.updatePaymentStatus(Number(billId), 'cancel', {
-                orderCode,
-                status,
-                payosCode,
-                payosId
-            });
-            message.error(t('payment.paymentCancelled'));
-            }
-            
-            // Refresh bill và appointment data
-            setTimeout(async () => {
-            try {
-                console.log('Refreshing bill data...');
-                const response = await paymentService.getPaymentInfo(Number(billId));
-                setBill({
-                id: billId,
-                amount: response.data.amount,
-                status: response.data.status,
-                created_at: response.data.createdAt,
-                description: response.data.description,
-                orderCode: response.data.orderCode
-                });
-                setAppointment(response.data.appointment || null);
-            } catch (error) {
-                console.error('Error refreshing bill data:', error);
-                setError(error.response?.data?.message || error.message || t('payment.callbackError'));
-            }
-            }, 1000);
-        } catch (error: any) {
-            console.error('Error processing payment callback:', error.response?.data || error.message);
-            if (error.response?.status === 405) {
-            console.warn('Method not allowed. Check backend endpoint /transactions/<bill_id>/success/');
-            setTimeout(async () => {
-                try {
-                const response = await paymentService.getPaymentInfo(Number(billId));
-                setBill({
-                    id: billId,
-                    amount: response.data.amount,
-                    status: response.data.status,
-                    created_at: response.data.createdAt,
-                    description: response.data.description,
-                    orderCode: response.data.orderCode
-                });
-                setAppointment(response.data.appointment || null);
-                } catch (refreshError) {
-                setError(refreshError.response?.data?.message || refreshError.message || t('payment.callbackError'));
-                }
-            }, 2000);
-            } else {
-            setError(error.response?.data?.message || error.message || t('payment.callbackError'));
-            }
-        }
-        }
-    };
+      if (!response.data) {
+          console.error('API returned no data for payment info.'); 
+          throw new Error('No data returned from API');
+      }
+      
+      setBill({
+          id: billId,
+          amount: response.data.amount,
+          status: response.data.status,
+          created_at: response.data.createdAt,
+          description: response.data.description,
+          orderCode: response.data.orderCode 
+      });
+      setAppointment(response.data.appointment || null);
+      console.log('Bill and Appointment state updated successfully.');
 
-    processPaymentCallback();
-    }, [billId, isSuccess, isCancel, status, orderCode, payosCode, payosId, cancelFlag, paymentProcessed, t]);
+    } catch (err: any) {
+      console.error('Caught error in fetchBillAndProcessCallback:', err); 
+      console.error('Error message:', err.message);
+      console.error('Error response data:', err.response?.data); 
+      setError(err.response?.data?.message || err.message || t('common.error'));
+    } finally {
+      setLoading(false);
+      console.log('fetchBillAndProcessCallback finished. Loading set to false.');
+    }
+  }, [billId, orderCode, status, payosCode, payosId, cancelFlag, isSuccessCallback, isCancelCallback, paymentProcessed, t]);
+
+  useEffect(() => {
+    console.log('useEffect in PaymentPage triggered.');
+    fetchBillAndProcessCallback();
+  }, [fetchBillAndProcessCallback]); 
 
   const handlePay = async () => {
     try {
@@ -193,7 +154,7 @@ const PaymentPage: React.FC = () => {
   };
 
   const handleReturnToDashboard = () => {
-    navigate('/dashboard');
+    navigate('dashboard');
   };
 
   if (loading) {
@@ -235,9 +196,9 @@ const PaymentPage: React.FC = () => {
       <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
         <strong>Debug Info:</strong>
         <br />billId: {billId}
-        <br />pathname: {pathname}
-        <br />isSuccess: {String(isSuccess)}
-        <br />isCancel: {String(isCancel)}
+        <br />pathname: {location.pathname}
+        <br />isSuccessCallback: {String(isSuccessCallback)}
+        <br />isCancelCallback: {String(isCancelCallback)}
         <br />PayOS status: {status}
         <br />Bill status: {bill.status}
         <br />Order Code: {orderCode}
@@ -272,7 +233,7 @@ const PaymentPage: React.FC = () => {
               </div>
               <div>
                 <span className="font-medium text-gray-600">{t('appointment.date')}:</span>
-                <p className="text-gray-900 font-medium">{new Date(appointment.date).toLocaleDateString('vi-VN')}</p>
+                <p className="text-gray-900 font-medium">{new Date(appointment.schedule?.workDate).toLocaleDateString('vi-VN')}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-600">{t('appointment.time')}:</span>
@@ -300,6 +261,7 @@ const PaymentPage: React.FC = () => {
               </div>
               <div>
                 <span className="font-medium text-gray-600">{t('payment.amount')}:</span>
+                {/* ĐÃ SỬA ĐỔI Ở ĐÂY: Đảm bảo truy cập đúng trường price từ doctorInfo */}
                 <p className="text-gray-900 font-medium">{appointment.doctorInfo?.price?.toLocaleString('vi-VN') || 'N/A'} VND</p>
               </div>
             </div>
@@ -390,13 +352,13 @@ const PaymentPage: React.FC = () => {
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
-                  onClick={handleReturnToDashboard}
+                  onClick={() => handleReturnToDashboard()}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
                 >
                   {t('common.returnToDashboard')}
                 </Button>
                 <Button
-                  onClick={() => navigate('/appointments')}
+                  onClick={() => navigate('/appointments/upcoming')}
                   className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold"
                 >
                   {t('appointment.viewAppointments')}
