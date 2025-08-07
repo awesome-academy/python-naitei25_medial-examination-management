@@ -1,8 +1,10 @@
+import type { UserRole } from "../constants/enums"
+
 export interface User {
   userId: number
   email: string | null 
   phone: string
-  role: "A" | "P" | "D" | "RECEPTIONIST"
+  role: UserRole
   createdAt: string
 }
 
@@ -10,14 +12,14 @@ export interface UserRequest {
   email?: string
   phone: string
   password: string
-  role: "A" | "P" | "D" | "RECEPTIONIST"
+  role: UserRole
 }
 
 export interface UserUpdateRequest {
   phone?: string
   email?: string | null
   password?: string
-  role?: "A" | "P" | "D" | "RECEPTIONIST"
+  role?: UserRole
 }
 
 export interface ChangePasswordRequest {
@@ -40,7 +42,7 @@ export interface AuthUser {
   name: string;
   email: string;
   phone: string;
-  role: "D" | "A" | "RECEPTIONIST" | "P";
+  role: UserRole;
   createdAt: string;
 }
 

@@ -1,3 +1,9 @@
+import type {
+  Gender,
+  DoctorType,
+  AcademicDegree
+} from "../constants/enums";
+
 export interface Department {
   departmentId: number;
   departmentName: string;
@@ -10,11 +16,11 @@ export interface Doctor {
   fullName: string
   birthday: string
   avatar: string
-  gender: "MALE" | "FEMALE" | "OTHER" 
+  gender: Gender
   address: string
-  academicDegree: "BS" | "BS_CKI" | "BS_CKII" | "THS_BS" | "TS_BS" | "PGS_TS_BS" | "GS_TS_BS"
+  academicDegree: AcademicDegree
   specialization: string
-  type: "EXAMINATION" | "SERVICE"
+  type: DoctorType
   department: Department;
   profileImage?: string;
   createdAt: string;
@@ -26,28 +32,10 @@ export interface DoctorDto {
   identityNumber: string;
   fullName: string;
   birthday: string;
-  gender: "MALE" | "FEMALE" | "OTHER";
+  gender: Gender;
   address: string;
-  academicDegree:
-    | "BS"
-    | "BS_CKI"
-    | "BS_CKII"
-    | "THS_BS"
-    | "TS_BS"
-    | "PGS_TS_BS"
-    | "GS_TS_BS";
+  academicDegree: AcademicDegree;
   specialization: string;
-  type: "EXAMINATION" | "SERVICE";
+  type: DoctorType;
   departmentId: number;
 }
-
-// Academic degree labels for display
-export const ACADEMIC_DEGREE_LABELS: Record<string, string> = {
-  BS: "BS",
-  BS_CKI: "BS CKI",
-  BS_CKII: "BS CKII",
-  THS_BS: "ThS.BS",
-  TS_BS: "TS.BS",
-  PGS_TS_BS: "PGS.TS.BS",
-  GS_TS_BS: "GS.TS.BS",
-};
