@@ -1,36 +1,37 @@
 import { api } from "../../../shared/services/api";
+import type { Shift } from "../types/appointment";
 
 export interface ScheduleResponse {
   scheduleId: number;
-  doctorId: number;
-  workDate: string; // YYYY-MM-DD
-  startTime: string; // HH:mm:ss
-  endTime: string; // HH:mm:ss
-  shift: "MORNING" | "AFTERNOON" | "SURGERY" | "MEETING";
-  roomId: number;
+  doctor_id: number; 
+  work_date: string; 
+  start_time: string;
+  end_time: string; 
+  shift: Shift;
+  room_id: number;
   location?: string;
-  roomNote?: string;
+  room_note?: string; 
   floor?: number;
   building?: string;
-  createdAt: string;
+  created_at: string; 
   title?: string;
 }
 
 export interface CreateScheduleRequest {
-  doctorId: number;
-  workDate: string; // YYYY-MM-DD
-  startTime: string; // HH:mm:ss
-  endTime: string; // HH:mm:ss
-  shift: "MORNING" | "AFTERNOON" | "SURGERY" | "MEETING";
-  roomId: number;
+  doctor_id: number; 
+  work_date: string; 
+  start_time: string; 
+  end_time: string; 
+  shift: Shift;
+  room_id: number; 
 }
 
 export const scheduleService = {
-  // Get schedules by doctor ID
+  // Lấy lịch làm việc theo ID bác sĩ
   async getSchedulesByDoctorId(doctorId: number): Promise<ScheduleResponse[]> {
     try {
       const response = await api.get<ScheduleResponse[]>(
-        `/schedules?doctor_id=${doctorId}`
+        `/schedules/?doctor_id=${doctorId}`
       );
       console.log(
         `Successfully fetched ${response.data.length} schedules:`,
@@ -46,12 +47,10 @@ export const scheduleService = {
     }
   },
 
-  // Get all schedules for admin view
+  // Lấy tất cả lịch làm việc cho chế độ admin
   async getAllSchedulesForAdmin(): Promise<ScheduleResponse[]> {
     try {
-      const response = await api.get<ScheduleResponse[]>(
-        "/doctors/schedules/admin"
-      );
+      const response = await api.get<ScheduleResponse[]>(`/doctors/schedules/admin/`);
       console.log(
         `✅ Successfully fetched ${response.data.length} admin schedules:`,
         response.data
@@ -63,11 +62,11 @@ export const scheduleService = {
     }
   },
 
-  // Get schedule by schedule ID
+  // Lấy lịch làm việc theo ID lịch
   async getScheduleById(scheduleId: number): Promise<ScheduleResponse> {
     try {
       const response = await api.get<ScheduleResponse>(
-        `/doctors/schedules/${scheduleId}`
+        `/doctors/schedules/${scheduleId}/`
       );
       console.log(`✅ Successfully fetched schedule:`, response.data);
       return response.data;
@@ -77,14 +76,22 @@ export const scheduleService = {
     }
   },
 
-  // Create new schedule
+  // Tạo lịch làm việc mới
   async createSchedule(
     scheduleData: CreateScheduleRequest
   ): Promise<ScheduleResponse> {
     try {
+      const payload = {
+        doctor: scheduleData.doctor_id,
+        room: scheduleData.room_id,     
+        work_date: scheduleData.work_date,
+        start_time: scheduleData.start_time,
+        end_time: scheduleData.end_time,
+        shift: scheduleData.shift,
+      };
       const response = await api.post<ScheduleResponse>(
-        `/doctors/${scheduleData.doctorId}/schedules`,
-        scheduleData
+        "/schedules/",
+        payload
       );
       console.log(`✅ Successfully created schedule:`, response.data);
       return response.data;
@@ -94,16 +101,24 @@ export const scheduleService = {
     }
   },
 
-  // Update existing schedule
+  // Cập nhật lịch làm việc hiện có
   async updateSchedule(
     doctorId: number,
     scheduleId: number,
     scheduleData: Partial<CreateScheduleRequest>
   ): Promise<ScheduleResponse> {
     try {
+      const payload: Partial<any> = {};
+      if (scheduleData.doctor_id !== undefined) payload.doctor = scheduleData.doctor_id;
+      if (scheduleData.room_id !== undefined) payload.room = scheduleData.room_id;
+      if (scheduleData.work_date !== undefined) payload.work_date = scheduleData.work_date;
+      if (scheduleData.start_time !== undefined) payload.start_time = scheduleData.start_time;
+      if (scheduleData.end_time !== undefined) payload.end_time = scheduleData.end_time;
+      if (scheduleData.shift !== undefined) payload.shift = scheduleData.shift;
+
       const response = await api.put<ScheduleResponse>(
-        `/doctors/${doctorId}/schedules/${scheduleId}`,
-        scheduleData
+        `/doctors/${doctorId}/schedules/${scheduleId}/`,
+        payload
       );
       console.log(`✅ Successfully updated schedule:`, response.data);
       return response.data;
@@ -113,10 +128,10 @@ export const scheduleService = {
     }
   },
 
-  // Delete schedule
+  // Xóa lịch làm việc
   async deleteSchedule(doctorId: number, scheduleId: number): Promise<void> {
     try {
-      await api.delete(`/doctors/${doctorId}/schedules/${scheduleId}`);
+      await api.delete(`/doctors/${doctorId}/schedules/${scheduleId}/`);
       console.log(`✅ Successfully deleted schedule ${scheduleId}`);
     } catch (error) {
       console.error(`❌ Error deleting schedule ${scheduleId}:`, error);

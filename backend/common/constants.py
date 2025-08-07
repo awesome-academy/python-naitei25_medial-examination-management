@@ -6,7 +6,7 @@ DECIMAL_DECIMAL_PLACES = 2
 DECIMAL_DEFAULT = 0
 
 PAGE_NO_DEFAULT = 0
-PAGE_SIZE_DEFAULT = 10
+PAGE_SIZE_DEFAULT = 20
 MIN_VALUE = 1
 
 # ======================
@@ -21,7 +21,7 @@ REGEX_PATTERNS = {
 # Enum char field length
 # ======================
 ENUM_LENGTH = {
-    "DEFAULT": 2
+    "DEFAULT": 20
 }
 
 # ======================
@@ -106,3 +106,13 @@ ALL_SLOTS = [
     {"slot_start": "08:30", "slot_end": "08:45"},
     {"slot_start": "08:45", "slot_end": "09:00"},
 ]
+
+# ======================
+# Appointment per slot domain
+# ======================
+SCHEDULE_DEFAULTS = {
+    "MAX_PATIENTS": 10,
+    "CURRENT_PATIENTS": 0,
+    "APPOINTMENT_DURATION_MINUTES": 30,
+    "MINUTES": 60,
+}
