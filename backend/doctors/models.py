@@ -2,11 +2,16 @@ from django.db import models
 from core.models import BaseModel
 from users.models import User
 from common.enums import Gender, AcademicDegree, DoctorType, RoomType, Shift
-from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH, DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES
+from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH, SCHEDULE_DEFAULTS, DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES
+
+class ScheduleStatus(models.TextChoices):
+    AVAILABLE = "AVAILABLE", "Available"
+    FULL = "FULL", "Full"
 
 class Department(BaseModel):
     department_name = models.CharField(max_length=DOCTOR_LENGTH["DEPARTMENT_NAME"])
     description = models.TextField(blank=True, null=True)
+    avatar = models.CharField(max_length=DOCTOR_LENGTH["AVATAR"], blank=True, null=True)
 
     def __str__(self):
         return self.department_name
@@ -52,6 +57,14 @@ class Schedule(BaseModel):
     end_time = models.TimeField()
     shift = models.CharField(max_length=ENUM_LENGTH["DEFAULT"], choices=[(s.value, s.name) for s in Shift])
     room = models.ForeignKey(ExaminationRoom, on_delete=models.RESTRICT)
+    max_patients = models.IntegerField(default=SCHEDULE_DEFAULTS["MAX_PATIENTS"])
+    current_patients = models.IntegerField(default=SCHEDULE_DEFAULTS["CURRENT_PATIENTS"])
+    status = models.CharField(
+        max_length=ENUM_LENGTH["DEFAULT"],
+        choices=ScheduleStatus.choices,
+        default=ScheduleStatus.AVAILABLE
+    )
+    default_appointment_duration_minutes = models.IntegerField(default=SCHEDULE_DEFAULTS["APPOINTMENT_DURATION_MINUTES"])
 
     def __str__(self):
         return f"Schedule {self.doctor} {self.work_date} {self.shift}"
