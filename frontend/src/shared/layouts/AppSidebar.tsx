@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -53,7 +51,7 @@ const AppSidebar: React.FC = () => {
       icon: <PatientIcon />,
       name: t("sidebar.patients"),
       path: `${basePath}/patients`,
-      roles: ["A", "RECEPTIONIST", ...(doctorType === "E" ? ["D"] : [])], // Chỉ hiển thị cho bác sĩ loại E
+      roles: ["A", "RECEPTIONIST", "D"], // Chỉ hiển thị cho bác sĩ loại E
     },
     {
       name: t("sidebar.examination"),

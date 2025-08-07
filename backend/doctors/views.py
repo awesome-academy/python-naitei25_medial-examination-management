@@ -182,6 +182,7 @@ class ScheduleViewSet(viewsets.ViewSet):
         shift = request.query_params.get('shift')
         work_date = request.query_params.get('workDate')
         room_id = request.query_params.get('roomId')
+        doctor_id = request.query_params.get('doctor_id')
         schedules = ScheduleService().get_all_schedules(doctor_id, shift, work_date, room_id)
         serializer = ScheduleSerializer(schedules, many=True)
         return Response(serializer.data)
