@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-
 from .models import Appointment, AppointmentNote, ServiceOrder, Schedule
 from patients.serializers import PatientSerializer
 from doctors.serializers import DoctorSerializer
@@ -11,14 +10,21 @@ from common.constants import DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES, PAGE_NO
 from django.utils.translation import gettext_lazy as _
 
 
+class AvailableSlotSerializer(serializers.Serializer):
+    time = serializers.CharField()
+    available = serializers.BooleanField()
+    scheduleId = serializers.IntegerField()
+    
 class AppointmentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = [
+            'id',
             'slot_start', 'slot_end', 'schedule',
             'symptoms', 'status',
             'doctor', 'patient'
         ]
+        read_only_fields = ['id']
 
 class AppointmentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -104,12 +110,6 @@ class AppointmentPatientViewSerializer(serializers.ModelSerializer):
             'symptoms','slot_start', 'slot_end',
             'status', 'created_at'
         ]
-
-
-class AvailableSlotSerializer(serializers.Serializer):
-    slot_start = serializers.TimeField()
-    slot_end = serializers.TimeField()
-    is_available = serializers.BooleanField()
 
 class ScheduleTimeSerializer(serializers.Serializer):
     schedule_id = serializers.IntegerField(required=False)
