@@ -251,7 +251,10 @@
     "lookup": "Lookup",
     "drugLookup": "Drug Lookup",
     "aiDiagnosis": "AI Diagnosis",
-    "profile": "Profile"
+    "profile": "Profile",
+    "appointments": "Appointments",
+    "upcomingAppointments": "Upcoming Appointments",
+    "pastAppointments": "Past Appointments"
   },
   "layout": {
     "toggleSidebar": "Toggle Sidebar",

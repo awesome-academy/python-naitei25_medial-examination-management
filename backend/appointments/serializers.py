@@ -9,6 +9,146 @@ from common.enums import ServiceType, Gender, AppointmentStatus
 from common.constants import DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES, PAGE_NO_DEFAULT, PAGE_SIZE_DEFAULT, MIN_VALUE
 from django.utils.translation import gettext_lazy as _
 from datetime import date, datetime, timedelta
+from doctors.serializers import DoctorSerializer
+
+
+class AvailableSlotSerializer(serializers.Serializer):
+    time = serializers.CharField()
+    available = serializers.BooleanField()
+    scheduleId = serializers.IntegerField()
+    
+class AppointmentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = [
+            'id',
+            'slot_start', 'slot_end', 'schedule',
+            'symptoms', 'status',
+            'doctor', 'patient'
+        ]
+        read_only_fields = ['id']
+
+class AppointmentUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = [
+            'id', 'doctor', 'patient', 'schedule', 'symptoms',
+            'number', 'status', 'slot_start', 'slot_end'
+        ]
+
+
+class AppointmentNoteSerializer(serializers.ModelSerializer):
+    appointmentId = serializers.IntegerField(source='appointment.id', read_only=True)
+    content = serializers.CharField(source='note_text')
+    note_type = serializers.CharField()
+
+    class Meta:
+        model = AppointmentNote
+        fields = ['id', 'appointmentId', 'note_type', 'content', 'created_at']
+
+class ScheduleSerializer(serializers.ModelSerializer):
+    location = serializers.CharField(source='room.location', read_only=True)
+    room_note = serializers.CharField(source='room.room_note', read_only=True)
+    floor = serializers.IntegerField(source='room.floor', read_only=True)
+    building = serializers.CharField(source='room.building', read_only=True)
+
+    class Meta:
+        model = Schedule
+        fields = [
+            'id',
+            'doctor',
+            'work_date',
+            'start_time',
+            'end_time',
+            'shift',
+            'room',
+            'location',
+            'room_note',
+            'floor',
+            'building',
+        ]
+
+
+class AppointmentDetailSerializer(serializers.ModelSerializer):
+    patientInfo = PatientSerializer(source='patient', read_only=True)
+    doctorInfo = DoctorSerializer(source='doctor', read_only=True)
+    schedule = ScheduleSerializer(read_only=True)
+    appointmentNotes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Appointment
+        fields = [
+            'id', 'doctor', 'schedule', 'symptoms',
+            'slot_start', 'slot_end', 'status', 'created_at',
+            'patientInfo', 'doctorInfo', 'appointmentNotes',
+        ]
+
+    def get_appointmentNotes(self, obj):
+        notes = AppointmentNote.objects.filter(appointment=obj)
+        return AppointmentNoteSerializer(notes, many=True).data
+
+
+
+class AppointmentDoctorViewSerializer(serializers.ModelSerializer):
+    patientInfo = PatientSerializer(source='patient', read_only=True)
+    schedule = ScheduleSerializer()
+
+    class Meta:
+        model = Appointment
+        fields = [
+            'id', 'patient_id', 'patientInfo', 'symptoms',
+            'schedule', 'status', 'created_at'
+        ]
+
+
+class AppointmentPatientViewSerializer(serializers.ModelSerializer):
+    doctorInfo = DoctorSerializer(source='doctor', read_only=True)
+    schedule = ScheduleSerializer()
+
+    class Meta:
+        model = Appointment
+        fields = [
+            'id', 'doctor_id', 'doctorInfo', 'schedule',
+            'symptoms','slot_start', 'slot_end',
+            'status', 'created_at'
+        ]
+
+class ScheduleTimeSerializer(serializers.Serializer):
+    schedule_id = serializers.IntegerField(required=False)
+    start_time = serializers.TimeField(required=False)
+    end_time = serializers.TimeField(required=False)
+
+
+class ServiceOrderSerializer(serializers.Serializer):
+    order_id = serializers.IntegerField(required=False)
+    appointment_id = serializers.IntegerField(
+        required=True,
+        error_messages={
+            'required': _('Mã lịch hẹn không được để trống')
+        }
+    )
+    room_id = serializers.IntegerField(
+        required=True,
+        error_messages={
+            'required': _('Mã phòng không được để trống')
+        }
+    )
+
+    service_id = serializers.IntegerField(
+        required=True,
+        error_messages={
+            'required': _('Mã dịch vụ không được để trống')
+        }
+    )
+    order_status = serializers.CharField(source='status',required=False)
+    result = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    number = serializers.IntegerField(required=False)
+    order_time = serializers.DateTimeField(required=False)
+    result_time = serializers.DateTimeField(required=False)
+    created_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        return ServiceOrder.objects.create(**validated_data)
 
 
 class ServiceSerializer(serializers.Serializer):

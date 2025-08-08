@@ -251,7 +251,10 @@
     "aiDiagnosis": "Chẩn đoán bằng AI",
     "profile": "Hồ sơ",
     "new": "mới",
-    "pro": "pro"
+    "pro": "pro",
+    "appointments": "Lịch khám",
+    "upcomingAppointments": "Lịch khám sắp tới",
+    "pastAppointments": "Lịch khám đã qua"
   },
   "layout": {
     "toggleSidebar": "Bật/tắt thanh bên",

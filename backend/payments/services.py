@@ -1,6 +1,6 @@
 from django.conf import settings
 import payos
-from .models import Bill, BillDetail, Transaction
+from .models import Bill, BillDetail, Transaction, Appointment
 from .serializers import TransactionDTOSerializer
 from common.enums import PaymentStatus, TransactionStatus, ServiceType, PaymentMethod
 from django.http import Http404
@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import get_object_or_404
 from payos import PayOS, ItemData, PaymentData
-from appointments.serializers import AppointmentSerializer
+from appointments.serializers import AppointmentDetailSerializer
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -199,25 +200,49 @@ class PayOSService:
             raise
 
     def get_payment_info(self, order_id):
-            try:
-                logger.info(f"Retrieving payment info for order_id {order_id}")
+        try:
+            logger.info(f"Retrieving payment info for order_id {order_id}")
+            
+            if int(order_id) > 1000:
+                logger.info(f"Treating {order_id} as orderCode")
                 result = self.payos.getPaymentLinkInformation(orderId=order_id)
-                bill = get_object_or_404(Bill, id=order_id)  # Giả sử order_id tương ứng với bill_id
-                appointment = Appointment.objects.filter(id=bill.appointment_id).first()
+                bill_id = int(order_id) // 1000
+                logger.info(f"Calculated bill_id from orderCode: {bill_id}")
+            else:
+                bill_id = order_id
+                logger.info(f"Treating {order_id} as bill_id")
                 
-                result_dict = {
-                    'orderCode': getattr(result, 'orderCode', None),
-                    'status': getattr(result, 'status', None),
-                    'amount': bill.amount,
-                    'description': bill.description,
-                    'createdAt': bill.created_at.isoformat(),
-                    'appointment': AppointmentSerializer(appointment).data if appointment else None
-                }
-                logger.info(f"Payment info retrieved for order_id {order_id}: {result_dict}")
-                return result_dict
-            except Exception as e:
-                logger.error(f"Error retrieving payment info for order_id {order_id}: {str(e)}")
-                raise ValueError(_("Lỗi khi lấy thông tin thanh toán: {error}").format(error=str(e)))
+                bill = get_object_or_404(Bill, id=bill_id)
+                transactions = Transaction.objects.filter(bill=bill).order_by('-created_at')
+                
+                if transactions.exists():
+                    estimated_order_code = int(bill_id) * 1000 + 263
+                    try:
+                        result = self.payos.getPaymentLinkInformation(orderId=estimated_order_code)
+                        logger.info(f"Found payment info with estimated orderCode: {estimated_order_code}")
+                    except Exception as e:
+                        logger.warning(f"Failed with estimated orderCode, trying with bill_id: {e}")
+                        result = self.payos.getPaymentLinkInformation(orderId=bill_id)
+                else:
+                    result = self.payos.getPaymentLinkInformation(orderId=bill_id)
+            
+            bill = get_object_or_404(Bill, id=bill_id)
+            appointment = Appointment.objects.filter(id=bill.appointment_id).first()
+            
+            result_dict = {
+                'orderCode': getattr(result, 'orderCode', None),
+                'status': getattr(result, 'status', None),
+                'amount': float(bill.amount),
+                'description': f"Hóa đơn #{bill_id}",
+                'createdAt': bill.created_at.isoformat(),
+                'appointment': AppointmentDetailSerializer(appointment).data if appointment else None
+            }
+            logger.info(f"Payment info retrieved successfully for order_id {order_id}")
+            return result_dict
+            
+        except Exception as e:
+            logger.error(f"Error retrieving payment info for order_id {order_id}: {str(e)}")
+            raise ValueError(_("Lỗi khi lấy thông tin thanh toán: {error}").format(error=str(e)))
 
     def cancel_payment(self, order_id):
         try:

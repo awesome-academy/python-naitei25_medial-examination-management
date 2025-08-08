@@ -79,7 +79,7 @@ const AppointmentConfirmationPage: React.FC = () => {
   };
 
   const handleBackToDoctor = () => {
-    navigate(`/doctors/${doctorId}`);
+    navigate(`/patient/doctors/${doctorId}`);
   };
 
   if (loading) {
@@ -138,7 +138,11 @@ const AppointmentConfirmationPage: React.FC = () => {
               </div>
               <div>
                 <span className="font-medium text-gray-600">{t('appointment.doctor')}:</span>
-                <p className="text-gray-900 font-medium">{appointment.doctorInfo?.fullName || 'N/A'}</p>
+                  <p className="text-gray-900 font-medium">
+                    {appointment.doctorInfo?.first_name && appointment.doctorInfo?.last_name
+                    ? `${appointment.doctorInfo.first_name} ${appointment.doctorInfo.last_name}`
+                    : 'N/A'}
+                </p>
               </div>
               <div>
                 <span className="font-medium text-gray-600">{t('appointment.date')}:</span>
@@ -153,12 +157,6 @@ const AppointmentConfirmationPage: React.FC = () => {
               <div>
                 <span className="font-medium text-gray-600">{t('appointment.status')}:</span>
                 <p className="text-yellow-600 font-semibold">{appointment.status === 'P' ? 'PENDING' : appointment.status}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">{t('appointment.patient')}:</span>
-                <p className="text-gray-900 font-medium">
-                  {appointment.patientInfo ? `${appointment.patientInfo.first_name} ${appointment.patientInfo.last_name}` : 'N/A'}
-                </p>
               </div>
               <div>
                 <span className="font-medium text-gray-600">{t('appointment.session')}:</span>

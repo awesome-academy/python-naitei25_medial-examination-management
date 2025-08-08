@@ -18,6 +18,19 @@ export interface TimeSlot {
   appointmentId?: number
 }
 
+export interface ScheduleDetail {
+  id: number
+  doctor_id?: number
+  created_at?: string
+  updated_at?: string
+  work_date?: string
+  start_time?: string
+  end_time?: string
+  shift?: 'M' | 'A' | 'E' | 'U' | string
+  doctor?: number
+  room?: number
+}
+
 export const scheduleService = {
   // Get doctor's schedule
   async getDoctorSchedule(doctorId: number): Promise<Schedule[]> {
@@ -81,5 +94,6 @@ export const scheduleService = {
     } catch (error: any) {
       throw new Error(handleApiError(error, false))
     }
-  }
+  },
+  
 }

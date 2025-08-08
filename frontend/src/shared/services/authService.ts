@@ -9,12 +9,34 @@ import i18n from "../../i18n"
 export const authService = {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
+      console.log('=== AUTH SERVICE LOGIN DEBUG ===');
+      console.log('Login credentials:', { username: credentials.username, password: '***' });
+      
       const loginResponse = await api.post<{ token: string; refresh?: string }>("/auth/login/", credentials)
       const { token, refresh } = loginResponse.data
 
-      storage.setRaw(LocalStorageKeys.AUTH_TOKEN, token)
+      console.log('Raw token from login API:', token?.substring(0, 30) + '...');
+      console.log('Token starts with Bearer:', token?.startsWith('Bearer'));
+      
+      // 🔥 FIX: Đảm bảo token có "Bearer " prefix khi lưu
+      let tokenToStore = token;
+      if (token && !token.startsWith('Bearer ')) {
+        tokenToStore = `Bearer ${token}`;
+        console.log('✅ Added Bearer prefix to token before storing');
+      } else {
+        console.log('✅ Token already has Bearer prefix');
+      }
+      
+      storage.setRaw(LocalStorageKeys.AUTH_TOKEN, tokenToStore)
+      console.log('Token stored in localStorage:', tokenToStore?.substring(0, 30) + '...');
+      
       if (refresh) {
-        storage.setRaw(LocalStorageKeys.REFRESH_TOKEN, refresh)
+        // 🔥 FIX: Refresh token cũng cần format đúng
+        let refreshToStore = refresh;
+        if (refresh && !refresh.startsWith('Bearer ')) {
+          refreshToStore = `Bearer ${refresh}`;
+        }
+        storage.setRaw(LocalStorageKeys.REFRESH_TOKEN, refreshToStore)
       }
 
       const userResponse = await api.get<AuthUser>("/users/me/")
@@ -50,8 +72,10 @@ export const authService = {
         storage.set(LocalStorageKeys.RECEPTIONIST_INFO, receptionistInfo)
       }
 
-      return { token, user: { ...user, userId }, doctorInfo }
+      console.log('✅ Login successful, returning data');
+      return { token: tokenToStore, user: { ...user, userId }, doctorInfo }
     } catch (error: any) {
+      console.error('❌ Login failed:', error);
       throw new Error(handleApiError(error, false))
     }
   },
@@ -166,10 +190,22 @@ export const authService = {
   async refreshToken(): Promise<string> {
     try {
       const refreshToken = storage.getRaw(LocalStorageKeys.REFRESH_TOKEN)
+      console.log('Refreshing token with:', refreshToken?.substring(0, 30) + '...');
+      
       const response = await api.post<{ token: string }>("/users/auth/refresh/", { refresh: refreshToken })
+      
       if (response.data.token) {
-        storage.setRaw(LocalStorageKeys.AUTH_TOKEN, response.data.token)
+        // 🔥 FIX: Đảm bảo token mới có "Bearer " prefix
+        let newToken = response.data.token;
+        if (!newToken.startsWith('Bearer ')) {
+          newToken = `Bearer ${newToken}`;
+        }
+        
+        storage.setRaw(LocalStorageKeys.AUTH_TOKEN, newToken)
+        console.log('New token stored:', newToken?.substring(0, 30) + '...');
+        return newToken;
       }
+      
       return response.data.token
     } catch (error: any) {
       throw new Error(handleApiError(error, false) || i18n.t("errors.refreshTokenFailed"))

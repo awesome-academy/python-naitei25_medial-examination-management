@@ -2,35 +2,69 @@ import { api } from './api'
 import { handleApiError } from '../utils/errorHandler'
 import type { Appointment, CreateAppointmentPayload, UpdateAppointmentPayload, AppointmentNote, AppointmentFilter } from '../types/appointment'
 import type { PaginatedResponse } from '../types/api'
+import { patientService } from './patientService'
+import { storage } from '../utils/storage'
+import { LocalStorageKeys } from '../constants/storageKeys'
 
 export type AppointmentListResponse = PaginatedResponse<Appointment>
 
 export const appointmentService = {
   // Get my appointments
-  async getMyAppointments(page = 1, pageSize = 10, filters?: AppointmentFilter): Promise<AppointmentListResponse> {
+  async getMyAppointments(page = 1, pageSize = 10, filters?: AppointmentFilter): Promise<any> {
     try {
-      const params = new URLSearchParams()
-      params.append('page', page.toString())
-      params.append('page_size', pageSize.toString())
-      
-      if (filters?.status) params.append('status', filters.status)
-      if (filters?.startDate) params.append('start_date', filters.startDate)
-      if (filters?.endDate) params.append('end_date', filters.endDate)
+      const userId = storage.getRaw(LocalStorageKeys.CURRENT_USER_ID);
+      if (!userId) {
+        throw new Error('Không tìm thấy user ID');
+      }
 
-      const response = await api.get<AppointmentListResponse>(`/appointments/my/?${params.toString()}`)
-      return response.data
+      let patientId: number;
+      try {
+        const patient = await patientService.getPatientByUserId(Number(userId));
+        patientId = patient.id;
+      } catch (error) {
+        console.error('Cannot get patient info:', error);
+        throw new Error('Không thể lấy thông tin bệnh nhân');
+      }
+
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('pageSize', pageSize.toString());
+      
+      if (filters?.status) params.append('appointmentStatus', filters.status);
+
+      console.log('Calling API: /appointments/patient/' + patientId + '/ with params:', params.toString());
+      
+      const response = await api.get(`/appointments/patient/${patientId}/?${params.toString()}`);
+      console.log('My appointments API response:', response.data);
+      
+      return response.data;
     } catch (error: any) {
-      throw new Error(handleApiError(error, false))
+      console.error('getMyAppointments error:', error);
+      throw new Error(handleApiError(error, false));
     }
   },
-
   // Get upcoming appointments
-  async getUpcomingAppointments(): Promise<Appointment[]> {
+  async getUpcomingAppointments(): Promise<any[]> {
     try {
-      const response = await api.get<{ results: Appointment[] }>('/appointments/upcoming/')
-      return response.data.results
+      console.log('Getting upcoming appointments...');
+
+      const appointmentsData = await this.getMyAppointments(1, 100);
+      const allAppointments = appointmentsData?.content || appointmentsData?.results || [];
+      
+      const now = new Date();
+      const upcoming = allAppointments.filter((appt: any) => {
+        const apptDate = new Date(appt.schedule?.work_date || appt.date);
+        const isUpcoming = apptDate >= now;
+        const isNotCancelled = appt.status !== 'CANCELLED' && appt.status !== 'COMPLETED';
+        
+        return isUpcoming && isNotCancelled;
+      });
+      
+      console.log('Filtered upcoming appointments:', upcoming);
+      return upcoming;
     } catch (error: any) {
-      throw new Error(handleApiError(error, false))
+      console.error('getUpcomingAppointments error:', error);
+      return [];
     }
   },
 

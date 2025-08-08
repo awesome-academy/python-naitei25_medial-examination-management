@@ -6,7 +6,8 @@ import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import DoctorListPage from './pages/DoctorListPage';
 import DoctorBookingPage from './pages/DoctorBookingPage';
-import AppointmentsPage from './pages/AppointmentsPage';
+import UpcomingAppointmentsPage from './pages/UpcomingAppointmentsPage';
+import PastAppointmentsPage from './pages/PastAppointmentsPage';
 import AppointmentConfirmationPage from './pages/AppointmentConfirmationPage';
 import PaymentPage from './pages/PaymentPage';
 import DepartmentListPage from './pages/DepartmentListPage';
@@ -37,8 +38,11 @@ export const PatientApp: React.FC = () => {
           <Route path="doctors/:id/book" element={<DoctorBookingPage />} />
           <Route path="book-appointment" element={<DepartmentListPage />} />
           <Route path="departments/:id/doctors" element={<DepartmentDetailPage />} />
-          <Route path="appointments" element={<AppointmentsPage />} />
-          <Route path="prescriptions" element={<AppointmentsPage />} />
+          
+          {/* Appointments Routes */}
+          <Route path="appointments/upcoming" element={<UpcomingAppointmentsPage />} />
+          <Route path="appointments/past" element={<PastAppointmentsPage />} />
+          
           <Route path="appointments/confirm" element={<AppointmentConfirmationPage />} />
           <Route path="payment/:billId" element={<PaymentPage />} />
           <Route path="payment/:billId/success" element={<PaymentPage />} />
