@@ -118,7 +118,7 @@ class PrescriptionDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrescriptionDetail
         fields = [
-            'id', 'prescription', 'medicine', 'dosage', 'frequency',
+            'id', 'prescription', 'medicine', 'medicine_id', 'dosage', 'frequency',
             'duration', 'prescription_notes', 'quantity', 'created_at'
         ]
 

@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               if (doctor) {
                 doctorInfo = doctor
                 storage.set(LocalStorageKeys.DOCTOR_INFO, doctor)
-                storage.setRaw(LocalStorageKeys.CURRENT_DOCTOR_ID, doctor.doctorId.toString())
+                storage.setRaw(LocalStorageKeys.CURRENT_DOCTOR_ID, doctor.id.toString())
               }
             } catch (error) {
               console.error("Failed to fetch doctor info:", error)
@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return t("roles.doctor")
         case "P":
           return t("roles.patient")
-        case "RECEPTIONIST":
+        case "R":
           return t("roles.receptionist")
         default:
           return t("roles.user")

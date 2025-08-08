@@ -9,6 +9,7 @@ import ServicePatient from "./pages/Patients/ServicePatient"
 import Appointment from "./pages/Appointment/Appointment"
 import Profile from "./pages/Profile/Profile"
 import Schedule from "./pages/Schedules/Schedule"
+import PatientDetail from "./pages/Patients/PatientDetail"
 import { AppointmentProvider } from "./context/AppointmentContext"
 
 const RequireDoctor: React.FC<{ children: React.ReactNode; allowedType?: string }> = ({ children, allowedType }) => {
@@ -34,7 +35,7 @@ const DoctorApp: React.FC = () => {
     const { t } = useTranslation()
 
     return (
-        <AppointmentProvider> {/* Wrap the entire Routes with AppointmentProvider */}
+        <AppointmentProvider>
             <ScrollToTop />
             <Routes>
                 <Route
@@ -48,6 +49,7 @@ const DoctorApp: React.FC = () => {
                     <Route index element={<Home />} />
                     <Route path="dashboard" element={<Home />} />
                     <Route path="patients" element={<Patient />} />
+                    <Route path="patient/detail" element={<PatientDetail />} />
                     <Route path="appointment" element={<Appointment />} />
                     <Route path="schedule" element={<Schedule />} />
                     <Route path="profile" element={<Profile />} />
