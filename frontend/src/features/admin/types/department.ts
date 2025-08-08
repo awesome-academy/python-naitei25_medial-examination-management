@@ -11,12 +11,11 @@ export interface Department {
   foundedYear: number;
   phoneNumber?: string;
   email?: string;
-  departmentId?: number; // Add this for API calls
 }
 
 export interface DepartmentFromAPI {
-  departmentId: number;
-  departmentName: string;
+  id: number; 
+  department_name: string;
   description: string;
   location?: string;
   head_doctor_id?: string;
@@ -44,13 +43,12 @@ export interface ExaminationRoom {
 // Helper function to transform API data to frontend format
 export const transformDepartmentData = (apiDepartment: DepartmentFromAPI, index?: number): Department => {
   // Generate a safe ID - use departmentId if available, otherwise use index or random string
-  const safeId = apiDepartment.departmentId 
-    ? `KH2025-${String(apiDepartment.departmentId).padStart(3, '0')}`
+  const safeId = apiDepartment.id 
+    ? `KH2025-${String(apiDepartment.id).padStart(3, '0')}`
     : `KH2025-${index !== undefined ? String(index).padStart(3, '0') : Math.random().toString(36).substr(2, 9)}`;
-    
   return {
     id: safeId,
-    name: apiDepartment.departmentName || "Khoa chưa có tên",
+    name: apiDepartment.department_name || "Khoa chưa có tên",
     head: apiDepartment.headDoctorName || "Chưa cập nhật trưởng khoa",
     team: {
       images: apiDepartment.staffImages || [],
@@ -61,6 +59,5 @@ export const transformDepartmentData = (apiDepartment: DepartmentFromAPI, index?
     foundedYear: apiDepartment.foundedYear || 2020,
     phoneNumber: apiDepartment.phoneNumber,
     email: apiDepartment.email,
-    departmentId: apiDepartment.departmentId, // Add this for API calls
   };
 };

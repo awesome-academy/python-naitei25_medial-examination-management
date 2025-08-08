@@ -1,12 +1,15 @@
 import cloudinary.uploader
 from django.shortcuts import get_object_or_404
 from django.db import transaction
-from .models import Doctor, Department, ExaminationRoom, Schedule
+from django.http import Http404
+from .models import Doctor, Department, ExaminationRoom, Schedule, ScheduleStatus
 from appointments.models import Appointment
 from patients.models import Patient
 from users.models import User
 from users.services import UserService
-from common.enums import UserRole
+from common.enums import UserRole, AppointmentStatus
+from common.constants import SCHEDULE_DEFAULTS
+from django.utils.translation import gettext_lazy as _
 
 
 class DoctorService:
@@ -53,7 +56,7 @@ class DoctorService:
         return doctor
 
     def delete_doctor(self, doctor_id):
-        doctor = self.get_doctor_by_id(doctor_id)
+        doctor = get_object_or_404(Doctor, pk=doctor_id)
         doctor.delete()
 
     def find_by_identity_number(self, identity_number):
@@ -73,7 +76,7 @@ class DoctorService:
 
     def get_doctor_by_user_id(self, user_id):
         return Doctor.objects.filter(user_id=user_id).first()
-    
+
     def upload_avatar(self, doctor, file):
         upload_result = cloudinary.uploader.upload(file)
         doctor.avatar = upload_result['secure_url']
@@ -152,29 +155,40 @@ class ScheduleService:
         if work_date:
             query = query.filter(work_date=work_date)
         if room_id:
-            query = query.filter(examination_room_id=room_id)
+            query = query.filter(room_id=room_id)
         return query.order_by('work_date', 'start_time')
 
     def get_schedule_by_id(self, schedule_id):
         return get_object_or_404(Schedule, pk=schedule_id)
 
     def create_schedule(self, doctor_id, data):
-        data['doctor_id'] = doctor_id
-        return Schedule.objects.create(**data)
+        doctor_instance = data.pop('doctor')
+        room_instance = data.pop('room')
+
+        if doctor_id and doctor_instance.id != doctor_id:
+            raise ValueError(_("Doctor ID mismatch between URL and payload"))
+
+        return Schedule.objects.create(doctor=doctor_instance, room=room_instance, **data)
 
     def update_schedule(self, doctor_id, schedule_id, data):
         schedule = self.get_schedule_by_id(schedule_id)
-        if schedule.doctor_id != doctor_id:
+        if schedule.doctor.id != doctor_id:
             raise Http404
+
+        if 'doctor' in data:
+            schedule.doctor = data.pop('doctor')
+        if 'room' in data:
+            schedule.room = data.pop('room')
+
         for key, value in data.items():
-            if key not in ['doctor', 'examination_room']:
+            if key not in ['current_patients']:
                 setattr(schedule, key, value)
         schedule.save()
         return schedule
 
     def delete_schedule(self, doctor_id, schedule_id):
         schedule = self.get_schedule_by_id(schedule_id)
-        if schedule.doctor_id != doctor_id:
+        if schedule.doctor.id != doctor_id:
             raise Http404
         schedule.delete()
 
@@ -183,3 +197,28 @@ class ScheduleService:
 
     def get_schedules_by_ids(self, schedule_ids):
         return Schedule.objects.filter(pk__in=schedule_ids).order_by('work_date', 'start_time')
+
+    @transaction.atomic
+    def update_current_patients_count(self, schedule_id):
+        schedule = self.get_schedule_by_id(schedule_id)
+        active_statuses = [
+            AppointmentStatus.PENDING.value,
+            AppointmentStatus.CONFIRMED.value,
+            AppointmentStatus.IN_PROGRESS.value,
+            AppointmentStatus.COMPLETED.value
+        ]
+
+        current_appointments_count = Appointment.objects.filter(
+            schedule_id=schedule_id,
+            status__in=active_statuses
+        ).count()
+
+        schedule.current_patients = current_appointments_count
+
+        if schedule.current_patients >= schedule.max_patients:
+            schedule.status = ScheduleStatus.FULL.value
+        else:
+            schedule.status = ScheduleStatus.AVAILABLE.value
+
+        schedule.save()
+        return schedule

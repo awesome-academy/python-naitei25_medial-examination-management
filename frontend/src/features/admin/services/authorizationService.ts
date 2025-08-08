@@ -492,7 +492,7 @@ export const userService = {
         department: params?.department,
         status: params?.status,
       }); // Calculate pagination for filtered results
-      const pageSize = params?.limit || 10; // Use requested page size or default to 10
+      const pageSize = params?.limit || 30; // Use requested page size or default to 10
       const currentPage = params?.page || 1;
       const startIndex = (currentPage - 1) * pageSize;
       const endIndex = startIndex + pageSize;
@@ -819,7 +819,7 @@ export const roleService = {
       }
 
       const page = params?.page || 1;
-      const limit = params?.limit || 10;
+      const limit = params?.limit || 30;
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
 
@@ -939,7 +939,7 @@ export const permissionService = {
       }
 
       const page = params?.page || 1;
-      const limit = params?.limit || 10;
+      const limit = params?.limit || 30;
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       return {
