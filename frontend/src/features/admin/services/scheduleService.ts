@@ -3,27 +3,27 @@ import type { Shift } from "../types/appointment";
 
 export interface ScheduleResponse {
   scheduleId: number;
-  doctor_id: number; 
-  work_date: string; 
+  doctor_id: number;
+  work_date: string;
   start_time: string;
-  end_time: string; 
+  end_time: string;
   shift: Shift;
   room_id: number;
   location?: string;
-  room_note?: string; 
+  room_note?: string;
   floor?: number;
   building?: string;
-  created_at: string; 
+  created_at: string;
   title?: string;
 }
 
 export interface CreateScheduleRequest {
-  doctor_id: number; 
-  work_date: string; 
-  start_time: string; 
-  end_time: string; 
+  doctor_id: number;
+  work_date: string;
+  start_time: string;
+  end_time: string;
   shift: Shift;
-  room_id: number; 
+  room_id: number;
 }
 
 export const scheduleService = {
@@ -50,7 +50,9 @@ export const scheduleService = {
   // Lấy tất cả lịch làm việc cho chế độ admin
   async getAllSchedulesForAdmin(): Promise<ScheduleResponse[]> {
     try {
-      const response = await api.get<ScheduleResponse[]>(`/doctors/schedules/admin/`);
+      const response = await api.get<ScheduleResponse[]>(
+        `/doctors/schedules/admin/`
+      );
       console.log(
         `✅ Successfully fetched ${response.data.length} admin schedules:`,
         response.data
@@ -83,7 +85,7 @@ export const scheduleService = {
     try {
       const payload = {
         doctor: scheduleData.doctor_id,
-        room: scheduleData.room_id,     
+        room: scheduleData.room_id,
         work_date: scheduleData.work_date,
         start_time: scheduleData.start_time,
         end_time: scheduleData.end_time,
@@ -91,7 +93,7 @@ export const scheduleService = {
       };
       const response = await api.post<ScheduleResponse>(
         "/schedules/",
-        payload
+        scheduleData
       );
       console.log(`✅ Successfully created schedule:`, response.data);
       return response.data;
@@ -109,11 +111,16 @@ export const scheduleService = {
   ): Promise<ScheduleResponse> {
     try {
       const payload: Partial<any> = {};
-      if (scheduleData.doctor_id !== undefined) payload.doctor = scheduleData.doctor_id;
-      if (scheduleData.room_id !== undefined) payload.room = scheduleData.room_id;
-      if (scheduleData.work_date !== undefined) payload.work_date = scheduleData.work_date;
-      if (scheduleData.start_time !== undefined) payload.start_time = scheduleData.start_time;
-      if (scheduleData.end_time !== undefined) payload.end_time = scheduleData.end_time;
+      if (scheduleData.doctor_id !== undefined)
+        payload.doctor = scheduleData.doctor_id;
+      if (scheduleData.room_id !== undefined)
+        payload.room = scheduleData.room_id;
+      if (scheduleData.work_date !== undefined)
+        payload.work_date = scheduleData.work_date;
+      if (scheduleData.start_time !== undefined)
+        payload.start_time = scheduleData.start_time;
+      if (scheduleData.end_time !== undefined)
+        payload.end_time = scheduleData.end_time;
       if (scheduleData.shift !== undefined) payload.shift = scheduleData.shift;
 
       const response = await api.put<ScheduleResponse>(

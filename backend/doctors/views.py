@@ -197,13 +197,10 @@ class ScheduleViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, doctor_id=None):
-        if doctor_id is None:
-            doctor_id = request.data.get('doctor_id')
-            if doctor_id is None:
-                return Response({"message": "doctor_id là bắt buộc."}, status=status.HTTP_400_BAD_REQUEST)
-
+        # Không ép phải có doctor_id nếu đã có doctor trong body
         serializer = ScheduleSerializer(data=request.data)
         if serializer.is_valid():
+            # Nếu doctor_id trên URL, ưu tiên truyền vào service, nếu không thì None
             schedule = ScheduleService().create_schedule(doctor_id, serializer.validated_data)
             return Response(ScheduleSerializer(schedule).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
