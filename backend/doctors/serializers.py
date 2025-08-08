@@ -52,6 +52,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
     def get_room_note(self, obj):
         return obj.room.note if obj.room else ""
 
+
 class CreateDoctorRequestSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=USER_LENGTH["PASSWORD"], required=True)
     identity_number = serializers.CharField(max_length=PATIENT_LENGTH["IDENTITY"], required=True)

@@ -13,7 +13,7 @@ import Department from "./pages/Departments/Department";
 import InpatientRoom from "./pages/Inpatient/InpatientRoom";
 import MedicalCalendar from "./pages/MedicalExamination/MedicalCalendar";
 import Authorization from "./pages/Authorization/Authorization";
-import DoctorSchedule from "./pages/Doctors/DoctorSchedule";
+import DoctorSchedule from "./pages/Doctors/inChanging";
 import DoctorDetail from "./pages/Doctors/DoctorDetail";
 
 const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({

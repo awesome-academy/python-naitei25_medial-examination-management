@@ -157,18 +157,34 @@ class ScheduleService:
         if room_id:
             query = query.filter(room_id=room_id)
         return query.order_by('work_date', 'start_time')
-
     def get_schedule_by_id(self, schedule_id):
         return get_object_or_404(Schedule, pk=schedule_id)
 
     def create_schedule(self, doctor_id, data):
-        doctor_instance = data.pop('doctor')
-        room_instance = data.pop('room')
+        # doctor: ưu tiên từ URL; nếu không có thì dùng giá trị trong data
+        doctor = None
+        if doctor_id:
+            doctor = get_object_or_404(Doctor, pk=doctor_id)
+        else:
+            doctor = data.get('doctor')  # có thể là int hoặc instance
+            if isinstance(doctor, int):
+                doctor = get_object_or_404(Doctor, pk=doctor)
+            elif doctor is None:
+                raise ValidationError("doctor là bắt buộc")
 
-        if doctor_id and doctor_instance.id != doctor_id:
-            raise ValueError(_("Doctor ID mismatch between URL and payload"))
+        # room: cho phép int hoặc instance
+        room = data.get('room') or data.get('room_id')
+        if isinstance(room, int):
+            room = get_object_or_404(ExaminationRoom, pk=room)
+        if room is None:
+            raise ValidationError("room là bắt buộc")
 
-        return Schedule.objects.create(doctor=doctor_instance, room=room_instance, **data)
+        # dọn data rác để tránh __all__
+        data.pop('room_id', None)
+        data['doctor'] = doctor
+        data['room'] = room
+
+        return Schedule.objects.create(**data)
 
     def update_schedule(self, doctor_id, schedule_id, data):
         schedule = self.get_schedule_by_id(schedule_id)
