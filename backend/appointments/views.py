@@ -34,6 +34,7 @@ from .serializers import (
 )
 from .services import (
     AppointmentService,
+    AppointmentNoteService,
     ServiceOrderService,
     ServicesService
 )
@@ -165,11 +166,11 @@ class AppointmentNoteViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='appointment/(?P<appointment_id>[^/.]+)/notes')
     def list_by_appointment(self, request, appointment_id=None):
-        notes = AppointmentNote.objects.filter(appointment_id=appointment_id)
+        notes = AppointmentNoteService().get_notes_by_appointment_id(appointment_id=appointment_id)
         serializer = self.get_serializer(notes, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'], url_path='appointment/(?P<appointment_id>[^/.]+)/notes')
+    @action(detail=False, methods=['post'], url_path='appointment/(?P<appointment_id>[^/.]+)/notes/create')
     def create_note(self, request, appointment_id=None):
         data = request.data.copy()
         data['appointment'] = appointment_id

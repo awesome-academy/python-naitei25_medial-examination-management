@@ -57,23 +57,19 @@ const Patient: React.FC = () => {
     const handleDateChange = (date: Dayjs | null, dateString: string | string[]) => {
         if (date) {
             const isoDate = date.format("YYYY-MM-DD")
-            console.log("Updating date filter:", isoDate)
             updateFilters({ work_date: isoDate })
         } else {
-            console.log("Clearing date filter")
             updateFilters({ work_date: undefined })
         }
     }
 
     // Handle shift filter change
     const handleShiftFilterChange = (value: string) => {
-        console.log("Updating shift filter:", value)
         updateFilters({ shift: value === "all" ? undefined : value })
     }
 
     // Handle status filter change
     const handleStatusFilterChange = (value: string) => {
-        console.log("Updating status filter:", value)
         updateFilters({ appointmentStatus: value === "all" ? undefined : value })
     }
 

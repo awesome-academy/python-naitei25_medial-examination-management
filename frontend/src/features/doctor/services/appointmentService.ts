@@ -118,9 +118,7 @@ export const appointmentService = {
       if (queryParams.appointmentStatus) params.appointmentStatus = queryParams.appointmentStatus
       if (queryParams.roomId) params.roomId = queryParams.roomId
 
-      console.log("API Request Params:", params) // Add this line
       const response = await api.get(`/appointments/doctor/${doctorId}`, { params })
-      console.log("API Response:", response.data) // Add this line
       return response.data
     } catch (error) {
       console.error("Error fetching appointments:", error)

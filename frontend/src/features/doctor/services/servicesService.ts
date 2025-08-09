@@ -21,4 +21,14 @@ export const servicesService = {
       throw new Error("Không thể lấy chi tiết dịch vụ")
     }
   },
+
+  async searchServices(searchTerm: string): Promise<Services[]> {
+    try {
+      const response = await api.get<Services[]>(`/services?search=${encodeURIComponent(searchTerm)}`)
+      return response.data
+    } catch (error) {
+      console.error("Error searching services:", error)
+      return []
+    }
+  },
 }

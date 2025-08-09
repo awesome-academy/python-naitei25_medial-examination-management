@@ -20,8 +20,9 @@ class CustomPermission(IsAuthenticated):
     def has_permission(self, request, view):
         if request.method in ['GET']:
             return True
-        return request.user.groups.filter(name__in=['ADMIN', 'RECEPTIONIST', 'DOCTOR']).exists()
-
+        allowed_roles = ['A', 'D', 'R']
+        return request.user.is_authenticated and hasattr(request.user, 'role') and request.user.role in allowed_roles
+    
 
 class PrescriptionViewSet(viewsets.ViewSet):
     permission_classes = [CustomPermission]

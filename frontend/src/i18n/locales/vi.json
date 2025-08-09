@@ -82,7 +82,6 @@
     "noAccount": "Chưa có tài khoản?",
     "haveAccount": "Đã có tài khoản?",
     "welcomeBack": "Chào mừng bạn trở lại với WeCare!",
-    "joinUs": "Tham gia để sử dụng dịch vụ của Heart2Heart!",
     "hospitalSystem": "Hệ thống quản lý bệnh viện",
     "forAdminDoctor": "Dành cho Admin và Bác sĩ",
     "weAreHere": "Vì bạn, chúng tôi luôn ở đây",
@@ -191,7 +190,11 @@
     "selectWorkingDate": "Chọn ngày làm việc",
     "selectRoom": "Chọn phòng",
     "shift": "Ca",
-    "status": "Trạng thái"
+    "status": "Trạng thái",
+    "addNewNote": "Thêm ghi chú mới...",
+    "searchMedicine": "Tìm thuốc...",
+    "doctorNotes": "Nhập ghi chú...",
+    "duration": "7 ngày"
   },
   "language": {
     "selectLanguage": "Chọn ngôn ngữ",
@@ -314,7 +317,17 @@
     "forgotPasswordFailed": "Yêu cầu OTP thất bại",
     "resetPasswordFailed": "Đặt lại mật khẩu thất bại",
     "resendOtpFailed": "Gửi lại OTP thất bại",
-    "fetchWorkSchedules": "Lấy lịch làm việc thất bại"
+    "fetchWorkSchedules": "Lấy lịch làm việc thất bại",
+    "noAppointmentFound": "Không tìm thấy thông tin cuộc hẹn",
+    "missingRequiredFields": "Không thể hoàn thành khám khi chưa nhập đủ các thông tin đánh dấu *",
+    "failedToChangeStatus": "Không thể chuyển đổi trạng thái hồ sơ:",
+    "statusChangeFailed": "Có lỗi xảy ra khi chuyển đổi trạng thái hồ sơ",
+    "failedToCompleteExamination": "Không thể hoàn thành khám:",
+    "examinationCompletionFailed": "Có lỗi xảy ra khi hoàn thành khám",
+    "noPatientInfo": "Không tìm thấy thông tin bệnh nhân",
+    "invalidDateFormat": "Định dạng không hợp lệ",
+    "noMedicationsAdded": "Vui lòng thêm ít nhất một thuốc vào toa",
+    "savePrescriptionFailed": "Không thể lưu toa thuốc"
   },
   "api": {
     "loading": "Đang tải...",
@@ -349,7 +362,7 @@
     "none": "Không có",
     "building": "Tòa nhà",
     "floor": "Tầng",
-    "service":"Dịch vụ",
+    "service": "Dịch vụ",
     "orderTime": "Thời gian chi định",
     "patientId": "Mã bệnh nhân",
     "male": "Nam",
@@ -357,12 +370,29 @@
     "orderId": "Mã đơn hàng",
     "viewPDF": "Xem PDF",
     "download": "Tải xuống",
-    "unknown": "Không rõ"
+    "unknown": "Không rõ",
+    "medicine": "Thuốc",
+    "dosage": "Liều lượng",
+    "frequency": "Tần suất",
+    "instructions": "Cách dùng",
+    "duration": "Thời gian",
+    "quantity": "Số lượng"
   },
   "buttons": {
     "clearFilters": "Xóa bộ lọc",
     "today": "Hôm nay",
-    "refresh": "Làm mới"
+    "refresh": "Làm mới",
+    "pendingTestResult": "Đang chờ kết quả xét nghiệm",
+    "completeExamination": "Hoàn thành khám",
+    "viewPDF": "Xem PDF",
+    "download": "Tải xuống",
+    "addNote": "Thêm ghi chú",
+    "addPrescription": "Thêm đơn thuốc",
+    "refreshAll": "Làm mới tất cả",
+    "retry": "Thử lại",
+    "cancel": "Hủy",
+    "savePrescription": "Lưu toa thuốc",
+    "updatePrescription": "Cập nhật toa thuốc"
   },
   "stats": {
     "totalAppointments": "Tổng số cuộc hẹn",
@@ -372,13 +402,15 @@
     "completed": "Đã hoàn thành"
   },
   "status": {
-    "pending": "Chờ xử lý",
+    "pending": "Chờ xác nhận",
     "confirmed": "Đã xác nhận",
     "ordered": "Đang chờ",
     "inProgress": "Đang tiến hành",
     "pendingTestResult": "Chờ kết quả xét nghiệm",
-    "completed": "Đã hoàn thành",
-    "cancelled": "Đã hủy"
+    "completed": "Hoàn thành",
+    "cancelled": "Đã hủy",
+    "inprogress": "Đang khám",
+    "pendingtestresult": "Chờ kết quả xét nghiệm"
   },
   "shifts": {
     "morning": "Buổi sáng",
@@ -387,13 +419,101 @@
   },
   "empty": {
     "loading": "Đang tải...",
-    "noPatientsFound": "Không tìm thấy bệnh nhân nào"
+    "noPatientsFound": "Không tìm thấy bệnh nhân nào",
+    "noTestResults": "Chưa có kết quả",
+    "noNotes": "Chưa có ghi chú",
+    "noPrescriptions": "Chưa có đơn thuốc nào",
+    "noMedicinesFound": "Không tìm thấy thuốc",
+    "noMedicinesInPrescription": "Chưa có thuốc nào trong toa thuốc"
   },
   "options": {
     "allShifts": "Tất cả các ca",
-    "allStatuses": "Tất cả các trạng thái"
+    "allStatuses": "Tất cả các trạng thái",
+    "frequency": {
+      "onceMorning": "Ngày 1 lần, buổi sáng",
+      "onceNoon": "Ngày 1 lần, buổi trưa",
+      "onceAfternoon": "Ngày 1 lần, buổi chiều",
+      "onceEvening": "Ngày 1 lần, buổi tối",
+      "twiceMorningEvening": "Ngày 2 lần, sáng tối",
+      "thriceMorningNoonAfternoon": "Ngày 3 lần, sáng trưa chiều"
+    },
+    "instructions": {
+      "beforeMeal": "Trước ăn",
+      "beforeMeal30Min": "Trước ăn 30 phút",
+      "afterMeal": "Sau ăn",
+      "afterMeal30Min": "Sau ăn 30 phút",
+      "duringMeal": "Trong bữa ăn",
+      "beforeSleep30Min": "Trước khi ngủ 30 phút",
+      "asNeeded": "Khi cần"
+    }
   },
   "pagination": {
     "showing": "Hiển thị từ {{start}} đến {{end}} trong tổng số {{total}} bệnh nhân"
+  },
+  "titles": {
+    "patientDetails": "Chi tiết bệnh nhân",
+    "createPrescription": "Kê toa thuốc",
+    "editPrescription": "Chỉnh sửa toa thuốc",
+    "prescriptionPDF": "Đơn thuốc PDF"
+  },
+  "labels": {
+    "patientName": "Tên bệnh nhân",
+    "clinic": "Phòng khám",
+    "doctor": "Bác sĩ",
+    "doctorCode": "Mã bác sĩ",
+    "appointmentTime": "Thời gian khám",
+    "appointmentDate": "Ngày khám",
+    "symptoms": "Triệu chứng",
+    "diagnosis": "Chẩn đoán",
+    "doctorNotes": "Ghi chú bác sĩ",
+    "followUp": "Theo dõi",
+    "followUpCheckbox": "Theo dõi",
+    "followUpDate": "Ngày theo dõi",
+    "systolicBloodPressure": "Huyết áp tâm thu",
+    "diastolicBloodPressure": "Huyết áp tâm trương",
+    "heartRate": "Nhịp tim",
+    "bloodSugar": "Đường huyết",
+    "orderId": "Mã đơn",
+    "room": "Phòng",
+    "notSpecified": "Không xác định",
+    "orderTime": "Thời gian đặt",
+    "resultTime": "Thời gian trả kết quả",
+    "results": "Kết quả",
+    "status": "Trạng thái",
+    "prescription": "Đơn thuốc",
+    "prescriptionDate": "Ngày kê",
+    "noDiagnosis": "Không có",
+    "followUpAppointment": "Hẹn tái khám",
+    "yes": "Có",
+    "patient": "Bệnh nhân",
+    "patientCode": "Mã bệnh nhân",
+    "unknownPatient": "Bệnh nhân không xác định",
+    "unknownPatientCode": "Mã bệnh nhân không xác định",
+    "age": "Tuổi",
+    "editingPrescription": "Đang chỉnh sửa toa thuốc",
+    "date": "Ngày",
+    "time": "Giờ",
+    "noInformation": "Không có thông tin",
+    "noName": "Không có tên",
+    "noCategory": "Không phân loại",
+    "currency": "VNĐ",
+    "unit": "Đơn vị",
+    "available": "Còn",
+    "noNotes": "Không có"
+  },
+  "tabs": {
+    "testResults": "Kết quả xét nghiệm",
+    "notes": "Ghi chú",
+    "prescriptions": "Đơn thuốc"
+  },
+  "headers": {
+    "testResults": "Kết quả xét nghiệm",
+    "notes": "Ghi chú",
+    "prescriptions": "Đơn thuốc"
+  },
+  "success": {
+    "pendingTestResult": "Đã chuyển trạng thái hồ sơ sang: Chờ kết quả xét nghiệm",
+    "examinationCompleted": "Hoàn thành khám thành công",
+    "prescriptionSaved": "Lưu toa thuốc thành công"
   }
 }
