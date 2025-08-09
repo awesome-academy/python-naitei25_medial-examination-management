@@ -251,7 +251,10 @@
     "lookup": "検索", 
     "drugLookup": "薬検索",
     "aiDiagnosis": "AI診断",
-    "profile": "プロフィール"
+    "profile": "プロフィール",
+    "appointments": "予約一覧",
+    "upcomingAppointments": "今後の予約",
+    "pastAppointments": "過去の予約"
   },
   "layout": {
     "toggleSidebar": "サイドバー切り替え",
