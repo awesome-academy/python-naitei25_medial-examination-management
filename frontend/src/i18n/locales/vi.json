@@ -41,7 +41,23 @@
     "none": "Không sắp xếp",
     "priceLowToHigh": "Giá: Thấp đến cao",
     "priceHighToLow": "Giá: Cao đến thấp",
-    "select": "Chọn một tùy chọn"
+    "select": "Chọn một tùy chọn",
+    "noUserId": "Thiếu ID người dùng.",
+    "noDiagnosis": "Chưa có chẩn đoán",
+    "downloadFailed": "Tải file thất bại.",
+    "prescriptionId": "Mã đơn thuốc",
+    "medicineList": "Danh sách thuốc",
+    "dosage": "Liều lượng",
+    "frequency": "Tần suất",
+    "duration": "Thời gian",
+    "quantity": "Số lượng",
+    "notes": "Ghi chú",
+    "noMedicinesFound": "Không tìm thấy thuốc.",
+    "medicationSchedule": "Lịch uống thuốc",
+    "scheduleExample": "Uống {{dosage}}, {{frequency}} trong {{duration}} ngày",
+    "downloadPdf": "Tải PDF",
+    "viewDetails": "Xem chi tiết",
+    "download": "Tải xuống"
   },
   "navigation": {
     "home": "Trang chủ",
@@ -60,7 +76,8 @@
     "service": "Dịch vụ",
     "notFound": "Không tìm thấy",
     "unauthorized": "Không có quyền truy cập",
-    "viewAllNotifications": "Xem tất cả thông báo"
+    "viewAllNotifications": "Xem tất cả thông báo",
+    "prescriptions": "Đơn thuốc"
   },
   "auth": {
     "login": "Đăng nhập",
@@ -293,6 +310,10 @@
       "patientNotFound": "Không tìm thấy bệnh nhân",
       "contactAdded": "Thêm liên hệ khẩn cấp thành công",
       "contactDeleted": "Xóa liên hệ khẩn cấp thành công"
+    },
+    "prescription": {
+      "notFound": "Không tìm thấy đơn thuốc",
+      "detailNotFound": "Không tìm thấy chi tiết đơn thuốc"
     }
   },
   "errors": {
@@ -401,5 +422,33 @@
   },
   "pagination": {
     "showing": "Hiển thị từ {{start}} đến {{end}} trong tổng số {{total}} bệnh nhân"
+  },
+  "prescription": {
+    "title": "Danh sách đơn thuốc",
+    "noPrescriptionsFound": "Không tìm thấy đơn thuốc nào.",
+    "prescriptionId": "Mã đơn thuốc",
+    "createdAt": "Ngày tạo",
+    "detailsCount": "Số loại thuốc",
+    "diagnosis": "Chẩn đoán",
+    "viewDetails": "Xem chi tiết",
+    "downloadPdf": "Tải PDF",
+    "notFound": "Không tìm thấy đơn thuốc"
+  },
+  "prescriptionDetail": {
+    "title": "Chi tiết đơn thuốc",
+    "medicineList": "Danh sách thuốc",
+    "noMedicinesFound": "Không tìm thấy thuốc.",
+    "dosage": "Liều lượng",
+    "frequency": "Tần suất",
+    "duration": "Thời gian",
+    "quantity": "Số lượng",
+    "notes": "Ghi chú",
+    "bloodPressure": "Huyết áp",
+    "heartRate": "Nhịp tim",
+    "bloodSugar": "Đường huyết",
+    "followUpDate": "Ngày tái khám",
+    "medicationSchedule": "Lịch uống thuốc",
+    "scheduleExample": "Uống {{dosage}}, {{frequency}} trong {{duration}} ngày",
+    "downloadPdf": "Tải PDF"
   }
 }

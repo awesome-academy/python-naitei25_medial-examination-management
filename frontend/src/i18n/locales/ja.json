@@ -41,7 +41,23 @@
     "none": "なし",
     "priceLowToHigh": "価格：安い順",
     "priceHighToLow": "価格：高い順",
-    "select": "オプションを選択"
+    "select": "オプションを選択",
+    "noUserId": "ユーザーIDがありません。",
+    "noDiagnosis": "診断なし",
+    "downloadFailed": "ファイルのダウンロードに失敗しました。",
+    "prescriptionId": "処方箋ID",
+    "medicineList": "薬の一覧",
+    "dosage": "用量",
+    "frequency": "服用頻度",
+    "duration": "期間",
+    "quantity": "数量",
+    "notes": "備考",
+    "noMedicinesFound": "薬が見つかりません。",
+    "medicationSchedule": "服薬スケジュール",
+    "scheduleExample": "{{dosage}}、{{frequency}}を{{duration}}日間服用してください",
+    "downloadPdf": "PDFをダウンロード",
+    "viewDetails": "詳細を見る",
+    "download": "ダウンロード"
   },
   "navigation": {
     "home": "ホーム",
@@ -60,7 +76,8 @@
     "service": "サービス",
     "notFound": "見つかりません",
     "unauthorized": "アクセス権限がありません",
-    "viewAllNotifications": "すべての通知を表示"
+    "viewAllNotifications": "すべての通知を表示",
+    "prescriptions": "処方箋"
   },
   "auth": {
     "login": "ログイン",
@@ -295,6 +312,10 @@
       "patientNotFound": "患者が見つかりません",
       "contactAdded": "緊急連絡先の追加に成功しました",
       "contactDeleted": "緊急連絡先の削除に成功しました"
+    },
+    "prescription": {
+      "notFound": "処方箋が見つかりません",
+      "detailNotFound": "処方箋の詳細が見つかりません"
     }
   },
   "errors": {
@@ -402,5 +423,33 @@
   },
   "pagination": {
     "showing": "{{total}}人中{{start}}〜{{end}}人を表示中"
+  },
+  "prescription": {
+    "title": "処方箋一覧",
+    "noPrescriptionsFound": "処方箋が見つかりません。",
+    "prescriptionId": "処方箋ID",
+    "createdAt": "作成日",
+    "detailsCount": "薬の種類数",
+    "diagnosis": "診断",
+    "viewDetails": "詳細を見る",
+    "downloadPdf": "PDFをダウンロード",
+    "notFound": "処方箋が見つかりません"
+  },
+  "prescriptionDetail": {
+    "title": "処方箋の詳細",
+    "medicineList": "薬の一覧",
+    "noMedicinesFound": "薬が見つかりません。",
+    "dosage": "用量",
+    "frequency": "服用頻度",
+    "duration": "期間",
+    "quantity": "数量",
+    "notes": "備考",
+    "bloodPressure": "血圧",
+    "heartRate": "心拍数",
+    "bloodSugar": "血糖値",
+    "followUpDate": "再診日",
+    "medicationSchedule": "服薬スケジュール",
+    "scheduleExample": "{{duration}}日間、{{frequency}}、{{dosage}}を服用",
+    "downloadPdf": "PDFをダウンロード"
   }
 }

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import {
   CalendarIcon,
   ClockIcon,
@@ -16,6 +16,7 @@ import {
   StarOff,
 } from "lucide-react"
 import { appointmentService } from "../../../shared/services/appointmentService"
+import { prescriptionService } from "../../../shared/services/prescriptionService"
 import type { Appointment, AppointmentStatus } from "../../../shared/types/appointment"
 
 const PastAppointmentsPage: React.FC = () => {
@@ -26,6 +27,8 @@ const PastAppointmentsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set())
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
+
+  const navigate = useNavigate()
 
   const fetchPastAppointments = useCallback(async () => {
     try {
@@ -83,6 +86,25 @@ const PastAppointmentsPage: React.FC = () => {
       year: "numeric",
       hour12: false,
     }).format(date)
+  }
+
+  const handleViewMedicalRecord = (prescriptionId?: number | null) => {
+    if (!prescriptionId) return
+    navigate(`/patient/medical-record/${prescriptionId}`)
+  }
+
+  const handleDownloadPrescription = async (prescriptionId?: number | null) => {
+    if (!prescriptionId) {
+      setError("Không có đơn thuốc để tải")
+      return
+    }
+    try {
+      const pdfUrl = await prescriptionService.downloadPrescriptionPdf(prescriptionId)
+      window.open(pdfUrl, "_blank")
+    } catch (err) {
+      console.error("Download PDF error:", err)
+      setError("Tải đơn thuốc thất bại")
+    }
   }
 
   const getStatusBadge = (backendStatus: string) => {
@@ -394,13 +416,21 @@ const PastAppointmentsPage: React.FC = () => {
                         </Link>
                       )}
 
-                      {appointment.doctorId && (
-                        <Link
-                          to={`/patient/doctors/${appointment.doctorId}?book=true`}
-                          className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
-                        >
-                          Xem bác sĩ
-                        </Link>
+                      {appointment.prescriptionId && (
+                        <>
+                          <button
+                            onClick={() => handleViewMedicalRecord(appointment.prescriptionId)}
+                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                          >
+                            Xem hồ sơ khám
+                          </button>
+                          <button
+                            onClick={() => handleDownloadPrescription(appointment.prescriptionId)}
+                            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+                          >
+                            Tải đơn thuốc
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>

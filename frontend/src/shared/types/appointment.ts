@@ -1,6 +1,7 @@
 export interface Appointment {
   id: number
   patientId: number
+  prescriptionId?: number
   patientInfo?: {
     id: number
     fullName: string

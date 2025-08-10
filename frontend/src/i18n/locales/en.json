@@ -41,7 +41,23 @@
     "none": "None",
     "priceLowToHigh": "Price: Low to High",
     "priceHighToLow": "Price: High to Low",
-    "select": "Select an option"
+    "select": "Select an option",
+    "noUserId": "User ID is missing.",
+    "noDiagnosis": "No diagnosis",
+    "downloadFailed": "Failed to download file.",
+    "prescriptionId": "Prescription ID",
+    "medicineList": "Medicine List",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "duration": "Duration",
+    "quantity": "Quantity",
+    "notes": "Notes",
+    "noMedicinesFound": "No medicines found.",
+    "medicationSchedule": "Medication Schedule",
+    "scheduleExample": "Take {{dosage}}, {{frequency}} for {{duration}} days",
+    "downloadPdf": "Download PDF",
+    "viewDetails": "View details",
+    "download": "Download"
   },
   "navigation": {
     "home": "Home",
@@ -60,7 +76,8 @@
     "service": "Service",
     "notFound": "Not Found",
     "unauthorized": "Unauthorized Access",
-    "viewAllNotifications": "View All Notifications"
+    "viewAllNotifications": "View All Notifications",
+    "prescriptions": "Prescriptions"
   },
   "auth": {
     "login": "Login",
@@ -295,6 +312,10 @@
       "patientNotFound": "Patient not found",
       "contactAdded": "Emergency contact added successfully",
       "contactDeleted": "Emergency contact deleted successfully"
+    },
+    "prescription": {
+      "notFound": "No prescriptions found",
+      "detailNotFound": "Prescription details not found"
     }
   },
   "errors": {
@@ -403,5 +424,33 @@
   },
   "pagination": {
     "showing": "Showing {{start}}-{{end}} of {{total}} patients"
+  },
+  "prescription": {
+    "title": "Prescription List",
+    "noPrescriptionsFound": "No prescriptions found.",
+    "prescriptionId": "Prescription ID",
+    "createdAt": "Created At",
+    "detailsCount": "Number of medicines",
+    "diagnosis": "Diagnosis",
+    "viewDetails": "View Details",
+    "downloadPdf": "Download PDF",
+    "notFound": "Prescription not found"
+  },
+  "prescriptionDetail": {
+    "title": "Prescription Details",
+    "medicineList": "Medicine List",
+    "noMedicinesFound": "No medicines found.",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "duration": "Duration",
+    "quantity": "Quantity",
+    "notes": "Notes",
+    "bloodPressure": "Blood Pressure",
+    "heartRate": "Heart Rate",
+    "bloodSugar": "Blood Sugar",
+    "followUpDate": "Follow-up Date",
+    "medicationSchedule": "Medication Schedule",
+    "scheduleExample": "Take {{dosage}}, {{frequency}} for {{duration}} days",
+    "downloadPdf": "Download PDF"
   }
 }
