@@ -44,67 +44,61 @@ class AppointmentService:
 
   @staticmethod
   def get_appointments_by_patient_id_optimized(patient_id, page_no, page_size, appointment_type='all', appointment_status=None, current_datetime=None):
-      queryset = Appointment.objects.filter(patient_id=patient_id)
+        queryset = Appointment.objects.filter(patient_id=patient_id).select_related('doctor', 'schedule').prefetch_related('prescription_set')
 
-      if current_datetime is None:
-          current_datetime = datetime.now()
-      
-      today_date = current_datetime.date()
-      current_time = current_datetime.time()
+        if current_datetime is None:
+            current_datetime = datetime.now()
+        
+        today_date = current_datetime.date()
+        current_time = current_datetime.time()
 
-      if appointment_type == 'upcoming':
-          # (work_date > today) OR (work_date == today AND start_time >= now_time)
-          queryset = queryset.filter(
-              Q(schedule__work_date__gt=today_date) |
-              Q(schedule__work_date=today_date, slot_start__gte=current_time)
-          )
-          # Filter by relevant statuses for upcoming
-          if appointment_status:
-              if isinstance(appointment_status, (list, tuple)):
-                  queryset = queryset.filter(status__in=appointment_status)
-              else:
-                  queryset = queryset.filter(status=appointment_status)
-          else: # Default upcoming statuses if not specified
-              queryset = queryset.filter(status__in=[
-                  AppointmentStatus.PENDING.value,
-                  AppointmentStatus.CONFIRMED.value,
-                  AppointmentStatus.IN_PROGRESS.value
-              ])
-          queryset = queryset.order_by('schedule__work_date', 'slot_start') # Order by date then time for upcoming
-      elif appointment_type == 'past':
-          # (work_date < today) OR (work_date == today AND start_time < now_time)
-          queryset = queryset.filter(
-              Q(schedule__work_date__lt=today_date) |
-              Q(schedule__work_date=today_date, slot_start__lt=current_time)
-          )
-          # Filter by relevant statuses for past
-          # MODIFIED: Only apply status filter if a specific status is provided (not None or empty string)
-          if appointment_status and appointment_status != '': 
-              if isinstance(appointment_status, (list, tuple)):
-                  queryset = queryset.filter(status__in=appointment_status)
-              else:
-                  queryset = queryset.filter(status=appointment_status)
-          # If appointment_status is None or empty string, no status filter is applied, showing all past appointments regardless of status.
-          queryset = queryset.order_by('-schedule__work_date', '-slot_start') # Order by date then time descending for past
-      else: # 'all' or no specific type
-          if appointment_status:
-              if isinstance(appointment_status, (list, tuple)):
-                  queryset = queryset.filter(status__in=appointment_status)
-              else:
-                  queryset = queryset.filter(status=appointment_status)
-          queryset = queryset.order_by('-created_at') # Default ordering for all
+        if appointment_type == 'upcoming':
+            queryset = queryset.filter(
+                Q(schedule__work_date__gt=today_date) |
+                Q(schedule__work_date=today_date, slot_start__gte=current_time)
+            )
+            if appointment_status:
+                if isinstance(appointment_status, (list, tuple)):
+                    queryset = queryset.filter(status__in=appointment_status)
+                else:
+                    queryset = queryset.filter(status=appointment_status)
+            else:
+                queryset = queryset.filter(status__in=[
+                    AppointmentStatus.PENDING.value,
+                    AppointmentStatus.CONFIRMED.value,
+                    AppointmentStatus.IN_PROGRESS.value
+                ])
+            queryset = queryset.order_by('schedule__work_date', 'slot_start')
+        elif appointment_type == 'past':
+            queryset = queryset.filter(
+                Q(schedule__work_date__lt=today_date) |
+                Q(schedule__work_date=today_date, slot_start__lt=current_time)
+            )
+            if appointment_status and appointment_status != '':
+                if isinstance(appointment_status, (list, tuple)):
+                    queryset = queryset.filter(status__in=appointment_status)
+                else:
+                    queryset = queryset.filter(status=appointment_status)
+            queryset = queryset.order_by('-schedule__work_date', '-slot_start')
+        else:
+            if appointment_status:
+                if isinstance(appointment_status, (list, tuple)):
+                    queryset = queryset.filter(status__in=appointment_status)
+                else:
+                    queryset = queryset.filter(status=appointment_status)
+            queryset = queryset.order_by('-created_at')
 
-      paginator = Paginator(queryset, page_size)
-      page = paginator.get_page(page_no + 1)
+        paginator = Paginator(queryset, page_size)
+        page = paginator.get_page(page_no + 1)
 
-      return {
-          "results": list(page.object_list),
-          "pageNo": page_no,
-          "pageSize": paginator.per_page,
-          "totalElements": paginator.count,
-          "totalPages": paginator.num_pages,
-          "last": not page.has_next()
-      }
+        return {
+            "results": list(page),
+            "pageNo": page_no,
+            "pageSize": page_size,
+            "totalElements": paginator.count,
+            "totalPages": paginator.num_pages,
+            "last": not page.has_next()
+        }
 
   @staticmethod
   def get_all_appointments(page_no=PAGE_NO_DEFAULT, page_size=PAGE_SIZE_DEFAULT):

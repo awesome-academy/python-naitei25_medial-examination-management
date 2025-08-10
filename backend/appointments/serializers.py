@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-
+from pharmacy.models import Prescription
 from .models import Appointment, AppointmentNote, ServiceOrder, Service
 from doctors.models import Schedule, Doctor, Department, ExaminationRoom
 from patients.serializers import PatientSerializer
@@ -246,19 +246,23 @@ class AppointmentDoctorViewSerializer(serializers.ModelSerializer):
 
 
 class AppointmentPatientViewSerializer(serializers.ModelSerializer):
-  doctorInfo = DoctorSerializer(source='doctor', read_only=True)
-  schedule = ScheduleSerializer()
-  # Corrected field names to match frontend interface
-  doctorId = serializers.IntegerField(source='doctor.id', read_only=True)
-  createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    doctorInfo = DoctorSerializer(source='doctor', read_only=True)
+    schedule = ScheduleSerializer()
+    doctorId = serializers.IntegerField(source='doctor.id', read_only=True)
+    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    prescriptionId = serializers.SerializerMethodField()
 
-  class Meta:
-      model = Appointment
-      fields = [
-          'id', 'doctorId', 'doctorInfo', 'schedule',
-          'symptoms','slot_start', 'slot_end',
-          'status', 'createdAt' # Use createdAt here
-      ]
+    class Meta:
+        model = Appointment
+        fields = [
+            'id', 'doctorId', 'doctorInfo', 'schedule',
+            'symptoms', 'slot_start', 'slot_end',
+            'status', 'createdAt', 'prescriptionId'
+        ]
+
+    def get_prescriptionId(self, obj):
+        prescription = obj.prescription_set.first()
+        return prescription.id if prescription else None
 
 
 class CustomPageNumberPagination(PageNumberPagination):
