@@ -36,7 +36,12 @@
     "noDepartmentsAvailable": "利用可能な部門はありません。",
     "doctorAvatar": "{{firstName}} {{lastName}} のアバター",
     "doctorTitle": "医師 {{firstName}} {{lastName}}",
-    "priceNotAvailable": "価格情報がありません"
+    "priceNotAvailable": "価格情報がありません",
+    "sortByPrice": "価格で並べ替え",
+    "none": "なし",
+    "priceLowToHigh": "価格：安い順",
+    "priceHighToLow": "価格：高い順",
+    "select": "オプションを選択"
   },
   "navigation": {
     "home": "ホーム",
@@ -248,7 +253,7 @@
     "pro": "プロ",
     "bookAppointment": "予約",
     "prescriptions": "処方箋",
-    "lookup": "検索", 
+    "lookup": "検索",
     "drugLookup": "薬検索",
     "aiDiagnosis": "AI診断",
     "profile": "プロフィール",

@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = '__all__'
+        fields = ['id', 'department_name', 'description', 'avatar', 'created_at']
 
 class ExaminationRoomSerializer(serializers.ModelSerializer):
     roomId = serializers.IntegerField(source='id', read_only=True)

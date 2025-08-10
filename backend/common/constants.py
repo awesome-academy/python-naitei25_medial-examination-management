@@ -59,6 +59,7 @@ PATIENT_LENGTH = {
     "INSURANCE": 50,
     "BLOOD_TYPE": 10,
     "RELATIONSHIP": 50,
+    "AVATAR": 255,
 }
 
 # ======================

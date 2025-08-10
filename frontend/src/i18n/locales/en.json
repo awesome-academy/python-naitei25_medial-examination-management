@@ -36,7 +36,12 @@
     "noDepartmentsAvailable": "No departments available.",
     "doctorAvatar": "{{firstName}} {{lastName}} avatar",
     "doctorTitle": "Dr. {{firstName}} {{lastName}}",
-    "priceNotAvailable": "Price not available"
+    "priceNotAvailable": "Price not available",
+    "sortByPrice": "Sort by Price",
+    "none": "None",
+    "priceLowToHigh": "Price: Low to High",
+    "priceHighToLow": "Price: High to Low",
+    "select": "Select an option"
   },
   "navigation": {
     "home": "Home",
@@ -247,7 +252,7 @@
     "new": "new",
     "pro": "pro",
     "bookAppointment": "Book Appointment",
-    "prescriptions": "Prescriptions", 
+    "prescriptions": "Prescriptions",
     "lookup": "Lookup",
     "drugLookup": "Drug Lookup",
     "aiDiagnosis": "AI Diagnosis",
@@ -356,7 +361,7 @@
     "orderTime": "Order Time",
     "patientId": "Patient ID",
     "male": "Male",
-    "female":"Female",
+    "female": "Female",
     "orderId": "Order ID",
     "viewPDF": "View PDF",
     "download": "Download",
@@ -377,7 +382,7 @@
   "status": {
     "pending": "Pending",
     "confirmed": "Confirmed",
-    "ordered":"Ordered",
+    "ordered": "Ordered",
     "inProgress": "In Progress",
     "pendingTestResult": "Pending Test Result",
     "completed": "Completed",

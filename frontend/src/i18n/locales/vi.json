@@ -30,13 +30,18 @@
     "department": "Khoa khám",
     "type": "Loại",
     "bookAppointment": "Đặt lịch hẹn",
-    "departmentList": "Danh sách khoa khám",
+    "departmentList": "D danh sách khoa khám",
     "searchDepartmentsPlaceholder": "Tìm kiếm khoa khám...",
     "noDepartmentsFound": "Không tìm thấy khoa khám nào phù hợp.",
     "noDepartmentsAvailable": "Không có khoa khám nào.",
     "doctorAvatar": "Ảnh bác sĩ {{firstName}} {{lastName}}",
     "doctorTitle": "BS. {{firstName}} {{lastName}}",
-    "priceNotAvailable": "Chưa có giá"
+    "priceNotAvailable": "Chưa có giá",
+    "sortByPrice": "Sắp xếp theo giá",
+    "none": "Không sắp xếp",
+    "priceLowToHigh": "Giá: Thấp đến cao",
+    "priceHighToLow": "Giá: Cao đến thấp",
+    "select": "Chọn một tùy chọn"
   },
   "navigation": {
     "home": "Trang chủ",
@@ -250,8 +255,6 @@
     "drugLookup": "Tra cứu thuốc",
     "aiDiagnosis": "Chẩn đoán bằng AI",
     "profile": "Hồ sơ",
-    "new": "mới",
-    "pro": "pro",
     "appointments": "Lịch khám",
     "upcomingAppointments": "Lịch khám sắp tới",
     "pastAppointments": "Lịch khám đã qua"
@@ -352,7 +355,7 @@
     "none": "Không có",
     "building": "Tòa nhà",
     "floor": "Tầng",
-    "service":"Dịch vụ",
+    "service": "Dịch vụ",
     "orderTime": "Thời gian chi định",
     "patientId": "Mã bệnh nhân",
     "male": "Nam",

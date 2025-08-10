@@ -126,6 +126,19 @@ class DepartmentViewSet(viewsets.ViewSet):
     def doctors(self, request, pk=None):
         doctors = DepartmentService().get_doctors_by_department_id(pk)
         return Response(DoctorSerializer(doctors, many=True).data)
+    
+    @action(detail=True, methods=['post'], parser_classes=[MultiPartParser])
+    def upload_avatar(self, request, pk=None):
+        file = request.FILES.get('file')
+        department = self.get_object(pk)
+        updated_department = DepartmentService().upload_avatar(department, file)
+        return Response(DepartmentSerializer(updated_department).data)
+
+    @action(detail=True, methods=['delete'])
+    def delete_avatar(self, request, pk=None):
+        department = self.get_object(pk)
+        updated_department = DepartmentService().delete_avatar(department)
+        return Response(DepartmentSerializer(updated_department).data)
 
 class ExaminationRoomViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
