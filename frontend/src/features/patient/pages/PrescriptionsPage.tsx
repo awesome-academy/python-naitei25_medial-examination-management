@@ -268,6 +268,11 @@ const PrescriptionsPage: React.FC = () => {
     return pages
   }
 
+  const handleViewMedicalRecord = (prescriptionId: number) => {
+    // Thêm query parameter để biết đến từ prescriptions
+    navigate(`/patient/medical-record/${prescriptionId}?from=prescriptions`)
+  }
+
   if (loading) return <LoadingSpinner size="lg" message={t("common.loading")} />
   if (error) return <ErrorMessage message={error} />
 
@@ -497,6 +502,13 @@ const PrescriptionsPage: React.FC = () => {
                         title={t("prescriptions.downloadPdf")}
                       >
                         <Download className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => handleViewMedicalRecord(prescription.id)}
+                        className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
+                        title={t("prescriptions.viewMedicalRecord")}
+                      >
+                        <Stethoscope className="w-4 h-4 text-gray-600" />
                       </button>
                     </div>
                   </div>

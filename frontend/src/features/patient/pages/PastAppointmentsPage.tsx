@@ -236,7 +236,8 @@ const PastAppointmentsPage: React.FC = () => {
 
   const handleViewMedicalRecord = (prescriptionId?: number | null) => {
     if (!prescriptionId) return
-    navigate(`/patient/medical-record/${prescriptionId}`)
+    // Thêm query parameter để biết đến từ past appointments
+    navigate(`/patient/medical-record/${prescriptionId}?from=past-appointments`)
   }
 
   const handleDownloadPrescription = async (prescriptionId?: number | null) => {
