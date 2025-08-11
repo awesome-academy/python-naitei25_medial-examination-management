@@ -125,6 +125,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return t("roles.doctor")
         case "P":
           return t("roles.patient")
+        case "RECEPTIONIST":
+          return t("roles.receptionist")
         default:
           return t("roles.user")
       }

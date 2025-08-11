@@ -1,37 +1,3 @@
-<<<<<<< HEAD
-import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { message } from 'antd';
-import { paymentService } from '../../../shared/services/paymentService';
-import LoadingSpinner from '../../../shared/components/common/LoadingSpinner';
-import ErrorMessage from '../../../shared/components/common/ErrorMessage';
-
-const PaymentPage: React.FC = () => {
-  console.log('PaymentPage component rendering...');
-  const location = useLocation(); 
-  console.log('Current location object:', location);
-  console.log('Current URL search params:', location.search);
-  const urlParams = new URLSearchParams(location.search);
-  const orderCode = urlParams.get('orderCode');
-  console.log('Extracted orderCode from URL:', orderCode);
-  
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  
-  const status = urlParams.get('status'); 
-  const payosCode = urlParams.get('code');
-  const payosId = urlParams.get('id');
-  const cancelFlag = urlParams.get('cancel');
-
-  const derivedBillId = orderCode ? Math.floor(Number(orderCode) / 1000).toString() : null;
-  const billId = derivedBillId; 
-
-  const isSuccessCallback = status === 'PAID' && cancelFlag === 'false';
-  const isCancelCallback = status === 'CANCELLED' || cancelFlag === 'true';
-=======
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -45,112 +11,11 @@ import { paymentService } from '../../../shared/services/paymentService'
 import { doctorService } from '../../../shared/services/doctorService'
 import { patientService } from '../../../shared/services/patientService'
 import { scheduleService } from '../../../shared/services/scheduleService'
->>>>>>> thorepo
 
 // Shared UI
 import LoadingSpinner from '../../../shared/components/common/LoadingSpinner'
 import ErrorMessage from '../../../shared/components/common/ErrorMessage'
 
-<<<<<<< HEAD
-  console.log('PaymentPage loaded with:', {
-    pathname: location.pathname,
-    search: location.search,
-    billId, 
-    orderCode,
-    isSuccessCallback,
-    isCancelCallback,
-    status,
-    payosCode,
-    payosId,
-    cancelFlag
-  });
-
-  console.log('Checking billId before early return:', billId);
-  if (!billId) {
-    console.error('Early return: No billId (derived from orderCode) found in URL params!');
-    return (
-      <div className="container mx-auto p-4 max-w-3xl">
-        <ErrorMessage message={t('payment.missingBillIdOrOrderCode')} /> 
-        <Button onClick={() => navigate('/dashboard')} className="mt-4">
-          {t('common.goBack')}
-        </Button>
-      </div>
-    );
-  }
-
-  const fetchBillAndProcessCallback = useCallback(async () => {
-    console.log('fetchBillAndProcessCallback started.');
-    try {
-      setLoading(true);
-      setError(null);
-
-      if ((isSuccessCallback || isCancelCallback) && !paymentProcessed && orderCode) { 
-        setPaymentProcessed(true);
-        console.log('Processing payment callback:', { 
-          isSuccessCallback, isCancelCallback, status, orderCode, payosCode, payosId, cancelFlag 
-        });
-        
-        if (isSuccessCallback) {
-          console.log('Calling updatePaymentStatus for SUCCESS with orderCode:', orderCode);
-          await paymentService.updatePaymentStatus(orderCode, 'success', {
-            orderCode,
-            status,
-            payosCode,
-            payosId
-          });
-          message.success(t('payment.paymentSuccess'));
-        } else if (isCancelCallback) {
-          console.log('Calling updatePaymentStatus for CANCEL with orderCode:', orderCode);
-          await paymentService.updatePaymentStatus(orderCode, 'cancel', {
-            orderCode,
-            status,
-            payosCode,
-            payosId
-          });
-          message.error(t('payment.paymentCancelled'));
-        }
-      } else {
-        console.log('Skipping payment callback processing. Conditions:', {
-          isSuccessCallback, isCancelCallback, paymentProcessed, orderCode
-        });
-      }
-
-      console.log('Fetching bill info for billId:', billId, 'with orderCode:', orderCode);
-      const response = await paymentService.getPaymentInfo(Number(billId), orderCode || undefined); 
-      console.log('Bill info response:', response); 
-
-      if (!response.data) {
-          console.error('API returned no data for payment info.'); 
-          throw new Error('No data returned from API');
-      }
-      
-      setBill({
-          id: billId,
-          amount: response.data.amount,
-          status: response.data.status,
-          created_at: response.data.createdAt,
-          description: response.data.description,
-          orderCode: response.data.orderCode 
-      });
-      setAppointment(response.data.appointment || null);
-      console.log('Bill and Appointment state updated successfully.');
-
-    } catch (err: any) {
-      console.error('Caught error in fetchBillAndProcessCallback:', err); 
-      console.error('Error message:', err.message);
-      console.error('Error response data:', err.response?.data); 
-      setError(err.response?.data?.message || err.message || t('common.error'));
-    } finally {
-      setLoading(false);
-      console.log('fetchBillAndProcessCallback finished. Loading set to false.');
-    }
-  }, [billId, orderCode, status, payosCode, payosId, cancelFlag, isSuccessCallback, isCancelCallback, paymentProcessed, t]);
-
-  useEffect(() => {
-    console.log('useEffect in PaymentPage triggered.');
-    fetchBillAndProcessCallback();
-  }, [fetchBillAndProcessCallback]); 
-=======
 type AnyObj = Record<string, any>
 
 export default function PaymentPage() {
@@ -509,7 +374,6 @@ export default function PaymentPage() {
 
     processPaymentCallback()
   }, [billId, isSuccess, isCancel, status, orderCode, payosCode, payosId, cancelFlag, paymentProcessed, t])
->>>>>>> thorepo
 
   const handlePay = async () => {
     try {
@@ -519,21 +383,6 @@ export default function PaymentPage() {
     } catch {
       message.error(t('payment.createPaymentLinkFailed', { defaultValue: 'Tạo link thanh toán thất bại' }))
     }
-<<<<<<< HEAD
-  };
-
-  const handleCancel = () => {
-    navigate('/appointments');
-  };
-
-  const handleReturnToDashboard = () => {
-    navigate('dashboard');
-  };
-
-  if (loading) {
-    return <LoadingSpinner message={t('common.loading')} />;
-=======
->>>>>>> thorepo
   }
 
   const handleCancel = () => navigate('/appointments')
@@ -606,23 +455,7 @@ export default function PaymentPage() {
   const apptStatus = mapAppointmentStatus(appointment.status)
 
   return (
-<<<<<<< HEAD
-    <div className="container mx-auto p-4 max-w-3xl">
-      {/* Debug info */}
-      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
-        <strong>Debug Info:</strong>
-        <br />billId: {billId}
-        <br />pathname: {location.pathname}
-        <br />isSuccessCallback: {String(isSuccessCallback)}
-        <br />isCancelCallback: {String(isCancelCallback)}
-        <br />PayOS status: {status}
-        <br />Bill status: {bill.status}
-        <br />Order Code: {orderCode}
-      </div>
-
-=======
     <div className="container mx-auto max-w-4xl">
->>>>>>> thorepo
       <Card className="shadow-lg border border-gray-200 rounded-lg">
         <CardHeader
           className={`text-white rounded-t-lg p-6 ${
@@ -666,19 +499,7 @@ export default function PaymentPage() {
                 <p className="text-gray-900 font-medium text-lg">{formatDoctorName(doctorData)}</p>
               </div>
               <div>
-<<<<<<< HEAD
-                <span className="font-medium text-gray-600">{t('appointment.doctor')}:</span>
-                <p className="text-gray-900 font-medium">{appointment.doctorInfo?.fullName || 'N/A'}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">{t('appointment.date')}:</span>
-                <p className="text-gray-900 font-medium">{new Date(appointment.schedule?.workDate).toLocaleDateString('vi-VN')}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">{t('appointment.time')}:</span>
-=======
                 <span className="font-medium text-blue-600">Chuyên khoa:</span>
->>>>>>> thorepo
                 <p className="text-gray-900 font-medium">
                   {safeRender(doctorData?.specialty || doctorData?.department || 'Tổng quát')}
                 </p>
@@ -698,22 +519,6 @@ export default function PaymentPage() {
                   VND
                 </p>
               </div>
-<<<<<<< HEAD
-              <div>
-                <span className="font-medium text-gray-600">{t('appointment.session')}:</span>
-                <p className="text-gray-900 font-medium">
-                  {appointment.schedule?.shift === 'M' ? t('appointment.session.morning') 
-                  : appointment.schedule?.shift === 'A' ? t('appointment.session.afternoon') 
-                  : appointment.schedule?.shift || 'N/A'}
-                </p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">{t('payment.amount')}:</span>
-                {/* ĐÃ SỬA ĐỔI Ở ĐÂY: Đảm bảo truy cập đúng trường price từ doctorInfo */}
-                <p className="text-gray-900 font-medium">{appointment.doctorInfo?.price?.toLocaleString('vi-VN') || 'N/A'} VND</p>
-              </div>
-=======
->>>>>>> thorepo
             </div>
           </div>
 
@@ -838,19 +643,11 @@ export default function PaymentPage() {
                 <div className="text-green-800 font-medium">✅ Thanh toán thành công! Cuộc hẹn của bạn đã được xác nhận.</div>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-<<<<<<< HEAD
-                <Button
-                  onClick={() => handleReturnToDashboard()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
-                >
-                  {t('common.returnToDashboard')}
-=======
                 <Button onClick={handleReturnToDashboard} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
                   {t('common.returnToDashboard', { defaultValue: 'Về trang chủ' })}
->>>>>>> thorepo
                 </Button>
                 <Button
-                  onClick={() => navigate('/appointments/upcoming')}
+                  onClick={() => navigate('/appointments')}
                   className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold"
                 >
                   {t('appointment.viewAppointments', { defaultValue: 'Xem lịch hẹn' })}
@@ -912,9 +709,6 @@ export default function PaymentPage() {
         </CardContent>
       </Card>
 
-<<<<<<< HEAD
-export default PaymentPage;
-=======
       {/* Footer */}
       <div className="text-center text-gray-500 text-sm py-4 mt-6">
         <p>© 2024 Hệ thống quản lý bệnh viện. Mọi quyền được bảo lưu.</p>
@@ -923,4 +717,3 @@ export default PaymentPage;
     </div>
   )
 }
->>>>>>> thorepo

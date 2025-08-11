@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { HomeLayout } from './layouts/HomeLayout';
 import AuthenticatedPatientLayout from './layouts/AuthenticatedPatientLayout';
-import HomePage from '../public/pages/HomePage';
+import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import DoctorListPage from './pages/DoctorListPage';
 import DoctorBookingPage from './pages/DoctorBookingPage';
@@ -20,10 +20,7 @@ import PrescriptionsPage from './pages/PrescriptionsPage';
 import PrescriptionDetailPage from './pages/PrescriptionDetailPage';
 import { ScrollToTop } from '../../shared/components/common/ScrollToTop';
 import { PatientProvider } from './context/PatientContext';
-<<<<<<< HEAD
-=======
 import MedicalRecordDetailPage from './pages/MedicalRecordDetailPage';
->>>>>>> thorepo
 export const PatientApp: React.FC = () => {
   const { t } = useTranslation();
 
@@ -53,10 +50,7 @@ export const PatientApp: React.FC = () => {
           <Route path="payment/:billId/cancel" element={<PaymentPage />} />
           <Route path="appointments/upcoming" element={<UpcomingAppointmentsPage />} />
           <Route path="appointments/past" element={<PastAppointmentsPage />} />
-<<<<<<< HEAD
-=======
           <Route path="medical-record/:id" element={<MedicalRecordDetailPage />} />
->>>>>>> thorepo
 
           
           <Route path="profile" element={<ProfilePage />} />

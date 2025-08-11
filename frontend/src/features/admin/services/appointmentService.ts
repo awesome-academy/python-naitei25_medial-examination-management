@@ -105,14 +105,10 @@ export const appointmentService = {
       );
       return response.data;
     } catch (error) {
-<<<<<<< HEAD
-      console.error(`Error fetching appointments for patient ${patientId}:`, error);
-=======
       console.error(
         `Error fetching appointments for patient ${patientId}:`,
         error
       );
->>>>>>> thorepo
       throw new Error("Không thể tải lịch khám của bệnh nhân");
     }
   },
@@ -186,12 +182,8 @@ export const appointmentService = {
           [AppointmentStatus.NO_SHOW]: "NO_SHOW",
           [AppointmentStatus.IN_PROGRESS]: "IN_PROGRESS",
         };
-<<<<<<< HEAD
-        snakeCaseUpdateData.appointment_status = statusMapToBackend[appointmentData.appointmentStatus];
-=======
         snakeCaseUpdateData.appointment_status =
           statusMapToBackend[appointmentData.appointmentStatus];
->>>>>>> thorepo
       }
       if (appointmentData.doctorId !== undefined) {
         snakeCaseUpdateData.doctor_id = Number(appointmentData.doctorId);
@@ -304,13 +296,7 @@ export const appointmentService = {
     pageSize: number;
   }> {
     try {
-<<<<<<< HEAD
-      const response = await api.get(
-        `/appointments/`
-      );
-=======
       const response = await api.get(`/appointments/`);
->>>>>>> thorepo
       return response.data;
     } catch (error) {
       console.error("Error fetching all appointments:", error);
