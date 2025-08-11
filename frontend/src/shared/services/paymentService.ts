@@ -1,28 +1,44 @@
-import { api } from './api'; // Giữ nguyên import này theo cấu trúc của bạn
+import { api } from './api';
 import { storage } from '../utils/storage';
 import { LocalStorageKeys } from '../constants/storageKeys';
 import { patientService } from './patientService';
-import type { Appointment } from '../types/appointment'; 
 
 const paymentService = {
-  // Cập nhật hàm để nhận 'price' thay vì 'consultationFee'
-  async createBillFromAppointment(appointmentId: number, patientId: number, price: number) {
-    if (isNaN(price) || price <= 0) {
+  async createBillFromAppointment(appointment: any) {
+    if (!appointment || !appointment.id || !appointment.doctorInfo || !appointment.doctorInfo.price) {
+      throw new Error('Dữ liệu cuộc hẹn không hợp lệ hoặc thiếu thông tin giá bác sĩ');
+    }
+
+    const consultationPrice = parseFloat(appointment.doctorInfo.price);
+    if (isNaN(consultationPrice) || consultationPrice <= 0) {
       throw new Error('Giá khám không hợp lệ hoặc bằng 0');
     }
 
-    const totalCost = price;
-    const insuranceDiscount = price * 0.1; 
+    const userId = Number(storage.getRaw(LocalStorageKeys.CURRENT_USER_ID));
+    if (isNaN(userId)) {
+      throw new Error('Không tìm thấy user_id trong localStorage');
+    }
+
+    let patientId: number;
+    try {
+      const patient = await patientService.getPatientByUserId(userId);
+      patientId = patient.id;
+    } catch (error: any) {
+      throw new Error('Không thể lấy patient_id: ' + (error.message || 'Lỗi không xác định'));
+    }
+
+    const totalCost = consultationPrice;
+    const insuranceDiscount = consultationPrice * 0.1;
     const amount = totalCost - insuranceDiscount;
 
     const payload = {
-      appointment_id: appointmentId,
+      appointment_id: appointment.id,
       patient_id: patientId,
       total_cost: totalCost,
       insurance_discount: insuranceDiscount,
       amount: amount,
-      status: 'U', 
-      bill_details: [] 
+      status: 'U',
+      bill_details: []
     };
 
     console.log('Gửi payload đến /bills/:', payload);
@@ -46,20 +62,10 @@ const paymentService = {
     }
   },
 
-  // ĐÃ SỬA ĐỔI Ở ĐÂY: Sử dụng orderCode trong URL path nếu có
   async getPaymentInfo(billId: number, orderCode?: string) {
     try {
-      let endpoint: string;
-      if (orderCode) {
-        // Nếu có orderCode (từ callback của PayOS), sử dụng nó trong đường dẫn
-        endpoint = `/transactions/payment-info/${orderCode}/`;
-      } else {
-        // Ngược lại, sử dụng billId (ví dụ: khi tra cứu hóa đơn trực tiếp)
-        endpoint = `/transactions/payment-info/${billId}/`;
-      }
-      
-      // Không cần query params nếu định danh đã nằm trong đường dẫn
-      const response = await api.get(endpoint);
+      const params = orderCode ? { orderCode } : {};
+      const response = await api.get(`/transactions/payment-info/${billId}/`, { params });
       console.log('Payment info response:', response.data);
       return response.data;
     } catch (error: any) {
@@ -68,12 +74,12 @@ const paymentService = {
     }
   },
 
-  // Đã sửa: Thay đổi billId thành orderCode và sử dụng orderCode trong URL path
-  async updatePaymentStatus(orderCode: string, status: 'success' | 'cancel', paymentData?: any) {
+  // Method mới để cập nhật status thanh toán từ callback PayOS
+  async updatePaymentStatus(billId: number, status: 'success' | 'cancel', paymentData?: any) {
     try {
       const endpoint = status === 'success' 
-        ? `/transactions/${orderCode}/success/` // Sử dụng orderCode trực tiếp
-        : `/transactions/${orderCode}/cancel/`; // Sử dụng orderCode trực tiếp
+        ? `/transactions/${billId}/success` 
+        : `/transactions/${billId}/cancel`;
       const payload = {
         orderCode: paymentData?.orderCode,
         status: paymentData?.status,
@@ -81,7 +87,7 @@ const paymentService = {
         payosId: paymentData?.payosId,
         timestamp: new Date().toISOString()
       };
-      console.log(`Cập nhật payment status cho order ${orderCode}:`, payload);
+      console.log(`Cập nhật payment status cho bill ${billId}:`, payload);
       const response = await api.post(endpoint, payload);
       console.log('Update payment status response:', response.data);
       return response.data;
@@ -91,6 +97,7 @@ const paymentService = {
     }
   },
 
+  // Method để verify payment status với backend
   async verifyPaymentStatus(billId: number, orderCode?: string) {
     try {
       const params = orderCode ? { orderCode } : {};
@@ -102,6 +109,7 @@ const paymentService = {
     }
   },
 
+  // Method để lấy payment status hiện tại
   async getPaymentStatus(billId: number) {
     try {
       const response = await api.get(`/transactions/status/${billId}/`);
@@ -112,6 +120,7 @@ const paymentService = {
     }
   },
 
+  // Method để retry payment nếu cần
   async retryPayment(billId: number) {
     try {
       const response = await api.post(`/transactions/retry-payment/${billId}/`);

@@ -19,11 +19,11 @@ const setDevelopmentAuth = () => {
 
 // Backend User interface to match real API
 export interface BackendUser {
-  id: number; // Backend returns 'id' not 'userId'
+  userId: number;
   email: string | null;
   phone: string;
-  role: "A" | "P" | "D"; // Backend uses single letters - only 3 roles
-  created_at: string; // Backend uses snake_case
+  role: "ADMIN" | "PATIENT" | "DOCTOR" | "RECEPTIONIST";
+  createdAt: string;
 }
 
 // Extended User interface for frontend display (we'll map backend roles to extended roles)
@@ -32,7 +32,7 @@ export interface User {
   userId: number;
   email: string | null;
   phone: string;
-  role: "ADMIN" | "PATIENT" | "DOCTOR";
+  role: "ADMIN" | "PATIENT" | "DOCTOR" | "RECEPTIONIST";
   createdAt: string;
   // Extended fields for admin table display
   user: {
@@ -49,35 +49,8 @@ export interface User {
 const mapBackendRoleToFrontend = (
   backendRole: BackendUser["role"]
 ): User["role"] => {
-  // Map backend single letters to frontend full names
-  switch (backendRole) {
-    case "A":
-      return "ADMIN";
-    case "D":
-      return "DOCTOR";
-    case "P":
-      return "PATIENT";
-    default:
-      return "PATIENT"; // fallback
-  }
-};
-
-// Helper function to map frontend role to backend role
-const mapFrontendRoleToBackend = (
-  frontendRole: CreateUserData["role"]
-): BackendUser["role"] => {
-  switch (frontendRole) {
-    case "ADMIN":
-      return "A";
-    case "DOCTOR":
-      return "D";
-    case "PATIENT":
-      return "P";
-    default:
-      // Fallback or throw an error if an unmapped role is encountered
-      console.warn("Unknown frontend role:", frontendRole);
-      return "P"; // Default to PATIENT or handle as an error
-  }
+  // For now, we keep the same mapping since backend only has 4 roles
+  return backendRole;
 };
 
 // Additional interfaces for API data - aligned with backend UserRequest/UserUpdateRequest
@@ -85,14 +58,14 @@ export interface CreateUserData {
   phone: string;
   email?: string; // Optional field
   password: string;
-  role: "ADMIN" | "DOCTOR" | "PATIENT"; // Only 3 roles supported
+  role: "ADMIN" | "DOCTOR" | "RECEPTIONIST" | "PATIENT"; // Backend only supports these roles
 }
 
 export interface UpdateUserData {
   phone?: string;
   email?: string | null; // Can be null
   password?: string;
-  role?: "ADMIN" | "DOCTOR" | "PATIENT";
+  role?: "ADMIN" | "DOCTOR" | "RECEPTIONIST" | "PATIENT";
 }
 
 export interface CreateRoleData {
@@ -196,7 +169,7 @@ const mockUsers: User[] = [
     userId: 3,
     email: "hung@wecare.vn",
     phone: "0123456791",
-    role: "DOCTOR",
+    role: "RECEPTIONIST",
     createdAt: "2025-01-25T00:00:00.000Z",
     user: {
       image: "/images/user/owner.jpg",
@@ -212,7 +185,7 @@ const mockUsers: User[] = [
     userId: 4,
     email: "lan@wecare.vn",
     phone: "0123456792",
-    role: "DOCTOR",
+    role: "RECEPTIONIST",
     createdAt: "2025-02-10T00:00:00.000Z",
     user: {
       image: "/images/user/owner.jpg",
@@ -262,6 +235,7 @@ const getMockRolesWithUserCount = (): Role[] => {
   const nameToRole: Record<string, string> = {
     "Quản trị viên": "ADMIN",
     "Bác sĩ": "DOCTOR",
+    "Lễ tân": "RECEPTIONIST",
     "Bệnh nhân": "PATIENT",
   };
   const baseRoles: Omit<Role, "userCount">[] = [
@@ -308,21 +282,21 @@ const getMockRolesWithUserCount = (): Role[] => {
       createdAt: "15/01/2025",
       updatedAt: "29/04/2025",
     },
-    // {
-    //   id: "R003",
-    //   name: "Lễ tân",
-    //   description: "Quyền truy cập dành cho lễ tân tiếp nhận",
-    //   permissions: [
-    //     "dashboard_view",
-    //     "patient_view",
-    //     "patient_create",
-    //     "appointment_view",
-    //     "appointment_create",
-    //   ],
-    //   color: "warning",
-    //   createdAt: "15/01/2025",
-    //   updatedAt: "26/04/2025",
-    // },
+    {
+      id: "R003",
+      name: "Lễ tân",
+      description: "Quyền truy cập dành cho lễ tân tiếp nhận",
+      permissions: [
+        "dashboard_view",
+        "patient_view",
+        "patient_create",
+        "appointment_view",
+        "appointment_create",
+      ],
+      color: "warning",
+      createdAt: "15/01/2025",
+      updatedAt: "26/04/2025",
+    },
     {
       id: "R004",
       name: "Bệnh nhân",
@@ -397,9 +371,6 @@ const filterUsers = (
 };
 
 // User Service - connects to real backend
-// Export the mapping functions for use in other parts of the application
-export { mapBackendRoleToFrontend, mapFrontendRoleToBackend };
-
 export const userService = {
   getUsers: async (params?: {
     page?: number;
@@ -420,11 +391,11 @@ export const userService = {
     setDevelopmentAuth();
 
     try {
-      // Get all users from backend using the correct endpoint
+      // Get all users from backend with a large page size
       const queryParams = new URLSearchParams();
       queryParams.append("page", "0"); // Get first page
       queryParams.append("size", "1000"); // Get a large number of records
-      const apiUrl = `/users/all/?${queryParams.toString()}`;
+      const apiUrl = `/users?${queryParams.toString()}`;
       console.log("🌐 [DEBUG] Calling users API:", apiUrl);
 
       const response = await api.get(apiUrl);
@@ -433,34 +404,12 @@ export const userService = {
       // Transform and filter users
       const transformedUsers = await Promise.all(
         (response.data.content || []).map(async (backendUser: BackendUser) => {
-          // Debug: Log the raw backend user data
-          console.log("🔍 [DEBUG] Raw backend user data:", backendUser);
-          console.log("🔍 [DEBUG] backendUser keys:", Object.keys(backendUser));
-          console.log(
-            "🔍 [DEBUG] backendUser.id:",
-            backendUser.id,
-            "Type:",
-            typeof backendUser.id
-          );
-          console.log(
-            "🔍 [DEBUG] backendUser has id property:",
-            "id" in backendUser
-          );
-          console.log(
-            "🔍 [DEBUG] backendUser.id === undefined:",
-            backendUser.id === undefined
-          );
-          console.log(
-            "🔍 [DEBUG] backendUser.id === null:",
-            backendUser.id === null
-          );
-
           // Map backend role to frontend role format
           const role = mapBackendRoleToFrontend(backendUser.role);
 
           // Create display name from email if no other name fields
           let displayName =
-            backendUser.email?.split("@")[0] || `User${backendUser.id}`;
+            backendUser.email?.split("@")[0] || `User${backendUser.userId}`;
           let userEmail = backendUser.email || "";
           let userAvatar =
             "https://cdn.kona-blue.com/upload/kona-blue_com/post/images/2024/09/19/465/avatar-trang-1.jpg";
@@ -469,21 +418,59 @@ export const userService = {
               ? "Quản trị hệ thống"
               : role === "DOCTOR"
               ? "Chưa phân khoa"
+              : role === "RECEPTIONIST"
+              ? "Tiếp nhận"
               : role === "PATIENT"
               ? "Bệnh nhân"
               : "Chưa phân công";
 
-          // Note: Removed calls to /doctors/users/ and /patients/users/ endpoints
-          // as they don't exist in the backend
-          // TODO: Implement these endpoints in backend if detailed user info is needed
+          try {
+            if (role === "DOCTOR") {
+              console.log(
+                `🩺 [DEBUG] Fetching doctor data for userId: ${backendUser.userId}`
+              );
+              const doctorResponse = await api.get(
+                `/doctors/users/${backendUser.userId}`
+              );
+              if (doctorResponse.data) {
+                const doctorData = doctorResponse.data;
+                displayName = doctorData.fullName || displayName;
+                userEmail = doctorData.email || userEmail;
+                userAvatar = doctorData.avatar || userAvatar;
+                department = doctorData.specialization || "Chưa phân khoa";
+                console.log(`✅ [DEBUG] Doctor data fetched:`, doctorData);
+              }
+            } else if (role === "PATIENT") {
+              console.log(
+                `🏥 [DEBUG] Fetching patient data for userId: ${backendUser.userId}`
+              );
+              const patientResponse = await api.get(
+                `/patients/users/${backendUser.userId}`
+              );
+              if (patientResponse.data) {
+                const patientData = patientResponse.data;
+                displayName = patientData.fullName || displayName;
+                userEmail = patientData.email || userEmail;
+                userAvatar = patientData.avatar || userAvatar;
+                department = "Bệnh nhân";
+                console.log(`✅ [DEBUG] Patient data fetched:`, patientData);
+              }
+            }
+          } catch (serviceError) {
+            console.warn(
+              `⚠️ [DEBUG] Failed to fetch service data:`,
+              serviceError
+            );
+            // Continue with default values if service call fails
+          }
 
-          const transformedUser = {
-            id: backendUser.id?.toString() || "unknown",
-            userId: backendUser.id || 0,
+          return {
+            id: backendUser.userId?.toString() || "",
+            userId: backendUser.userId,
             email: backendUser.email,
             phone: backendUser.phone || "N/A",
             role: role,
-            createdAt: backendUser.created_at,
+            createdAt: backendUser.createdAt,
             user: {
               image: userAvatar,
               name: displayName,
@@ -493,12 +480,6 @@ export const userService = {
             status: "Hoạt động", // Default status
             lastLogin: "Chưa có dữ liệu",
           };
-
-          // Debug: Log the transformed user
-          console.log("🔍 [DEBUG] Transformed user:", transformedUser);
-          console.log("🔍 [DEBUG] Final user ID:", transformedUser.id);
-
-          return transformedUser;
         })
       );
 
@@ -511,7 +492,7 @@ export const userService = {
         department: params?.department,
         status: params?.status,
       }); // Calculate pagination for filtered results
-      const pageSize = params?.limit || 30; // Use requested page size or default to 10
+      const pageSize = params?.limit || 10; // Use requested page size or default to 10
       const currentPage = params?.page || 1;
       const startIndex = (currentPage - 1) * pageSize;
       const endIndex = startIndex + pageSize;
@@ -527,10 +508,9 @@ export const userService = {
 
       return {
         users: paginatedUsers,
-        total: response.data.totalElements || totalFilteredUsers,
-        page: response.data.page || currentPage,
-        totalPages:
-          response.data.totalPages || Math.ceil(totalFilteredUsers / pageSize),
+        total: totalFilteredUsers,
+        page: currentPage,
+        totalPages: Math.ceil(totalFilteredUsers / pageSize),
       };
     } catch (error) {
       console.error("Failed to load users from backend API:", error);
@@ -539,7 +519,7 @@ export const userService = {
   },
   getUserById: async (id: string): Promise<User> => {
     try {
-      const response = await api.get(`/users/get_user_by_id/${id}/`);
+      const response = await api.get(`/users/${id}`);
       const backendUser: BackendUser = response.data;
 
       const role = mapBackendRoleToFrontend(backendUser.role);
@@ -552,21 +532,65 @@ export const userService = {
           ? "Quản trị hệ thống"
           : role === "DOCTOR"
           ? "Chưa phân khoa"
+          : role === "RECEPTIONIST"
+          ? "Tiếp nhận"
           : role === "PATIENT"
           ? "Bệnh nhân"
-          : "Chưa phân công";
-
-      // Note: Removed calls to /doctors/users/ and /patients/users/ endpoints
-      // as they don't exist in the backend
-      // TODO: Implement these endpoints in backend if detailed user info is needed
+          : "Chưa phân công"; // Fetch additional data from doctor/patient services if applicable
+      try {
+        if (role === "DOCTOR") {
+          console.log(
+            `🩺 [DEBUG] Fetching doctor data for userId: ${backendUser.userId}`
+          );
+          const doctorResponse = await api.get(
+            `/doctors/users/${backendUser.userId}`
+          );
+          if (doctorResponse.data) {
+            const doctorData = doctorResponse.data;
+            displayName = doctorData.fullName || displayName;
+            userEmail = doctorData.email || userEmail;
+            userAvatar = doctorData.avatar || userAvatar;
+            // Use the doctor's specialization as department
+            department = doctorData.specialization || "Chưa phân khoa";
+            console.log(
+              `✅ [DEBUG] Doctor data fetched for getUserById:`,
+              doctorData
+            );
+          }
+        } else if (role === "PATIENT") {
+          console.log(
+            `🏥 [DEBUG] Fetching patient data for userId: ${backendUser.userId}`
+          );
+          const patientResponse = await api.get(
+            `/patients/users/${backendUser.userId}`
+          );
+          if (patientResponse.data) {
+            const patientData = patientResponse.data;
+            displayName = patientData.fullName || displayName;
+            userEmail = patientData.email || userEmail;
+            userAvatar = patientData.avatar || userAvatar;
+            department = "Bệnh nhân";
+            console.log(
+              `✅ [DEBUG] Patient data fetched for getUserById:`,
+              patientData
+            );
+          }
+        }
+      } catch (serviceError) {
+        console.warn(
+          `⚠️ [DEBUG] Failed to fetch service data for getUserById:`,
+          serviceError
+        );
+        // Continue with default values if service call fails
+      }
 
       return {
-        id: backendUser.id?.toString() || id,
-        userId: backendUser.id || 0,
+        id: backendUser.userId?.toString() || id,
+        userId: backendUser.userId,
         email: backendUser.email,
         phone: backendUser.phone || "N/A",
         role: role,
-        createdAt: backendUser.created_at,
+        createdAt: backendUser.createdAt,
         user: {
           image: userAvatar,
           name: displayName,
@@ -585,41 +609,43 @@ export const userService = {
     console.log("🔧 [DEBUG] Creating user with data:", userData);
     setDevelopmentAuth();
     try {
-      // Map frontend role to backend role format
+      // Now we use backend roles directly, no mapping needed
       const backendUserData = {
         phone: userData.phone,
         email: userData.email || null,
         password: userData.password,
-        role: mapFrontendRoleToBackend(userData.role),
+        role: userData.role,
       };
 
       console.log("🌐 [DEBUG] Sending to backend:", backendUserData);
-      const response = await api.post("/users/add/", backendUserData);
+      const response = await api.post("/users", backendUserData);
       console.log("✅ [DEBUG] User created successfully:", response.data);
 
       const backendUser: BackendUser = response.data;
       const role = mapBackendRoleToFrontend(backendUser.role);
       const displayName =
-        backendUser.email?.split("@")[0] || `User${backendUser.id}`;
+        backendUser.email?.split("@")[0] || `User${backendUser.userId}`;
 
       return {
-        id: backendUser.id?.toString() || "unknown",
-        userId: backendUser.id || 0,
+        id: backendUser.userId?.toString(),
+        userId: backendUser.userId,
         email: backendUser.email,
         phone: backendUser.phone || "N/A",
         role: role,
-        createdAt: backendUser.created_at,
+        createdAt: backendUser.createdAt,
         user: {
           image:
             "https://cdn.kona-blue.com/upload/kona-blue_com/post/images/2024/09/19/465/avatar-trang-1.jpg",
           name: displayName,
-          email: backendUser.email || `user${backendUser.id}@wecare.vn`,
+          email: backendUser.email || `user${backendUser.userId}@wecare.vn`,
         },
         department:
           role === "ADMIN"
             ? "Quản trị hệ thống"
             : role === "DOCTOR"
             ? "Chưa phân khoa"
+            : role === "RECEPTIONIST"
+            ? "Tiếp nhận"
             : "Chưa phân công",
         status: "Hoạt động",
         lastLogin: "Chưa đăng nhập",
@@ -650,12 +676,12 @@ export const userService = {
     console.log("🔧 [DEBUG] Updating user with ID:", id, "data:", userData);
     setDevelopmentAuth();
     try {
-      // Map frontend role to backend role format if role is provided
+      // Now we use backend roles directly, no mapping needed
       const backendUserData: {
         phone?: string;
         email?: string | null;
         password?: string;
-        role?: BackendUser["role"];
+        role?: string;
       } = {
         phone: userData.phone,
         email: userData.email,
@@ -663,14 +689,11 @@ export const userService = {
       };
 
       if (userData.role) {
-        backendUserData.role = mapFrontendRoleToBackend(userData.role);
+        backendUserData.role = userData.role; // Use role directly since it's now backend-compatible
       }
 
       console.log("🌐 [DEBUG] Sending update to backend:", backendUserData);
-      const response = await api.put(
-        `/users/${id}/edit_user/`,
-        backendUserData
-      );
+      const response = await api.put(`/users/${id}`, backendUserData);
       console.log("✅ [DEBUG] User updated successfully:", response.data);
 
       const backendUser: BackendUser = response.data;
@@ -685,12 +708,14 @@ export const userService = {
           ? "Quản trị hệ thống"
           : role === "DOCTOR"
           ? "Chưa phân khoa"
+          : role === "RECEPTIONIST"
+          ? "Tiếp nhận"
           : "Chưa phân công";
 
       try {
         if (role === "DOCTOR") {
           const doctorResponse = await api.get(
-            `/doctors/users/${backendUser.id}`
+            `/doctors/users/${backendUser.userId}`
           );
           if (doctorResponse.data) {
             const doctorData = doctorResponse.data;
@@ -699,7 +724,7 @@ export const userService = {
           }
         } else if (role === "PATIENT") {
           const patientResponse = await api.get(
-            `/patients/users/${backendUser.id}`
+            `/patients/users/${backendUser.userId}`
           );
           if (patientResponse.data) {
             const patientData = patientResponse.data;
@@ -715,12 +740,12 @@ export const userService = {
       }
 
       return {
-        id: backendUser.id?.toString() || id,
-        userId: backendUser.id || 0,
+        id: backendUser.userId?.toString() || id,
+        userId: backendUser.userId,
         email: backendUser.email,
         phone: backendUser.phone || "N/A",
         role: role,
-        createdAt: backendUser.created_at,
+        createdAt: backendUser.createdAt,
         user: {
           image: userAvatar,
           name: displayName,
@@ -752,128 +777,14 @@ export const userService = {
       throw new Error(errorMessage);
     }
   },
-
-  updateUserByEmail: async (
-    email: string,
-    userData: UpdateUserData
-  ): Promise<User> => {
-    setDevelopmentAuth();
-    try {
-      console.log("🔍 [DEBUG] Getting user ID for email:", email);
-
-      // First, get user ID from email
-      const userResponse = await api.get(
-        `/users/get_user_by_email/?email=${encodeURIComponent(email)}`
-      );
-      const userId = userResponse.data.id;
-
-      console.log("✅ [DEBUG] Found user ID:", userId, "for email:", email);
-
-      // Then update user by ID
-      return await userService.updateUser(userId.toString(), userData);
-    } catch (error: unknown) {
-      console.error("❌ [DEBUG] Failed to update user by email:", error);
-      let errorMessage = "Cannot update user in backend";
-      const errorResponse = error as ApiErrorResponse;
-      if (errorResponse.response?.data) {
-        if (typeof errorResponse.response.data === "string") {
-          errorMessage = errorResponse.response.data;
-        } else if (errorResponse.response.data.message) {
-          errorMessage = errorResponse.response.data.message;
-        } else {
-          errorMessage = JSON.stringify(errorResponse.response.data);
-        }
-      } else if (errorResponse.message) {
-        errorMessage = errorResponse.message;
-      }
-      throw new Error(errorMessage);
-    }
-  },
   deleteUser: async (id: string): Promise<void> => {
-    setDevelopmentAuth(); // Set development auth if needed
     try {
-      console.log("🗑️ [DEBUG] Attempting to delete user with ID:", id);
-      const response = await api.delete(`/users/${id}/delete_user/`);
-      console.log("✅ [DEBUG] User deleted successfully:", response.data);
-    } catch (error: unknown) {
-      console.error("❌ [DEBUG] Failed to delete user in backend:", error);
-      let errorMessage = "Cannot delete user in backend";
-      const errorResponse = error as ApiErrorResponse;
-      if (errorResponse.response?.data) {
-        if (typeof errorResponse.response.data === "string") {
-          errorMessage = errorResponse.response.data;
-        } else if (errorResponse.response.data.message) {
-          errorMessage = errorResponse.response.data.message;
-        } else {
-          errorMessage = JSON.stringify(errorResponse.response.data);
-        }
-      } else if (errorResponse.message) {
-        errorMessage = errorResponse.message;
-      }
-      throw new Error(errorMessage);
-    }
-  },
-
-  deleteUserByEmail: async (email: string): Promise<void> => {
-    setDevelopmentAuth();
-    try {
-      console.log("🔍 [DEBUG] Getting user ID for email:", email);
-
-      // First, get user ID from email
-      const userResponse = await api.get(
-        `/users/get_user_by_email/?email=${encodeURIComponent(email)}`
-      );
-      const userId = userResponse.data.id;
-
-      console.log("✅ [DEBUG] Found user ID:", userId, "for email:", email);
-
-      // Then delete user by ID
-      const deleteResponse = await api.delete(`/users/${userId}/delete_user/`);
-      console.log("✅ [DEBUG] User deleted successfully:", deleteResponse.data);
-    } catch (error: unknown) {
-      console.error("❌ [DEBUG] Failed to delete user by email:", error);
-      let errorMessage = "Cannot delete user in backend";
-      const errorResponse = error as ApiErrorResponse;
-      if (errorResponse.response?.data) {
-        if (typeof errorResponse.response.data === "string") {
-          errorMessage = errorResponse.response.data;
-        } else if (errorResponse.response.data.message) {
-          errorMessage = errorResponse.response.data.message;
-        } else {
-          errorMessage = JSON.stringify(errorResponse.response.data);
-        }
-      } else if (errorResponse.message) {
-        errorMessage = errorResponse.message;
-      }
-      throw new Error(errorMessage);
-    }
-  },
-
-  forceDeleteUser: async (id: string): Promise<void> => {
-    setDevelopmentAuth(); // Set development auth if needed
-    try {
-      console.log("💥 [DEBUG] Attempting to force delete user with ID:", id);
-      const response = await api.delete(`/users/${id}/force-delete/`);
-      console.log("✅ [DEBUG] User force deleted successfully:", response.data);
-    } catch (error: unknown) {
-      console.error(
-        "❌ [DEBUG] Failed to force delete user in backend:",
-        error
-      );
-      let errorMessage = "Cannot force delete user in backend";
-      const errorResponse = error as ApiErrorResponse;
-      if (errorResponse.response?.data) {
-        if (typeof errorResponse.response.data === "string") {
-          errorMessage = errorResponse.response.data;
-        } else if (errorResponse.response.data.message) {
-          errorMessage = errorResponse.response.data.message;
-        } else {
-          errorMessage = JSON.stringify(errorResponse.response.data);
-        }
-      } else if (errorResponse.message) {
-        errorMessage = errorResponse.message;
-      }
-      throw new Error(errorMessage);
+      await api.delete(`/users/${id}`);
+    } catch (error) {
+      console.warn("Deleting mock user:", error);
+      const userIndex = mockUsers.findIndex((u) => u.id === id);
+      if (userIndex === -1) throw new Error("User not found");
+      mockUsers.splice(userIndex, 1);
     }
   },
 };
@@ -908,7 +819,7 @@ export const roleService = {
       }
 
       const page = params?.page || 1;
-      const limit = params?.limit || 30;
+      const limit = params?.limit || 10;
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
 
@@ -1003,21 +914,15 @@ export const permissionService = {
       return response.data;
     } catch (error) {
       console.warn("Using mock data for permissions:", error);
-      // Create mock permissions with correct structure
-      const mockPermissions: Permission[] = [
-        { id: "1", name: "User Management", category: "Admin" },
-        { id: "2", name: "Role Management", category: "Admin" },
-        { id: "3", name: "Patient View", category: "Doctor" },
-        { id: "4", name: "Appointment Management", category: "Doctor" },
-      ];
-
       let filteredPermissions = [...mockPermissions];
 
       if (params?.search) {
         filteredPermissions = filteredPermissions.filter(
           (perm) =>
             perm.name.toLowerCase().includes(params.search!.toLowerCase()) ||
-            perm.category.toLowerCase().includes(params.search!.toLowerCase())
+            perm.description
+              .toLowerCase()
+              .includes(params.search!.toLowerCase())
         );
       }
 
@@ -1027,8 +932,14 @@ export const permissionService = {
         );
       }
 
+      if (params?.status) {
+        filteredPermissions = filteredPermissions.filter(
+          (perm) => perm.status === params.status
+        );
+      }
+
       const page = params?.page || 1;
-      const limit = params?.limit || 30;
+      const limit = params?.limit || 10;
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       return {
@@ -1046,24 +957,17 @@ export const statisticsService = {
   getUserStatistics: async (): Promise<UserStatistics> => {
     try {
       // Try to get statistics from backend API
-      console.log("🔍 [STATS] Trying to get statistics from backend API...");
       const response = await api.get("/users/statistics");
-      console.log("✅ [STATS] Backend statistics API response:", response.data);
       return response.data;
     } catch (error) {
       console.warn(
-        "⚠️ [STATS] Backend statistics API not available, calculating from user data:",
+        "Backend statistics API not available, calculating from user data:",
         error
       );
       try {
         // Get real user data from userService
-        console.log("🔍 [STATS] Getting user data from userService...");
         const allUsersResponse = await userService.getUsers({ limit: 1000 }); // Get all users
-        console.log("✅ [STATS] UserService response:", allUsersResponse);
-
         const users = allUsersResponse.users;
-        console.log("👥 [STATS] Users array length:", users.length);
-        console.log("👥 [STATS] Users array:", users);
 
         // Calculate statistics from real user data
         const totalUsers = users.length;
@@ -1086,7 +990,7 @@ export const statisticsService = {
         // Get total roles count
         const totalRoles = Object.keys(usersByRole).length;
 
-        const stats = {
+        return {
           totalUsers,
           todayLogins,
           activeUsers,
@@ -1096,70 +1000,11 @@ export const statisticsService = {
           userGrowthPercent: Math.floor(Math.random() * 20) + 5, // Random growth percentage for demo
           loginGrowthPercent: Math.floor(Math.random() * 10) + 1, // Random growth percentage for demo
         };
-
-        console.log("📊 [STATS] Calculated statistics:", stats);
-        return stats;
       } catch (userError) {
-        console.error(
-          "❌ [STATS] Failed to get user data for statistics:",
-          userError
+        console.error("Failed to get user data for statistics:", userError);
+        throw new Error(
+          "Cannot load user statistics from backend: " + userError
         );
-
-        // Fallback: Try direct API call without complex transformation
-        try {
-          console.log("🔄 [STATS] Trying direct API call as fallback...");
-          setDevelopmentAuth();
-
-          const queryParams = new URLSearchParams();
-          queryParams.append("page", "0");
-          queryParams.append("size", "1000");
-          const apiUrl = `/users/all/?${queryParams.toString()}`;
-
-          const directResponse = await api.get(apiUrl);
-          console.log("✅ [STATS] Direct API response:", directResponse.data);
-
-          const backendUsers = directResponse.data.content || [];
-          console.log("👥 [STATS] Backend users count:", backendUsers.length);
-
-          // Simple statistics calculation
-          const totalUsers = backendUsers.length;
-          const usersByRole: { [role: string]: number } = {};
-          backendUsers.forEach((user: any) => {
-            const role = user.role || "UNKNOWN";
-            usersByRole[role] = (usersByRole[role] || 0) + 1;
-          });
-
-          const stats = {
-            totalUsers,
-            todayLogins: Math.floor(totalUsers * 0.5), // Estimate 50% of users logged in today
-            activeUsers: totalUsers,
-            inactiveUsers: 0,
-            totalRoles: Object.keys(usersByRole).length,
-            usersByRole,
-            userGrowthPercent: 15, // Demo value
-            loginGrowthPercent: 8, // Demo value
-          };
-
-          console.log("📊 [STATS] Fallback statistics calculated:", stats);
-          return stats;
-        } catch (fallbackError) {
-          console.error("❌ [STATS] Fallback also failed:", fallbackError);
-
-          // Final fallback: return mock data
-          const mockStats = {
-            totalUsers: 25, // Mock value
-            todayLogins: 18,
-            activeUsers: 25,
-            inactiveUsers: 0,
-            totalRoles: 3,
-            usersByRole: { ADMIN: 5, DOCTOR: 8, PATIENT: 10 },
-            userGrowthPercent: 15,
-            loginGrowthPercent: 8,
-          };
-
-          console.log("📊 [STATS] Using mock statistics:", mockStats);
-          return mockStats;
-        }
       }
     }
   },

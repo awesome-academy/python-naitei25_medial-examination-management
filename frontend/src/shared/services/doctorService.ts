@@ -3,7 +3,6 @@ import type { DoctorInfo } from '../types/auths';
 import { api } from "./api";
 import { handleApiError } from "../utils/errorHandler";
 import i18n from "../../i18n";
-import type { AvailableSlot } from "../types/appointment"; 
 
 export interface DoctorSearchParams {
   specialty?: string;
@@ -28,6 +27,7 @@ export interface DoctorSchedule {
 }
 
 export const doctorService = {
+  // Get all doctors
   async getAllDoctors(): Promise<Doctor[]> {
     try {
       const response = await api.get<Doctor[]>("/doctors");
@@ -37,6 +37,7 @@ export const doctorService = {
     }
   },
 
+  // Get doctor by ID
   async getDoctorById(userId: number): Promise<Doctor> {
     try {
       const response = await api.get<Doctor>(`/doctors/${userId}`);
@@ -46,6 +47,7 @@ export const doctorService = {
     }
   },
 
+  // Get doctor by userId
   async getDoctorByUserId(doctorId: number): Promise<Doctor> {
     try {
       const response = await api.get<Doctor>(`/doctors/user/${doctorId}`);
@@ -55,6 +57,7 @@ export const doctorService = {
     }
   },
 
+  // Create doctor
   async createDoctor(doctorData: DoctorDto): Promise<Doctor> {
     try {
       const response = await api.post<Doctor>("/doctors", doctorData);
@@ -64,6 +67,7 @@ export const doctorService = {
     }
   },
 
+  // Get doctor's schedule
   async getDoctorSchedule(doctorId: number, workDate?: string): Promise<DoctorSchedule[]> {
     try {
       const params = new URLSearchParams();
@@ -84,25 +88,16 @@ export const doctorService = {
     timeSlots: Array<{ time: string; available: boolean; scheduleId: number }>;
   }> {
     try {
-      const response = await api.post<AvailableSlot[]>(`/appointments/schedule/available-slots/`, {
-        schedule_id: scheduleId,
+      const response = await api.get(`/appointments/schedule/available-slots/`, {
+        params: { schedule_id: scheduleId, date }
       });
-      
-      const formattedTimeSlots = response.data.map(slot => ({
-        time: slot.slot_start, 
-        available: slot.available,
-        scheduleId: slot.scheduleId || scheduleId 
-      }));
-
-      return {
-        date: date, 
-        timeSlots: formattedTimeSlots
-      };
+      return response.data;
     } catch (error: any) {
       throw new Error(handleApiError(error, false));
     }
   },
 
+  // Update doctor profile (for doctors)
   async updateDoctorProfile(doctorId: number, data: Partial<DoctorInfo>): Promise<DoctorInfo> {
     try {
       const response = await api.patch<DoctorInfo>(`/doctors/${doctorId}/`, data);
@@ -112,6 +107,7 @@ export const doctorService = {
     }
   },
 
+  // Upload doctor avatar
   async uploadDoctorAvatar(doctorId: number, file: File): Promise<{ avatar: string }> {
     try {
       const formData = new FormData();

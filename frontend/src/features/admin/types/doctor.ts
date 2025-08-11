@@ -1,29 +1,27 @@
 // Schedule for admin (lịch làm việc bác sĩ, dùng cho admin quản lý)
 export interface AdminDoctorSchedule {
   scheduleId: number;
-  doctor_id: number; 
-  doctorName?: string;
-  work_date: string; 
-  start_time: string; 
-  end_time: string; 
+  doctorId: number;
+  doctorName?: string; // optional, for display
+  workDate: string; // YYYY-MM-DD
+  startTime: string; // HH:mm:ss
+  endTime: string; // HH:mm:ss
   shift: Shift;
-  room_id: number; 
-  roomName?: string; 
+  roomId: number;
+  roomName?: string; // optional, for display
   building?: string;
   floor?: number;
   note?: string;
-  created_at: string; 
-  title?: string;
+  createdAt: string;
 }
-
 export interface Doctor {
-  doctorId: number; 
+  doctorId: number;
   userId: number;
   identityNumber: string;
-  fullName: string; 
+  fullName: string;
   birthday: string;
-  gender: "MALE" | "FEMALE" | "OTHER"; 
-  ress: string;
+  gender: "MALE" | "FEMALE";
+  address: string;
   academicDegree:
     | "BS"
     | "BS_CKI"
@@ -35,41 +33,31 @@ export interface Doctor {
   specialization: string;
   avatar?: string;
   type: "EXAMINATION" | "SERVICE";
-  // UPDATED: Department info as nested object, matching API
-  department: {
-    id: number;
-    department_name: string; 
-    description?: string;
-    created_at?: string; 
-  };
   departmentId: number;
-  departmentName: string; 
+  departmentName: string;
   createdAt: string;
-  price?: number; 
 }
 
 export interface DoctorDto {
   doctorId?: number;
   userId?: number;
-  identityNumber?: string; 
-  first_name?: string; 
-  last_name?: string; 
-  birthday?: string; 
-  gender?: "MALE" | "FEMALE" | "OTHER"; 
-  ress?: string; 
-  academicDegree?:
+  identityNumber: string;
+  fullName: string;
+  birthday: string;
+  gender: "MALE" | "FEMALE";
+  address: string;
+  academicDegree:
     | "BS"
     | "BS_CKI"
     | "BS_CKII"
     | "THS_BS"
     | "TS_BS"
     | "PGS_TS_BS"
-    | "GS_TS_BS"; 
-  specialization?: string; 
-  avatar?: string; 
-  type?: "EXAMINATION" | "SERVICE"; 
-  departmentId?: number; 
-  price?: number; 
+    | "GS_TS_BS";
+  specialization: string;
+  avatar?: string;
+  type: "EXAMINATION" | "SERVICE";
+  departmentId: number;
 }
 
 // Academic degree labels for display
@@ -85,15 +73,13 @@ export const ACADEMIC_DEGREE_LABELS: Record<string, string> = {
 
 export type RoomType = "EXAMINATION" | "TEST";
 
-import type { Shift } from "./appointment"; 
-
+export type Shift = "MORNING" | "AFTERNOON" | "EVENING" | "NIGHT";
 export interface Department {
   departmentId: number;
   departmentName: string;
   description: string;
   createdAt: string;
 }
-
 export interface ExaminationRoom {
   roomId: number;
   departmentId: number;
@@ -113,31 +99,25 @@ export interface ExaminationRoomDto {
   note: string;
   createdAt?: string;
 }
-
 export interface Schedule {
   scheduleId: number;
-  doctor_id: number; 
-  work_date: string; 
-  start_time: string; 
-  end_time: string; 
+  doctorId: number;
+  workDate: string;
+  startTime: string; // HH:mm:ss
+  endTime: string; // HH:mm:ss
   shift: Shift;
-  room_id: number; 
-  location?: string; 
-  room_note?: string; 
-  floor?: number; 
-  building?: string; 
-  created_at: string; 
+  roomId: number;
+  createdAt: string;
 }
 
 export interface CreateDoctorRequest {
   email?: string;
-  phone?: string; 
+  phone: string;
   password: string;
   identityNumber: string;
-  first_name: string; 
-  last_name: string; 
+  fullName: string;
   birthday: string;
-  gender: "MALE" | "FEMALE" | "OTHER"; 
+  gender: "MALE" | "FEMALE";
   address?: string;
   academicDegree:
     | "BS"
@@ -151,5 +131,5 @@ export interface CreateDoctorRequest {
   avatar?: string;
   type: "EXAMINATION" | "SERVICE";
   departmentId: number;
-  price?: number; 
+  consultationFee?: number;
 }

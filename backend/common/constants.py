@@ -6,7 +6,7 @@ DECIMAL_DECIMAL_PLACES = 2
 DECIMAL_DEFAULT = 0
 
 PAGE_NO_DEFAULT = 0
-PAGE_SIZE_DEFAULT = 30
+PAGE_SIZE_DEFAULT = 20
 MIN_VALUE = 1
 
 # ======================
@@ -59,7 +59,6 @@ PATIENT_LENGTH = {
     "INSURANCE": 50,
     "BLOOD_TYPE": 10,
     "RELATIONSHIP": 50,
-    "AVATAR": 255,
 }
 
 # ======================

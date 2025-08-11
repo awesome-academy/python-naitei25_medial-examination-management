@@ -177,29 +177,29 @@ const AppSidebar: React.FC = () => {
       path: `${basePath}/patients`,
       roles: ["admin", "receptionist"],
     },
-    // {
-    //   name: "Nội trú",
-    //   icon: <InpatientIcon />,
-    //   subItems: [
-    //     {
-    //       name: "Phòng bệnh",
-    //       path: `${basePath}/inpatients-rooms`,
-    //       pro: false,
-    //     },
-    //     {
-    //       name: "Bệnh nhân nội trú",
-    //       path: `${basePath}/inpatients`,
-    //       pro: false,
-    //     },
-    //   ],
-    //   roles: ["admin", "receptionist"],
-    // },
-    // {
-    //   name: "Phòng ban",
-    //   icon: <DepartmentIcon />,
-    //   path: `${basePath}/departments`,
-    //   roles: ["admin", "receptionist"],
-    // },
+    {
+      name: "Nội trú",
+      icon: <InpatientIcon />,
+      subItems: [
+        {
+          name: "Phòng bệnh",
+          path: `${basePath}/inpatients-rooms`,
+          pro: false,
+        },
+        {
+          name: "Bệnh nhân nội trú",
+          path: `${basePath}/inpatients`,
+          pro: false,
+        },
+      ],
+      roles: ["admin", "receptionist"],
+    },
+    {
+      name: "Phòng ban",
+      icon: <DepartmentIcon />,
+      path: `${basePath}/departments`,
+      roles: ["admin", "receptionist"],
+    },
     {
       icon: <AdminIcon />,
       name: "Phân quyền",
@@ -212,18 +212,18 @@ const AppSidebar: React.FC = () => {
       path: `${basePath}/doctors`,
       roles: ["admin"],
     },
-    // {
-    //   icon: <CalendarIcon />,
-    //   name: "Kho thuốc",
-    //   path: `${basePath}/medicines`,
-    //   roles: ["admin"],
-    // },
-    // {
-    //   icon: <BoxCubeIcon />,
-    //   name: "Dịch vụ",
-    //   path: `${basePath}/health-services`,
-    //   roles: ["admin"],
-    // },
+    {
+      icon: <CalendarIcon />,
+      name: "Kho thuốc",
+      path: `${basePath}/medicines`,
+      roles: ["admin"],
+    },
+    {
+      icon: <BoxCubeIcon />,
+      name: "Dịch vụ",
+      path: `${basePath}/health-services`,
+      roles: ["admin"],
+    },
     {
       icon: <UserCircleIcon />,
       name: "Hồ sơ",

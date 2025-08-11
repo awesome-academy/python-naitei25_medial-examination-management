@@ -1,7 +1,7 @@
 import { EventInput } from "@fullcalendar/core";
 
-// Kiểu trạng thái lịch khám cho CalendarEvent
-export type EventStatus = "danger" | "success" | "waiting" | "cancel" | "no-show";
+// Kiểu trạng thái lịch khám
+export type EventStatus = "danger" | "success" | "waiting" | "cancel";
 
 // Ánh xạ tên trạng thái và giá trị
 export const EVENT_STATUS_MAP = {
@@ -9,18 +9,7 @@ export const EVENT_STATUS_MAP = {
   "Đã khám": "success" as EventStatus,
   "Chờ khám": "waiting" as EventStatus,
   Hủy: "cancel" as EventStatus,
-  "Không đến": "no-show" as EventStatus,
 };
-
-// Định nghĩa AppointmentStatus enum 
-export enum AppointmentStatus {
-  PENDING = "PENDING",
-  CONFIRMED = "CONFIRMED",
-  CANCELLED = "CANCELLED",
-  COMPLETED = "COMPLETED",
-  NO_SHOW = "NO_SHOW",
-  IN_PROGRESS = "IN_PROGRESS",
-}
 
 // Interface cho sự kiện lịch
 export interface CalendarEvent extends EventInput {
@@ -37,8 +26,6 @@ export interface CalendarEvent extends EventInput {
     department?: string;
     departmentId?: string;
     doctorId?: string;
-    appointmentStatus?: AppointmentStatus; 
-    appointmentId?: number;
   };
 }
 
@@ -109,7 +96,7 @@ export interface Appointment {
   slotStart: string;
   slotEnd: string;
   number: number;
-  appointmentStatus: AppointmentStatus; 
+  appointmentStatus: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
   createdAt: string;
   doctorInfo: {
     doctorId: number;
@@ -127,7 +114,7 @@ export interface AppointmentDto {
   slotStart: string;
   slotEnd: string;
   number: number;
-  appointmentStatus: AppointmentStatus; 
+  appointmentStatus: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 }
 
 export interface AppointmentNote {
@@ -144,27 +131,22 @@ export interface AppointmentNoteDto {
   noteText: string;
 }
 
-// UPDATED: Shift enum to match backend (models.py)
-export type Shift = "MORNING" | "AFTERNOON" | "EVENING" | "NIGHT";
-
 export interface Schedule {
   id: number;
   doctorId: number;
   doctorName: string;
   departmentId: number;
   departmentName: string;
-  workDate: string; 
+  date: string;
   startTime: string;
   endTime: string;
   maxPatients: number;
   currentPatients: number;
   status: "AVAILABLE" | "FULL" | "CANCELLED";
-  defaultAppointmentDurationMinutes?: number; 
-  shift: Shift; // Thêm trường shift
 }
 
 export interface ScheduleDto extends Schedule {
-  workDate: string; 
+  date: string;
 }
 
 export interface Patient {
@@ -175,8 +157,6 @@ export interface Patient {
   age: number;
   gender: "MALE" | "FEMALE" | "OTHER";
   address: string;
-  birthday?: string; 
-  userId?: number; 
 }
 
 export interface PatientDto {
@@ -215,31 +195,31 @@ export interface DoctorDto {
 }
 
 export interface AppointmentUpdateRequest {
-  appointmentId?: number;
-  doctorId?: number;
-  patientId?: number;
-  scheduleId?: number;
-  symptoms?: string;
-  appointmentStatus: AppointmentStatus; 
-  slotStart?: string;
-  slotEnd?: string;
+  appointmentId: number;
+  doctorId: number;
+  patientId: number;
+  scheduleId: number;
+  symptoms: string;
+  number: number;
+  appointmentStatus: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+  slotStart: string;
+  slotEnd: string;
 }
 
 export interface AppointmentRequest {
-  doctor: number; 
-  patient: number; 
-  schedule: number; 
+  slotStart: string;
+  slotEnd: string;
+  scheduleId: number;
   symptoms: string;
-  slot_start: string;
-  slot_end: string; 
-  appointment_status?: AppointmentStatus;
+  doctorId: number;
+  patientId: number;
 }
 
 export interface AppointmentResponse {
   appointmentId: number;
-  schedule: Schedule; 
-  orderNumber?: string;
-  appointmentStatus: AppointmentStatus; 
+  schedule: ScheduleDto;
+  orderNumber: string;
+  appointmentStatus: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
   slotStart: string;
   slotEnd: string;
   symptoms: string;
@@ -252,11 +232,6 @@ export interface AppointmentResponse {
     age: number;
     gender: "MALE" | "FEMALE" | "OTHER";
   };
-  doctorInfo?: { 
-    id: number;
-    fullName: string;
-    academicDegree: string;
-    specialization: string;
-  };
   createdAt: string;
+  updatedAt: string;
 }

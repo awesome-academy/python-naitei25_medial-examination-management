@@ -1,29 +1,22 @@
-import { api } from "./api"
-import { handleApiError } from "../utils/errorHandler"
-import type {
-  Appointment,
-  UpdateAppointmentPayload,
-  AppointmentNote,
-  AppointmentFilter,
-  BackendCreateAppointmentPayload,
-} from "../types/appointment" // Import BackendCreateAppointmentPayload
-import type { PaginatedResponse } from "../types/api"
+import { api } from './api'
+import { handleApiError } from '../utils/errorHandler'
+import type { Appointment, CreateAppointmentPayload, UpdateAppointmentPayload, AppointmentNote, AppointmentFilter } from '../types/appointment'
+import type { PaginatedResponse } from '../types/api'
 
 export type AppointmentListResponse = PaginatedResponse<Appointment>
 
 export const appointmentService = {
-  // Get my appointments (used for past appointments)
+  // Get my appointments
   async getMyAppointments(page = 1, pageSize = 10, filters?: AppointmentFilter): Promise<AppointmentListResponse> {
     try {
       const params = new URLSearchParams()
-      params.append("pageNo", page.toString()) // Changed to pageNo
-      params.append("pageSize", pageSize.toString()) // Changed to pageSize
+      params.append('page', page.toString())
+      params.append('page_size', pageSize.toString())
+      
+      if (filters?.status) params.append('status', filters.status)
+      if (filters?.startDate) params.append('start_date', filters.startDate)
+      if (filters?.endDate) params.append('end_date', filters.endDate)
 
-      if (filters?.status) params.append("status", filters.status)
-      if (filters?.startDate) params.append("start_date", filters.startDate) // Changed to start_date
-      if (filters?.endDate) params.append("end_date", filters.endDate) // Changed to end_date
-
-      // Call the new /appointments/my/ endpoint
       const response = await api.get<AppointmentListResponse>(`/appointments/my/?${params.toString()}`)
       return response.data
     } catch (error: any) {
@@ -34,8 +27,7 @@ export const appointmentService = {
   // Get upcoming appointments
   async getUpcomingAppointments(): Promise<Appointment[]> {
     try {
-      // Call the new /appointments/upcoming/ endpoint
-      const response = await api.get<{ results: Appointment[] }>("/appointments/upcoming/")
+      const response = await api.get<{ results: Appointment[] }>('/appointments/upcoming/')
       return response.data.results
     } catch (error: any) {
       throw new Error(handleApiError(error, false))
@@ -53,10 +45,9 @@ export const appointmentService = {
   },
 
   // Create new appointment
-  async createAppointment(payload: BackendCreateAppointmentPayload): Promise<Appointment> {
-    // Đã sửa kiểu payload
+  async createAppointment(payload: CreateAppointmentPayload): Promise<Appointment> {
     try {
-      const response = await api.post<Appointment>("/appointments/", payload)
+      const response = await api.post<Appointment>('/appointments/', payload)
       return response.data
     } catch (error: any) {
       throw new Error(handleApiError(error, false))
@@ -77,8 +68,8 @@ export const appointmentService = {
   async cancelAppointment(appointmentId: number, reason?: string): Promise<Appointment> {
     try {
       const response = await api.patch<Appointment>(`/appointments/${appointmentId}/`, {
-        status: "CANCELLED",
-        cancellationReason: reason,
+        status: 'CANCELLED',
+        cancellationReason: reason
       })
       return response.data
     } catch (error: any) {
@@ -87,20 +78,15 @@ export const appointmentService = {
   },
 
   // Get available time slots
-  async getAvailableSlots(
-    scheduleId: number,
-    date: string,
-  ): Promise<{
+  async getAvailableSlots(doctorId: number, date: string): Promise<{
     morning: string[]
     afternoon: string[]
   }> {
     try {
-      const response = await api.post<{
+      const response = await api.get<{
         morning: string[]
         afternoon: string[]
-      }>(`/appointments/schedule/available-slots/`, {
-        schedule_id: scheduleId,
-      })
+      }>(`/appointments/available-slots/?doctor_id=${doctorId}&date=${date}`)
       return response.data
     } catch (error: any) {
       throw new Error(handleApiError(error, false))
@@ -111,14 +97,14 @@ export const appointmentService = {
   async getAllAppointments(page = 1, pageSize = 10, filters?: AppointmentFilter): Promise<AppointmentListResponse> {
     try {
       const params = new URLSearchParams()
-      params.append("page", page.toString())
-      params.append("page_size", pageSize.toString())
-
-      if (filters?.status) params.append("status", filters.status)
-      if (filters?.doctorId) params.append("doctor_id", filters.doctorId.toString())
-      if (filters?.patientId) params.append("patient_id", filters.patientId.toString())
-      if (filters?.startDate) params.append("start_date", filters.startDate)
-      if (filters?.endDate) params.append("end_date", filters.endDate)
+      params.append('page', page.toString())
+      params.append('page_size', pageSize.toString())
+      
+      if (filters?.status) params.append('status', filters.status)
+      if (filters?.doctorId) params.append('doctor_id', filters.doctorId.toString())
+      if (filters?.patientId) params.append('patient_id', filters.patientId.toString())
+      if (filters?.startDate) params.append('start_date', filters.startDate)
+      if (filters?.endDate) params.append('end_date', filters.endDate)
 
       const response = await api.get<AppointmentListResponse>(`/appointments/?${params.toString()}`)
       return response.data
@@ -127,27 +113,22 @@ export const appointmentService = {
     }
   },
 
-  async getDoctorAppointments(
-    doctorId: number,
-    page = 1,
-    pageSize = 10,
-    filters?: AppointmentFilter,
-  ): Promise<AppointmentListResponse> {
+  async getDoctorAppointments(doctorId: number, page = 1, pageSize = 10, filters?: AppointmentFilter): Promise<AppointmentListResponse> {
     try {
       const params = new URLSearchParams()
-      params.append("page", page.toString())
-      params.append("page_size", pageSize.toString())
-
-      if (filters?.status) params.append("status", filters.status)
-      if (filters?.startDate) params.append("start_date", filters.startDate)
-      if (filters?.endDate) params.append("end_date", filters.endDate)
+      params.append('page', page.toString())
+      params.append('page_size', pageSize.toString())
+      
+      if (filters?.status) params.append('status', filters.status)
+      if (filters?.startDate) params.append('start_date', filters.startDate)
+      if (filters?.endDate) params.append('end_date', filters.endDate)
 
       const response = await api.get<AppointmentListResponse>(`/appointments/doctor/${doctorId}/?${params.toString()}`)
       return response.data
     } catch (error: any) {
       throw new Error(handleApiError(error, false))
     }
-  },
+  }
 }
 
 export const appointmentNoteService = {
@@ -162,13 +143,10 @@ export const appointmentNoteService = {
   },
 
   // Create appointment note
-  async createAppointmentNote(
-    appointmentId: number,
-    payload: {
-      noteType: "DIAGNOSIS" | "PRESCRIPTION" | "GENERAL"
-      content: string
-    },
-  ): Promise<AppointmentNote> {
+  async createAppointmentNote(appointmentId: number, payload: {
+    noteType: 'DIAGNOSIS' | 'PRESCRIPTION' | 'GENERAL'
+    content: string
+  }): Promise<AppointmentNote> {
     try {
       const response = await api.post<AppointmentNote>(`/appointments/${appointmentId}/notes/`, payload)
       return response.data
@@ -178,12 +156,9 @@ export const appointmentNoteService = {
   },
 
   // Update appointment note
-  async updateAppointmentNote(
-    noteId: number,
-    payload: {
-      content: string
-    },
-  ): Promise<AppointmentNote> {
+  async updateAppointmentNote(noteId: number, payload: {
+    content: string
+  }): Promise<AppointmentNote> {
     try {
       const response = await api.patch<AppointmentNote>(`/appointment-notes/${noteId}/`, payload)
       return response.data
@@ -199,7 +174,7 @@ export const appointmentNoteService = {
     } catch (error: any) {
       throw new Error(handleApiError(error, false))
     }
-  },
+  }
 }
 
 export default appointmentService

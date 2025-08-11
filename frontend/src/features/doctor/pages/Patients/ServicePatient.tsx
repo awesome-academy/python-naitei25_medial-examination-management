@@ -63,12 +63,14 @@ const ServicePatients: React.FC = () => {
         try {
             const response = await api.get(`/schedules/?doctor_id=${doctorId}`);
             const schedules = response.data || [];
+            console.log("Fetched schedules:", schedules);
             setWorkSchedules(schedules);
 
             if (selectedDate && !selectedRoomId && schedules.length > 0) {
                 const dateSchedule = schedules.find((schedule: WorkSchedule) => schedule.work_date === selectedDate);
                 if (dateSchedule) {
-                    const roomId = typeof dateSchedule.room_id === "number" ? dateSchedule.room_id : dateSchedule.room?.id;
+                    const roomId = typeof dateSchedule.room === "number" ? dateSchedule.room : dateSchedule.room?.id;
+                    console.log("Found dateSchedule:", dateSchedule, "Setting roomId to:", roomId);
                     setSelectedRoomId(roomId);
                 } else {
                     console.log("No schedule found for date:", selectedDate);
@@ -87,11 +89,13 @@ const ServicePatients: React.FC = () => {
         if (!selectedRoomId) {
             setServiceOrders([]);
             setAppointmentsData({});
+            console.log("No selectedRoomId, skipping fetchServiceOrders");
             return;
         }
 
         setLoading(true);
         setError(null);
+        console.log("Fetching service orders for roomId:", selectedRoomId, "status:", statusFilter, "date:", selectedDate);
 
         try {
             const data = await getServiceOrdersByRoomId(
@@ -99,9 +103,11 @@ const ServicePatients: React.FC = () => {
                 statusFilter !== "all" ? statusFilter : undefined,
                 selectedDate || undefined,
             );
+            console.log("Raw service orders data:", data);
 
             const orders = Array.isArray(data) ? data : [];
             if (orders.length === 0) {
+                console.log("No service orders found for the given filters");
                 setServiceOrders([]);
                 setAppointmentsData({});
                 return;
@@ -117,7 +123,7 @@ const ServicePatients: React.FC = () => {
             } else {
                 console.warn("servicesData is not an array:", servicesData);
             }
-            console.log("Orders:", orders);
+            console.log("Service Map:", serviceMap);
             const enrichedOrders = orders.map((order) => ({
                 orderId: order.id || order.order_id,
                 appointmentId: order.appointment_id,
@@ -134,6 +140,7 @@ const ServicePatients: React.FC = () => {
             const appointmentPromises = enrichedOrders.map(async (order) => {
                 try {
                     const appointment = await appointmentService.getAppointmentById(order.appointmentId);
+                    console.log(`Appointment data for order ${order.orderId} (appointmentId: ${order.appointmentId}):`, appointment);
                     return { appointmentId: order.appointmentId, data: appointment };
                 } catch (error) {
                     console.error(`Error fetching appointment ${order.appointmentId}:`, error);
@@ -142,6 +149,7 @@ const ServicePatients: React.FC = () => {
             });
 
             const appointmentResults = await Promise.all(appointmentPromises);
+            console.log("Appointment results:", appointmentResults);
             const appointmentsMap = appointmentResults.reduce(
                 (acc, result) => {
                     acc[result.appointmentId] = result.data;
@@ -168,6 +176,7 @@ const ServicePatients: React.FC = () => {
     }, [fetchWorkSchedules])
 
     useEffect(() => {
+        console.log("Selected Room ID:", selectedRoomId)
         if (selectedRoomId) {
             fetchServiceOrders()
         }
@@ -267,6 +276,7 @@ const ServicePatients: React.FC = () => {
             render: (appointmentId: number, record: ServiceOrder) => {
                 const appointment = appointmentsData[appointmentId];
                 const patientInfo = appointment?.patientInfo;
+                console.log(`Rendering patient for appointmentId ${appointmentId}:`, { appointment, patientInfo });
                 return (
                     <div style={{ display: "flex", alignItems: "center" }}>
                         <Avatar
@@ -496,8 +506,8 @@ const ServicePatients: React.FC = () => {
                             suffixIcon={<FilterOutlined style={{ color: "#6b7280" }} />}
                         >
                             <Option value="all">{t("options.allStatuses")}</Option>
-                            <Option value="O">{t("status.ordered")}</Option>
-                            <Option value="D">{t("status.completed")}</Option>
+                            <Option value="ORDERED">{t("status.ordered")}</Option>
+                            <Option value="COMPLETED">{t("status.completed")}</Option>
                         </Select>
                         <Button icon={<ClearOutlined />} onClick={handleClearFilters} type="text" style={{ color: "#1d4ed8" }}>
                             {t("buttons.clearFilters")}

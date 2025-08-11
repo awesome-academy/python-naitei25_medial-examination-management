@@ -52,18 +52,7 @@ export const updateServiceOrder = async (
   serviceOrder: ServiceOrder,
 ): Promise<ServiceOrder> => {
   try {
-    // Backend ServiceOrderViewSet.update expects field names in snake_case
-    const payload: any = {
-      appointment_id: serviceOrder.appointmentId,
-      room_id: serviceOrder.roomId,
-      service_id: serviceOrder.serviceId,
-      order_status: serviceOrder.orderStatus, // mapped to status via serializer source
-      result: serviceOrder.result,
-      number: serviceOrder.number,
-      order_time: serviceOrder.orderTime,
-      result_time: serviceOrder.resultTime,
-    }
-    const response = await api.put(`/service-orders/${orderId}/`, payload)
+    const response = await api.put(`/appointments/services/service-orders/${orderId}`, serviceOrder)
     return response.data
   } catch (error) {
     console.error("Lỗi khi cập nhật đơn dịch vụ:", error)
@@ -83,7 +72,7 @@ export const deleteServiceOrder = async (serviceId: number, orderId: number): Pr
 
 export const getServiceOrdersByAppointmentId = async (appointmentId: number): Promise<ServiceOrder[]> => {
   try {
-    const response = await api.get(`/service-orders/appointments/${appointmentId}/orders`)
+    const response = await api.get(`/appointments/services/appointments/${appointmentId}/orders`)
     return response.data
   } catch (error) {
     console.error("Lỗi khi lấy danh sách đơn dịch vụ theo appointmentId:", error)

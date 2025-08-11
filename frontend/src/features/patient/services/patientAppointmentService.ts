@@ -2,14 +2,14 @@ import { appointmentService, appointmentNoteService } from '../../../shared/serv
 import { scheduleService } from '../../../shared/services/scheduleService'
 import { transformAvailableSlotsToTimeSlots } from '../../../shared/utils/appointmentTransform'
 import type { 
-  CreateAppointmentPayload, 
-  Appointment, 
-  AvailableSlot,
-  BackendCreateAppointmentPayload 
+  CreateAppointmentRequest, 
+  AppointmentDetail,
+  AvailableSlot 
 } from '../../../shared/types/appointment'
 import type { TimeSlot } from '../../../shared/types'
 
 export class PatientAppointmentService {
+  // Tạo appointment mới từ booking details
   async createAppointmentFromBooking(bookingDetails: {
     doctorId: number
     patientId: number
@@ -17,18 +17,19 @@ export class PatientAppointmentService {
     selectedDate: string
     selectedTime: string
     symptoms: string[]
-  }): Promise<Appointment> {
+  }): Promise<AppointmentDetail> {
     try {
+      // Convert time string to slot format
       const [startTime, endTime] = this.parseTimeSlot(bookingDetails.selectedTime)
       
-      const appointmentData: BackendCreateAppointmentPayload = { 
+      const appointmentData: CreateAppointmentRequest = {
         doctor: bookingDetails.doctorId,
         patient: bookingDetails.patientId,
         schedule: bookingDetails.scheduleId,
         slot_start: startTime,
         slot_end: endTime,
         symptoms: bookingDetails.symptoms.join(', '),
-        status: 'PENDING' 
+        status: 'PENDING'
       }
 
       const appointment = await appointmentService.createAppointment(appointmentData)
@@ -39,36 +40,22 @@ export class PatientAppointmentService {
     }
   }
 
+  // Lấy available time slots cho doctor và date
   async getAvailableTimeSlots(doctorId: number, date: string): Promise<{
     morning: TimeSlot[]
     afternoon: TimeSlot[]
   }> {
     try {
+      // Lấy schedules của doctor cho ngày đó
       const schedules = await scheduleService.getDoctorSchedules(doctorId, { workDate: date })
       
       if (schedules.length === 0) {
         return { morning: [], afternoon: [] }
       }
 
+      // Lấy available slots cho schedule đầu tiên (có thể cải thiện logic này)
       const schedule = schedules[0]
-      
-      const response = await fetch('http://localhost:8000/api/v1/appointments/schedule/available-slots/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // 'Authorization': `Bearer YOUR_AUTH_TOKEN` 
-        },
-        body: JSON.stringify({
-          schedule_id: schedule.id,
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to fetch available slots: ${response.status} ${response.statusText} - ${errorData.detail || JSON.stringify(errorData)}`);
-      }
-
-      const availableSlots: AvailableSlot[] = await response.json();
+      const availableSlots = await appointmentService.getAvailableSlots(schedule.id, date)
       
       return transformAvailableSlotsToTimeSlots(availableSlots)
     } catch (error) {
@@ -77,6 +64,7 @@ export class PatientAppointmentService {
     }
   }
 
+  // Hủy appointment
   async cancelAppointment(appointmentId: number): Promise<void> {
     try {
       await appointmentService.updateAppointment(appointmentId, {
@@ -89,6 +77,7 @@ export class PatientAppointmentService {
     }
   }
 
+  // Thêm note cho appointment
   async addAppointmentNote(appointmentId: number, content: string, noteType = 'GENERAL'): Promise<void> {
     try {
       await appointmentNoteService.createNote(appointmentId, {
@@ -102,10 +91,12 @@ export class PatientAppointmentService {
   }
 
   private parseTimeSlot(timeString: string): [string, string] {
+    // Parse time string like "09:00 - 09:30" to ["09:00", "09:30"]
     const [start, end] = timeString.split(' - ')
     return [start.trim(), end.trim()]
   }
 
+  // Kiểm tra xem có thể đặt lịch không
   async canBookAppointment(doctorId: number, date: string, time: string): Promise<boolean> {
     try {
       const availableSlots = await this.getAvailableTimeSlots(doctorId, date)

@@ -32,7 +32,6 @@ class Patient(BaseModel):
         max_length=PATIENT_LENGTH["BLOOD_TYPE"],
         blank=True, null=True
     )
-    avatar = models.CharField(max_length=PATIENT_LENGTH["AVATAR"], blank=True, null=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

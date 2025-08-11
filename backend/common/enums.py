@@ -34,8 +34,6 @@ class AppointmentStatus(Enum):
     CONFIRMED = "C"
     CANCELLED = "X"
     COMPLETED = "D"
-    NO_SHOW = "N" 
-    IN_PROGRESS = "I"
 
 class ServiceType(Enum):
     TEST = "T"

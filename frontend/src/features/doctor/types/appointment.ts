@@ -45,5 +45,3 @@ export interface AppointmentStats {
   pendingTestResult: number
   inProgress: number
 }
-
-export type Shift = "MORNING" | "AFTERNOON" | "EVENING" | "NIGHT" | 'SURGERY' | 'MEETING';

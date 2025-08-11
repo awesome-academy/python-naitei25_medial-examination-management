@@ -61,7 +61,7 @@ const DepartmentListPage: React.FC = () => {
 
       {/* Departments Grid */}
       {filteredDepartments.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredDepartments.map((department) => (
             <DepartmentCard
               key={department.id}
