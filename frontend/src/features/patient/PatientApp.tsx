@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { HomeLayout } from './layouts/HomeLayout';
 import AuthenticatedPatientLayout from './layouts/AuthenticatedPatientLayout';
-import HomePage from './pages/HomePage';
+import HomePage from '../public/pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import DoctorListPage from './pages/DoctorListPage';
 import DoctorBookingPage from './pages/DoctorBookingPage';
