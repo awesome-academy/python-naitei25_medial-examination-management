@@ -5,12 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django.http import Http404
-from django.utils.dateparse import parse_date 
+from django.utils.dateparse import parse_date
 from .models import Doctor, Department, ExaminationRoom, Schedule
 from .serializers import DoctorSerializer, CreateDoctorRequestSerializer, DepartmentSerializer, ExaminationRoomSerializer, ScheduleSerializer
 from .services import DoctorService, DepartmentService, ExaminationRoomService, ScheduleService
 
-logger = logging.getLogger(__name__) 
+logger = logging.getLogger(__name__)
 
 class DoctorViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -126,6 +126,19 @@ class DepartmentViewSet(viewsets.ViewSet):
     def doctors(self, request, pk=None):
         doctors = DepartmentService().get_doctors_by_department_id(pk)
         return Response(DoctorSerializer(doctors, many=True).data)
+    
+    @action(detail=True, methods=['post'], parser_classes=[MultiPartParser])
+    def upload_avatar(self, request, pk=None):
+        file = request.FILES.get('file')
+        department = self.get_object(pk)
+        updated_department = DepartmentService().upload_avatar(department, file)
+        return Response(DepartmentSerializer(updated_department).data)
+
+    @action(detail=True, methods=['delete'])
+    def delete_avatar(self, request, pk=None):
+        department = self.get_object(pk)
+        updated_department = DepartmentService().delete_avatar(department)
+        return Response(DepartmentSerializer(updated_department).data)
 
 class ExaminationRoomViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -197,13 +210,10 @@ class ScheduleViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, doctor_id=None):
-        if doctor_id is None:
-            doctor_id = request.data.get('doctor_id')
-            if doctor_id is None:
-                return Response({"message": "doctor_id là bắt buộc."}, status=status.HTTP_400_BAD_REQUEST)
-
+        # Không ép phải có doctor_id nếu đã có doctor trong body
         serializer = ScheduleSerializer(data=request.data)
         if serializer.is_valid():
+            # Nếu doctor_id trên URL, ưu tiên truyền vào service, nếu không thì None
             schedule = ScheduleService().create_schedule(doctor_id, serializer.validated_data)
             return Response(ScheduleSerializer(schedule).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -213,7 +223,7 @@ class ScheduleViewSet(viewsets.ViewSet):
         if doctor_id is None:
             doctor_id = request.data.get('doctor_id', schedule.doctor_id)
 
-        serializer = ScheduleSerializer(schedule, data=request.data, partial=True) 
+        serializer = ScheduleSerializer(schedule, data=request.data, partial=True)
         if serializer.is_valid():
             schedule = ScheduleService().update_schedule(doctor_id, pk, serializer.validated_data)
             return Response(ScheduleSerializer(schedule).data)
@@ -247,7 +257,7 @@ class ScheduleViewSet(viewsets.ViewSet):
         if not parsed_date:
             return Response({"message": "Định dạng ngày không hợp lệ. YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
-        doctor_id = request.query_params.get('doctor_id') 
+        doctor_id = request.query_params.get('doctor_id')
 
         schedules = ScheduleService().get_all_schedules(
             doctor_id=doctor_id,
