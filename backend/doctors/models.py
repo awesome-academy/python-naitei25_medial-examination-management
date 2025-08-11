@@ -11,6 +11,7 @@ class ScheduleStatus(models.TextChoices):
 class Department(BaseModel):
     department_name = models.CharField(max_length=DOCTOR_LENGTH["DEPARTMENT_NAME"])
     description = models.TextField(blank=True, null=True)
+    avatar = models.CharField(max_length=DOCTOR_LENGTH["AVATAR"], blank=True, null=True)
 
     def __str__(self):
         return self.department_name

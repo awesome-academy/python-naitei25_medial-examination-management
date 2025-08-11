@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -10,14 +12,11 @@ import {
   HorizontaLDots,
   UserCircleIcon,
   PatientIcon,
-  InpatientIcon,
-  DepartmentIcon,
   AdminIcon,
   DoctorIcon,
   BoxCubeIcon,
 } from "../../assets/icons"
 import { useSidebar } from "../context/SidebarContext"
-import LanguageSwitcher from "../components/common/LanguageSwitcher"
 
 type NavItem = {
   name: string
@@ -33,9 +32,9 @@ const AppSidebar: React.FC = () => {
   const location = useLocation()
   const role = localStorage.getItem("authRole") || ""
   const doctorType = localStorage.getItem("doctorType") || ""
-  
+
   // Cập nhật basePath để khớp với routing structure
-  const basePath = 
+  const basePath =
     role === "RECEPTIONIST"
       ? "/receptionist"
       : role === "D"
@@ -55,32 +54,48 @@ const AppSidebar: React.FC = () => {
       icon: <PatientIcon />,
       name: t("sidebar.patients"),
       path: `${basePath}/patients`,
-      roles: ["A", "RECEPTIONIST", "D"], // Chỉ hiển thị cho bác sĩ loại E
+      roles: ["A", "RECEPTIONIST", "D"],
     },
     {
       name: t("sidebar.examination"),
       icon: <CalendarIcon />,
       subItems: [
-        { name: t("sidebar.calendar"), path: `${basePath}/calendar`, pro: false },
-        { name: t("sidebar.outpatientClinics"), path: `${basePath}/outpatient-clinics`, pro: false },
+        {
+          name: t("sidebar.calendar"),
+          path: `${basePath}/calendar`,
+          pro: false,
+        },
+        {
+          name: t("sidebar.outpatientClinics"),
+          path: `${basePath}/outpatient-clinics`,
+          pro: false,
+        },
       ],
       roles: ["A", "RECEPTIONIST"],
     },
-    {
-      name: t("sidebar.inpatient"),
-      icon: <InpatientIcon />,
-      subItems: [
-        { name: t("sidebar.inpatientRooms"), path: `${basePath}/inpatients-rooms`, pro: false },
-        { name: t("sidebar.inpatientPatients"), path: `${basePath}/inpatients`, pro: false },
-      ],
-      roles: ["A", "RECEPTIONIST"],
-    },
-    {
-      icon: <DepartmentIcon />,
-      name: t("sidebar.departments"),
-      path: `${basePath}/departments`,
-      roles: ["A", "RECEPTIONIST"],
-    },
+    // {
+    //   name: t("sidebar.inpatient"),
+    //   icon: <InpatientIcon />,
+    //   subItems: [
+    //     {
+    //       name: t("sidebar.inpatientRooms"),
+    //       path: `${basePath}/inpatients-rooms`,
+    //       pro: false,
+    //     },
+    //     {
+    //       name: t("sidebar.inpatientPatients"),
+    //       path: `${basePath}/inpatients`,
+    //       pro: false,
+    //     },
+    //   ],
+    //   roles: ["A", "RECEPTIONIST"],
+    // },
+    // {
+    //   icon: <DepartmentIcon />,
+    //   name: t("sidebar.departments"),
+    //   path: `${basePath}/departments`,
+    //   roles: ["A", "RECEPTIONIST"],
+    // },
     {
       icon: <AdminIcon />,
       name: t("sidebar.authorization"),
@@ -93,29 +108,43 @@ const AppSidebar: React.FC = () => {
       path: `${basePath}/doctors`,
       roles: ["A"],
     },
-    {
-      icon: <CalendarIcon />,
-      name: t("sidebar.medicines"),
-      path: `${basePath}/medicines`,
-      roles: ["A"],
-    },
-    {
-      icon: <BoxCubeIcon />,
-      name: t("sidebar.healthServices"),
-      path: `${basePath}/health-services`,
-      roles: ["A"],
-    },
+    // {
+    //   icon: <CalendarIcon />,
+    //   name: t("sidebar.medicines"),
+    //   path: `${basePath}/medicines`,
+    //   roles: ["A"],
+    // },
+    // {
+    //   icon: <BoxCubeIcon />,
+    //   name: t("sidebar.healthServices"),
+    //   path: `${basePath}/health-services`,
+    //   roles: ["A"],
+    // },
     {
       icon: <CalendarIcon />,
       name: t("sidebar.workSchedule"),
       path: `${basePath}/schedule`,
       roles: ["D"],
     },
-    // Patient-specific menu items - Đảm bảo khớp với PatientApp routes
     {
       icon: <CalendarIcon />,
       name: t("sidebar.bookAppointment"),
       path: `${basePath}/book-appointment`,
+      roles: ["P"],
+    },
+    {
+      name: t("sidebar.appointments"),
+      icon: <CalendarIcon />,
+      subItems: [
+        {
+          name: t("sidebar.upcomingAppointments"),
+          path: `${basePath}/appointments/upcoming`,
+        },
+        {
+          name: t("sidebar.pastAppointments"),
+          path: `${basePath}/appointments/past`,
+        },
+      ],
       roles: ["P"],
     },
     {
@@ -128,8 +157,17 @@ const AppSidebar: React.FC = () => {
       name: t("sidebar.lookup"),
       icon: <DoctorIcon />,
       subItems: [
-        { name: t("sidebar.drugLookup"), path: `${basePath}/drug-lookup`, pro: false },
-        { name: t("sidebar.aiDiagnosis"), path: `${basePath}/ai-diagnosis`, pro: false, new: true },
+        {
+          name: t("sidebar.drugLookup"),
+          path: `${basePath}/drug-lookup`,
+          pro: false,
+        },
+        {
+          name: t("sidebar.aiDiagnosis"),
+          path: `${basePath}/ai-diagnosis`,
+          pro: false,
+          new: true,
+        },
       ],
       roles: ["P"],
     },
@@ -151,23 +189,80 @@ const AppSidebar: React.FC = () => {
   const isActive = useCallback(
     (path: string) => {
       // Xử lý đặc biệt cho dashboard route
-      if (path.endsWith('/dashboard')) {
+      if (path.endsWith("/dashboard")) {
         return location.pathname === path
       }
-      
-      // Xử lý cho các route khác
+
+      // Xử lý cho base path
       if (path === basePath) {
         return location.pathname === path
       }
+
+      // Xử lý đặc biệt cho các detail routes
+      const currentPath = location.pathname
+      const searchParams = new URLSearchParams(location.search)
+      const fromParam = searchParams.get("from")
+
+      // Nếu đang ở trang chi tiết prescription, highlight menu prescriptions
+      if (currentPath.match(/\/prescriptions\/\d+$/) && path.endsWith("/prescriptions")) {
+        return true
+      }
+
+      // Nếu đang ở trang chi tiết medical record
+      if (currentPath.match(/\/medical-record\/\d+$/)) {
+        // Nếu đến từ past appointments, highlight past appointments
+        if (fromParam === "past-appointments" && path.endsWith("/appointments/past")) {
+          return true
+        }
+        // Nếu đến từ upcoming appointments, highlight upcoming appointments
+        if (fromParam === "upcoming-appointments" && path.endsWith("/appointments/upcoming")) {
+          return true
+        }
+        // Nếu đến từ prescriptions hoặc không có from param, highlight prescriptions
+        if ((fromParam === "prescriptions" || !fromParam) && path.endsWith("/prescriptions")) {
+          return true
+        }
+      }
+
+      // Nếu đang ở trang chi tiết appointment từ upcoming, highlight upcoming appointments
+      if (currentPath.includes("/appointments/upcoming/") && path.endsWith("/appointments/upcoming")) {
+        return true
+      }
+
+      // Nếu đang ở trang chi tiết appointment từ past, highlight past appointments
+      if (currentPath.includes("/appointments/past/") && path.endsWith("/appointments/past")) {
+        return true
+      }
+
+      // Nếu đang ở các trang thuộc booking flow, highlight book appointment
+      if (path.endsWith("/book-appointment")) {
+        // Trang danh sách bác sĩ theo khoa
+        if (currentPath.match(/\/departments\/\d+\/doctors$/)) {
+          return true
+        }
+        // Trang chi tiết bác sĩ
+        if (currentPath.match(/\/doctors\/\d+$/)) {
+          return true
+        }
+        // Trang book appointment với doctor ID
+        if (currentPath.match(/\/doctors\/\d+\/book$/)) {
+          return true
+        }
+      }
+
+      // Logic mặc định - exact match hoặc starts with
       return location.pathname === path || location.pathname.startsWith(path + "/")
     },
-    [location.pathname, basePath],
+    [location.pathname, location.search, basePath],
   )
 
   // Đơn giản hóa useEffect để chỉ xử lý auto-open submenu khi có route active
   useEffect(() => {
     let activeSubmenuIndex: number | null = null
-    
+    const currentPath = location.pathname
+    const searchParams = new URLSearchParams(location.search)
+    const fromParam = searchParams.get("from")
+
     // Tìm submenu có item active
     filteredNavItems.forEach((nav, index) => {
       if (nav.subItems) {
@@ -179,11 +274,24 @@ const AppSidebar: React.FC = () => {
       }
     })
 
+    // Xử lý đặc biệt cho medical record với from parameter
+    if (activeSubmenuIndex === null && currentPath.match(/\/medical-record\/\d+$/)) {
+      if (fromParam === "past-appointments" || fromParam === "upcoming-appointments") {
+        // Tìm appointments submenu
+        const appointmentIndex = filteredNavItems.findIndex(
+          (item) => item.name === t("sidebar.appointments") && item.subItems,
+        )
+        if (appointmentIndex !== -1) {
+          activeSubmenuIndex = appointmentIndex
+        }
+      }
+    }
+
     // Chỉ set submenu active nếu tìm thấy
     if (activeSubmenuIndex !== null) {
       setOpenSubmenu(activeSubmenuIndex)
     }
-  }, [location.pathname, filteredNavItems, isActive])
+  }, [location.pathname, location.search, filteredNavItems, isActive, t])
 
   // Tính toán chiều cao submenu
   useEffect(() => {
@@ -198,7 +306,7 @@ const AppSidebar: React.FC = () => {
   }, [openSubmenu])
 
   const handleSubmenuToggle = (index: number) => {
-    console.log('Toggle submenu:', index, 'Current open:', openSubmenu) // Debug log
+    console.log("Toggle submenu:", index, "Current open:", openSubmenu) // Debug log
     setOpenSubmenu((prevOpen) => {
       // Nếu đang mở cùng submenu thì đóng, nếu không thì mở submenu mới
       return prevOpen === index ? null : index
@@ -214,16 +322,12 @@ const AppSidebar: React.FC = () => {
               <button
                 onClick={() => handleSubmenuToggle(index)}
                 className={`menu-item group ${
-                  openSubmenu === index
-                    ? "menu-item-active"
-                    : "menu-item-inactive"
+                  openSubmenu === index ? "menu-item-active" : "menu-item-inactive"
                 } cursor-pointer w-full ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
               >
                 <span
                   className={`menu-item-icon-size ${
-                    openSubmenu === index
-                      ? "menu-item-icon-active"
-                      : "menu-item-icon-inactive"
+                    openSubmenu === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
                   }`}
                 >
                   {nav.icon}

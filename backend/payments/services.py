@@ -1,16 +1,18 @@
-from django.conf import settings
 import payos
-from .models import Bill, BillDetail, Transaction
-from .serializers import TransactionDTOSerializer
-from common.enums import PaymentStatus, TransactionStatus, ServiceType, PaymentMethod
-from django.http import Http404
+import logging
+from django.conf import settings
 from django.db import transaction as django_transaction
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.shortcuts import get_object_or_404
-from payos import PayOS, ItemData, PaymentData
+
+from appointments.models import Appointment 
+
+from .models import Bill, BillDetail, Transaction
+from .serializers import TransactionDTOSerializer
+from common.enums import PaymentStatus, TransactionStatus, ServiceType, PaymentMethod, AppointmentStatus # THÊM AppointmentStatus
 from appointments.serializers import AppointmentSerializer
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +111,7 @@ class BillService:
 class PayOSService:
     def __init__(self):
         payos_config = settings.PAYOS
-        self.payos = PayOS(client_id=payos_config['client_id'], 
+        self.payos = payos.PayOS(client_id=payos_config['client_id'], 
                           api_key=payos_config['api_key'], 
                           checksum_key=payos_config['checksum_key'])
 
@@ -131,10 +133,10 @@ class PayOSService:
             existing_transaction.save()
 
         # Create payment data
-        item = ItemData(name=f"Hóa đơn #{bill_id}", quantity=1, price=int(bill.amount))
+        item = payos.ItemData(name=f"Hóa đơn #{bill_id}", quantity=1, price=int(bill.amount))
         order_code = int(bill_id) * 1000 + (int(timezone.now().timestamp()) % 1000)
         
-        payment_data = PaymentData(
+        payment_data = payos.PaymentData(
             orderCode=order_code,
             description=f"Thanh toán hóa đơn #{bill_id}",
             amount=int(bill.amount),
@@ -202,14 +204,19 @@ class PayOSService:
             try:
                 logger.info(f"Retrieving payment info for order_id {order_id}")
                 result = self.payos.getPaymentLinkInformation(orderId=order_id)
-                bill = get_object_or_404(Bill, id=order_id)  # Giả sử order_id tương ứng với bill_id
+
+                # Trích xuất bill_id từ order_id
+                bill_id_from_order = int(order_id) // 1000
+                
+                bill = get_object_or_404(Bill, id=bill_id_from_order) 
                 appointment = Appointment.objects.filter(id=bill.appointment_id).first()
                 
                 result_dict = {
                     'orderCode': getattr(result, 'orderCode', None),
                     'status': getattr(result, 'status', None),
                     'amount': bill.amount,
-                    'description': bill.description,
+                    # Lấy description từ đối tượng result của PayOS
+                    'description': getattr(result, 'description', f"Thanh toán hóa đơn #{bill_id_from_order}"), 
                     'createdAt': bill.created_at.isoformat(),
                     'appointment': AppointmentSerializer(appointment).data if appointment else None
                 }
@@ -254,15 +261,29 @@ class TransactionService:
         bill.status = PaymentStatus.PAID.value
         bill.save()
 
+    @django_transaction.atomic # Đảm bảo tính toàn vẹn dữ liệu
     def handle_payment_success(self, order_id):
         bill_id = int(order_id) // 1000 if int(order_id) > 1000 else int(order_id)
         bill = get_object_or_404(Bill, pk=bill_id)
         transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
+        
         if transaction and transaction.status == TransactionStatus.PENDING.value:
             bill.status = PaymentStatus.PAID.value
             transaction.status = TransactionStatus.SUCCESS.value
+            
+            # ĐÃ SỬA ĐỔI Ở ĐÂY: Cập nhật trạng thái của Appointment
+            if bill.appointment_id:
+                appointment = get_object_or_404(Appointment, pk=bill.appointment_id)
+                appointment.status = AppointmentStatus.CONFIRMED.value # Đặt trạng thái là 'C'
+                appointment.save()
+                logger.info(f"Appointment {appointment.id} status updated to CONFIRMED.")
+            
             bill.save()
             transaction.save()
+            logger.info(f"Bill {bill.id} and Transaction {transaction.id} updated to PAID/SUCCESS.")
+        else:
+            logger.warning(f"Payment success handler called for order {order_id} but transaction not in PENDING state or not found.")
+
 
     def handle_payment_cancel(self, order_id):
         bill = get_object_or_404(Bill, pk=order_id)
@@ -288,6 +309,6 @@ class TransactionService:
             return [TransactionDTOSerializer(t).data for t in transactions]
         except Http404:
             raise
-        except Exception as e:
+        except ValueError as e:
             logger.error(f"Error retrieving transactions for bill_id={bill_id}: {str(e)}")
             raise ValueError(_("Lỗi khi lấy giao dịch: {error}").format(error=str(e)))

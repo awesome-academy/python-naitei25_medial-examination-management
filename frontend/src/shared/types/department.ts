@@ -1,6 +1,7 @@
 export interface Department {
   id: number;
   department_name: string;
+  avatar?: string | null;
 }
 
 export interface DepartmentDetail extends Department {
