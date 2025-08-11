@@ -58,7 +58,7 @@ class Prescription(BaseModel):
 
 
 class PrescriptionDetail(BaseModel):
-    prescription = models.ForeignKey(Prescription, on_delete=models.RESTRICT)
+    prescription = models.ForeignKey(Prescription, on_delete=models.RESTRICT, related_name="prescription_details")
     medicine = models.ForeignKey(Medicine, on_delete=models.RESTRICT)
     dosage = models.CharField(max_length=PHARMACY_LENGTH["DOSAGE"])
     frequency = models.CharField(max_length=PHARMACY_LENGTH["FREQUENCY"])
