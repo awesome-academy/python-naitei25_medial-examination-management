@@ -69,7 +69,7 @@ const ServicePatients: React.FC = () => {
             if (selectedDate && !selectedRoomId && schedules.length > 0) {
                 const dateSchedule = schedules.find((schedule: WorkSchedule) => schedule.work_date === selectedDate);
                 if (dateSchedule) {
-                    const roomId = typeof dateSchedule.room === "number" ? dateSchedule.room : dateSchedule.room?.id;
+                    const roomId = typeof dateSchedule.room_id === "number" ? dateSchedule.room_id : dateSchedule.room_id?.id;
                     console.log("Found dateSchedule:", dateSchedule, "Setting roomId to:", roomId);
                     setSelectedRoomId(roomId);
                 } else {
@@ -506,8 +506,8 @@ const ServicePatients: React.FC = () => {
                             suffixIcon={<FilterOutlined style={{ color: "#6b7280" }} />}
                         >
                             <Option value="all">{t("options.allStatuses")}</Option>
-                            <Option value="ORDERED">{t("status.ordered")}</Option>
-                            <Option value="COMPLETED">{t("status.completed")}</Option>
+                            <Option value="O">{t("status.ordered")}</Option>
+                            <Option value="C">{t("status.completed")}</Option>
                         </Select>
                         <Button icon={<ClearOutlined />} onClick={handleClearFilters} type="text" style={{ color: "#1d4ed8" }}>
                             {t("buttons.clearFilters")}

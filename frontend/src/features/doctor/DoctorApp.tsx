@@ -6,6 +6,8 @@ import { ScrollToTop } from "../../shared/components/common/ScrollToTop"
 import Home from "./pages/Dashboard/Home"
 import Patient from "./pages/Patients/Patient"
 import ServicePatient from "./pages/Patients/ServicePatient"
+import PatientDetail from "./pages/Patients/PatientDetail"
+import ServicePatientDetail from "./pages/Patients/ServicePatientDetail"
 import Appointment from "./pages/Appointment/Appointment"
 import Profile from "./pages/Profile/Profile"
 import Schedule from "./pages/Schedules/Schedule"
@@ -48,6 +50,7 @@ const DoctorApp: React.FC = () => {
                     <Route index element={<Home />} />
                     <Route path="dashboard" element={<Home />} />
                     <Route path="patients" element={<Patient />} />
+                    <Route path="patient/detail" element={<PatientDetail />} />
                     <Route path="appointment" element={<Appointment />} />
                     <Route path="schedule" element={<Schedule />} />
                     <Route path="profile" element={<Profile />} />
@@ -67,6 +70,7 @@ const DoctorApp: React.FC = () => {
                     <Route path="schedule" element={<Schedule />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="patients" element={<ServicePatient />} />
+                    <Route path="patient/detail" element={<ServicePatientDetail />} />
                 </Route>
 
                 <Route

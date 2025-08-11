@@ -224,7 +224,7 @@ class PharmacyService:
                     'duration': d.duration,
                     'prescription_notes': d.prescription_notes or '',
                     'quantity': d.quantity
-                } for d in prescription.prescription_details.all()
+                } for d in prescription.prescriptiondetail_set.all()
             ]
         }
 
