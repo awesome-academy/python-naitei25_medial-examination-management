@@ -3,7 +3,6 @@ import { SidebarProvider, useSidebar } from "../../../shared/context/SidebarCont
 import AppHeader from "../../../shared/layouts/AppHeader";
 import Backdrop from "../../../shared/layouts/Backdrop";
 import AppSidebar from "../../../shared/layouts/AppSidebar";
-import AppRightSidebar from "../../../shared/layouts/AppRightSidebar";
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
@@ -19,19 +18,14 @@ const LayoutContent: React.FC = () => {
       {/* Main Content */}
       <div
         className={`flex-1 transition-all duration-300 ease-in-out ${
-          isExpanded || isHovered ? "lg:ml-[250px] lg:mr-[250px]" : "lg:ml-[90px] lg:mr-[90px]"
-        } ${isMobileOpen ? "ml-0 mr-0" : ""}`}
+          isExpanded || isHovered ? "lg:ml-[250px]" : "lg:ml-[90px]"
+        } ${isMobileOpen ? "ml-0" : ""}`}
       >
         <AppHeader />
         <div className="p-4 mx-auto max-w-7xl md:p-6">
           <Outlet /> {/* Thay children bằng Outlet */}
         </div>
       </div>
-
-      {/* Right Sidebar */}
-      {/* <div>
-        <AppRightSidebar />
-      </div> */}
     </div>
   );
 };

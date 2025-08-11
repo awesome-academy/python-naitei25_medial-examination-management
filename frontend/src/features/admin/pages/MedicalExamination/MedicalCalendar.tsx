@@ -1864,4 +1864,8 @@ return (
 )
 }
 
+<<<<<<< HEAD
 export default MedicalCalendar
+=======
+export default MedicalCalendar
+>>>>>>> thorepo
