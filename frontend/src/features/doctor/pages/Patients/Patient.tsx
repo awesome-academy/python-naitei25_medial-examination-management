@@ -84,7 +84,11 @@ const Patient: React.FC = () => {
 
     // Handle clearing all filters
     const handleClearFilters = () => {
+        // Clear date
         clearDateFilter()
+        // Reset shift and status to 'all' by unsetting their values
+        updateFilters({ shift: undefined, appointmentStatus: undefined })
+        // Clear local search input
         setLocalSearch("")
     }
 
@@ -114,6 +118,7 @@ const Patient: React.FC = () => {
             M: t("shifts.morning"),
             A: t("shifts.afternoon"),
             E: t("shifts.evening"),
+            N: t("shifts.night"),
         }
         return shiftLabels[shift as keyof typeof shiftLabels] || shift
     }
@@ -123,9 +128,10 @@ const Patient: React.FC = () => {
         if (!localSearch) return true
         const searchLower = localSearch.toLowerCase()
         return (
-            appointment.patientInfo?.fullName?.toLowerCase().includes(searchLower) ||
+            appointment.patientInfo?.first_name?.toLowerCase().includes(searchLower) ||
+            appointment.patientInfo?.last_name?.toLowerCase().includes(searchLower) ||
             appointment.patientInfo?.phoneNumber?.includes(searchLower) ||
-            appointment.number?.toString().includes(searchLower)
+            appointment.patientInfo?.id?.toString().includes(searchLower)
         )
     })
 
@@ -331,6 +337,7 @@ const Patient: React.FC = () => {
                             <Option value="MORNING">{t("shifts.morning")}</Option>
                             <Option value="AFTERNOON">{t("shifts.afternoon")}</Option>
                             <Option value="EVENING">{t("shifts.evening")}</Option>
+                            <Option value="NIGHT">{t("shifts.night")}</Option>
                         </Select>
                         <Select
                             placeholder={t("placeholders.status")}
