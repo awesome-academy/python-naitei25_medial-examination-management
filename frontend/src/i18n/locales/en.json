@@ -415,7 +415,8 @@
   "shifts": {
     "morning": "Morning",
     "afternoon": "Afternoon",
-    "evening": "Evening"
+    "evening": "Evening",
+    "night": "Night"
   },
   "empty": {
     "loading": "Loading...",
