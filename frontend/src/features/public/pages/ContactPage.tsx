@@ -84,15 +84,14 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-teal-600 to-emerald-700 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Liên hệ với chúng tôi</h1>
-            <p className="text-lg text-teal-100 max-w-2xl mx-auto">
-              Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi bất cứ lúc nào.
-            </p>
-          </div>
+      {/* Header Section */}
+      <section className="relative overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-teal-700 text-white mb-12">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative container mx-auto px-4 py-20 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Liên hệ với chúng tôi</h1>
+          <p className="text-lg text-teal-100 mb-6">
+            Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi bất cứ lúc nào.
+          </p>
         </div>
       </section>
 

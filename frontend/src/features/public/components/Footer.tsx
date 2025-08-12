@@ -8,14 +8,10 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                <Heart className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold">HealthCare</h3>
-                <p className="text-sm text-gray-400">Chăm sóc sức khỏe</p>
-              </div>
+            <div className="flex items-center gap-2">
+          <div className="flex justify-center">
+            <img className="w-30 pb-10" src="/public/images/logo/logo-white.png" alt="logo" />
+          </div>
             </div>
             <p className="text-gray-400 mb-6 leading-relaxed">
               Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất với đội ngũ bác sĩ chuyên nghiệp và công
@@ -125,7 +121,7 @@ export function Footer() {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-teal-500 mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-gray-400">123 Đường ABC, Quận 1</p>
+                  <p className="text-gray-400">Phường Linh Trung, TP. Thủ Đức</p>
                   <p className="text-gray-400">TP. Hồ Chí Minh, Việt Nam</p>
                 </div>
               </div>

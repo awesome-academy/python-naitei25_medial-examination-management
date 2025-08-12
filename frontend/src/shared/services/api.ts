@@ -58,7 +58,7 @@ api.interceptors.response.use(
 
         try {
           const refreshResponse = await axios.post<{ token: string }>(
-            `${BASE_URL.replace(/\/+$/, "")}${API_PREFIX}/users/auth/refresh/`,
+            `${BASE_URL.replace(/\/+$/, "")}${API_PREFIX}/auth/token/refresh/`,
             {},
             {
               headers: {
@@ -81,7 +81,7 @@ api.interceptors.response.use(
             LocalStorageKeys.RECEPTIONIST_INFO,
           ].forEach((key) => storage.remove(key));
 
-          window.location.href = "/login";
+          window.location.href = "/";
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;

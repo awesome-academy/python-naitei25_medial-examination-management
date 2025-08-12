@@ -1,8 +1,8 @@
 import logging
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import action, permission_classes as drf_permission_classes
 from rest_framework.parsers import MultiPartParser
 from django.http import Http404
 from django.utils.dateparse import parse_date
@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 class DoctorViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve', 'search', 'filter', 'get_doctor_by_user_id']:
+            return [AllowAny()]
+        return super().get_permissions()
 
     def get_object(self, pk):
         try:
@@ -22,11 +27,13 @@ class DoctorViewSet(viewsets.ViewSet):
         except Doctor.DoesNotExist:
             raise Http404
 
+    @drf_permission_classes((AllowAny,))
     def list(self, request):
         doctors = DoctorService().get_all_doctors()
         serializer = DoctorSerializer(doctors, many=True)
         return Response(serializer.data)
 
+    @drf_permission_classes((AllowAny,))
     def retrieve(self, request, pk=None):
         doctor = self.get_object(pk)
         serializer = DoctorSerializer(doctor)
@@ -64,12 +71,14 @@ class DoctorViewSet(viewsets.ViewSet):
         updated_doctor = DoctorService().delete_avatar(doctor)
         return Response(DoctorSerializer(updated_doctor).data)
 
+    @drf_permission_classes((AllowAny,))
     @action(detail=False, methods=['get'])
     def search(self, request):
         identity_number = request.query_params.get('identityNumber')
         doctor = DoctorService().find_by_identity_number(identity_number)
         return Response(DoctorSerializer(doctor).data if doctor else None)
 
+    @drf_permission_classes((AllowAny,))
     @action(detail=False, methods=['get'])
     def filter(self, request):
         gender = request.query_params.get('gender')
@@ -79,6 +88,7 @@ class DoctorViewSet(viewsets.ViewSet):
         doctors = DoctorService().filter_doctors(gender, academic_degree, specialization, type)
         return Response(DoctorSerializer(doctors, many=True).data)
 
+    @drf_permission_classes((AllowAny,))
     @action(detail=False, methods=['get'], url_path='user/(?P<user_id>\d+)')
     def get_doctor_by_user_id(self, request, user_id=None):
         doctor = DoctorService().get_doctor_by_user_id(user_id)
@@ -92,12 +102,19 @@ class DepartmentViewSet(viewsets.ViewSet):
             return Department.objects.get(pk=pk)
         except Department.DoesNotExist:
             raise Http404
+        
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve', 'doctors']:
+            return [AllowAny()]
+        return super().get_permissions()
 
+    @drf_permission_classes((AllowAny,))
     def list(self, request):
         departments = DepartmentService().get_all_departments()
         serializer = DepartmentSerializer(departments, many=True)
         return Response(serializer.data)
 
+    @drf_permission_classes((AllowAny,))
     def retrieve(self, request, pk=None):
         department = self.get_object(pk)
         serializer = DepartmentSerializer(department)
@@ -122,6 +139,7 @@ class DepartmentViewSet(viewsets.ViewSet):
         DepartmentService().delete_department(pk)
         return Response({"message": "Khoa được xóa thành công"}, status=status.HTTP_200_OK)
 
+    @drf_permission_classes((AllowAny,))
     @action(detail=True, methods=['get'])
     def doctors(self, request, pk=None):
         doctors = DepartmentService().get_doctors_by_department_id(pk)

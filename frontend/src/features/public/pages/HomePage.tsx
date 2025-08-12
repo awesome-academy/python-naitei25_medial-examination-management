@@ -21,24 +21,26 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { doctorService } from "../../../shared/services/doctorService"
+import { departmentService, DepartmentDetail } from "../../../shared/services/departmentService"
+import { storage } from "../../../shared/utils/storage"
+import { LocalStorageKeys } from "../../../shared/constants/storageKeys"
 
 interface Doctor {
   id: number
-  firstName: string
-  lastName: string
+  first_name: string
+  last_name: string
   specialization: string
-  profileImage?: string
-  rating: number
-  consultationFee: number
-  experience: number
+  avatar?: string
+  price?: number
   department: {
-    departmentName: string
+    department_name: string
   }
 }
 
 interface Department {
   id: number
-  departmentName: string
+  department_name: string
   doctorCount: number
 }
 
@@ -47,60 +49,55 @@ const HomePage: React.FC = () => {
   const [specialties, setSpecialties] = useState<Department[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [loading, setLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(!!storage.getRaw(LocalStorageKeys.AUTH_TOKEN)) // Vẫn giữ để hiển thị nút CTA
   const navigate = useNavigate()
 
-  // Mock data for demonstration
   useEffect(() => {
-    const mockDoctors: Doctor[] = [
-      {
-        id: 1,
-        firstName: "Nguyễn",
-        lastName: "Văn An",
-        specialization: "Tim mạch",
-        profileImage: "/caring-doctor.png",
-        rating: 4.9,
-        consultationFee: 500000,
-        experience: 15,
-        department: { departmentName: "Khoa Tim mạch" },
-      },
-      {
-        id: 2,
-        firstName: "Trần",
-        lastName: "Thị Bình",
-        specialization: "Nhi khoa",
-        profileImage: "/female-doctor.png",
-        rating: 4.8,
-        consultationFee: 400000,
-        experience: 12,
-        department: { departmentName: "Khoa Nhi" },
-      },
-      {
-        id: 3,
-        firstName: "Lê",
-        lastName: "Minh Cường",
-        specialization: "Thần kinh",
-        profileImage: "/neurologist.png",
-        rating: 4.7,
-        consultationFee: 600000,
-        experience: 18,
-        department: { departmentName: "Khoa Thần kinh" },
-      },
-    ]
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        // Lấy danh sách departments
+        const departments = await departmentService.getDepartments()
+        
+        // Lấy số lượng bác sĩ cho mỗi department
+        const departmentsWithCount = await Promise.all(
+          departments.map(async (dept) => {
+            const doctors = await departmentService.getDoctorsByDepartmentId(dept.id)
+            return {
+              id: dept.id,
+              department_name: dept.department_name,
+              doctorCount: doctors.length
+            }
+          })
+        )
+        setSpecialties(departmentsWithCount)
 
-    const mockSpecialties: Department[] = [
-      { id: 1, departmentName: "Tim mạch", doctorCount: 25 },
-      { id: 2, departmentName: "Nhi khoa", doctorCount: 30 },
-      { id: 3, departmentName: "Thần kinh", doctorCount: 20 },
-      { id: 4, departmentName: "Da liễu", doctorCount: 15 },
-    ]
+        // Lấy danh sách bác sĩ
+        const allDoctors = await doctorService.getAllDoctors()
+        // Chọn 3 bác sĩ đầu tiên làm featured
+        setFeaturedDoctors(allDoctors.slice(0, 3).map(doctor => ({
+          id: doctor.id,
+          first_name: doctor.first_name,
+          last_name: doctor.last_name,
+          specialization: doctor.specialization,
+          avatar: doctor.avatar,
+          price: doctor.price,
+          department: {
+            department_name: doctor.department.department_name
+          }
+        })))
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu từ backend:", error)
+        // Không fallback mock data nữa, có thể hiển thị thông báo lỗi nếu muốn
+        setFeaturedDoctors([])
+        setSpecialties([])
+      } finally {
+        setLoading(false)
+      }
+    }
 
-    setTimeout(() => {
-      setFeaturedDoctors(mockDoctors)
-      setSpecialties(mockSpecialties)
-      setLoading(false)
-    }, 1000)
-  }, [])
+    fetchData()
+  }, []) // Bỏ isAuthenticated khỏi dependency vì API giờ công khai
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -150,159 +147,86 @@ const HomePage: React.FC = () => {
               <Heart className="h-4 w-4 text-red-400" />
               <span className="text-sm font-medium">Chăm sóc sức khỏe hàng đầu</span>
             </div>
-
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
               Sức khỏe là
               <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                {" "}
-                ưu tiên{" "}
+                {" "}hạnh phúc
               </span>
-              hàng đầu
             </h1>
-
-            <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-teal-100 leading-relaxed">
-              Kết nối với hơn 500+ bác sĩ chuyên khoa hàng đầu. Đặt lịch khám nhanh chóng, an toàn và tiện lợi.
+            <p className="text-lg md:text-xl text-teal-100 mb-10">
+              Đặt lịch khám với các bác sĩ hàng đầu, dễ dàng và nhanh chóng
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto mb-8">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Tìm bác sĩ, chuyên khoa..."
-                  className="pl-12 h-14 text-lg border-0 bg-white/95 backdrop-blur-sm shadow-lg"
-                />
-              </div>
+            <div className="flex justify-center gap-4 max-w-xl mx-auto">
+              <Input
+                placeholder="Tìm bác sĩ, chuyên khoa..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="bg-white/10 border-white/20 text-white placeholder:text-teal-200"
+              />
               <Button
                 onClick={handleSearch}
-                size="lg"
-                className="h-14 px-8 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 shadow-lg"
+                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
               >
+                <Search className="h-4 w-4 mr-2" />
                 Tìm kiếm
               </Button>
             </div>
-
-            <div className="flex flex-wrap justify-center gap-4 text-sm">
-              {["Tim mạch", "Nhi khoa", "Da liễu", "Thần kinh"].map((specialty) => (
-                <Badge
-                  key={specialty}
-                  variant="secondary"
-                  className="bg-white/10 hover:bg-white/20 text-white border-white/20 cursor-pointer"
-                  onClick={() => navigate(`/specialties?filter=${encodeURIComponent(specialty)}`)}
-                >
-                  {specialty}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { icon: Users, number: "500+", label: "Bác sĩ chuyên khoa", color: "text-teal-600" },
-              { icon: Heart, number: "50,000+", label: "Bệnh nhân tin tưởng", color: "text-emerald-500" },
-              { icon: Award, number: "25+", label: "Chuyên khoa", color: "text-green-600" },
-              { icon: TrendingUp, number: "4.8/5", label: "Đánh giá trung bình", color: "text-slate-600" },
-            ].map((stat, index) => (
-              <div key={index} className="text-center group">
-                <div
-                  className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-50 group-hover:bg-gray-100 transition-colors mb-4 ${stat.color}`}
-                >
-                  <stat.icon className="h-8 w-8" />
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
-                <div className="text-gray-600 text-sm">{stat.label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
       {/* Featured Doctors Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-teal-100 text-teal-700 rounded-full px-4 py-2 mb-4">
-              <Stethoscope className="h-4 w-4" />
-              <span className="text-sm font-medium">Đội ngũ y tế</span>
-            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Bác sĩ nổi bật</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Gặp gỡ những bác sĩ hàng đầu với kinh nghiệm phong phú và được bệnh nhân tin tưởng
+              Gặp gỡ đội ngũ bác sĩ giàu kinh nghiệm của chúng tôi
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {featuredDoctors.map((doctor) => (
-              <Card
-                key={doctor.id}
-                className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg overflow-hidden"
-              >
-                <CardHeader className="text-center pb-4">
-                  <div className="relative mx-auto mb-4">
-                    <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
-                      <AvatarImage
-                        src={doctor.profileImage || "/placeholder.svg"}
-                        alt={`${doctor.firstName} ${doctor.lastName}`}
-                      />
-                      <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-teal-500 to-emerald-600 text-white">
-                        {doctor.firstName[0]}
-                        {doctor.lastName[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-2 -right-2 bg-green-500 text-white rounded-full p-1">
-                      <div className="w-3 h-3 bg-white rounded-full"></div>
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredDoctors.length > 0 ? (
+              featuredDoctors.map((doctor) => (
+                <Card key={doctor.id} className="group hover:shadow-xl transition-all border-0 overflow-hidden">
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={doctor.avatar || "/placeholder-doctor.jpg"}
+                      alt={`${doctor.first_name} ${doctor.last_name}`}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    />
+                    <Badge className="absolute top-4 right-4 bg-gradient-to-r from-teal-500 to-emerald-500">
+                      {doctor.department.department_name}
+                    </Badge>
                   </div>
-
-                  <h3 className="text-xl font-bold text-gray-900">
-                    BS. {doctor.firstName} {doctor.lastName}
-                  </h3>
-                  <p className="text-teal-600 font-medium">{doctor.specialization}</p>
-
-                  <div className="flex items-center justify-center gap-1 mt-2">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold text-gray-900">{doctor.rating}</span>
-                    <span className="text-gray-500 text-sm">(128 đánh giá)</span>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="pt-0">
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        Kinh nghiệm
-                      </span>
-                      <span className="font-semibold">{doctor.experience} năm</span>
+                  <CardHeader className="p-6 text-center">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      BS. {doctor.first_name} {doctor.last_name}
+                    </h3>
+                    <p className="text-teal-600 font-medium">{doctor.specialization}</p>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Phí khám</span>
+                        <span className="font-bold text-green-600">{doctor.price?.toLocaleString()}đ</span>
+                      </div>
                     </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Phí khám</span>
-                      <span className="font-bold text-green-600">{doctor.consultationFee?.toLocaleString()}đ</span>
-                    </div>
-                  </div>
-
-                  <Button
-                    className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 group-hover:shadow-lg transition-all"
-                    onClick={() => console.log(`Booking doctor ${doctor.id}`)}
-                  >
-                    Đặt lịch khám
-                    <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                    <Button
+                      className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 group-hover:shadow-lg transition-all"
+                      onClick={() => console.log(`Booking doctor ${doctor.id}`)}
+                    >
+                      Đặt lịch khám
+                      <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <p className="text-center text-gray-600 col-span-3">Không tìm thấy bác sĩ</p>
+            )}
           </div>
-
-          <div className="text-center">
+          <div className="text-center mt-12">
             <Button
               variant="outline"
               size="lg"
@@ -316,6 +240,41 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
+      {/* Specialties Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Chuyên khoa</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Khám phá các chuyên khoa hàng đầu với đội ngũ bác sĩ chuyên môn cao
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {specialties.length > 0 ? (
+              specialties.map((specialty) => (
+                <Card
+                  key={specialty.id}
+                  className="p-6 hover:shadow-lg transition-all cursor-pointer group"
+                  onClick={() => navigate(`/doctors?department=${specialty.id}`)}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 text-white">
+                      <Stethoscope className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">{specialty.department_name}</h3>
+                      <p className="text-sm text-gray-600">{specialty.doctorCount} bác sĩ</p>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <p className="text-center text-gray-600 col-span-4">Không tìm thấy chuyên khoa</p>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -325,7 +284,6 @@ const HomePage: React.FC = () => {
               Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất với công nghệ hiện đại
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
@@ -364,7 +322,6 @@ const HomePage: React.FC = () => {
             <p className="text-lg mb-10 text-teal-100">
               Đăng ký ngay hôm nay để trải nghiệm dịch vụ chăm sóc sức khỏe hiện đại và chuyên nghiệp
             </p>
-
             {!isAuthenticated ? (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button

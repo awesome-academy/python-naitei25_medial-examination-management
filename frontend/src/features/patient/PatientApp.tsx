@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { HomeLayout } from './layouts/HomeLayout';
+import { HomeLayout } from '../public/layouts/HomeLayout';
 import AuthenticatedPatientLayout from './layouts/AuthenticatedPatientLayout';
 import HomePage from '../public/pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
