@@ -48,16 +48,14 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-teal-600 to-emerald-700 text-white py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">Về HealthCare</h1>
-            <p className="text-xl text-teal-100 leading-relaxed">
-              Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất với đội ngũ bác sĩ chuyên nghiệp và công
-              nghệ y tế hiện đại nhất.
-            </p>
-          </div>
+      {/* Header Section */}
+      <section className="relative overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-teal-700 text-white mb-12">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative container mx-auto px-4 py-20 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Về HealthCare</h1>
+          <p className="text-lg text-teal-100 mb-6">
+            Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất với đội ngũ bác sĩ chuyên nghiệp và công nghệ y tế hiện đại nhất.
+          </p>
         </div>
       </section>
 

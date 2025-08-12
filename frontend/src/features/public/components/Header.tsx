@@ -18,7 +18,13 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const location = useLocation()
-  const navigate = useNavigate() // ✅ thêm hook điều hướng
+  const navigate = useNavigate()
+
+  // Hàm kiểm tra active link
+  const isActive = (href: string) => {
+    if (href === "/") return location.pathname === "/"
+    return location.pathname.startsWith(href)
+  }
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -26,12 +32,8 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-lg flex items-center justify-center">
-              <Heart className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">HealthCare</h1>
-              <p className="text-xs text-gray-500">Chăm sóc sức khỏe</p>
+            <div className="flex justify-center">
+              <img className="w-30 pb-10 pt-10" src="/public/images/logo/logo.png" alt="logo" />
             </div>
           </Link>
 
@@ -42,10 +44,10 @@ export function Header() {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  "font-medium transition-colors",
-                  location.pathname === item.href
-                    ? "text-teal-600"
-                    : "text-gray-700 hover:text-teal-600",
+                  "font-medium transition-colors pb-1",
+                  isActive(item.href)
+                    ? "text-teal-600 border-b-2 border-teal-600"
+                    : "text-gray-700 hover:text-teal-600"
                 )}
               >
                 {item.name}
@@ -104,9 +106,9 @@ export function Header() {
                   to={item.href}
                   className={cn(
                     "font-medium",
-                    location.pathname === item.href
-                      ? "text-teal-600"
-                      : "text-gray-700 hover:text-teal-600",
+                    isActive(item.href)
+                      ? "text-teal-600 font-semibold"
+                      : "text-gray-700 hover:text-teal-600"
                   )}
                   onClick={() => setMobileMenuOpen(false)}
                 >
