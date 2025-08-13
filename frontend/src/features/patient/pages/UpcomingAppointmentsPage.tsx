@@ -22,6 +22,7 @@ import { appointmentService } from "../../../shared/services/appointmentService"
 import { paymentService } from "../../../shared/services/paymentService"
 import LoadingSpinner from "../../../shared/components/common/LoadingSpinner"
 import type { Appointment } from "../../../shared/types/appointment"
+import { mapAppointmentStatus } from "../../../shared/constants/enums"
 
 type SortField = "date" | "doctor" | "status" | "price"
 type SortOrder = "asc" | "desc"
@@ -64,17 +65,15 @@ const UpcomingAppointmentsPage: React.FC = () => {
   // Filter and sort appointments
   const filteredAndSortedAppointments = useMemo(() => {
     const filtered = appointments.filter((appointment) => {
-      // Search filter
       const searchMatch =
         searchTerm === "" ||
         appointment.doctorInfo?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         appointment.doctorInfo?.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         appointment.symptoms?.toLowerCase().includes(searchTerm.toLowerCase())
 
-      // Status filter
-      const statusMatch = statusFilter === "all" || appointment.status === statusFilter
+      const statusKey = mapAppointmentStatus(appointment.status).key
+      const statusMatch = statusFilter === "all" || statusKey === statusFilter
 
-      // Date filter
       let dateMatch = true
       if (dateFilter !== "all") {
         const appointmentDate = new Date(appointment.schedule?.work_date || "")
@@ -100,7 +99,6 @@ const UpcomingAppointmentsPage: React.FC = () => {
       return searchMatch && statusMatch && dateMatch
     })
 
-    // Sort appointments
     filtered.sort((a, b) => {
       let aValue: any
       let bValue: any
@@ -115,8 +113,8 @@ const UpcomingAppointmentsPage: React.FC = () => {
           bValue = b.doctorInfo?.fullName || ""
           break
         case "status":
-          aValue = a.status
-          bValue = b.status
+          aValue = mapAppointmentStatus(a.status).key
+          bValue = mapAppointmentStatus(b.status).key
           break
         case "price":
           aValue = Number(a.doctorInfo?.price || 0)
@@ -140,16 +138,12 @@ const UpcomingAppointmentsPage: React.FC = () => {
   const endIndex = startIndex + itemsPerPage
   const currentAppointments = filteredAndSortedAppointments.slice(startIndex, endIndex)
 
-  // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, statusFilter, dateFilter, sortField, sortOrder])
 
   const handleCancelAppointment = async (appointmentId: number) => {
-    if (!window.confirm(t("upcomingAppointments.confirmCancel"))) {
-      return
-    }
-
+    if (!window.confirm(t("upcomingAppointments.confirmCancel"))) return
     try {
       setCancellingId(appointmentId)
       await appointmentService.cancelAppointment(appointmentId, t("upcomingAppointments.cancelReason"))
@@ -171,17 +165,64 @@ const UpcomingAppointmentsPage: React.FC = () => {
     }
   }
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-    } else {
-      setSortField(field)
-      setSortOrder("asc")
+  const getStatusBadge = (statusCode: string) => {
+    const { key, labelKey } = mapAppointmentStatus(statusCode)
+
+    const statusConfig = {
+      PENDING: {
+        className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+        icon: <AlertCircleIcon className="w-4 h-4" />,
+      },
+      CONFIRMED: {
+        className: "bg-green-100 text-green-800 border-green-200",
+        icon: <CheckCircleIcon className="w-4 h-4" />,
+      },
+      CANCELLED: {
+        className: "bg-red-100 text-red-800 border-red-200",
+        icon: <XCircleIcon className="w-4 h-4" />,
+      },
+      COMPLETED: {
+        className: "bg-blue-100 text-blue-800 border-blue-200",
+        icon: <CheckCircleIcon className="w-4 h-4" />,
+      },
+      IN_PROGRESS: {
+        className: "bg-purple-100 text-purple-800 border-purple-200",
+        icon: <ClockIcon className="w-4 h-4" />,
+      },
+      NO_SHOW: {
+        className: "bg-gray-100 text-gray-800 border-gray-200",
+        icon: <XCircleIcon className="w-4 h-4" />,
+      },
+      UNKNOWN: {
+        className: "bg-gray-100 text-gray-800 border-gray-200",
+        icon: <AlertCircleIcon className="w-4 h-4" />,
+      },
     }
+
+    const config = statusConfig[key as keyof typeof statusConfig]
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${config.className}`}
+      >
+        {config.icon}
+        {t(labelKey)}
+      </span>
+    )
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat("vi-VN", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date)
   }
 
   const formatTime = (timeString: string) => {
-    return timeString.slice(0, 5)
+    return timeString ? timeString.slice(0, 5) : ""
   }
 
   const formatDateTime = (dateString: string) => {
@@ -200,78 +241,6 @@ const UpcomingAppointmentsPage: React.FC = () => {
     }).format(date)
   }
 
-  const getStatusBadge = (backendStatus: string) => {
-    const statusMap: Record<string, string> = {
-      P: "PENDING",
-      C: "CONFIRMED",
-      I: "IN_PROGRESS",
-      D: "COMPLETED",
-      X: "CANCELLED",
-      N: "NO_SHOW",
-    }
-
-    const fullStatus = statusMap[backendStatus] || "UNKNOWN"
-
-    const statusConfig = {
-      PENDING: {
-        label: t("upcomingAppointments.statusPending"),
-        className: "bg-yellow-100 text-yellow-800 border-yellow-200",
-        icon: <AlertCircleIcon className="w-4 h-4" />,
-      },
-      CONFIRMED: {
-        label: t("upcomingAppointments.statusConfirmed"),
-        className: "bg-green-100 text-green-800 border-green-200",
-        icon: <CheckCircleIcon className="w-4 h-4" />,
-      },
-      CANCELLED: {
-        label: t("upcomingAppointments.statusCancelled"),
-        className: "bg-red-100 text-red-800 border-red-200",
-        icon: <XCircleIcon className="w-4 h-4" />,
-      },
-      COMPLETED: {
-        label: t("upcomingAppointments.statusCompleted"),
-        className: "bg-blue-100 text-blue-800 border-blue-200",
-        icon: <CheckCircleIcon className="w-4 h-4" />,
-      },
-      IN_PROGRESS: {
-        label: t("upcomingAppointments.statusInProgress"),
-        className: "bg-purple-100 text-purple-800 border-purple-200",
-        icon: <ClockIcon className="w-4 h-4" />,
-      },
-      NO_SHOW: {
-        label: t("upcomingAppointments.statusNoShow"),
-        className: "bg-gray-100 text-gray-800 border-gray-200",
-        icon: <XCircleIcon className="w-4 h-4" />,
-      },
-      UNKNOWN: {
-        label: t("upcomingAppointments.statusUnknown"),
-        className: "bg-gray-100 text-gray-800 border-gray-200",
-        icon: <AlertCircleIcon className="w-4 h-4" />,
-      },
-    }
-
-    const config = statusConfig[fullStatus as keyof typeof statusConfig]
-
-    return (
-      <span
-        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${config.className}`}
-      >
-        {config.icon}
-        {config.label}
-      </span>
-    )
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat("vi-VN", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(date)
-  }
-
   const getPageNumbers = () => {
     const pages: (number | string)[] = []
     const maxVisible = 5
@@ -280,29 +249,15 @@ const UpcomingAppointmentsPage: React.FC = () => {
       for (let i = 1; i <= totalPages; i++) pages.push(i)
     } else {
       pages.push(1)
-
-      if (currentPage > 3) {
-        pages.push("...")
-      }
-
+      if (currentPage > 3) pages.push("...")
       const start = Math.max(2, currentPage - 1)
       const end = Math.min(totalPages - 1, currentPage + 1)
-
       for (let i = start; i <= end; i++) {
-        if (i !== 1 && i !== totalPages) {
-          pages.push(i)
-        }
+        if (i !== 1 && i !== totalPages) pages.push(i)
       }
-
-      if (currentPage < totalPages - 2) {
-        pages.push("...")
-      }
-
-      if (totalPages > 1) {
-        pages.push(totalPages)
-      }
+      if (currentPage < totalPages - 2) pages.push("...")
+      if (totalPages > 1) pages.push(totalPages)
     }
-
     return pages
   }
 
