@@ -1,0 +1,234 @@
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import type { PrescriptionResponse, PrescriptionDetailResponse } from "../../../types/pharmacy"
+
+interface MedicalRecordProps {
+  prescription: PrescriptionResponse
+  onEdit?: (prescriptionId: number) => void
+  onDelete?: (prescriptionId: number) => void
+}
+
+const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onDelete }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Debug: Log the prescription data when component renders
+  console.log("MedicalRecord component - prescription data:", prescription)
+
+  // Lấy thông tin tổng hợp từ prescription
+  const { prescriptionId, createdAt, note, diagnosis, prescriptionDetails } = prescription
+
+  // Sửa lỗi truy cập sinh hiệu - sử dụng snake_case từ backend
+  const systolicBloodPressure = prescription.systolic_blood_pressure || prescription.systolicBloodPressure
+  const diastolicBloodPressure = prescription.diastolic_blood_pressure || prescription.diastolicBloodPressure
+  const heartRate = prescription.heart_rate || prescription.heartRate
+  const bloodSugar = prescription.blood_sugar || prescription.bloodSugar
+
+  // Debug: Log vital signs
+  console.log("MedicalRecord component - vital signs:", {
+    systolic_blood_pressure: prescription.systolic_blood_pressure,
+    diastolic_blood_pressure: prescription.diastolic_blood_pressure,
+    heart_rate: prescription.heart_rate,
+    blood_sugar: prescription.blood_sugar,
+    processed: { systolicBloodPressure, diastolicBloodPressure, heartRate, bloodSugar },
+  })
+
+  // Tổng hợp đơn thuốc dạng bảng
+  const renderPrescriptionTable = () => {
+    console.log("Rendering prescription table with details:", prescriptionDetails)
+    return (
+      <div className="overflow-x-auto border bg-gray-50 border-gray-200 rounded-md">
+        <table className="w-full text-sm bg-gray-50">
+          <thead>
+            <tr className="bg-white border-b border-gray-200">
+              <th className="p-2 text-left">Tên thuốc</th>
+              <th className="p-2 text-left">Giá (₫)</th>
+              <th className="p-2 text-left">Liều dùng</th>
+              <th className="p-2 text-left">Hướng dẫn</th>
+              <th className="p-2 text-left">Số lượng</th>
+              <th className="p-2 text-left">Thành tiền (₫)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {prescriptionDetails?.map((detail: PrescriptionDetailResponse) => {
+              console.log(
+                `Detail ${detail.detailId}: quantity=${detail.quantity}, medicine=${detail.medicine?.medicineName}`,
+              )
+              return (
+                <tr key={detail.detailId} className="border-b border-gray-200">
+                  <td className="p-2">{detail.medicine?.medicineName || ""}</td>
+                  <td className="p-2">{detail.medicine?.price?.toLocaleString() || ""}</td>
+                  <td className="p-2">{detail.dosage}</td>
+                  <td className="p-2">
+                    {detail.frequency} - {detail.duration}
+                  </td>
+                  <td className="p-2 font-semibold text-blue-600">{detail.quantity || 0}</td>
+                  <td className="p-2 font-semibold text-green-600">
+                    {detail.medicine?.price && detail.quantity
+                      ? (detail.medicine.price * detail.quantity).toLocaleString()
+                      : "0"}
+                  </td>
+                </tr>
+              )
+            }) || []}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row gap-4 p-4 justify-between bg-gray-50/50 rounded-lg border-gray-200 border">
+        {/* Thông tin bệnh án */}
+        <div className="mb-6">
+          <h3 className="text-gray-600 font-semibold">Bệnh án #{prescriptionId}</h3>
+          <span className="text-gray-400 text-sm font-semibold">
+            {createdAt ? new Date(createdAt).toLocaleDateString("vi-VN") : ""}
+          </span>
+        </div>
+
+        {/* Chi tiết bệnh án */}
+        <div className="md:w-[55%]">
+          <p className="text-gray-600 truncate">
+            <span className="font-medium text-gray-800">Lý do khám: </span>
+            {note || "Không có ghi chú"}
+          </p>
+          <p className="text-gray-600 truncate">
+            <span className="font-medium text-gray-800">Chẩn đoán: </span>
+            {diagnosis || "Chưa có chẩn đoán"}
+          </p>
+          {/* Sửa hiển thị sinh hiệu - sử dụng giá trị đã xử lý */}
+          <p className="text-gray-600 truncate">
+            <span className="font-medium text-gray-800">Sinh hiệu: </span>
+            Huyết áp: {systolicBloodPressure || "N/A"}/{diastolicBloodPressure || "N/A"} mmHg, Nhịp tim:{" "}
+            {heartRate || "N/A"} bpm, Đường huyết: {bloodSugar || "N/A"}
+          </p>
+          <p className="text-gray-600 truncate">
+            <span className="font-medium text-gray-800">Đơn thuốc: </span>
+            {prescriptionDetails && prescriptionDetails.length > 0
+              ? prescriptionDetails
+                  .map((d) => {
+                    const quantity = d.quantity || 0
+                    return `${d.medicine?.medicineName || ""} - ${d.dosage} - ${
+                      d.frequency
+                    } - ${d.duration} (SL: ${quantity})`
+                  })
+                  .join("; ")
+              : "Không có đơn thuốc"}
+          </p>
+        </div>
+
+        {/* Các nút hành động */}
+        <div className="flex gap-2">
+          {/* Nút xem */}
+          <button
+            className="flex size-10 justify-center items-center gap-1 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-blue-200 transition-colors"
+            onClick={() => setIsModalOpen(true)}
+            title="Xem chi tiết"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+              <path
+                fillRule="evenodd"
+                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+
+          {/* Nút chỉnh sửa */}
+          <button
+            className="flex size-10 justify-center items-center gap-1 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors"
+            onClick={() => onEdit?.(prescriptionId)}
+            title="Chỉnh sửa bệnh án"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+            </svg>
+          </button>
+
+          {/* Nút xóa */}
+          <button
+            className="flex size-10 justify-center items-center gap-1 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors"
+            onClick={() => onDelete?.(prescriptionId)}
+            title="Xóa bệnh án"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Modal đơn giản */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-800">Bệnh án #{prescriptionId}</h3>
+                <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Lý do khám</label>
+                    <div className="p-3 bg-gray-50 rounded-md">{note || "Không có ghi chú"}</div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Chẩn đoán</label>
+                    <div className="p-3 bg-gray-50 rounded-md">{diagnosis || "Chưa có chẩn đoán"}</div>
+                  </div>
+                </div>
+
+                {/* Hiển thị sinh hiệu trong modal */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sinh hiệu</label>
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    Huyết áp: {systolicBloodPressure || "N/A"}/{diastolicBloodPressure || "N/A"} mmHg, Nhịp tim:{" "}
+                    {heartRate || "N/A"} bpm, Đường huyết: {bloodSugar || "N/A"}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Đơn thuốc</label>
+                  {renderPrescriptionTable()}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <button
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition"
+                  onClick={() => console.log("View Invoice clicked")}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path
+                      fillRule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Xem hóa đơn
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default MedicalRecord

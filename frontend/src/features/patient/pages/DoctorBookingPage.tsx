@@ -19,13 +19,11 @@ const DoctorBookingPage: React.FC = () => {
   const params = useParams()
   const doctorId = Number.parseInt(params.id as string)
   
-  // Kiểm tra PatientContext có tồn tại không
   let patientContext
   try {
     patientContext = usePatientContext()
   } catch (error) {
     console.error("PatientContext not found:", error)
-    // Fallback state management nếu context không có
     patientContext = null
   }
 
@@ -34,29 +32,26 @@ const DoctorBookingPage: React.FC = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null)
   const [hasInsurance, setHasInsurance] = useState<boolean | null>(null)
 
-  // Validate doctorId
   if (!doctorId || isNaN(doctorId)) {
     return <ErrorMessage message="ID bác sĩ không hợp lệ" />
   }
 
-  // Lấy thông tin bác sĩ từ API
   const { 
     data: doctor, 
     loading: doctorLoading, 
     error: doctorError 
   } = useApi(() => patientApiService.getDoctorById(doctorId), [doctorId])
 
-  // Lấy available time slots khi có selectedDate
   const { 
     data: availableSlots, 
-    loading: slotsLoading 
+    loading: slotsLoading,
+    error: slotsError 
   } = useApi(
     () => selectedDate ? patientAppointmentService.getAvailableTimeSlots(doctorId, selectedDate) : Promise.resolve({ morning: [], afternoon: [] }),
     [doctorId, selectedDate]
   )
 
   useEffect(() => {
-    // Set default date to today if available
     const today = new Date()
     const todayFormatted = today.toISOString().split("T")[0]
     setSelectedDate(todayFormatted)
@@ -82,7 +77,7 @@ const DoctorBookingPage: React.FC = () => {
         label: dayLabel,
         date: formattedDate,
         dayOfWeek: date.toLocaleDateString("vi-VN", { weekday: "short" }),
-        isAvailable: true // Sẽ được cập nhật dựa trên API response
+        isAvailable: true 
       })
     }
     return options
@@ -126,11 +121,9 @@ const DoctorBookingPage: React.FC = () => {
         insuranceDiscount: 0,
       }
 
-      // Sử dụng context nếu có, nếu không thì lưu vào localStorage
       if (patientContext && patientContext.setBookingDetails) {
         patientContext.setBookingDetails(bookingDetails)
       } else {
-        // Fallback: save to localStorage
         try {
           localStorage.setItem('bookingDetails', JSON.stringify(bookingDetails))
         } catch (error) {
@@ -151,6 +144,9 @@ const DoctorBookingPage: React.FC = () => {
   if (doctorError || !doctor) {
     return <ErrorMessage message={doctorError || "Không tìm thấy thông tin bác sĩ"} />
   }
+
+  // Đảm bảo availableSlots luôn là một đối tượng có morning và afternoon là mảng
+  const safeAvailableSlots = availableSlots || { morning: [], afternoon: [] };
 
   return (
     <>
@@ -178,14 +174,21 @@ const DoctorBookingPage: React.FC = () => {
         {/* Choose Time Section */}
         <div className="space-y-6 mb-8">
           <h3 className="text-lg font-semibold text-gray-900 uppercase">Chọn thời gian</h3>
+          
+          {/* Nhãn "Ngày" */}
+          <label htmlFor="appointment-date" className="block text-sm font-medium text-gray-700 mb-2">Ngày</label>
           <DateSelector days={getDayOptions()} selectedDate={selectedDate} onSelectDate={handleSelectDate} />
           
+          {/* Nhãn "Ca làm việc" */}
+          <label htmlFor="appointment-session" className="block text-sm font-medium text-gray-700 mb-2">Ca làm việc</label>
           {slotsLoading ? (
             <LoadingSpinner size="sm" message="Đang tải khung giờ..." />
+          ) : slotsError ? (
+            <ErrorMessage message={`Lỗi tải khung giờ: ${slotsError.message}`} />
           ) : (
             <TimeSlotSelector
-              morningSlots={availableSlots?.morning || []}
-              afternoonSlots={availableSlots?.afternoon || []}
+              morningSlots={safeAvailableSlots.morning}
+              afternoonSlots={safeAvailableSlots.afternoon}
               selectedTimeOfDay={selectedTimeOfDay}
               selectedTimeSlot={selectedTimeSlot}
               onSelectTimeOfDay={handleSelectTimeOfDay}
@@ -199,6 +202,28 @@ const DoctorBookingPage: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900">Bảo hiểm Y Tế</h3>
           <InsuranceOption hasInsurance={hasInsurance} onSelect={handleSelectInsurance} />
         </div>
+
+        {/* Symptom and Note Section (assuming these are separate components or inputs) */}
+        <div className="space-y-4 mb-8">
+          <h3 className="text-lg font-semibold text-gray-900">Triệu chứng</h3>
+          {/* Placeholder for Symptom Selector */}
+          <input
+            type="text"
+            placeholder="Chọn triệu chứng"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
+          />
+        </div>
+
+        <div className="space-y-4 mb-8">
+          <h3 className="text-lg font-semibold text-gray-900">Ghi chú</h3>
+          {/* Placeholder for Note Input */}
+          <textarea
+            placeholder="Nhập ghi chú thêm..."
+            rows={3}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
+          ></textarea>
+        </div>
+
 
         {/* Continue Button */}
         <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg lg:static lg:shadow-none lg:p-0 lg:mt-8">

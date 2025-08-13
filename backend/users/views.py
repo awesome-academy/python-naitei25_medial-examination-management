@@ -70,6 +70,25 @@ class UserViewSet(viewsets.ViewSet):
         user = self.get_object(pk)
         return Response(UserResponseSerializer(user).data)
 
+    @action(detail=False, methods=['get'], url_path='get_user_by_email')
+    def get_user_by_email(self, request):
+        email = request.query_params.get('email')
+        if not email:
+            return Response({"error": _("Email parameter is required")}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email, is_deleted=False)
+            return Response({
+                "id": user.id,
+                "email": user.email,
+                "phone": user.phone,
+                "role": user.role
+            })
+        except User.DoesNotExist:
+            return Response({"error": _("User not found with this email")}, 
+                            status=status.HTTP_404_NOT_FOUND)
+
     @action(detail=False, methods=['post'], url_path='add')
     def add_user(self, request):
         serializer = UserRequestSerializer(data=request.data)
