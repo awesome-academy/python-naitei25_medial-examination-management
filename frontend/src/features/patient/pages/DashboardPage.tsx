@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../shared/context/AuthContext";
 import { patientApiService } from "../services/patientApiService";
 import { Calendar, Clock, FileText, User, Activity, Bell } from "lucide-react";
-
+import { patientService } from "../../../shared/services/patientService";
 interface DashboardStats {
   upcomingAppointments: number;
   totalAppointments: number;
@@ -21,6 +21,7 @@ interface RecentAppointment {
 }
 
 const DashboardPage: React.FC = () => {
+  const [patient, setPatient] = useState<PatientInfo | null>(null);
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
@@ -37,14 +38,22 @@ const DashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isAuthenticated && user?.role === "P") {
+      patientService
+        .getCurrentPatient()
+        .then((data) => setPatient(data))
+        .catch((err) => console.error("Lỗi lấy thông tin bệnh nhân:", err));
+    }
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        console.log(" Bắt đầu fetch dashboard data...");
+        console.log("Bắt đầu fetch dashboard data...");
 
         let myAppointments = [];
         let upcomingAppointments = [];
-        let bills = [];
 
         try {
           console.log("Fetching my appointments...");
@@ -68,6 +77,7 @@ const DashboardPage: React.FC = () => {
           console.error("Failed to fetch my appointments:", error);
         }
 
+        // Lấy lịch hẹn sắp tới
         try {
           console.log("Fetching upcoming appointments...");
           const upcomingData =
@@ -84,21 +94,8 @@ const DashboardPage: React.FC = () => {
           console.error("Failed to fetch upcoming appointments:", error);
         }
 
-        try {
-          console.log("Fetching bills...");
-          const billsData = await patientApiService.payments.getMyBills();
-          bills = Array.isArray(billsData) ? billsData : [];
-          console.log("Bills loaded:", bills.length, "items");
-        } catch (error) {
-          console.error("Failed to fetch bills:", error);
-        }
-
         const upcomingCount = upcomingAppointments?.length || 0;
         const totalCount = myAppointments?.length || 0;
-        const pendingBillsCount =
-          bills?.filter(
-            (bill: any) => bill?.status === "pending" || bill?.status === "U"
-          )?.length || 0;
         const completedVisitsCount =
           myAppointments?.filter(
             (appt: any) => appt?.status === "COMPLETED" || appt?.status === "C"
@@ -107,24 +104,21 @@ const DashboardPage: React.FC = () => {
         console.log("Calculated stats:", {
           upcomingCount,
           totalCount,
-          pendingBillsCount,
           completedVisitsCount,
         });
 
         setStats({
           upcomingAppointments: upcomingCount,
           totalAppointments: totalCount,
-          pendingBills: pendingBillsCount,
+          pendingBills: 0, // Không lấy bills nên để 0
           completedVisits: completedVisitsCount,
         });
 
         const formattedAppointments: RecentAppointment[] =
           upcomingAppointments?.slice(0, 2)?.map((appt: any) => ({
             id: appt?.id || Math.random(),
-            doctorName:
-              appt?.doctorInfo?.name ||
-              appt?.doctorInfo?.full_name ||
-              "Bác sĩ không xác định",
+            doctorName: appt?.doctorInfo?.fullName || "Bác sĩ không xác định",
+
             specialization:
               appt?.doctorInfo?.specialization ||
               appt?.doctorInfo?.department ||
@@ -206,7 +200,11 @@ const DashboardPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Xin chào, {user?.name || user?.email || "Bệnh nhân"}!
+              Xin chào,{" "}
+              {patient
+                ? `${patient.first_name} ${patient.last_name}`
+                : user?.name || user?.email || "Bệnh nhân"}
+              !
             </h1>
             <p className="text-gray-600 mt-1">
               Chào mừng bạn quay trở lại. Đây là tổng quan về tình trạng sức
