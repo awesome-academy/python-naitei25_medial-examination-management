@@ -1,37 +1,87 @@
 from rest_framework import serializers
-from .models import Doctor, Department, ExaminationRoom, Schedule
-from common.enums import Gender, AcademicDegree, DoctorType
+from .models import Doctor, Department, ExaminationRoom, Schedule, ScheduleStatus
+from common.enums import Gender, AcademicDegree, DoctorType, Shift # Import Shift enum
 from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH, USER_LENGTH, DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES
 from users.serializers import UserResponseSerializer
-from datetime import datetime
 from django.utils.translation import gettext_lazy as _
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = '__all__'
+        fields = ['id', 'department_name', 'description', 'avatar', 'created_at']
 
 class ExaminationRoomSerializer(serializers.ModelSerializer):
+    roomId = serializers.IntegerField(source='id', read_only=True)
     department_id = serializers.IntegerField(source='department.id', read_only=True)
 
     class Meta:
         model = ExaminationRoom
-        fields = '__all__'
+        fields = ['roomId', 'id', 'department', 'department_id', 'type', 'building', 'floor', 'note', 'created_at']
 
 class ScheduleSerializer(serializers.ModelSerializer):
+    # Fields for input (write-only) - expect integer IDs
+    doctor = serializers.PrimaryKeyRelatedField(queryset=Doctor.objects.all(), write_only=True)
+    room = serializers.PrimaryKeyRelatedField(queryset=ExaminationRoom.objects.all(), write_only=True)
+
+    # Fields for output (read-only) - provide integer IDs
     doctor_id = serializers.IntegerField(source='doctor.id', read_only=True)
-    room_id = serializers.IntegerField(source='examination_room.id', read_only=True)
+    room_id = serializers.IntegerField(source='room.id', read_only=True)
+
+    # SerializerMethodFields for derived data (read-only)
+    location = serializers.SerializerMethodField()
+    building = serializers.SerializerMethodField()
+    floor = serializers.SerializerMethodField()
+    room_note = serializers.SerializerMethodField() 
 
     class Meta:
         model = Schedule
-        fields = '__all__'
+        # Explicitly list all fields for clarity and control
+        fields = [
+            'id', # Read-only primary key
+            'doctor', # Write-only field for input doctor ID
+            'room',   # Write-only field for input room ID
+            'work_date',
+            'start_time',
+            'end_time',
+            'shift',
+            'max_patients',
+            'current_patients',
+            'status',
+            'default_appointment_duration_minutes',
+            'created_at', # Read-only timestamp
+
+            # Read-only fields for output
+            'doctor_id',
+            'room_id',
+            'location',
+            'building',
+            'floor',
+            'room_note',
+        ]
+        # Ensure that fields that are read-only are explicitly marked as such
+        read_only_fields = [
+            'id', 'created_at', 'location', 'building', 'floor', 'room_note',
+            'doctor_id', 'room_id', # These are read-only representations of the FKs
+            'current_patients', 'status' # These have defaults and are updated by backend logic
+        ]
 
     def get_location(self, obj):
-        return _("Tòa {building}, tầng {floor}, phòng {room}").format(
-            building=obj.examination_room.building,
-            floor=obj.examination_room.floor,
-            room=obj.examination_room.room_name or obj.examination_room.note
-        )
+        if obj.room:
+            return _("Tòa {building}, tầng {floor}, phòng {room_note}").format(
+                building=obj.room.building,
+                floor=obj.room.floor,
+                room_note=obj.room.note or ""
+            )
+        return ""
+
+    def get_building(self, obj):
+        return obj.room.building if obj.room else ""
+
+    def get_floor(self, obj):
+        return obj.room.floor if obj.room else None
+
+    def get_room_note(self, obj):
+        return obj.room.note if obj.room else ""
 
 class CreateDoctorRequestSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=USER_LENGTH["PASSWORD"], required=True)
@@ -67,7 +117,7 @@ class CreateDoctorRequestSerializer(serializers.Serializer):
         for field, message in required_fields.items():
             if not data.get(field):
                 errors[field] = message
-        
+
         if not data.get('email') and not data.get('phone'):
             errors['email_or_phone'] = _("Email hoặc số điện thoại là bắt buộc")
 
@@ -85,4 +135,4 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doctor
-        fields = '__all__'
+        fields = '__all__' # Đã thêm lại dòng này

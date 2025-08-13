@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+"use client";
+
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import SearchInput from "../../common/SearchInput";
-import DatePicker from "../appointments/DatePicker";
 import Badge from "../../ui/badge/Badge";
 import {
   Table,
@@ -12,9 +14,10 @@ import {
 } from "../../ui/table";
 import { DeleteConfirmationModal } from "../../ui/modal/DeleteConfirmationModal";
 import { patientService } from "../../../services/patientService";
-import { Patient } from "../../../types/patient";
+import type { Patient } from "../../../types/patient";
 import { format } from "date-fns";
 import { X } from "lucide-react";
+import type { PatientUpdateDto } from "../../../types/patient";
 
 export default function PatientTable() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -29,16 +32,21 @@ export default function PatientTable() {
   const [editLoading, setEditLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const fetchPatients = async () => {
     setLoading(true);
-    patientService
-      .getAllPatients()
-      .then((data) => setPatients(data))
-      .catch((err) => {
-        console.error("API error:", err);
-        setPatients([]);
-      })
-      .finally(() => setLoading(false));
+    try {
+      const data = await patientService.getAllPatients();
+      setPatients(data);
+    } catch (err) {
+      console.error("API error:", err);
+      setPatients([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPatients();
   }, []);
 
   const handleView = (patientId: number) => {
@@ -50,35 +58,32 @@ export default function PatientTable() {
     setModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (patientToDelete === null) return;
-    patientService
-      .deletePatient(patientToDelete)
-      .then(() => {
-        setPatients((prev) =>
-          prev.filter((patient) => patient.patientId !== patientToDelete)
-        );
-      })
-      .catch((err) => {
-        console.error("Error deleting patient:", err);
-      })
-      .finally(() => {
-        setModalOpen(false);
-        setPatientToDelete(null);
-      });
+    try {
+      await patientService.deletePatient(patientToDelete);
+      setPatients((prev) =>
+        prev.filter((patient) => patient.patientId !== patientToDelete)
+      );
+    } catch (err) {
+      console.error("Error deleting patient:", err);
+    } finally {
+      setModalOpen(false);
+      setPatientToDelete(null);
+    }
   };
 
-  // Xử lý tìm kiếm
   const handleSearch = async () => {
     setLoading(true);
     try {
       if (!searchTerm.trim()) {
-        // Nếu không có từ khóa, load lại toàn bộ danh sách
-        const all = await patientService.getAllPatients();
-        setPatients(all);
+        await fetchPatients();
       } else {
-        // Ưu tiên tìm theo CCCD, nếu không có thì theo BHYT
-        const params: any = {};
+        const params: {
+          identityNumber?: string;
+          insuranceNumber?: string;
+          fullName?: string;
+        } = {};
         if (/^\d{9,12}$/.test(searchTerm.trim())) {
           params.identityNumber = searchTerm.trim();
         } else if (/^[A-Za-z0-9]{8,20}$/.test(searchTerm.trim())) {
@@ -91,44 +96,57 @@ export default function PatientTable() {
       }
     } catch (err) {
       setPatients([]);
+      console.error("Error during search:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Khi bấm Sửa
   const handleEditClick = (patient: Patient) => {
     setEditPatient(patient);
-    setEditData(patient);
+    setEditData({
+      patientId: patient.patientId,
+      fullName: patient.fullName,
+      identityNumber: patient.identityNumber,
+      insuranceNumber: patient.insuranceNumber,
+      birthday: patient.birthday,
+      phone: patient.phone,
+      email: patient.email,
+      gender: patient.gender,
+      address: patient.address,
+      allergies: patient.allergies,
+      height: patient.height,
+      weight: patient.weight,
+      bloodType: patient.bloodType,
+    });
     setShowEditModal(true);
   };
 
-  // Xử lý submit sửa
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editPatient) return;
+    if (!editPatient || !editData.patientId) return;
     setEditLoading(true);
     try {
-      await patientService.updatePatient(editPatient.patientId, {
-        userId: editData.userId ?? editPatient.patientId ?? 0,
-        identityNumber: editData.identityNumber || "",
-        insuranceNumber: editData.insuranceNumber || "",
-        fullName: editData.fullName || "",
-        birthday: editData.birthday || "",
-        phone: editData.phone || "",
-        email: editData.email || "",
-        avatar: editData.avatar || "",
-        gender: (editData.gender as "MALE" | "FEMALE" | "OTHER") || "OTHER",
-        address: editData.address || "",
-        allergies: editPatient.allergies || "",
-        height: editPatient.height ?? 0,
-        weight: editPatient.weight ?? 0,
-        bloodType: editPatient.bloodType || "O+",
-      });
+      const updatePayload: Partial<PatientUpdateDto> = {
+        fullName: editData.fullName,
+        identityNumber: editData.identityNumber,
+        insuranceNumber: editData.insuranceNumber,
+        birthday: editData.birthday,
+        phone: editData.phone,
+        email: editData.email,
+        gender: editData.gender,
+        address: editData.address,
+        allergies: editData.allergies,
+        height: editData.height,
+        weight: editData.weight,
+        bloodType: editData.bloodType,
+      };
+
+      await patientService.updatePatient(editData.patientId, updatePayload);
       setShowEditModal(false);
-      const all = await patientService.getAllPatients();
-      setPatients(all);
+      await fetchPatients();
     } catch (err) {
+      console.error("Error updating patient:", err);
     } finally {
       setEditLoading(false);
     }
@@ -155,11 +173,10 @@ export default function PatientTable() {
       {!loading && (
         <>
           <div className="flex items-center p-4 gap-2">
-            {/* Search Bar chiếm full width */}
             <div className="flex-1">
               <SearchInput
                 inputRef={inputRef}
-                placeholder="Tìm kiếm theo CCCD hoặc BHYT"
+                placeholder="Tìm kiếm theo CCCD, BHYT hoặc Họ tên"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => {
@@ -167,7 +184,6 @@ export default function PatientTable() {
                 }}
               />
             </div>
-            {/* Filter Button */}
             <button
               className="h-11 w-20 rounded-lg bg-base-700 text-white text-sm font-medium shadow-theme-xs hover:bg-base-600 focus:outline-hidden focus:ring-3 focus:ring-base-600/50"
               onClick={handleSearch}
@@ -177,7 +193,6 @@ export default function PatientTable() {
           </div>
           <div className="max-w-full overflow-x-auto">
             <Table>
-              {/* Table Header */}
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
                   <TableCell
@@ -220,7 +235,6 @@ export default function PatientTable() {
                 </TableRow>
               </TableHeader>
 
-              {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {patients.map((patient) => (
                   <TableRow key={patient.patientId}>

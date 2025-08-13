@@ -32,6 +32,7 @@ class CreatePatientRequestSerializer(serializers.Serializer):
         required=False
     )
     emergency_contact_dtos = EmergencyContactSerializer(many=True, required=False)
+    avatar = serializers.CharField(max_length=PATIENT_LENGTH["AVATAR"], required=False, allow_blank=True, allow_null=True)
 
     def validate(self, data):
         required_fields = {
@@ -59,7 +60,11 @@ class CreatePatientRequestSerializer(serializers.Serializer):
 
 class PatientSerializer(serializers.ModelSerializer):
     emergency_contacts = EmergencyContactSerializer(many=True, read_only=True)
-
+    
     class Meta:
         model = Patient
-        fields = '__all__'
+        fields = [
+            'id', 'user', 'identity_number', 'insurance_number', 'first_name', 'last_name',
+            'birthday', 'gender', 'address', 'allergies', 'height', 'weight', 'blood_type',
+            'avatar', 'created_at', 'emergency_contacts'
+        ]
