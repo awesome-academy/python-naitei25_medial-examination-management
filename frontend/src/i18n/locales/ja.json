@@ -414,7 +414,8 @@
   "shifts": {
     "morning": "午前",
     "afternoon": "午後",
-    "evening": "夕方"
+    "evening": "夕方",
+    "night": "夜"
   },
   "empty": {
     "loading": "読み込み中...",

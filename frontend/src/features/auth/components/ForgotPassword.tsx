@@ -166,7 +166,7 @@ const ForgotPassword: React.FC = () => {
             </button>
           </form>
           <div className="mt-6 text-center">
-            <NavLink to="/patient-login" className="text-brand-500 font-medium hover:underline">
+            <NavLink to="/auth/patient-login" className="text-brand-500 font-medium hover:underline">
               {t("auth.backToLogin")}
             </NavLink>
           </div>
