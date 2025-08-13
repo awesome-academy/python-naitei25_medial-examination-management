@@ -114,6 +114,30 @@ class UserViewSet(viewsets.ViewSet):
             return Response(user_data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def partial_update(self, request, pk=None):
+        """
+        PATCH method để cập nhật một số trường cụ thể của User
+        Hỗ trợ cập nhật phone, email, etc.
+        """
+        user = self.get_object(pk)
+        if request.user.id != int(pk) and request.user.role != UserRole.ADMIN.value:
+            return Response({"error": _("Bạn không có quyền sửa thông tin user này")}, 
+                            status=status.HTTP_403_FORBIDDEN)
+        
+        # Chỉ cho phép cập nhật một số trường nhất định
+        allowed_fields = ['phone', 'email']
+        update_data = {k: v for k, v in request.data.items() if k in allowed_fields}
+        
+        if not update_data:
+            return Response({"error": _("Không có trường nào được phép cập nhật")}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = UserUpdateRequestSerializer(user, data=update_data, partial=True)
+        if serializer.is_valid():
+            user_data = UserService().edit_user(pk, serializer.validated_data)
+            return Response(user_data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=True, methods=['delete'])
     def delete_user(self, request, pk=None):
         if request.user.role != UserRole.ADMIN.value:

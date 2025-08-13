@@ -333,9 +333,24 @@ export const appointmentService = {
   ): Promise<Schedule[]> {
     try {
       const response = await api.get<Schedule[]>(
-        `/schedules/?doctorId=${doctorId}&workDate=${date}`
+        `/schedules/?doctor_id=${doctorId}&workDate=${date}`
       );
-      return response.data;
+      console.log(
+        "🔍 appointmentService.getSchedulesByDoctorAndDate - Response data:",
+        response.data
+      );
+
+      // Thêm bước lọc để chỉ trả về schedules của bác sĩ được chọn
+      const filteredSchedules = response.data.filter(
+        (schedule: any) => schedule.doctor_id === doctorId
+      );
+
+      console.log(
+        `🔍 Filtered schedules for doctor ${doctorId}:`,
+        filteredSchedules
+      );
+
+      return filteredSchedules;
     } catch (error) {
       console.error(
         `Error fetching schedules for doctor ${doctorId} on date ${date}:`,
