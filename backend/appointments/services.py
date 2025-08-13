@@ -96,7 +96,7 @@ class AppointmentService:
         return {
             "results": list(page),
             "pageNo": page_no,
-            "pageSize": page_size,
+            "pageSize": paginator.per_page,
             "totalElements": paginator.count,
             "totalPages": paginator.num_pages,
             "last": not page.has_next()
@@ -261,7 +261,6 @@ class AppointmentService:
           schedule.save()
 
           return appointment
-
 
 class AppointmentNoteService:
 

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from pharmacy.models import Prescription
+
 from .models import Appointment, AppointmentNote, ServiceOrder, Service
 from doctors.models import Schedule, Doctor, Department, ExaminationRoom
 from patients.serializers import PatientSerializer
@@ -9,7 +10,6 @@ from common.enums import ServiceType, Gender, AppointmentStatus
 from common.constants import DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES, PAGE_NO_DEFAULT, PAGE_SIZE_DEFAULT, MIN_VALUE
 from django.utils.translation import gettext_lazy as _
 from datetime import date, datetime, timedelta
-
 
 class DoctorSerializer(serializers.ModelSerializer):
     fullName = serializers.SerializerMethodField()
@@ -176,6 +176,7 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
+
 class AppointmentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
@@ -187,13 +188,13 @@ class AppointmentUpdateSerializer(serializers.ModelSerializer):
 
 
 class AppointmentNoteSerializer(serializers.ModelSerializer):
-    appointmentId = serializers.IntegerField(source='appointment.id', read_only=True)
-    content = serializers.CharField(source='note_text')
-    note_type = serializers.CharField()
+	appointmentId = serializers.IntegerField(source='appointment.id', read_only=True)
+	content = serializers.CharField(source='note_text')
+	note_type = serializers.CharField()
 
-    class Meta:
-        model = AppointmentNote
-        fields = ['id', 'appointmentId', 'note_type', 'content', 'created_at']
+	class Meta:
+		model = AppointmentNote
+		fields = ['id', 'appointmentId', 'note_type', 'content', 'created_at']
 
 
 class AvailableSlotSerializer(serializers.Serializer):
@@ -243,35 +244,68 @@ class AppointmentSerializer(serializers.ModelSerializer):
         ]
 
 
+class AppointmentSerializer(serializers.ModelSerializer):
+	appointmentId = serializers.IntegerField(source='id', read_only=True)
+	doctorId = serializers.IntegerField(source='doctor.id', read_only=True)
+	patientId = serializers.IntegerField(source='patient.id', read_only=True)
+	appointmentStatus = serializers.CharField(source='status', read_only=True)
+	slotStart = serializers.TimeField(source='slot_start', read_only=True)
+	slotEnd = serializers.TimeField(source='slot_end', read_only=True)
+	createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+	patientInfo = PatientSerializer(source='patient', read_only=True)
+	doctorInfo = DoctorSerializer(source='doctor', read_only=True)
+	schedule = ScheduleSerializer()
+	appointment_notes = AppointmentNoteSerializer(many=True, read_only=True, source='appointmentnote_set')
+	service_orders = ServiceOrderSerializer(many=True, read_only=True, source='serviceorder_set')
+
+	class Meta:
+		model = Appointment
+		fields = [
+			'appointmentId',
+			'doctorId',
+			'patientId',
+			'schedule',
+			'symptoms',
+			'slotStart',
+			'slotEnd',
+			'appointmentStatus',
+			'createdAt',
+			'patientInfo',
+			'doctorInfo',
+			'appointment_notes',
+			'service_orders',
+			'id', 'doctor', 'patient', 'slot_start', 'slot_end', 'status', 'created_at',
+		]
+
+
 class AppointmentDetailSerializer(serializers.ModelSerializer):
-    patientInfo = PatientSerializer(source='patient', read_only=True)
-    doctorInfo = DoctorSerializer(source='doctor', read_only=True)
-    schedule = ScheduleSerializer()
-    appointmentNotes = serializers.SerializerMethodField()
+	patientInfo = PatientSerializer(source='patient', read_only=True)
+	doctorInfo = DoctorSerializer(source='doctor', read_only=True)
+	schedule = ScheduleSerializer()
+	appointmentNotes = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Appointment
-        fields = [
-            'id', 'doctor', 'schedule', 'symptoms',
-            'slot_start', 'slot_end', 'status', 'created_at',
-            'patientInfo', 'doctorInfo', 'appointmentNotes',
-        ]
+	class Meta:
+		model = Appointment
+		fields = [
+			'id', 'doctor', 'schedule', 'symptoms',
+			'slot_start', 'slot_end', 'status', 'created_at',
+			'patientInfo', 'doctorInfo', 'appointmentNotes',
+		]
 
-    def get_appointmentNotes(self, obj):
-        notes = AppointmentNote.objects.filter(appointment=obj)
-        return AppointmentNoteSerializer(notes, many=True).data
-
+	def get_appointmentNotes(self, obj):
+		notes = AppointmentNote.objects.filter(appointment=obj)
+		return AppointmentNoteSerializer(notes, many=True).data
 
 class AppointmentDoctorViewSerializer(serializers.ModelSerializer):
-    patientInfo = PatientSerializer(source='patient', read_only=True)
-    schedule = ScheduleSerializer()
+	patientInfo = PatientSerializer(source='patient', read_only=True)
+	schedule = ScheduleSerializer()
 
-    class Meta:
-        model = Appointment
-        fields = [
-            'id', 'patient_id', 'patientInfo', 'symptoms',
-            'schedule', 'status', 'created_at'
-        ]
+	class Meta:
+		model = Appointment
+		fields = [
+			'id', 'patient_id', 'patientInfo', 'symptoms',
+			'schedule', 'status', 'created_at'
+		]
 
 
 class AppointmentPatientViewSerializer(serializers.ModelSerializer):
@@ -295,27 +329,28 @@ class AppointmentPatientViewSerializer(serializers.ModelSerializer):
 
 
 class CustomPageNumberPagination(PageNumberPagination):
-    page_size_query_param = 'pageSize'
-    page_query_param = 'pageNo'
+	page_size_query_param = 'pageSize'
+	page_query_param = 'pageNo'
 
-    def get_paginated_response(self, data):
-        return Response({
-            "content": data,
-            "pageNo": self.page.number,
-            "pageSize": self.page.paginator.per_page,
-            "totalElements": self.page.paginator.count,
-            "totalPages": self.page.paginator.num_pages,
-            "last": not self.page.has_next()
-        })
+	def get_paginated_response(self, data):
+		return Response({
+			"content": data,
+			"pageNo": self.page.number,
+			"pageSize": self.page.paginator.per_page,
+			"totalElements": self.page.paginator.count,
+			"totalPages": self.page.paginator.num_pages,
+			"last": not self.page.has_next()
+		})
 
 
 class AppointmentFilterSerializer(serializers.Serializer):
-    shift = serializers.CharField(required=False, allow_blank=True)
-    workDate = serializers.DateField(required=False, source='work_date', input_formats=['%Y-%m-%d'])
-    appointmentStatus = serializers.CharField(required=False, source='appointment_status', allow_blank=True)
-    roomId = serializers.IntegerField(required=False, source='room_id')
-    pageNo = serializers.IntegerField(default=PAGE_NO_DEFAULT, min_value=MIN_VALUE, source='page_no')
-    pageSize = serializers.IntegerField(default=PAGE_SIZE_DEFAULT, min_value=MIN_VALUE, source='page_size')
+	shift = serializers.CharField(required=False, allow_blank=True)
+	workDate = serializers.DateField(required=False, source='work_date', input_formats=['%Y-%m-%d'])
+	appointmentStatus = serializers.CharField(required=False, source='appointment_status', allow_blank=True)
+	roomId = serializers.IntegerField(required=False, source='room_id')
+	pageNo = serializers.IntegerField(default=PAGE_NO_DEFAULT, min_value=MIN_VALUE, source='page_no')
+	pageSize = serializers.IntegerField(default=PAGE_SIZE_DEFAULT, min_value=MIN_VALUE, source='page_size')
+
 
 
 class AppointmentPatientFilterSerializer(serializers.Serializer):

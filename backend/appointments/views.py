@@ -1,3 +1,4 @@
+import logging 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -208,6 +209,44 @@ class AppointmentViewSet(viewsets.ModelViewSet):
       except Exception as e:
           logger.exception("Error updating appointment:")
           return Response({"message": _("Đã xảy ra lỗi khi cập nhật cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'], url_path='cancel')
+    def cancel_appointment(self, request, pk=None):
+        try:
+            appointment = AppointmentService.cancel_appointment(pk)
+            serializer = AppointmentSerializer(appointment) 
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.exception("Error cancelling appointment:")
+            return Response({"message": _("Đã xảy ra lỗi khi hủy cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            appointment = AppointmentService.create_appointment(serializer.validated_data)
+            return Response(AppointmentSerializer(appointment).data, status=status.HTTP_201_CREATED)
+        except ValueError as e: 
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e: 
+            logger.exception("Error creating appointment:")
+            return Response({"message": _("Đã xảy ra lỗi khi tạo cuộc hẹn. Chi tiết: ") + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        try:
+            updated_appointment = AppointmentService.update_appointment(instance.id, serializer.validated_data)
+            return Response(AppointmentSerializer(updated_appointment).data)
+        except ValueError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.exception("Error updating appointment:")
+            return Response({"message": _("Đã xảy ra lỗi khi cập nhật cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class AppointmentNoteViewSet(viewsets.ModelViewSet):
