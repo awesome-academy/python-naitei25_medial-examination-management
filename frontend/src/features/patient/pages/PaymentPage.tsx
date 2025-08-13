@@ -647,7 +647,7 @@ export default function PaymentPage() {
                   {t('common.returnToDashboard', { defaultValue: 'Về trang chủ' })}
                 </Button>
                 <Button
-                  onClick={() => navigate('/appointments')}
+                  onClick={() => navigate('/patient/appointments/upcoming')}
                   className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold"
                 >
                   {t('appointment.viewAppointments', { defaultValue: 'Xem lịch hẹn' })}

@@ -2,12 +2,13 @@ import { appointmentService, appointmentNoteService } from '../../../shared/serv
 import { scheduleService } from '../../../shared/services/scheduleService'
 import { transformAvailableSlotsToTimeSlots } from '../../../shared/utils/appointmentTransform'
 import type { 
-  CreateAppointmentPayload, 
   Appointment, 
   AvailableSlot,
   BackendCreateAppointmentPayload 
 } from '../../../shared/types/appointment'
 import type { TimeSlot } from '../../../shared/types'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export class PatientAppointmentService {
   async createAppointmentFromBooking(bookingDetails: {
@@ -52,24 +53,26 @@ export class PatientAppointmentService {
 
       const schedule = schedules[0]
       
-      const response = await fetch('http://localhost:8000/api/v1/appointments/schedule/available-slots/', {
+      const response = await fetch(`${API_BASE_URL}api/v1/appointments/schedule/available-slots/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer YOUR_AUTH_TOKEN` 
         },
         body: JSON.stringify({
           schedule_id: schedule.id,
         })
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to fetch available slots: ${response.status} ${response.statusText} - ${errorData.detail || JSON.stringify(errorData)}`);
+        const errorData = await response.json()
+        throw new Error(
+          `Failed to fetch available slots: ${response.status} ${response.statusText} - ${
+            errorData.detail || JSON.stringify(errorData)
+          }`
+        )
       }
 
-      const availableSlots: AvailableSlot[] = await response.json();
-      
+      const availableSlots: AvailableSlot[] = await response.json()
       return transformAvailableSlotsToTimeSlots(availableSlots)
     } catch (error) {
       console.error('Error fetching available slots:', error)
@@ -110,7 +113,6 @@ export class PatientAppointmentService {
     try {
       const availableSlots = await this.getAvailableTimeSlots(doctorId, date)
       const allSlots = [...availableSlots.morning, ...availableSlots.afternoon]
-      
       return allSlots.some(slot => slot.time === time && slot.isAvailable)
     } catch (error) {
       console.error('Error checking appointment availability:', error)
