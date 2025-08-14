@@ -30,7 +30,7 @@
     "department": "Khoa khám",
     "type": "Loại",
     "bookAppointment": "Đặt lịch hẹn",
-    "departmentList": "D danh sách khoa khám",
+    "departmentList": "Danh sách khoa khám",
     "searchDepartmentsPlaceholder": "Tìm kiếm khoa khám...",
     "noDepartmentsFound": "Không tìm thấy khoa khám nào phù hợp.",
     "noDepartmentsAvailable": "Không có khoa khám nào.",
@@ -383,7 +383,8 @@
     "manageAndTrack": "Quản lý và theo dõi thông tin bệnh nhân",
     "date": "Ngày",
     "shift": "Ca",
-    "patients": "bệnh nhân"
+    "patients": "Bệnh nhân",
+    "schedule": "Lịch trình"
   },
   "table": {
     "no": "STT",
@@ -436,7 +437,8 @@
     "completeExamination": "Hoàn tất khám",
     "refreshAll": "Làm mới tất cả",
     "pendingTestResult": "Chờ kết quả xét nghiệm",
-    "retry": "Thử lại"
+    "retry": "Thử lại",
+    "close": "Đóng"
   },
   "stats": {
     "totalAppointments": "Tổng số cuộc hẹn",
@@ -477,15 +479,6 @@
       "onceEvening": "1 lần buổi tối",
       "twiceMorningEvening": "2 lần sáng/tối",
       "thriceMorningNoonAfternoon": "3 lần sáng/trưa/chiều"
-    },
-    "instructions": {
-      "beforeMeal": "Trước bữa ăn",
-      "beforeMeal30Min": "Trước bữa ăn 30 phút",
-      "afterMeal": "Sau bữa ăn",
-      "afterMeal30Min": "Sau bữa ăn 30 phút",
-      "duringMeal": "Trong bữa ăn",
-      "beforeSleep30Min": "Trước khi ngủ 30 phút",
-      "asNeeded": "Khi cần thiết"
     }
   },
   "pagination": {
@@ -612,7 +605,11 @@
     "unknownPatient": "Bệnh nhân không xác định",
     "unknownClinic": "Phòng khám không xác định",
     "currency": "Tiền tệ",
-    "available": "Còn lại"
+    "available": "Còn lại",
+    "orderId": "Mã chỉ định",
+    "room": "Phòng",
+    "notSpecified": "Không xác định",
+    "unknownPatientCode": "Mã bệnh nhân không xác định"
   },
   "medicalRecord": {
     "noAppointmentFound": "Không tìm thấy cuộc hẹn.",
@@ -778,5 +775,28 @@
     "showNotes": "Hiển thị ghi chú",
     "hideNotes": "Ẩn ghi chú",
     "downloadPrescription": "Tải đơn thuốc"
+  },
+  "meta": {
+    "title": "Lịch",
+    "description": "Xem và quản lý lịch của bạn"
+  },
+  "modal": {
+    "scheduleDetails": "Chi tiết lịch",
+    "error": "Đã xảy ra lỗi",
+    "success": "Hoàn thành thao tác"
+  },
+  "months": {
+    "january": "Tháng 1",
+    "february": "Tháng 2",
+    "march": "Tháng 3",
+    "april": "Tháng 4",
+    "may": "Tháng 5",
+    "june": "Tháng 6",
+    "july": "Tháng 7",
+    "august": "Tháng 8",
+    "september": "Tháng 9",
+    "october": "Tháng 10",
+    "november": "Tháng 11",
+    "december": "Tháng 12"
   }
 }

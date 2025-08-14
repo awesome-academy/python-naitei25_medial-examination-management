@@ -385,7 +385,8 @@
     "manageAndTrack": "Manage and track patient information",
     "date": "Date",
     "shift": "Shift",
-    "patients": "patients"
+    "patients": "patients",
+    "schedule": "Schedule"
   },
   "table": {
     "no": "No.",
@@ -438,7 +439,8 @@
     "completeExamination": "Complete Examination",
     "refreshAll": "Refresh All",
     "pendingTestResult": "Pending Test Result",
-    "retry": "Retry"
+    "retry": "Retry",
+    "close": "Close"
   },
   "stats": {
     "totalAppointments": "Total Appointments",
@@ -479,15 +481,6 @@
       "onceEvening": "Once in the evening",
       "twiceMorningEvening": "Twice a day (morning & evening)",
       "thriceMorningNoonAfternoon": "Three times a day (morning, noon, afternoon)"
-    },
-    "instructions": {
-      "beforeMeal": "Before meal",
-      "beforeMeal30Min": "30 minutes before meal",
-      "afterMeal": "After meal",
-      "afterMeal30Min": "30 minutes after meal",
-      "duringMeal": "During meal",
-      "beforeSleep30Min": "30 minutes before sleep",
-      "asNeeded": "As needed"
     }
   },
   "pagination": {
@@ -571,7 +564,11 @@
     "unknownPatient": "Unknown patient",
     "unknownClinic": "Unknown clinic",
     "currency": "Currency",
-    "available": "Available"
+    "available": "Available",
+    "orderId": "Order ID",
+    "room": "Room",
+    "notSpecified": "Not specified",
+    "unknownPatientCode": "Unknown patient code"
   },
   "medicalRecord": {
     "noAppointmentFound": "No appointment found.",
@@ -781,5 +778,28 @@
     "noResultsText": "Try changing filters or search terms.",
     "previous": "Previous",
     "next": "Next"
+  },
+  "meta": {
+    "title": "Schedule",
+    "description": "View and manage your schedule"
+  },
+  "modal": {
+    "scheduleDetails": "Schedule Details",
+    "error": "An error occurred",
+    "success": "Operation completed successfully"
+  },
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
   }
 }
