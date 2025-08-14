@@ -11,11 +11,14 @@ import {
   HorizontaLDots,
   UserCircleIcon,
   PatientIcon,
+  InpatientIcon,
+  DepartmentIcon,
   AdminIcon,
   DoctorIcon,
   BoxCubeIcon,
-} from "../../assets/icons"
-import { useSidebar } from "../context/SidebarContext"
+} from "../../assets/icons";
+import { useSidebar } from "../context/SidebarContext";
+import LanguageSwitcher from "../components/common/LanguageSwitcher";
 
 type NavItem = {
   name: string;
@@ -26,11 +29,11 @@ type NavItem = {
 };
 
 const AppSidebar: React.FC = () => {
-  const { t } = useTranslation()
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar()
-  const location = useLocation()
-  const role = localStorage.getItem("authRole") || ""
-  const doctorType = localStorage.getItem("doctorType") || ""
+  const { t } = useTranslation();
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const location = useLocation();
+  const role = localStorage.getItem("authRole") || "";
+  const doctorType = localStorage.getItem("doctorType") || "";
 
   // Cập nhật basePath để khớp với routing structure
   const basePath =
@@ -59,24 +62,13 @@ const AppSidebar: React.FC = () => {
       icon: <PatientIcon />,
       name: t("sidebar.patients"),
       path: `${basePath}/patients`,
-      roles: ["A", "RECEPTIONIST", "D"],
+      roles: ["A", "D"], // Chỉ hiển thị cho bác sĩ loại E
     },
     {
-      name: t("sidebar.examination"),
-      icon: <CalendarIcon />,
-      subItems: [
-        {
+          icon: <CalendarIcon />,
           name: t("sidebar.calendar"),
           path: `${basePath}/calendar`,
-          pro: false,
-        },
-        {
-          name: t("sidebar.outpatientClinics"),
-          path: `${basePath}/outpatient-clinics`,
-          pro: false,
-        },
-      ],
-      roles: ["A", "RECEPTIONIST"],
+          roles: ["A"],
     },
     {
       icon: <AdminIcon />,
@@ -164,7 +156,7 @@ const AppSidebar: React.FC = () => {
     (path: string) => {
       // Xử lý đặc biệt cho dashboard route
       if (path.endsWith("/dashboard")) {
-        return location.pathname === path
+        return location.pathname === path;
       }
 
       if (path === basePath) {
@@ -180,61 +172,16 @@ const AppSidebar: React.FC = () => {
       if (currentPath.match(/\/prescriptions\/\d+$/) && path.endsWith("/prescriptions")) {
         return true
       }
-
-      // Nếu đang ở trang chi tiết medical record
-      if (currentPath.match(/\/medical-record\/\d+$/)) {
-        // Nếu đến từ past appointments, highlight past appointments
-        if (fromParam === "past-appointments" && path.endsWith("/appointments/past")) {
-          return true
-        }
-        // Nếu đến từ upcoming appointments, highlight upcoming appointments
-        if (fromParam === "upcoming-appointments" && path.endsWith("/appointments/upcoming")) {
-          return true
-        }
-        // Nếu đến từ prescriptions hoặc không có from param, highlight prescriptions
-        if ((fromParam === "prescriptions" || !fromParam) && path.endsWith("/prescriptions")) {
-          return true
-        }
-      }
-
-      // Nếu đang ở trang chi tiết appointment từ upcoming, highlight upcoming appointments
-      if (currentPath.includes("/appointments/upcoming/") && path.endsWith("/appointments/upcoming")) {
-        return true
-      }
-
-      // Nếu đang ở trang chi tiết appointment từ past, highlight past appointments
-      if (currentPath.includes("/appointments/past/") && path.endsWith("/appointments/past")) {
-        return true
-      }
-
-      // Nếu đang ở các trang thuộc booking flow, highlight book appointment
-      if (path.endsWith("/book-appointment")) {
-        // Trang danh sách bác sĩ theo khoa
-        if (currentPath.match(/\/departments\/\d+\/doctors$/)) {
-          return true
-        }
-        // Trang chi tiết bác sĩ
-        if (currentPath.match(/\/doctors\/\d+$/)) {
-          return true
-        }
-        // Trang book appointment với doctor ID
-        if (currentPath.match(/\/doctors\/\d+\/book$/)) {
-          return true
-        }
-      }
-
-      // Logic mặc định - exact match hoặc starts with
-      return location.pathname === path || location.pathname.startsWith(path + "/")
+      return (
+        location.pathname === path || location.pathname.startsWith(path + "/")
+      );
     },
-    [location.pathname, location.search, basePath],
-  )
+    [location.pathname, basePath]
+  );
 
   // Đơn giản hóa useEffect để chỉ xử lý auto-open submenu khi có route active
   useEffect(() => {
-    let activeSubmenuIndex: number | null = null
-    const currentPath = location.pathname
-    const searchParams = new URLSearchParams(location.search)
-    const fromParam = searchParams.get("from")
+    let activeSubmenuIndex: number | null = null;
 
     // Tìm submenu có item active
     filteredNavItems.forEach((nav, index) => {
@@ -264,7 +211,7 @@ const AppSidebar: React.FC = () => {
     if (activeSubmenuIndex !== null) {
       setOpenSubmenu(activeSubmenuIndex);
     }
-  }, [location.pathname, location.search, filteredNavItems, isActive, t])
+  }, [location.pathname, filteredNavItems, isActive]);
 
   // Tính toán chiều cao submenu
   useEffect(() => {
@@ -279,7 +226,7 @@ const AppSidebar: React.FC = () => {
   }, [openSubmenu]);
 
   const handleSubmenuToggle = (index: number) => {
-    console.log("Toggle submenu:", index, "Current open:", openSubmenu) // Debug log
+    console.log("Toggle submenu:", index, "Current open:", openSubmenu); // Debug log
     setOpenSubmenu((prevOpen) => {
       // Nếu đang mở cùng submenu thì đóng, nếu không thì mở submenu mới
       return prevOpen === index ? null : index;
@@ -295,12 +242,20 @@ const AppSidebar: React.FC = () => {
               <button
                 onClick={() => handleSubmenuToggle(index)}
                 className={`menu-item group ${
-                  openSubmenu === index ? "menu-item-active" : "menu-item-inactive"
-                } cursor-pointer w-full ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
+                  openSubmenu === index
+                    ? "menu-item-active"
+                    : "menu-item-inactive"
+                } cursor-pointer w-full ${
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center"
+                    : "lg:justify-start"
+                }`}
               >
                 <span
                   className={`menu-item-icon-size ${
-                    openSubmenu === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                    openSubmenu === index
+                      ? "menu-item-icon-active"
+                      : "menu-item-icon-inactive"
                   }`}
                 >
                   {nav.icon}
