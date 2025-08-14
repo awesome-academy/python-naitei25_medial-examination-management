@@ -1,30 +1,33 @@
-import { Routes, Route } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { HomeLayout } from '../public/layouts/HomeLayout';
-import AuthenticatedPatientLayout from './layouts/AuthenticatedPatientLayout';
-import HomePage from '../public/pages/HomePage';
-import DashboardPage from './pages/DashboardPage';
-import DoctorListPage from './pages/DoctorListPage';
-import DoctorBookingPage from './pages/DoctorBookingPage';
-import AppointmentsPage from './pages/AppointmentsPage';
-import AppointmentConfirmationPage from './pages/AppointmentConfirmationPage';
-import PaymentPage from './pages/PaymentPage';
-import DepartmentListPage from './pages/DepartmentListPage';
-import DepartmentDetailPage from './pages/DepartmentDetailPage';
-import DoctorDetailPage from './pages/DoctorDetailPage';
-import ProfilePage from './pages/ProfilePage';
-import UpcomingAppointmentsPage from './pages/UpcomingAppointmentsPage';
-import PastAppointmentsPage from './pages/PastAppointmentsPage';
-import NotFound from '../../shared/components/common/NotFound';
-import PrescriptionsPage from './pages/PrescriptionsPage';
-import PrescriptionDetailPage from './pages/PrescriptionDetailPage';
-import { ScrollToTop } from '../../shared/components/common/ScrollToTop';
-import { PatientProvider } from './context/PatientContext';
-import MedicalRecordDetailPage from './pages/MedicalRecordDetailPage';
-export const PatientApp: React.FC = () => {
-  const { t } = useTranslation();
+import type React from "react"
+import { Routes, Route } from "react-router-dom"
+import { useTranslation } from "react-i18next"
+import { HomeLayout } from "../public/layouts/HomeLayout"
+import AuthenticatedPatientLayout from "./layouts/AuthenticatedPatientLayout"
+import HomePage from "../public/pages/HomePage"
+import DashboardPage from "./pages/DashboardPage"
+import DoctorListPage from "./pages/DoctorListPage"
+import DoctorBookingPage from "./pages/DoctorBookingPage"
+import AppointmentsPage from "./pages/AppointmentsPage"
+import AppointmentConfirmationPage from "./pages/AppointmentConfirmationPage"
+import PaymentPage from "./pages/PaymentPage"
+import DepartmentListPage from "./pages/DepartmentListPage"
+import DepartmentDetailPage from "./pages/DepartmentDetailPage"
+import DoctorDetailPage from "./pages/DoctorDetailPage"
+import ProfilePage from "./pages/ProfilePage"
+import UpcomingAppointmentsPage from "./pages/UpcomingAppointmentsPage"
+import PastAppointmentsPage from "./pages/PastAppointmentsPage"
+import NotFound from "../../shared/components/common/NotFound"
+import PrescriptionsPage from "./pages/PrescriptionsPage"
+import PrescriptionDetailPage from "./pages/PrescriptionDetailPage"
+import { ScrollToTop } from "../../shared/components/common/ScrollToTop"
+import { PatientProvider } from "./context/PatientContext"
+import MedicalRecordDetailPage from "./pages/MedicalRecordDetailPage"
+import DrugLookupPage from "./pages/DrugLookupPage"
 
-  console.log('PatientApp rendering...');
+export const PatientApp: React.FC = () => {
+  const { t } = useTranslation()
+
+  console.log("PatientApp rendering...")
 
   return (
     <PatientProvider>
@@ -52,30 +55,27 @@ export const PatientApp: React.FC = () => {
           <Route path="appointments/past" element={<PastAppointmentsPage />} />
           <Route path="medical-record/:id" element={<MedicalRecordDetailPage />} />
 
-          
           <Route path="profile" element={<ProfilePage />} />
-          <Route path="drug-lookup" element={
-            <div className="p-6">
-              <h1 className="text-2xl font-bold mb-4">{t('sidebar.drugLookup')}</h1>
-              <p>Drug Lookup Page - Coming Soon</p>
-            </div>
-          } />
-          <Route path="ai-diagnosis" element={
-            <div className="p-6">
-              <h1 className="text-2xl font-bold mb-4">{t('sidebar.aiDiagnosis')}</h1>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <span className="inline-block bg-blue-500 text-white text-xs px-2 py-1 rounded mb-2">
-                  {t('sidebar.new')}
-                </span>
-                <p>AI Diagnosis Page - Coming Soon</p>
+          <Route path="drug-lookup" element={<DrugLookupPage />} />
+          <Route
+            path="ai-diagnosis"
+            element={
+              <div className="p-6">
+                <h1 className="text-2xl font-bold mb-4">{t("sidebar.aiDiagnosis")}</h1>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <span className="inline-block bg-blue-500 text-white text-xs px-2 py-1 rounded mb-2">
+                    {t("sidebar.new")}
+                  </span>
+                  <p>AI Diagnosis Page - Coming Soon</p>
+                </div>
               </div>
-            </div>
-          } />
+            }
+          />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PatientProvider>
-  );
-};
+  )
+}
 
-export default PatientApp;
+export default PatientApp
