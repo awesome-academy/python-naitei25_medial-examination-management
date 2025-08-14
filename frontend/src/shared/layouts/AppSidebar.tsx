@@ -195,14 +195,21 @@ const AppSidebar: React.FC = () => {
     });
 
     // Xử lý đặc biệt cho medical record với from parameter
-    if (activeSubmenuIndex === null && currentPath.match(/\/medical-record\/\d+$/)) {
-      if (fromParam === "past-appointments" || fromParam === "upcoming-appointments") {
-        // Tìm appointments submenu
+    if (
+      activeSubmenuIndex === null &&
+      location.pathname.match(/\/medical-record\/\d+$/)
+    ) {
+      const fromParam = new URLSearchParams(location.search).get("from");
+
+      if (
+        fromParam === "past-appointments" ||
+        fromParam === "upcoming-appointments"
+      ) {
         const appointmentIndex = filteredNavItems.findIndex(
-          (item) => item.name === t("sidebar.appointments") && item.subItems,
-        )
+          (item) => item.name === t("sidebar.appointments") && item.subItems
+        );
         if (appointmentIndex !== -1) {
-          activeSubmenuIndex = appointmentIndex
+          activeSubmenuIndex = appointmentIndex;
         }
       }
     }
