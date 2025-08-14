@@ -216,7 +216,11 @@
     "selectWorkingDate": "Select working date",
     "selectRoom": "Select room",
     "shift": "Shift",
-    "status": "Status"
+    "status": "Status",
+    "searchMedicine": "Search medicine...",
+    "doctorNotes": "Enter doctor's notes",
+    "addNewNote": "Add a new note...",
+    "duration": "Enter duration (days)"
   },
   "language": {
     "selectLanguage": "Select Language",
@@ -280,6 +284,22 @@
     "appointments": "Appointments",
     "upcomingAppointments": "Upcoming Appointments",
     "pastAppointments": "Past Appointments"
+  },
+  "tabs": {
+    "testResults": "Test Results",
+    "notes": "Notes",
+    "prescriptions": "Prescriptions"
+  },
+  "headers": {
+    "testResults": "Test Results",
+    "notes": "Notes",
+    "prescriptions": "Prescriptions"
+  },
+  "titles": {
+    "createPrescription": "Create Prescription",
+    "prescriptionPDF": "Prescription PDF",
+    "patientDetails": "Patient Details",
+    "prescriptionHistory": "Prescription Details"
   },
   "layout": {
     "toggleSidebar": "Toggle Sidebar",
@@ -346,7 +366,8 @@
     "forgotPasswordFailed": "OTP request failed",
     "resetPasswordFailed": "Password reset failed",
     "resendOtpFailed": "Resend OTP failed",
-    "fetchWorkSchedules": "Failed to fetch work schedules"
+    "fetchWorkSchedules": "Failed to fetch work schedules",
+    "noPatientInfo": "No patient information"
   },
   "api": {
     "loading": "Loading...",
@@ -389,12 +410,35 @@
     "orderId": "Order ID",
     "viewPDF": "View PDF",
     "download": "Download",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "medicine": "Medicine",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "instructions": "Instructions",
+    "duration": "Duration",
+    "unit": "Unit",
+    "quantity": "Quantity"
+  },
+  "units": {
+    "mmHg": "mmHg",
+    "bpm": "bpm",
+    "mgPerDl": "mg/dL"
+  },
+  "currency": {
+    "vnd": "VND"
   },
   "buttons": {
     "clearFilters": "Clear Filters",
     "today": "Today",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "cancel": "Cancel",
+    "savePrescription": "Save Prescription",
+    "addNote": "Add Note",
+    "addPrescription": "Add Prescription",
+    "completeExamination": "Complete Examination",
+    "refreshAll": "Refresh All",
+    "pendingTestResult": "Pending Test Result",
+    "retry": "Retry"
   },
   "stats": {
     "totalAppointments": "Total Appointments",
@@ -420,11 +464,31 @@
   },
   "empty": {
     "loading": "Loading...",
-    "noPatientsFound": "No patients found"
+    "noPatientsFound": "No patients found",
+    "noMedicinesInPrescription": "No medicines in this prescription",
+    "noTestResults": "No test results",
+    "noNotes": "No notes"
   },
   "options": {
     "allShifts": "All shifts",
-    "allStatuses": "All statuses"
+    "allStatuses": "All statuses",
+    "frequency": {
+      "onceMorning": "Once in the morning",
+      "onceNoon": "Once at noon",
+      "onceAfternoon": "Once in the afternoon",
+      "onceEvening": "Once in the evening",
+      "twiceMorningEvening": "Twice a day (morning & evening)",
+      "thriceMorningNoonAfternoon": "Three times a day (morning, noon, afternoon)"
+    },
+    "instructions": {
+      "beforeMeal": "Before meal",
+      "beforeMeal30Min": "30 minutes before meal",
+      "afterMeal": "After meal",
+      "afterMeal30Min": "30 minutes after meal",
+      "duringMeal": "During meal",
+      "beforeSleep30Min": "30 minutes before sleep",
+      "asNeeded": "As needed"
+    }
   },
   "pagination": {
     "showing": "Showing {{start}}-{{end}} of {{total}} patients"
@@ -476,8 +540,38 @@
     "shareText": "Prescription details #{{id}}",
     "linkCopied": "Link copied to clipboard"
   },
+  "prescriptionHistory": {
+    "totalMedicineTypes": "Total medicine types",
+    "totalPrescriptionValue": "Total prescription value"
+  },
   "labels": {
-    "noNotes": "No notes"
+    "noNotes": "No notes",
+    "patient": "Patient",
+    "patientCode": "Patient Code",
+    "date": "Date",
+    "time": "Time",
+    "doctorNotes": "Doctor's Notes",
+    "prescription": "Prescription",
+    "prescriptionDate": "Prescription Date",
+    "diagnosis": "Diagnosis",
+    "followUpAppointment": "Follow-up Appointment",
+    "status": "Status",
+    "patientName": "Patient Name",
+    "clinic": "Clinic",
+    "appointmentTime": "Appointment Time",
+    "appointmentDate": "Appointment Date",
+    "symptoms": "Symptoms",
+    "followUp": "Follow-up",
+    "followUpCheckbox": "Schedule follow-up appointment",
+    "followUpDate": "Follow-up Date",
+    "systolicBloodPressure": "Systolic Blood Pressure",
+    "diastolicBloodPressure": "Diastolic Blood Pressure",
+    "heartRate": "Heart Rate",
+    "bloodSugar": "Blood Sugar",
+    "unknownPatient": "Unknown patient",
+    "unknownClinic": "Unknown clinic",
+    "currency": "Currency",
+    "available": "Available"
   },
   "medicalRecord": {
     "noAppointmentFound": "No appointment found.",

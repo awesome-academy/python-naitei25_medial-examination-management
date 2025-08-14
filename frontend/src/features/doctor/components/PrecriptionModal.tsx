@@ -190,7 +190,7 @@ export const PrescriptionModal: React.FC<ModalProps> = ({
                         <div className="font-medium">{record.medicine.medicine_name || t("labels.noName")}</div>
                         <div className="text-sm text-gray-500">{record.medicine.category || t("labels.noCategory")}</div>
                         <div className="text-xs text-gray-400">
-                            {(record.medicine.price || 0).toLocaleString("vi-VN")} {t("labels.currency")}/{record.medicine.unit || t("labels.unit")}
+                            {(record.medicine.price || 0).toLocaleString("vi-VN")} VND/{record.medicine.unit || t("labels.unit")}
                         </div>
                         {record.medicine.quantity && <div className="text-xs text-gray-400">{t("labels.available")}: {record.medicine.quantity}</div>}
                     </div>
@@ -218,38 +218,16 @@ export const PrescriptionModal: React.FC<ModalProps> = ({
             width: 200,
             render: (text: string, record: PrescriptionDetail, index: number) => (
                 <Select
-                    value={text || t("options.frequency.onceMorning")}
+                    value={ t("options.frequency.onceMorning") || text}
                     onChange={(value) => updateMedicationField(index, "frequency", value)}
                     style={{ width: "100%" }}
                     options={[
-                        { value: t("options.frequency.onceMorning"), label: t("options.frequency.onceMorning") },
-                        { value: t("options.frequency.onceNoon"), label: t("options.frequency.onceNoon") },
-                        { value: t("options.frequency.onceAfternoon"), label: t("options.frequency.onceAfternoon") },
-                        { value: t("options.frequency.onceEvening"), label: t("options.frequency.onceEvening") },
-                        { value: t("options.frequency.twiceMorningEvening"), label: t("options.frequency.twiceMorningEvening") },
-                        { value: t("options.frequency.thriceMorningNoonAfternoon"), label: t("options.frequency.thriceMorningNoonAfternoon") },
-                    ]}
-                />
-            ),
-        },
-        {
-            title: t("table.instructions"),
-            dataIndex: "prescriptionNotes",
-            key: "prescriptionNotes",
-            width: 150,
-            render: (text: string, record: PrescriptionDetail, index: number) => (
-                <Select
-                    value={text || t("options.instructions.beforeMeal")}
-                    onChange={(value) => updateMedicationField(index, "prescriptionNotes", value)}
-                    style={{ width: "100%" }}
-                    options={[
-                        { value: t("options.instructions.beforeMeal"), label: t("options.instructions.beforeMeal") },
-                        { value: t("options.instructions.beforeMeal30Min"), label: t("options.instructions.beforeMeal30Min") },
-                        { value: t("options.instructions.afterMeal"), label: t("options.instructions.afterMeal") },
-                        { value: t("options.instructions.afterMeal30Min"), label: t("options.instructions.afterMeal30Min") },
-                        { value: t("options.instructions.duringMeal"), label: t("options.instructions.duringMeal") },
-                        { value: t("options.instructions.beforeSleep30Min"), label: t("options.instructions.beforeSleep30Min") },
-                        { value: t("options.instructions.asNeeded"), label: t("options.instructions.asNeeded") },
+                        { value: "1 lần buổi sáng", label: t("options.frequency.onceMorning") },
+                        { value: "1 lần buổi trưa", label: t("options.frequency.onceNoon") },
+                        { value: "1 lần buổi chiều", label: t("options.frequency.onceAfternoon") },
+                        { value: "1 lần buổi tối", label: t("options.frequency.onceEvening") },
+                        { value: "2 lần sáng tối", label: t("options.frequency.twiceMorningEvening") },
+                        { value: "3 lần sáng trưa chiều", label: t("options.frequency.thriceMorningNoonAfternoon") },
                     ]}
                 />
             ),
