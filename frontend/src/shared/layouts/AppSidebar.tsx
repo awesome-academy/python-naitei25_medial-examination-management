@@ -1,4 +1,6 @@
-import type React from "react";
+"use client"
+
+import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -63,23 +65,10 @@ const AppSidebar: React.FC = () => {
       roles: ["A", "D"], // Chỉ hiển thị cho bác sĩ loại E
     },
     {
-      // name: t("sidebar.examination"),
-      // icon: <CalendarIcon />,
-      // subItems: [
-      //   {
           icon: <CalendarIcon />,
           name: t("sidebar.calendar"),
           path: `${basePath}/calendar`,
           roles: ["A"],
-          // pro: false,
-      //   },
-      //   {
-      //     name: t("sidebar.outpatientClinics"),
-      //     path: `${basePath}/outpatient-clinics`,
-      //     pro: false,
-      //   },
-      // ],
-      // roles: ["A", "RECEPTIONIST"],
     },
     {
       icon: <AdminIcon />,
@@ -172,6 +161,16 @@ const AppSidebar: React.FC = () => {
 
       if (path === basePath) {
         return location.pathname === path;
+      }
+
+      // Xử lý đặc biệt cho các detail routes
+      const currentPath = location.pathname
+      const searchParams = new URLSearchParams(location.search)
+      const fromParam = searchParams.get("from")
+
+      // Nếu đang ở trang chi tiết prescription, highlight menu prescriptions
+      if (currentPath.match(/\/prescriptions\/\d+$/) && path.endsWith("/prescriptions")) {
+        return true
       }
       return (
         location.pathname === path || location.pathname.startsWith(path + "/")
