@@ -77,7 +77,6 @@ const DashboardPage: React.FC = () => {
           console.error("Failed to fetch my appointments:", error);
         }
 
-        // Lấy lịch hẹn sắp tới
         try {
           console.log("Fetching upcoming appointments...");
           const upcomingData =
