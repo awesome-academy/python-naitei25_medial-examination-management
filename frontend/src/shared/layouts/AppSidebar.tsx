@@ -1,5 +1,4 @@
 import type React from "react";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -82,29 +81,6 @@ const AppSidebar: React.FC = () => {
       // ],
       // roles: ["A", "RECEPTIONIST"],
     },
-    // {
-    //   name: t("sidebar.inpatient"),
-    //   icon: <InpatientIcon />,
-    //   subItems: [
-    //     {
-    //       name: t("sidebar.inpatientRooms"),
-    //       path: `${basePath}/inpatients-rooms`,
-    //       pro: false,
-    //     },
-    //     {
-    //       name: t("sidebar.inpatientPatients"),
-    //       path: `${basePath}/inpatients`,
-    //       pro: false,
-    //     },
-    //   ],
-    //   roles: ["A", "RECEPTIONIST"],
-    // },
-    // {
-    //   icon: <DepartmentIcon />,
-    //   name: t("sidebar.departments"),
-    //   path: `${basePath}/departments`,
-    //   roles: ["A", "RECEPTIONIST"],
-    // },
     {
       icon: <AdminIcon />,
       name: t("sidebar.authorization"),
@@ -117,18 +93,6 @@ const AppSidebar: React.FC = () => {
       path: `${basePath}/doctors`,
       roles: ["A"],
     },
-    // {
-    //   icon: <CalendarIcon />,
-    //   name: t("sidebar.medicines"),
-    //   path: `${basePath}/medicines`,
-    //   roles: ["A"],
-    // },
-    // {
-    //   icon: <BoxCubeIcon />,
-    //   name: t("sidebar.healthServices"),
-    //   path: `${basePath}/health-services`,
-    //   roles: ["A"],
-    // },
     {
       icon: <CalendarIcon />,
       name: t("sidebar.workSchedule"),
@@ -206,7 +170,6 @@ const AppSidebar: React.FC = () => {
         return location.pathname === path;
       }
 
-      // Xử lý cho các route khác
       if (path === basePath) {
         return location.pathname === path;
       }
@@ -231,6 +194,19 @@ const AppSidebar: React.FC = () => {
         });
       }
     });
+
+    // Xử lý đặc biệt cho medical record với from parameter
+    if (activeSubmenuIndex === null && currentPath.match(/\/medical-record\/\d+$/)) {
+      if (fromParam === "past-appointments" || fromParam === "upcoming-appointments") {
+        // Tìm appointments submenu
+        const appointmentIndex = filteredNavItems.findIndex(
+          (item) => item.name === t("sidebar.appointments") && item.subItems,
+        )
+        if (appointmentIndex !== -1) {
+          activeSubmenuIndex = appointmentIndex
+        }
+      }
+    }
 
     // Chỉ set submenu active nếu tìm thấy
     if (activeSubmenuIndex !== null) {
