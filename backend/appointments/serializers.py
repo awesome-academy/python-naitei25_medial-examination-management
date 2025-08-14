@@ -181,7 +181,6 @@ class AppointmentUpdateSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = [
             'id', 'doctor', 'patient', 'schedule', 'symptoms',
-            'number',
             'status', 'slot_start', 'slot_end'
         ]
 
