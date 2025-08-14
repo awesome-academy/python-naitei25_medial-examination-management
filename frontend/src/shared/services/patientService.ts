@@ -193,7 +193,7 @@ async uploadAvatar(patientId: string | number, file: File): Promise<{ avatar: st
 
   async getPatientByUserId(userId: number): Promise<Patient> {
     try {
-      const response = await api.get<Patient>(`/patients/?user_id=${userId}/`);
+      const response = await api.get<Patient>(`/patients/?user_id=${userId}`);
       if (!response.data) {
         throw new Error(i18n.t("services.patient.patientNotFound"));
       }
