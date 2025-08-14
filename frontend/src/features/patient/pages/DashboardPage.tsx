@@ -4,6 +4,7 @@ import { useAuth } from "../../../shared/context/AuthContext";
 import { patientApiService } from "../services/patientApiService";
 import { Calendar, Clock, FileText, User, Activity, Bell } from "lucide-react";
 import { patientService } from "../../../shared/services/patientService";
+
 interface DashboardStats {
   upcomingAppointments: number;
   totalAppointments: number;
@@ -117,7 +118,6 @@ const DashboardPage: React.FC = () => {
           upcomingAppointments?.slice(0, 2)?.map((appt: any) => ({
             id: appt?.id || Math.random(),
             doctorName: appt?.doctorInfo?.fullName || "Bác sĩ không xác định",
-
             specialization:
               appt?.doctorInfo?.specialization ||
               appt?.doctorInfo?.department ||

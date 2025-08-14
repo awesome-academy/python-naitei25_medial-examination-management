@@ -1,194 +1,150 @@
-import MedicalRecord from "./MedicalRecord";
-import AddMedicalRecordModal from "./AddMedicalRecordModal";
-import EditMedicalRecordModal from "./EditMedicalRecordModal";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../../ui/table";
-import { format } from "date-fns";
-import Badge from "../../ui/badge/Badge";
-import React, { useState, useEffect } from "react";
-import { patientService } from "../../../services/patientService";
-import {
-  Patient,
-  EmergencyContact,
-  PatientDto,
-  EmergencyContactDto,
-} from "../../../types/patient";
-import { useParams, useNavigate } from "react-router-dom";
-import { appointmentService } from "../../../services/appointmentService";
-import {
-  Appointment,
-  AppointmentUpdateRequest,
-} from "../../../types/appointment";
-import { AppointmentModal, DeleteAppointmentModal } from "./AppointmentModal";
-import { Bill } from "../../../types/payment";
-import { paymentService } from "../../../services/paymentService";
-import { BillModal, DeleteBillModal } from "./BillModal";
-import { PrescriptionResponse, UpdatePrescriptionRequest } from "../../../types/pharmacy";
-import { medicineService } from "../../../services/pharmacyService";
-import { DeleteConfirmationModal } from "../../ui/modal/DeleteConfirmationModal";
+"use client"
+
+import MedicalRecord from "./MedicalRecord"
+import AddMedicalRecordModal from "./AddMedicalRecordModal"
+import EditMedicalRecordModal from "./EditMedicalRecordModal"
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table"
+import { format } from "date-fns"
+import Badge from "../../ui/badge/Badge"
+import type React from "react"
+import { useState, useEffect } from "react"
+import { patientService } from "../../../services/patientService"
+import type { Patient, EmergencyContact, PatientUpdateDto, EmergencyContactDto } from "../../../types/patient"
+import { useParams, useNavigate } from "react-router-dom"
+import { appointmentService } from "../../../services/appointmentService"
+import type { Appointment, AppointmentUpdateRequest } from "../../../types/appointment"
+import { AppointmentModal, DeleteAppointmentModal } from "./AppointmentModal"
+import type { Bill } from "../../../types/payment"
+import { paymentService } from "../../../services/paymentService"
+import { BillModal } from "./BillModal"
+import type { PrescriptionResponse, UpdatePrescriptionRequest } from "../../../types/pharmacy"
+import { pharmacyService } from "../../../services/pharmacyService"
+import { DeleteConfirmationModal } from "../../ui/modal/DeleteConfirmationModal"
+import { useModal } from "../../../hooks/useModal"
+import { Loader2 } from "lucide-react"
+import type { CreatePrescriptionRequest } from "../../../types/pharmacy"
 
 export function MedicalRecordsContent() {
-  const { patientId } = useParams();
-  const navigate = useNavigate();
-  const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingPrescription, setEditingPrescription] = useState<PrescriptionResponse | null>(null);
-  const [deletingPrescriptionId, setDeletingPrescriptionId] = useState<number | null>(null);
+  const { patientId } = useParams()
+  const navigate = useNavigate()
+  const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null) // Thêm trạng thái lỗi
+  const [selectedPrescription, setSelectedPrescription] = useState<PrescriptionResponse | null>(null)
+
+  const { isOpen: isAddModalOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal()
+  const { isOpen: isEditModalOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal()
+  const {
+    isOpen: isDeleteConfirmModalOpen,
+    openModal: openDeleteConfirmModal,
+    closeModal: closeDeleteConfirmModal,
+  } = useModal()
+  const [deletingPrescriptionId, setDeletingPrescriptionId] = useState<number | null>(null)
+
+  const fetchMedicalRecords = async () => {
+    if (!patientId) {
+      setError("ID bệnh nhân không hợp lệ.")
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    setError(null) // Reset lỗi
+    try {
+      console.log("=== DEBUG: Fetching medical records for patient ===", patientId)
+      const data = await pharmacyService.getPrescriptionHistoryByPatientId(Number(patientId))
+      console.log("=== DEBUG: Received data from service ===", data)
+
+      // Đảm bảo dữ liệu được ánh xạ đúng cách, đặc biệt là quantity
+      const mappedData = data.map((prescription: any) => ({
+        ...prescription,
+        prescriptionDetails:
+          prescription.prescriptionDetails?.map((detail: any) => ({
+            ...detail,
+            prescriptionId: detail.prescriptionId ?? prescription.prescriptionId,
+            quantity: detail.quantity !== undefined && detail.quantity !== null ? Number(detail.quantity) : 1,
+          })) ?? [],
+      }))
+
+      console.log("=== DEBUG: Final mapped data for state ===", mappedData)
+      setPrescriptions(mappedData)
+    } catch (err) {
+      console.error("Lỗi khi tải bệnh án:", err)
+      setError("Không thể tải bệnh án. Vui lòng thử lại sau.")
+      setPrescriptions([]) // Đặt lại danh sách rỗng khi có lỗi
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    if (!patientId) return;
-    const fetchPrescriptions = async () => {
-      try {
-        setLoading(true);
-        const data = await medicineService.getPrescriptionsByPatientId(
-          Number(patientId)
-        );
-        console.log("Raw prescription data from backend:", data);
-        
-        // Additional processing to ensure quantity is properly handled
-        const mappedData = data.map((prescription: any) => ({
-          ...prescription,
-          prescriptionDetails:
-            prescription.prescriptionDetails?.map((detail: any) => {
-              console.log(`Mapping prescription detail: ID=${detail.detailId}, quantity=${detail.quantity}, type=${typeof detail.quantity}`);
-              return {
-                ...detail,
-                prescriptionId: detail.prescriptionId ?? prescription.prescriptionId,
-                // Ensure quantity is a number and has a default value
-                quantity: detail.quantity !== undefined && detail.quantity !== null ? Number(detail.quantity) : 1
-              };
-            }) ?? [],
-        }));
-        console.log("Final mapped prescription data:", mappedData);
-        setPrescriptions(mappedData);
-      } catch (error) {
-        console.error("Error fetching prescriptions:", error);
-        setPrescriptions([]);
-      } finally {
-        setLoading(false);
-      }
+    fetchMedicalRecords()
+  }, [patientId])
+
+  const handleAddMedicalRecord = async (appointmentId: number, prescriptionData: CreatePrescriptionRequest) => {
+  try {
+    const finalData = {
+      ...prescriptionData,
+      appointment_id: appointmentId,
+      patient_id: Number(patientId) 
     };
-    fetchPrescriptions();
-  }, [patientId]);
 
-  // Hàm xử lý khi submit modal
-  const handleAddMedicalRecord = async (data: any) => {
-    try {
-      console.log("Creating prescription with data:", data);
-      await medicineService.createPrescription(data);
-      setIsAddModalOpen(false);
-      
-      // Reload list with timeout to ensure state updates
-      setTimeout(async () => {
-        if (patientId) {
-          try {
-            const newData = await medicineService.getPrescriptionsByPatientId(
-              Number(patientId)
-            );
-            const mappedData = newData.map((prescription: any) => ({
-              ...prescription,
-              prescriptionDetails:
-                prescription.prescriptionDetails?.map((detail: any) => ({
-                  ...detail,
-                  prescriptionId:
-                    detail.prescriptionId ?? prescription.prescriptionId,
-                })) ?? [],
-            }));
-            setPrescriptions(mappedData);
-          } catch (error) {
-            console.error("Error reloading prescriptions:", error);
-          }
-        }
-      }, 200);
-    } catch (error) {
-      console.error("Error creating prescription:", error);
-      alert("Thêm bệnh án thất bại!");
-    }
-  };
+    await pharmacyService.createPrescription(finalData);
+    await fetchMedicalRecords();
+    closeAddModal();
+  } catch (err) {
+    console.error("Lỗi khi thêm bệnh án:", err);
+    alert("Thêm bệnh án thất bại! Vui lòng kiểm tra lại thông tin.");
+  }
+};
 
-  // Hàm xử lý chỉnh sửa bệnh án
+
   const handleEditMedicalRecord = (prescriptionId: number) => {
-    const prescription = prescriptions.find(p => p.prescriptionId === prescriptionId);
-    if (prescription) {
-      setEditingPrescription(prescription);
+    const prescriptionToEdit = prescriptions.find((p) => p.prescriptionId === prescriptionId)
+    if (prescriptionToEdit) {
+      setSelectedPrescription(prescriptionToEdit)
+      openEditModal()
+    } else {
+      alert("Không tìm thấy bệnh án để chỉnh sửa.")
     }
-  };
+  }
 
-  // Hàm xử lý khi submit edit modal
   const handleUpdateMedicalRecord = async (prescriptionId: number, data: UpdatePrescriptionRequest) => {
     try {
-      await medicineService.updatePrescription(prescriptionId, data);
-      setEditingPrescription(null);
-      // Reload list
-      if (patientId) {
-        const newData = await medicineService.getPrescriptionsByPatientId(
-          Number(patientId)
-        );
-        const mappedData = newData.map((prescription: any) => ({
-          ...prescription,
-          prescriptionDetails:
-            prescription.prescriptionDetails?.map((detail: any) => ({
-              ...detail,
-              prescriptionId:
-                detail.prescriptionId ?? prescription.prescriptionId,
-            })) ?? [],
-        }));
-        setPrescriptions(mappedData);
-      }
-    } catch (error) {
-      alert("Cập nhật bệnh án thất bại!");
+      await pharmacyService.updatePrescription(prescriptionId, data)
+      await fetchMedicalRecords() // Tải lại dữ liệu sau khi cập nhật
+      closeEditModal() // Đóng modal
+    } catch (err) {
+      console.error("Lỗi khi cập nhật bệnh án:", err)
+      alert("Cập nhật bệnh án thất bại! Vui lòng kiểm tra lại thông tin.")
     }
-  };
+  }
 
-  // Hàm xử lý xóa bệnh án
   const handleDeleteMedicalRecord = (prescriptionId: number) => {
-    setDeletingPrescriptionId(prescriptionId);
-  };
+    setDeletingPrescriptionId(prescriptionId)
+    openDeleteConfirmModal()
+  }
 
-  // Hàm xử lý xác nhận xóa bệnh án
   const handleConfirmDeleteMedicalRecord = async () => {
-    if (!deletingPrescriptionId) return;
-    
+    if (!deletingPrescriptionId) return
+
     try {
-      await medicineService.deletePrescription(deletingPrescriptionId);
-      setDeletingPrescriptionId(null);
-      // Reload list after delete
-      if (patientId) {
-        const newData = await medicineService.getPrescriptionsByPatientId(
-          Number(patientId)
-        );
-        const mappedData = newData.map((prescription: any) => ({
-          ...prescription,
-          prescriptionDetails:
-            prescription.prescriptionDetails?.map((detail: any) => ({
-              ...detail,
-              prescriptionId:
-                detail.prescriptionId ?? prescription.prescriptionId,
-            })) ?? [],
-        }));
-        setPrescriptions(mappedData);
-      }
-      alert("Xóa bệnh án thành công!");
-    } catch (error) {
-      alert("Xóa bệnh án thất bại!");
+      await pharmacyService.deletePrescription(deletingPrescriptionId)
+      await fetchMedicalRecords() // Tải lại dữ liệu sau khi xóa
+      closeDeleteConfirmModal()
+      alert("Xóa bệnh án thành công!")
+    } catch (err) {
+      console.error("Lỗi khi xóa bệnh án:", err)
+      alert("Xóa bệnh án thất bại! Vui lòng thử lại.")
     }
-  };
+  }
 
   return (
-    <div className=" font-outfit bg-white py-6 px-4 rounded-lg border border-gray-200">
+    <div className="font-outfit bg-white py-6 px-4 rounded-lg border border-gray-200">
       <div className="flex justify-between mb-4 ml-1">
         <h2 className="text-xl font-semibold">Bệnh án</h2>
         <button
           className="flex items-center justify-center bg-base-700 py-2.5 px-5 rounded-lg text-white text-sm hover:bg-base-700/70"
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={openAddModal} // Sử dụng openAddModal từ useModal
         >
           Thêm bệnh án
           <span className="ml-2 text-lg">+</span>
@@ -196,15 +152,22 @@ export function MedicalRecordsContent() {
       </div>
       <div className="grid grid-cols-1 gap-4">
         {loading ? (
-          <div className="text-center py-8">Đang tải bệnh án...</div>
-        ) : prescriptions.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            Không có bệnh án nào.
+          <div className="text-center py-8 text-gray-500 flex items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Đang tải bệnh án...
           </div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-600">
+            <p>{error}</p>
+            <button onClick={fetchMedicalRecords} className="mt-2 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+              Thử lại
+            </button>
+          </div>
+        ) : prescriptions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">Không có bệnh án nào.</div>
         ) : (
           prescriptions.map((pres) => (
-            <MedicalRecord 
-              key={pres.prescriptionId} 
+            <MedicalRecord
+              key={pres.prescriptionId}
               prescription={pres}
               onEdit={handleEditMedicalRecord}
               onDelete={handleDeleteMedicalRecord}
@@ -214,19 +177,21 @@ export function MedicalRecordsContent() {
       </div>
       <AddMedicalRecordModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={closeAddModal} // Sử dụng closeModal từ useModal
         onSubmit={handleAddMedicalRecord}
         patientId={Number(patientId)}
+        // Nếu có appointmentId từ context, bạn có thể truyền vào đây
+        // appointmentId={someAppointmentId}
       />
       <EditMedicalRecordModal
-        isOpen={!!editingPrescription}
-        onClose={() => setEditingPrescription(null)}
+        isOpen={isEditModalOpen} // Sử dụng isEditModalOpen từ useModal
+        onClose={closeEditModal} // Sử dụng closeModal từ useModal
         onSubmit={handleUpdateMedicalRecord}
-        prescription={editingPrescription}
+        prescription={selectedPrescription} // Sử dụng selectedPrescription
       />
       <DeleteConfirmationModal
-        isOpen={!!deletingPrescriptionId}
-        onClose={() => setDeletingPrescriptionId(null)}
+        isOpen={isDeleteConfirmModalOpen} // Sử dụng isDeleteConfirmModalOpen từ useModal
+        onClose={closeDeleteConfirmModal} // Sử dụng closeModal từ useModal
         onConfirm={handleConfirmDeleteMedicalRecord}
         title="Xác nhận xóa bệnh án"
         message="Bạn có chắc chắn muốn xóa bệnh án này không? Hành động này không thể hoàn tác."
@@ -234,70 +199,62 @@ export function MedicalRecordsContent() {
         cancelButtonText="Hủy"
       />
     </div>
-  );
+  )
 }
 
 // AppointmentsContent
 export function AppointmentsContent() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const { patientId } = useParams();
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Appointment | null>(null);
-  const [deleteModal, setDeleteModal] = useState<Appointment | null>(null);
-  const [editModal, setEditModal] = useState<AppointmentUpdateRequest | null>(
-    null
-  );
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const { patientId } = useParams()
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+  const [deleteModal, setDeleteModal] = useState<Appointment | null>(null)
+  const [editModal, setEditModal] = useState<AppointmentUpdateRequest | null>(null)
 
   const formatHHmm = (timeStr: string) => {
-    if (!timeStr) return "N/A";
-    const parts = timeStr.split(":");
-    if (parts.length < 2) return "N/A";
-    return `${parts[0]}:${parts[1]}`;
-  };
+    if (!timeStr) return "N/A"
+    const parts = timeStr.split(":")
+    if (parts.length < 2) return "N/A"
+    return `${parts[0]}:${parts[1]}`
+  }
 
   const reloadAppointments = async () => {
-    if (!patientId) return;
+    if (!patientId) return
     try {
-      const data = await appointmentService.getAppointmentsByPatientId(
-        Number(patientId)
-      );
-      setAppointments(Array.isArray(data) ? data : data.content || []);
+      const data = await appointmentService.getAppointmentsByPatientId(Number(patientId))
+      setAppointments(Array.isArray(data) ? data : data.content || [])
     } catch (error) {
-      console.error("Failed to fetch appointments:", error);
+      console.error("Failed to fetch appointments:", error)
     }
-  };
+  }
+
+  useEffect(() => {
+    reloadAppointments()
+  }, [patientId])
 
   const handleEdit = async (appointmentId: number) => {
     try {
-      const data = await appointmentService.getAppointmentById(appointmentId);
+      const data = await appointmentService.getAppointmentById(appointmentId)
       setEditModal({
         appointmentId: data.appointmentId,
         doctorId: data.doctorId,
         patientId: data.patientInfo?.patientId ?? data.patientId ?? 0,
         scheduleId: data.schedule?.scheduleId ?? data.scheduleId ?? 0,
         symptoms: data.symptoms || "",
-        number:
-          typeof data.number === "number"
-            ? data.number
-            : parseInt(data.number, 10) || 0,
+        // The 'number' field is missing in AppointmentUpdateRequest, assuming it's not needed for update payload
+        // If it is, you'll need to add it to AppointmentUpdateRequest type
         appointmentStatus: data.appointmentStatus,
         slotStart: data.slotStart,
         slotEnd: data.slotEnd,
-      });
+      })
     } catch (error) {
-      alert("Không thể tải thông tin cuộc hẹn!");
+      alert("Không thể tải thông tin cuộc hẹn!")
     }
-  };
-
-  useEffect(() => {
-    reloadAppointments();
-  }, [patientId]);
+  }
 
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4 ml-1">Lịch khám</h2>
       <Table>
-        {/* Table Header */}
         <TableHeader className="border-b border-gray-100 bg-slate-600/10 dark:border-white/[0.05]">
           <TableRow>
             <TableCell
@@ -306,34 +263,21 @@ export function AppointmentsContent() {
             >
               Mã đặt lịch
             </TableCell>
-            <TableCell
-              isHeader
-              className="px-4 py-3 font-medium text-gray-800 text-theme-sm dark:text-gray-400"
-            >
+            <TableCell isHeader className="px-4 py-3 font-medium text-gray-800 text-theme-sm dark:text-gray-400">
               Tên bác sĩ
             </TableCell>
-            <TableCell
-              isHeader
-              className="px-4 py-3 font-medium text-gray-800 text-theme-sm dark:text-gray-400"
-            >
+            <TableCell isHeader className="px-4 py-3 font-medium text-gray-800 text-theme-sm dark:text-gray-400">
               Tình trạng
             </TableCell>
-            <TableCell
-              isHeader
-              className="px-4 py-3 font-medium text-gray-800 text-theme-sm dark:text-gray-400"
-            >
+            <TableCell isHeader className="px-4 py-3 font-medium text-gray-800 text-theme-sm dark:text-gray-400">
               Thời gian khám
             </TableCell>
-            <TableCell
-              isHeader
-              className="px-3 py-3 font-medium text-gray-800 text-theme-sm dark:text-gray-400"
-            >
+            <TableCell isHeader className="px-3 py-3 font-medium text-gray-800 text-theme-sm dark:text-gray-400">
               Hành động
             </TableCell>
           </TableRow>
         </TableHeader>
 
-        {/* Table Body */}
         <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
           {appointments.length > 0 ? (
             appointments.map((appt) => (
@@ -351,23 +295,23 @@ export function AppointmentsContent() {
                       appt.appointmentStatus === "PENDING"
                         ? "pending"
                         : appt.appointmentStatus === "COMPLETED"
-                        ? "completed"
-                        : appt.appointmentStatus === "CANCELLED"
-                        ? "cancelled"
-                        : appt.appointmentStatus === "CONFIRMED"
-                        ? "confirmed"
-                        : "light"
+                          ? "completed"
+                          : appt.appointmentStatus === "CANCELLED"
+                            ? "cancelled"
+                            : appt.appointmentStatus === "CONFIRMED"
+                              ? "confirmed"
+                              : "light"
                     }
                   >
                     {appt.appointmentStatus === "PENDING"
                       ? "Chờ xác nhận"
                       : appt.appointmentStatus === "COMPLETED"
-                      ? "Đã khám"
-                      : appt.appointmentStatus === "CANCELLED"
-                      ? "Đã hủy"
-                      : appt.appointmentStatus === "CONFIRMED"
-                      ? "Đã xác nhận"
-                      : "Chưa xác định"}
+                        ? "Đã khám"
+                        : appt.appointmentStatus === "CANCELLED"
+                          ? "Đã hủy"
+                          : appt.appointmentStatus === "CONFIRMED"
+                            ? "Đã xác nhận"
+                            : "Chưa xác định"}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
@@ -375,7 +319,6 @@ export function AppointmentsContent() {
                 </TableCell>
                 <TableCell className="px-4 py-3 flex items-center text-gray-500 text-theme-md dark:text-gray-400">
                   <div className="flex gap-2">
-                    {/* Xem */}
                     <button
                       onClick={() => setSelectedAppointment(appt)}
                       className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
@@ -394,7 +337,6 @@ export function AppointmentsContent() {
                         />
                       </svg>
                     </button>
-                    {/* Sửa */}
                     <button
                       onClick={() => handleEdit(appt.appointmentId)}
                       className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors"
@@ -408,7 +350,6 @@ export function AppointmentsContent() {
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                       </svg>
                     </button>
-                    {/* Xóa */}
                     <button
                       onClick={() => setDeleteModal(appt)}
                       className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
@@ -433,23 +374,15 @@ export function AppointmentsContent() {
           ) : (
             <TableRow>
               <TableCell className="text-center text-gray-500">
-                <span className="block col-span-5">
-                  Không có lịch khám nào.
-                </span>
+                <span className="block col-span-5">Không có lịch khám nào.</span>
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
-      {/* Hiển thị modal xem chi tiết */}
       {selectedAppointment && (
-        <AppointmentModal
-          {...selectedAppointment}
-          isOpen={true}
-          onClose={() => setSelectedAppointment(null)}
-        />
+        <AppointmentModal {...selectedAppointment} isOpen={true} onClose={() => setSelectedAppointment(null)} />
       )}
-      {/* Hiển thị modal chỉnh sửa */}
       {editModal && (
         <AppointmentEditModal
           appointment={{
@@ -459,102 +392,99 @@ export function AppointmentsContent() {
           onClose={() => setEditModal(null)}
           onSubmit={async (updatedData) => {
             try {
-              await appointmentService.updateAppointment(
-                editModal.appointmentId,
-                {
-                  doctorId: updatedData.doctorId,
-                  patientId: updatedData.patientId,
-                  scheduleId: updatedData.scheduleId,
-                  symptoms: updatedData.symptoms,
-                  number: updatedData.number,
-                  appointmentStatus: updatedData.appointmentStatus,
-                  slotStart: updatedData.slotStart,
-                  slotEnd: updatedData.slotEnd,
-                }
-              );
-              setEditModal(null);
-              reloadAppointments();
+              await appointmentService.updateAppointment(editModal.appointmentId, {
+                doctorId: updatedData.doctorId,
+                patientId: updatedData.patientId,
+                scheduleId: updatedData.scheduleId,
+                symptoms: updatedData.symptoms,
+                // number: updatedData.number, // Removed as it's not in AppointmentUpdateRequest
+                appointmentStatus: updatedData.appointmentStatus,
+                slotStart: updatedData.slotStart,
+                slotEnd: updatedData.slotEnd,
+              })
+              setEditModal(null)
+              reloadAppointments()
             } catch (error) {
-              throw error;
+              throw error
             }
           }}
         />
       )}
-      {/* Hiển thị modal xóa */}
       {deleteModal && (
         <DeleteAppointmentModal
           isOpen={true}
           onClose={() => setDeleteModal(null)}
           appointmentId={deleteModal.appointmentId}
           onDelete={async () => {
-            await appointmentService.deleteAppointment(
-              deleteModal.appointmentId
-            );
-            setDeleteModal(null);
-            reloadAppointments();
+            await appointmentService.deleteAppointment(deleteModal.appointmentId)
+            setDeleteModal(null)
+            reloadAppointments()
           }}
         />
       )}
     </div>
-  );
+  )
 }
 
 // InvoicesContent
 export function InvoicesContent() {
-  const [bills, setBills] = useState<Bill[]>([]);
-  const { patientId } = useParams();
-  const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [bills, setBills] = useState<Bill[]>([])
+  const { patientId } = useParams()
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const reloadBills = async () => {
-    if (!patientId) return;
+    if (!patientId) return
     try {
-      setLoading(true);
-      const data = await paymentService.getBillsByPatientId(Number(patientId));
-      setBills(data);
+      setLoading(true)
+      const data = await paymentService.getBillsByPatientId(Number(patientId))
+      setBills(data)
     } catch (error: any) {
-      setError(error.message || "Không thể tải danh sách hóa đơn");
+      setError(error.message || "Không thể tải danh sách hóa đơn")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    reloadBills();
-  }, [patientId]);
+    reloadBills()
+  }, [patientId])
 
-  const handlePayment = async (bill: Bill, method: 'online' | 'cash') => {
+  const handlePayment = async (bill: Bill, method: "online" | "cash") => {
     try {
-      if (method === 'online') {
-        const paymentUrl = await paymentService.createPayment(bill.billId);
-        window.open(paymentUrl, '_blank');
-        
+      if (method === "online") {
+        const paymentUrl = await paymentService.createPayment(bill.billId)
+        window.open(paymentUrl, "_blank")
+
         const checkPaymentStatus = setInterval(async () => {
           try {
-            const updatedBills = await paymentService.getBillsByPatientId(Number(patientId));
-            const currentBill = updatedBills.find(b => b.billId === bill.billId);
-            
+            const updatedBills = await paymentService.getBillsByPatientId(Number(patientId))
+            const currentBill = updatedBills.find((b) => b.billId === bill.billId)
+
             if (currentBill?.status === "PAID") {
-              clearInterval(checkPaymentStatus);
-              setBills(updatedBills);
+              clearInterval(checkPaymentStatus)
+              setBills(updatedBills)
             }
           } catch (error) {
-            console.error('Lỗi kiểm tra trạng thái thanh toán:', error);
+            console.error("Lỗi kiểm tra trạng thái thanh toán:", error)
           }
-        }, 2000);
+        }, 2000)
 
-        setTimeout(() => {
-          clearInterval(checkPaymentStatus);
-        }, 5 * 60 * 1000);
+        setTimeout(
+          () => {
+            clearInterval(checkPaymentStatus)
+          },
+          5 * 60 * 1000,
+        )
       } else {
-        await paymentService.processCashPayment(bill.billId);
-        reloadBills();
+        await paymentService.processCashPayment(bill.billId)
+        reloadBills()
       }
     } catch (error: any) {
-      alert(error.message || 'Không thể thực hiện thanh toán');
+      alert(error.message || "Không thể thực hiện thanh toán")
     }
-  };
+  }
 
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
@@ -562,7 +492,6 @@ export function InvoicesContent() {
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto">
           <Table>
-            {/* Table Header */}
             <TableHeader className="border-b border-gray-100 bg-slate-600/10 dark:border-white/[0.05]">
               <TableRow>
                 <TableCell
@@ -598,7 +527,6 @@ export function InvoicesContent() {
               </TableRow>
             </TableHeader>
 
-            {/* Table Body */}
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {loading ? (
                 <TableRow>
@@ -622,7 +550,7 @@ export function InvoicesContent() {
                 bills.map((bill) => (
                   <TableRow key={bill.billId}>
                     <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
-                      #{bill.billId.toString().padStart(4, '0')}
+                      #{bill.billId.toString().padStart(4, "0")}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
                       {format(new Date(bill.createdAt), "dd-MM-yyyy")}
@@ -630,19 +558,13 @@ export function InvoicesContent() {
                     <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
                       <Badge
                         size="sm"
-                        color={
-                          bill.status === "PAID"
-                            ? "success"
-                            : bill.status === "UNPAID"
-                            ? "error"
-                            : "cancel"
-                        }
+                        color={bill.status === "PAID" ? "success" : bill.status === "UNPAID" ? "error" : "cancel"}
                       >
                         {bill.status === "PAID"
                           ? "Đã thanh toán"
                           : bill.status === "UNPAID"
-                          ? "Chưa thanh toán"
-                          : "Đã hủy"}
+                            ? "Chưa thanh toán"
+                            : "Đã hủy"}
                       </Badge>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-700 text-start text-xs text-green-700 font-semibold">
@@ -652,9 +574,8 @@ export function InvoicesContent() {
                       <div className="flex gap-2">
                         {bill.status === "UNPAID" ? (
                           <>
-                            {/* Nút thanh toán online */}
                             <button
-                              onClick={() => handlePayment(bill, 'online')}
+                              onClick={() => handlePayment(bill, "online")}
                               className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors"
                             >
                               <svg
@@ -673,9 +594,8 @@ export function InvoicesContent() {
                               Online
                             </button>
 
-                            {/* Nút thanh toán tiền mặt */}
                             <button
-                              onClick={() => handlePayment(bill, 'cash')}
+                              onClick={() => handlePayment(bill, "cash")}
                               className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors"
                             >
                               <svg
@@ -694,7 +614,6 @@ export function InvoicesContent() {
                             </button>
                           </>
                         ) : (
-                          /* Nút xem chi tiết cho hóa đơn đã thanh toán */
                           <button
                             onClick={() => setSelectedBill(bill)}
                             className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-sky-200 transition-colors"
@@ -725,90 +644,88 @@ export function InvoicesContent() {
         </div>
       </div>
 
-      {/* Modal xem chi tiết */}
       {selectedBill && (
         <BillModal
           {...selectedBill}
           isOpen={true}
           onClose={() => {
-            setSelectedBill(null);
-            reloadBills();
+            setSelectedBill(null)
+            reloadBills()
           }}
         />
       )}
     </div>
-  );
+  )
 }
-
-interface Payment {
-  id: string;
-  transactionDate: string;
-  status: "Thành công" | "Lỗi" | "Đang chờ";
-  amount: string;
-  method: "Tiền mặt" | "Chuyển khoản" | "Thẻ";
-}
-
-const paymentData: Payment[] = [
-  {
-    id: "P2025-0045",
-    transactionDate: "2025-02-15 12:50",
-    status: "Đang chờ",
-    amount: "2.250.000 VNĐ",
-    method: "Thẻ",
-  },
-  {
-    id: "P2025-0023",
-    transactionDate: "2025-01-14 12:50",
-    status: "Thành công",
-    amount: "150.000 VNĐ",
-    method: "Chuyển khoản",
-  },
-  {
-    id: "P2025-0018",
-    transactionDate: "2025-01-13 12:50",
-    status: "Lỗi",
-    amount: "150.000 VNĐ",
-    method: "Chuyển khoản",
-  },
-  {
-    id: "P2025-0011",
-    transactionDate: "2025-01-12 12:50",
-    status: "Thành công",
-    amount: "500.000 VNĐ",
-    method: "Tiền mặt",
-  },
-  {
-    id: "P2025-0023",
-    transactionDate: "2025-01-11 12:50",
-    status: "Thành công",
-    amount: "150.000 VNĐ",
-    method: "Chuyển khoản",
-  },
-  {
-    id: "P2025-0018",
-    transactionDate: "2025-01-10 12:50",
-    status: "Lỗi",
-    amount: "150.000 VNĐ",
-    method: "Chuyển khoản",
-  },
-  {
-    id: "P2025-0011",
-    transactionDate: "2025-01-08 12:50",
-    status: "Đang chờ",
-    amount: "500.000 VNĐ",
-    method: "Tiền mặt",
-  },
-];
 
 // PaymentsContent
 export function PaymentsContent() {
+  // Define Payment interface locally as it's not exported from ../../../types/payment
+  interface Payment {
+    id: string
+    transactionDate: string
+    status: "Thành công" | "Lỗi" | "Đang chờ"
+    amount: string
+    method: "Tiền mặt" | "Chuyển khoản" | "Thẻ"
+  }
+
+  const paymentData: Payment[] = [
+    {
+      id: "P2025-0045",
+      transactionDate: "2025-02-15 12:50",
+      status: "Đang chờ",
+      amount: "2.250.000 VNĐ",
+      method: "Thẻ",
+    },
+    {
+      id: "P2025-0023",
+      transactionDate: "2025-01-14 12:50",
+      status: "Thành công",
+      amount: "150.000 VNĐ",
+      method: "Chuyển khoản",
+    },
+    {
+      id: "P2025-0018",
+      transactionDate: "2025-01-13 12:50",
+      status: "Lỗi",
+      amount: "150.000 VNĐ",
+      method: "Chuyển khoản",
+    },
+    {
+      id: "P2025-0011",
+      transactionDate: "2025-01-12 12:50",
+      status: "Thành công",
+      amount: "500.000 VNĐ",
+      method: "Tiền mặt",
+    },
+    {
+      id: "P2025-0023",
+      transactionDate: "2025-01-11 12:50",
+      status: "Thành công",
+      amount: "150.000 VNĐ",
+      method: "Chuyển khoản",
+    },
+    {
+      id: "P2025-0018",
+      transactionDate: "2025-01-10 12:50",
+      status: "Lỗi",
+      amount: "150.000 VNĐ",
+      method: "Chuyển khoản",
+    },
+    {
+      id: "P2025-0011",
+      transactionDate: "2025-01-08 12:50",
+      status: "Đang chờ",
+      amount: "500.000 VNĐ",
+      method: "Tiền mặt",
+    },
+  ]
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4">Thanh toán</h2>
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto">
           <Table>
-            {/* Table Header */}
             <TableHeader className="border-b border-gray-100 bg-slate-600/10 dark:border-white/[0.05]">
               <TableRow>
                 <TableCell
@@ -850,7 +767,6 @@ export function PaymentsContent() {
               </TableRow>
             </TableHeader>
 
-            {/* Table Body */}
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {paymentData.map((transaction) => (
                 <TableRow key={transaction.id}>
@@ -867,8 +783,8 @@ export function PaymentsContent() {
                         transaction.status === "Thành công"
                           ? "success"
                           : transaction.status === "Đang chờ"
-                          ? "warning"
-                          : "error"
+                            ? "warning"
+                            : "error"
                       }
                     >
                       {transaction.status}
@@ -926,96 +842,87 @@ export function PaymentsContent() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 // PatientInfoContent
-export function PatientInfoContent() {
-  const [patient, setPatient] = useState<Patient | null>(null);
-  const { patientId } = useParams();
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editData, setEditData] = useState<PatientDto>({} as PatientDto);
-  const [loading, setLoading] = useState(false);
-  const [errorModal, setErrorModal] = useState<string | null>(null);
+export function PatientInfoContent({ patient }: { patient: Patient }) {
+  const { patientId } = useParams()
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editData, setEditData] = useState<PatientUpdateDto>({} as PatientUpdateDto)
+  const [loading, setLoading] = useState(false)
+  const [errorModal, setErrorModal] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!patientId) return;
+    if (patient) {
+      setEditData({
+        userId: patient.patientId,
+        height: patient.height,
+        weight: patient.weight,
+        bloodType: patient.bloodType,
+        avatar: patient.avatar,
+        allergies: patient.allergies,
+        fullName: patient.fullName,
+        birthday: patient.birthday,
+        gender: patient.gender,
+        phone: patient.phone,
+        email: patient.email,
+        address: patient.address,
+        insuranceNumber: patient.insuranceNumber,
+        identityNumber: patient.identityNumber,
+      })
+    }
+  }, [patient])
 
-    const fetchPatient = async () => {
-      try {
-        const data = await patientService.getPatientById(Number(patientId));
-        setPatient(data);
-        setEditData({
-          userId: data.patientId,
-          height: data.height,
-          weight: data.weight,
-          bloodType: data.bloodType,
-          avatar: data.avatar,
-          allergies: data.allergies,
-          fullName: data.fullName,
-          birthday: data.birthday,
-          gender: data.gender,
-          phone: data.phone,
-          email: data.email,
-          address: data.address,
-          insuranceNumber: data.insuranceNumber,
-          identityNumber: data.identityNumber,
-        });
-      } catch (error) {
-        setErrorModal("Không thể tải thông tin bệnh nhân!");
-      }
-    };
-
-    fetchPatient();
-  }, [patientId]);
-
-  const handleEditChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
     setEditData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
   const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!patientId) return;
+    e.preventDefault()
+    if (!patientId) return
     try {
-      setLoading(true);
+      setLoading(true)
       await patientService.updatePatient(Number(patientId), {
-        userId: editData.userId ?? patient?.patientId ?? 0,
-        identityNumber: editData.identityNumber || "",
-        insuranceNumber: editData.insuranceNumber || "",
-        fullName: editData.fullName || "",
-        birthday: editData.birthday || "",
-        phone: editData.phone || "",
-        email: editData.email || "",
-        avatar: editData.avatar || "",
+        fullName: editData.fullName,
+        identityNumber: editData.identityNumber,
+        insuranceNumber: editData.insuranceNumber,
+        birthday: editData.birthday,
+        phone: editData.phone,
+        email: editData.email,
+        avatar: editData.avatar,
         gender: editData.gender as "MALE" | "FEMALE" | "OTHER",
-        address: editData.address || "",
-        allergies: patient?.allergies || "",
-        height: patient?.height ?? 0,
-        weight: patient?.weight ?? 0,
-        bloodType: patient?.bloodType || "O+",
-      });
-      setShowEditModal(false);
-      const data = await patientService.getPatientById(Number(patientId));
-      setPatient(data);
+        address: editData.address,
+        allergies: editData.allergies,
+        height: editData.height,
+        weight: editData.weight,
+        bloodType: editData.bloodType,
+      })
+      setShowEditModal(false)
+      // Re-fetch patient data to update the parent component's state
+      const updatedPatient = await patientService.getPatientById(Number(patientId))
+      // This assumes PatientDetailLayout will re-render with the new patient prop
+      // In a real app, you might want to pass a callback to update parent state
+      // For now, relying on the parent (PatientDetail) to re-fetch if needed.
     } catch (error: any) {
-      console.error("Lỗi cập nhật:", error);
-      let message = "Cập nhật thông tin thất bại!";
+      console.error("Lỗi cập nhật:", error)
+      let message = "Cập nhật thông tin thất bại!"
       if (error?.response?.data?.message) {
-        message = error.response.data.message;
+        message = error.response.data.message
+      } else if (error?.response?.data) {
+        message = JSON.stringify(error.response.data)
       } else if (error?.message) {
-        message = error.message;
+        message = error.message
       }
-      setErrorModal(message);
+      setErrorModal(message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="bg-white py-6 px-5 rounded-lg border border-gray-200">
@@ -1036,9 +943,7 @@ export function PatientInfoContent() {
           </div>
           <div>
             <p className="text-gray-500 text-sm">Mã bệnh nhân</p>
-            <p className="font-medium">
-              BN{patient?.patientId?.toString().padStart(4, "0")}
-            </p>
+            <p className="font-medium">BN{patient?.patientId?.toString().padStart(4, "0")}</p>
           </div>
           <div>
             <p className="text-gray-500 text-sm">Ngày sinh</p>
@@ -1047,11 +952,7 @@ export function PatientInfoContent() {
           <div>
             <p className="text-gray-500 text-sm">Giới tính</p>
             <p className="font-medium">
-              {patient?.gender === "MALE"
-                ? "Nam"
-                : patient?.gender === "FEMALE"
-                ? "Nữ"
-                : "Khác"}
+              {patient?.gender === "MALE" ? "Nam" : patient?.gender === "FEMALE" ? "Nữ" : "Khác"}
             </p>
           </div>
           <div>
@@ -1077,15 +978,12 @@ export function PatientInfoContent() {
           <div>
             <p className="text-gray-500 text-sm">Ngày tạo tài khoản</p>
             <p className="font-medium">
-              {patient?.createdAt
-                ? format(new Date(patient?.createdAt), "dd-MM-yyyy")
-                : ""}
+              {patient?.createdAt ? format(new Date(patient?.createdAt), "dd-MM-yyyy") : ""}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Modal chỉnh sửa thông tin bệnh nhân */}
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999">
           <div
@@ -1100,13 +998,7 @@ export function PatientInfoContent() {
               onClick={() => setShowEditModal(false)}
               className="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11"
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -1115,20 +1007,16 @@ export function PatientInfoContent() {
                 />
               </svg>
             </button>
-            
+
             <div className="flex flex-col h-full">
               <div className="flex-shrink-0 px-2 pb-4">
                 <h5 className="mb-4 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-xl">
                   Chỉnh sửa thông tin bệnh nhân
                 </h5>
               </div>
-              
+
               <div className="flex-1 px-2">
-                <form
-                  id="patient-edit-form"
-                  onSubmit={handleEditSubmit}
-                  className="space-y-6"
-                >
+                <form id="patient-edit-form" onSubmit={handleEditSubmit} className="space-y-6">
                   {/* Thông tin cơ bản */}
                   <div>
                     <h6 className="text-base font-medium text-gray-800 mb-3 pb-2 border-b border-gray-200">
@@ -1167,7 +1055,7 @@ export function PatientInfoContent() {
                           </select>
                         </div>
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Ngày sinh <span className="text-red-500">*</span>
@@ -1192,9 +1080,7 @@ export function PatientInfoContent() {
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Điện thoại
-                          </label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Điện thoại</label>
                           <input
                             name="phone"
                             value={editData.phone || ""}
@@ -1204,9 +1090,7 @@ export function PatientInfoContent() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Email
-                          </label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                           <input
                             name="email"
                             type="email"
@@ -1217,11 +1101,9 @@ export function PatientInfoContent() {
                           />
                         </div>
                       </div>
-                      
+
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Địa chỉ
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
                         <input
                           name="address"
                           value={editData.address || ""}
@@ -1240,9 +1122,7 @@ export function PatientInfoContent() {
                     </h6>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Căn cước công dân
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Căn cước công dân</label>
                         <input
                           name="identityNumber"
                           value={editData.identityNumber || ""}
@@ -1252,9 +1132,7 @@ export function PatientInfoContent() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Bảo hiểm y tế
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Bảo hiểm y tế</label>
                         <input
                           name="insuranceNumber"
                           value={editData.insuranceNumber || ""}
@@ -1273,9 +1151,7 @@ export function PatientInfoContent() {
                     </h6>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          URL ảnh đại diện
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">URL ảnh đại diện</label>
                         <input
                           name="avatar"
                           value={editData.avatar || ""}
@@ -1283,29 +1159,31 @@ export function PatientInfoContent() {
                           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
                           placeholder="Nhập đường dẫn ảnh đại diện (https://...)"
                         />
-                        <p className="mt-1 text-xs text-gray-500">
-                          Nhập URL hình ảnh hợp lệ.
-                        </p>
+                        <p className="mt-1 text-xs text-gray-500">Nhập URL hình ảnh hợp lệ.</p>
                       </div>
-                      
-                      {/* Preview ảnh */}
+
                       {editData.avatar && (
                         <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg border">
                           <div className="flex-shrink-0">
                             <div className="relative">
                               <img
-                                src={editData.avatar}
+                                src={editData.avatar || "/placeholder.svg"}
                                 alt="Preview ảnh đại diện"
                                 className="w-16 h-16 object-cover rounded-full border-2 border-white shadow-lg"
                                 onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiNGM0Y0RjYiLz4KPHN2ZyB4PSIxNiIgeT0iMTYiIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIj4KPHA0aCBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGQ9Ik0yMCAyMXYtMmE0IDQgMCAwIDAtNC00SDhhNCA0IDAgMCAwLTQgNHYyIi8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCIgc3Ryb2tlPSIjOUNBNEFGIiBzdHJva2Utd2lkdGg9IjEuNSIvPgo8L3N2Zz4KPC9zdmc+';
-                                  target.classList.add('opacity-50');
+                                  const target = e.target as HTMLImageElement
+                                  target.src =
+                                    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiNGM0Y0RjYiLz4KPHN2ZyB4PSIxNiIgeT0iMTYiIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIj4KPHA0aCBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGQ9Ik0yMCAyMXYtMmE0IDQgMCAwIDAtNC00SDhhNCA0IDAgMCAwLTQgNHYyIi8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCIgc3Ryb2tlPSIjOUNBNEFGIiBzdHJva2Utd2lkdGg9IjEuNSIvPgo8L3N2Zz4KPC9zdmc+"
+                                  target.classList.add("opacity-50")
                                 }}
                               />
                               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full flex items-center justify-center">
                                 <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clipRule="evenodd"
+                                  />
                                 </svg>
                               </div>
                             </div>
@@ -1317,7 +1195,7 @@ export function PatientInfoContent() {
                             </p>
                             <button
                               type="button"
-                              onClick={() => setEditData(prev => ({ ...prev, avatar: "" }))}
+                              onClick={() => setEditData((prev) => ({ ...prev, avatar: "" }))}
                               className="mt-2 text-xs text-red-600 hover:text-red-700 font-medium"
                             >
                               Xóa ảnh
@@ -1325,14 +1203,23 @@ export function PatientInfoContent() {
                           </div>
                         </div>
                       )}
-                      
-                      {/* Placeholder khi chưa có ảnh */}
+
                       {!editData.avatar && (
                         <div className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
                           <div className="text-center">
                             <div className="w-12 h-12 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
-                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              <svg
+                                className="w-6 h-6 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
                               </svg>
                             </div>
                             <p className="text-sm text-gray-500">Chưa có ảnh đại diện</p>
@@ -1370,17 +1257,13 @@ export function PatientInfoContent() {
         </div>
       )}
 
-      {/* Modal thông báo lỗi */}
       {errorModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-lg">
             <h2 className="text-lg font-semibold mb-4 text-red-600">Lỗi</h2>
             <p>{errorModal}</p>
             <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setErrorModal(null)}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              >
+              <button onClick={() => setErrorModal(null)} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
                 Đóng
               </button>
             </div>
@@ -1388,83 +1271,76 @@ export function PatientInfoContent() {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 // HealthInfoContent
-export function HealthInfoContent() {
-  const [patient, setPatient] = useState<Patient | null>(null);
-  const { patientId } = useParams();
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editData, setEditData] = useState<PatientDto>({} as PatientDto);
-  const [loading, setLoading] = useState(false);
-  const [errorModal, setErrorModal] = useState<string | null>(null);
+export function HealthInfoContent({ patient }: { patient: Patient }) {
+  const { patientId } = useParams()
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editData, setEditData] = useState<PatientUpdateDto>({} as PatientUpdateDto)
+  const [loading, setLoading] = useState(false)
+  const [errorModal, setErrorModal] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!patientId) return;
+    if (patient) {
+      setEditData({
+        userId: patient.patientId,
+        fullName: patient.fullName,
+        birthday: patient.birthday,
+        gender: patient.gender,
+        phone: patient.phone,
+        email: patient.email,
+        avatar: patient.avatar,
+        address: patient.address,
+        insuranceNumber: patient.insuranceNumber,
+        identityNumber: patient.identityNumber,
+        allergies: patient.allergies,
+        height: patient.height,
+        weight: patient.weight,
+        bloodType: patient.bloodType,
+      })
+    }
+  }, [patient])
 
-    const fetchPatient = async () => {
-      try {
-        const data = await patientService.getPatientById(Number(patientId));
-        setPatient(data);
-        setEditData({
-          userId: data.patientId,
-          fullName: data.fullName,
-          birthday: data.birthday,
-          gender: data.gender,
-          phone: data.phone,
-          email: data.email,
-          avatar: data.avatar,
-          address: data.address,
-          insuranceNumber: data.insuranceNumber,
-          identityNumber: data.identityNumber,
-          allergies: data.allergies,
-          height: data.height,
-          weight: data.weight,
-          bloodType: data.bloodType,
-        });
-      } catch (error) {
-        setErrorModal("Không thể tải thông tin bệnh nhân!");
-      }
-    };
-
-    fetchPatient();
-  }, [patientId]);
-
-  const handleEditChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value } = e.target;
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
     setEditData((prev) => ({
       ...prev,
       [name]: name === "height" || name === "weight" ? Number(value) : value,
-    }));
-  };
+    }))
+  }
 
   const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!patientId) return;
+    e.preventDefault()
+    if (!patientId) return
     try {
-      setLoading(true);
+      setLoading(true)
       await patientService.updatePatient(Number(patientId), {
-        ...editData,
-        userId: editData.userId ?? patient?.patientId ?? Number(patientId),
-        height: editData.height ?? 0,
-        weight: editData.weight ?? 0,
-        bloodType: editData.bloodType || "O+",
-        allergies: editData.allergies || "",
-      });
-      setShowEditModal(false);
-      const data = await patientService.getPatientById(Number(patientId));
-      setPatient(data);
+        fullName: editData.fullName,
+        identityNumber: editData.identityNumber,
+        insuranceNumber: editData.insuranceNumber,
+        birthday: editData.birthday,
+        phone: editData.phone,
+        email: editData.email,
+        avatar: editData.avatar,
+        gender: editData.gender,
+        address: editData.address,
+        allergies: editData.allergies,
+        height: editData.height,
+        weight: editData.weight,
+        bloodType: editData.bloodType,
+      })
+      setShowEditModal(false)
+      // Re-fetch patient data to update the parent component's state
+      const updatedPatient = await patientService.getPatientById(Number(patientId))
+      // For now, relying on the parent (PatientDetail) to re-fetch if needed.
     } catch (error: any) {
-      setErrorModal("Cập nhật thông tin sức khỏe thất bại!");
+      setErrorModal("Cập nhật thông tin sức khỏe thất bại!")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="bg-white py-6 px-5 rounded-lg border border-gray-200">
@@ -1499,15 +1375,12 @@ export function HealthInfoContent() {
             </div>
             <div className="p-3 bg-gray-50 rounded-lg text-center">
               <p className="text-gray-500 text-sm">Nhóm máu</p>
-              <p className="font-medium">
-                {patient?.bloodType || "Chưa xác định"}
-              </p>
+              <p className="font-medium">{patient?.bloodType || "Chưa xác định"}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal chỉnh sửa thông tin sức khỏe */}
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999">
           <div
@@ -1522,13 +1395,7 @@ export function HealthInfoContent() {
               onClick={() => setShowEditModal(false)}
               className="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11"
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -1537,20 +1404,18 @@ export function HealthInfoContent() {
                 />
               </svg>
             </button>
-            
+
             <div className="flex flex-col h-full">
               <div className="flex-shrink-0 px-2 pb-4">
                 <h5 className="mb-4 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
                   Chỉnh sửa thông tin sức khỏe
                 </h5>
               </div>
-              
+
               <div className="flex-1 px-2">
                 <form id="health-edit-form" onSubmit={handleEditSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dị ứng
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Dị ứng</label>
                     <textarea
                       name="allergies"
                       value={editData.allergies || ""}
@@ -1559,12 +1424,10 @@ export function HealthInfoContent() {
                       placeholder="Nhập dị ứng (mỗi dòng 1 dị ứng)"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Chiều cao (cm)
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Chiều cao (cm)</label>
                       <input
                         name="height"
                         type="number"
@@ -1576,9 +1439,7 @@ export function HealthInfoContent() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Cân nặng (kg)
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Cân nặng (kg)</label>
                       <input
                         name="weight"
                         type="number"
@@ -1590,11 +1451,9 @@ export function HealthInfoContent() {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nhóm máu
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm máu</label>
                     <select
                       name="bloodType"
                       value={editData.bloodType || ""}
@@ -1640,17 +1499,13 @@ export function HealthInfoContent() {
         </div>
       )}
 
-      {/* Modal thông báo lỗi */}
       {errorModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-lg">
             <h2 className="text-lg font-semibold mb-4 text-red-600">Lỗi</h2>
             <p>{errorModal}</p>
             <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setErrorModal(null)}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              >
+              <button onClick={() => setErrorModal(null)} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
                 Đóng
               </button>
             </div>
@@ -1658,7 +1513,7 @@ export function HealthInfoContent() {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 export function AppointmentEditModal({
@@ -1667,87 +1522,77 @@ export function AppointmentEditModal({
   onClose,
   onSubmit,
 }: {
-  appointment: AppointmentUpdateRequest;
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: AppointmentUpdateRequest) => Promise<void>;
+  appointment: AppointmentUpdateRequest
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: (data: AppointmentUpdateRequest) => Promise<void>
 }) {
   const [formData, setFormData] = useState<AppointmentUpdateRequest>({
     ...appointment,
-    number: appointment.number,
-  });
-  const [loading, setLoading] = useState(false);
-  const [errorModal, setErrorModal] = useState<string | null>(null);
+    // number: appointment.number, // Removed as it's not in AppointmentUpdateRequest
+  })
+  const [loading, setLoading] = useState(false)
+  const [errorModal, setErrorModal] = useState<string | null>(null)
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
       [name]: name === "number" || name === "doctorId" ? Number(value) : value,
-    }));
-  };
+    }))
+  }
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFormData((prev) => ({
       ...prev,
-      appointmentStatus: e.target
-        .value as AppointmentUpdateRequest["appointmentStatus"],
-    }));
-  };
+      appointmentStatus: e.target.value as AppointmentUpdateRequest["appointmentStatus"],
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
     try {
-      await onSubmit(formData);
-      setErrorModal(null);
+      await onSubmit(formData)
+      setErrorModal(null)
     } catch (error: any) {
       // In chi tiết lỗi ra console
-      console.error("Lỗi cập nhật lịch khám:", error);
+      console.error("Lỗi cập nhật lịch khám:", error)
 
       // Lấy thông tin chi tiết lỗi từ backend nếu có
-      let message = "Cập nhật lịch khám thất bại!";
+      let message = "Cập nhật lịch khám thất bại!"
       if (error?.response?.data) {
         // Nếu backend trả về mảng lỗi hoặc object lỗi chi tiết
         if (Array.isArray(error.response.data)) {
-          message = error.response.data
-            .map((err: any) => err.message || JSON.stringify(err))
-            .join("\n");
+          message = error.response.data.map((err: any) => err.message || JSON.stringify(err)).join("\n")
         } else if (typeof error.response.data === "object") {
           // Nếu là object, lấy từng trường lỗi
           message = Object.values(error.response.data)
             .map((msg) => (Array.isArray(msg) ? msg.join(", ") : msg))
-            .join("\n");
+            .join("\n")
         } else if (error.response.data.message) {
-          message = error.response.data.message;
+          message = error.response.data.message
         } else {
-          message = JSON.stringify(error.response.data);
+          message = JSON.stringify(error.response.data)
         }
       } else if (error?.message) {
-        message = error.message;
+        message = error.message
       }
-      alert(message);
-      setErrorModal(message);
+      alert(message)
+      setErrorModal(message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md">
         <div className="bg-white rounded-2xl p-6 w-full max-w-2xl ">
           <h2 className="text-xl font-semibold mb-4">Chỉnh sửa lịch khám</h2>
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          >
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
                 <label className="block font-medium mb-1">Bác sĩ (ID)</label>
@@ -1774,9 +1619,7 @@ export function AppointmentEditModal({
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block font-medium mb-1">
-                  Thời gian bắt đầu
-                </label>
+                <label className="block font-medium mb-1">Thời gian bắt đầu</label>
                 <input
                   name="slotStart"
                   type="time"
@@ -1787,9 +1630,7 @@ export function AppointmentEditModal({
                 />
               </div>
               <div>
-                <label className="block font-medium mb-1">
-                  Thời gian kết thúc
-                </label>
+                <label className="block font-medium mb-1">Thời gian kết thúc</label>
                 <input
                   name="slotEnd"
                   type="time"
@@ -1847,17 +1688,13 @@ export function AppointmentEditModal({
           </form>
         </div>
       </div>
-      {/* Modal lỗi */}
       {errorModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-lg">
             <h2 className="text-lg font-semibold mb-4 text-red-600">Lỗi</h2>
             <p>{errorModal}</p>
             <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setErrorModal(null)}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              >
+              <button onClick={() => setErrorModal(null)} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
                 Đóng
               </button>
             </div>
@@ -1865,139 +1702,120 @@ export function AppointmentEditModal({
         </div>
       )}
     </>
-  );
+  )
 }
 
-export function ContactInfoContent() {
-  const [contacts, setContacts] = useState<EmergencyContact[]>([]);
-  const { patientId } = useParams();
-  const [selectedContact, setSelectedContact] =
-    useState<EmergencyContact | null>(null);
-  const [editContact, setEditContact] = useState<EmergencyContact | null>(null);
-  const [deleteContact, setDeleteContact] = useState<EmergencyContact | null>(
-    null
-  );
+export function ContactInfoContent({ patient }: { patient: Patient }) {
+  const [contacts, setContacts] = useState<EmergencyContact[]>([])
+  const { patientId } = useParams()
+  const [selectedContact, setSelectedContact] = useState<EmergencyContact | null>(null)
+  const [editContact, setEditContact] = useState<EmergencyContact | null>(null)
+  const [deleteContact, setDeleteContact] = useState<EmergencyContact | null>(null)
   const [editData, setEditData] = useState<EmergencyContactDto>({
     contactName: "",
     contactPhone: "",
     relationship: "FAMILY",
-  });
-  const [loading, setLoading] = useState(false);
-  const [errorModal, setErrorModal] = useState<string | null>(null);
+  })
+  const [loading, setLoading] = useState(false)
+  const [errorModal, setErrorModal] = useState<string | null>(null)
 
   const reloadContacts = async () => {
-    if (!patientId) return;
+    if (!patientId) return
     try {
-      const data = await patientService.getEmergencyContacts(Number(patientId));
-      setContacts(data);
+      const data = await patientService.getEmergencyContacts(Number(patientId))
+      setContacts(data)
     } catch (error) {
-      setErrorModal("Không thể tải danh sách liên hệ!");
+      setErrorModal("Không thể tải danh sách liên hệ!")
     }
-  };
+  }
 
   useEffect(() => {
-    reloadContacts();
+    if (patientId) {
+      reloadContacts()
+    }
     // eslint-disable-next-line
-  }, [patientId]);
+  }, [patientId])
 
-  // Xem chi tiết
   const handleView = (contact: EmergencyContact) => {
-    setSelectedContact(contact);
-  };
+    setSelectedContact(contact)
+  }
 
-  // Sửa
   const handleEdit = (contact: EmergencyContact) => {
-    setEditContact(contact);
+    setEditContact(contact)
     setEditData({
       contactName: contact.contactName,
       contactPhone: contact.contactPhone,
       relationship: contact.relationship as "FAMILY" | "FRIEND" | "OTHERS",
-    });
-  };
+    })
+  }
 
-  // Lưu chỉnh sửa
   const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editContact || !patientId) return;
+    e.preventDefault()
+    if (!editContact || !patientId) return
     if (
       !editData.contactName ||
       !editData.contactPhone ||
       !editData.relationship ||
       !["FAMILY", "FRIEND", "OTHERS"].includes(editData.relationship)
     ) {
-      setErrorModal("Vui lòng nhập đầy đủ và đúng thông tin liên hệ!");
-      return;
+      setErrorModal("Vui lòng nhập đầy đủ và đúng thông tin liên hệ!")
+      return
     }
-    setLoading(true);
+    setLoading(true)
     try {
-      await patientService.updateEmergencyContact(
-        editContact.contactId,
-        Number(patientId),
-        editData
-      );
-      setEditContact(null);
+      await patientService.updateEmergencyContact(editContact.contactId, Number(patientId), editData)
+      setEditContact(null)
       setEditData({
         contactName: "",
         contactPhone: "",
         relationship: "FAMILY",
-      });
-      reloadContacts();
+      })
+      reloadContacts()
     } catch (error: any) {
-      // In chi tiết lỗi ra console
-      console.error("Lỗi cập nhật liên hệ:", error);
+      console.error("Lỗi cập nhật liên hệ:", error)
 
-      // Lấy thông tin chi tiết lỗi từ backend nếu có
-      let message = "Cập nhật liên hệ thất bại!";
+      let message = "Cập nhật liên hệ thất bại!"
       if (error?.response?.data) {
         if (Array.isArray(error.response.data)) {
-          message = error.response.data
-            .map((err: any) => err.message || JSON.stringify(err))
-            .join("\n");
+          message = error.response.data.map((err: any) => err.message || JSON.stringify(err)).join("\n")
         } else if (typeof error.response.data === "object") {
           message = Object.values(error.response.data)
             .map((msg) => (Array.isArray(msg) ? msg.join(", ") : msg))
-            .join("\n");
+            .join("\n")
         } else if (error.response.data.message) {
-          message = error.response.data.message;
+          message = error.response.data.message
         } else {
-          message = JSON.stringify(error.response.data);
+          message = JSON.stringify(error.response.data)
         }
       } else if (error?.message) {
-        message = error.message;
+        message = error.message
       }
-      setErrorModal(message);
+      setErrorModal(message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  // Xóa
   const handleDelete = async () => {
-    if (!deleteContact || !patientId) return;
-    setLoading(true);
+    if (!deleteContact || !patientId) return
+    setLoading(true)
     try {
-      await patientService.deleteEmergencyContact(
-        deleteContact.contactId,
-        Number(patientId)
-      );
-      setDeleteContact(null);
-      reloadContacts();
+      await patientService.deleteEmergencyContact(deleteContact.contactId, Number(patientId))
+      setDeleteContact(null)
+      reloadContacts()
     } catch (error: any) {
-      setErrorModal("Xóa liên hệ thất bại!");
+      setErrorModal("Xóa liên hệ thất bại!")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
-      <h2 className="text-xl font-semibold mb-4 ml-1">
-        Thông tin liên lạc khẩn cấp
-      </h2>
+      <h2 className="text-xl font-semibold mb-4 ml-1">Thông tin liên lạc khẩn cấp</h2>
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto">
           <Table>
-            {/* Table Header */}
             <TableHeader className="border-b border-gray-100 bg-slate-600/10 dark:border-white/[0.05]">
               <TableRow>
                 <TableCell
@@ -2027,7 +1845,6 @@ export function ContactInfoContent() {
               </TableRow>
             </TableHeader>
 
-            {/* Table Body */}
             {contacts && contacts.length > 0 ? (
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {contacts.map((contact) => (
@@ -2042,14 +1859,13 @@ export function ContactInfoContent() {
                       {contact.relationship === "FAMILY"
                         ? "Gia đình"
                         : contact.relationship === "FRIEND"
-                        ? "Bạn bè"
-                        : contact.relationship === "OTHERS"
-                        ? "Khác"
-                        : "Chưa xác định"}
+                          ? "Bạn bè"
+                          : contact.relationship === "OTHERS"
+                            ? "Khác"
+                            : "Chưa xác định"}
                     </TableCell>
                     <TableCell className="px-3 py-3 text-theme-sm">
                       <div className="flex gap-2">
-                        {/* Xem */}
                         <button
                           onClick={() => handleView(contact)}
                           className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
@@ -2069,7 +1885,6 @@ export function ContactInfoContent() {
                           </svg>
                           Xem
                         </button>
-                        {/* Sửa */}
                         <button
                           onClick={() => handleEdit(contact)}
                           className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-md hover:bg-yellow-200 transition-colors"
@@ -2084,7 +1899,6 @@ export function ContactInfoContent() {
                           </svg>
                           Sửa
                         </button>
-                        {/* Xóa */}
                         <button
                           onClick={() => setDeleteContact(contact)}
                           className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
@@ -2121,29 +1935,26 @@ export function ContactInfoContent() {
         </div>
       </div>
 
-      {/* Modal xem chi tiết */}
       {selectedContact && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg">
             <h2 className="text-lg font-semibold mb-4">Chi tiết liên hệ</h2>
             <div className="space-y-2">
               <div>
-                <span className="font-medium">Tên:</span>{" "}
-                {selectedContact.contactName}
+                <span className="font-medium">Tên:</span> {selectedContact.contactName}
               </div>
               <div>
-                <span className="font-medium">Số điện thoại:</span>{" "}
-                {selectedContact.contactPhone}
+                <span className="font-medium">Số điện thoại:</span> {selectedContact.contactPhone}
               </div>
               <div>
                 <span className="font-medium">Mối quan hệ:</span>{" "}
                 {selectedContact.relationship === "FAMILY"
                   ? "Gia đình"
                   : selectedContact.relationship === "FRIEND"
-                  ? "Bạn bè"
-                  : selectedContact.relationship === "OTHERS"
-                  ? "Khác"
-                  : "Chưa xác định"}
+                    ? "Bạn bè"
+                    : selectedContact.relationship === "OTHERS"
+                      ? "Khác"
+                      : "Chưa xác định"}
               </div>
             </div>
             <div className="flex justify-end mt-6">
@@ -2158,22 +1969,17 @@ export function ContactInfoContent() {
         </div>
       )}
 
-      {/* Modal chỉnh sửa */}
       {editContact && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg">
             <h2 className="text-lg font-semibold mb-4">Chỉnh sửa liên hệ</h2>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label className="block font-medium mb-1">
-                  Tên người liên lạc
-                </label>
+                <label className="block font-medium mb-1">Tên người liên lạc</label>
                 <input
                   name="contactName"
                   value={editData.contactName || ""}
-                  onChange={(e) =>
-                    setEditData((d) => ({ ...d, contactName: e.target.value }))
-                  }
+                  onChange={(e) => setEditData((d) => ({ ...d, contactName: e.target.value }))}
                   className="w-full border rounded px-3 py-2"
                   required
                 />
@@ -2183,9 +1989,7 @@ export function ContactInfoContent() {
                 <input
                   name="contactPhone"
                   value={editData.contactPhone || ""}
-                  onChange={(e) =>
-                    setEditData((d) => ({ ...d, contactPhone: e.target.value }))
-                  }
+                  onChange={(e) => setEditData((d) => ({ ...d, contactPhone: e.target.value }))}
                   className="w-full border rounded px-3 py-2"
                   required
                 />
@@ -2198,8 +2002,7 @@ export function ContactInfoContent() {
                   onChange={(e) =>
                     setEditData((d) => ({
                       ...d,
-                      relationship: e.target
-                        .value as EmergencyContact["relationship"],
+                      relationship: e.target.value as EmergencyContact["relationship"],
                     }))
                   }
                   className="w-full border rounded px-3 py-2"
@@ -2233,7 +2036,6 @@ export function ContactInfoContent() {
         </div>
       )}
 
-      {/* Modal xác nhận xóa */}
       <DeleteConfirmationModal
         isOpen={!!deleteContact}
         onClose={() => setDeleteContact(null)}
@@ -2246,17 +2048,13 @@ export function ContactInfoContent() {
         }
       />
 
-      {/* Modal lỗi */}
       {errorModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-lg">
             <h2 className="text-lg font-semibold mb-4 text-red-600">Lỗi</h2>
             <p>{errorModal}</p>
             <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setErrorModal(null)}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              >
+              <button onClick={() => setErrorModal(null)} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
                 Đóng
               </button>
             </div>
@@ -2264,5 +2062,5 @@ export function ContactInfoContent() {
         </div>
       )}
     </div>
-  );
+  )
 }

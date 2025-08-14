@@ -1,10 +1,9 @@
 "use client"
 
 import type React from "react"
-
-import { useCallback, useEffect, useRef, useState } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { useTranslation } from "react-i18next"
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   GridIcon,
   CalendarIcon,
@@ -19,12 +18,12 @@ import {
 import { useSidebar } from "../context/SidebarContext"
 
 type NavItem = {
-  name: string
-  icon: React.ReactNode
-  path?: string
-  roles?: string[]
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[]
-}
+  name: string;
+  icon: React.ReactNode;
+  path?: string;
+  roles?: string[];
+  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+};
 
 const AppSidebar: React.FC = () => {
   const { t } = useTranslation()
@@ -38,17 +37,23 @@ const AppSidebar: React.FC = () => {
     role === "RECEPTIONIST"
       ? "/receptionist"
       : role === "D"
-        ? `/doctor/${doctorType === "E" ? "examination" : doctorType === "S" ? "service" : ""}`
-        : role === "P"
-          ? "/patient"
-          : "/admin"
+      ? `/doctor/${
+          doctorType === "E"
+            ? "examination"
+            : doctorType === "S"
+            ? "service"
+            : ""
+        }`
+      : role === "P"
+      ? "/patient"
+      : "/admin";
 
   const navItems: NavItem[] = [
     {
       icon: <GridIcon />,
       name: t("sidebar.overview"),
       path: `${basePath}/dashboard`,
-      roles: ["A", "RECEPTIONIST", "D", "P"],
+      roles: ["A", "D", "P"],
     },
     {
       icon: <PatientIcon />,
@@ -73,29 +78,6 @@ const AppSidebar: React.FC = () => {
       ],
       roles: ["A", "RECEPTIONIST"],
     },
-    // {
-    //   name: t("sidebar.inpatient"),
-    //   icon: <InpatientIcon />,
-    //   subItems: [
-    //     {
-    //       name: t("sidebar.inpatientRooms"),
-    //       path: `${basePath}/inpatients-rooms`,
-    //       pro: false,
-    //     },
-    //     {
-    //       name: t("sidebar.inpatientPatients"),
-    //       path: `${basePath}/inpatients`,
-    //       pro: false,
-    //     },
-    //   ],
-    //   roles: ["A", "RECEPTIONIST"],
-    // },
-    // {
-    //   icon: <DepartmentIcon />,
-    //   name: t("sidebar.departments"),
-    //   path: `${basePath}/departments`,
-    //   roles: ["A", "RECEPTIONIST"],
-    // },
     {
       icon: <AdminIcon />,
       name: t("sidebar.authorization"),
@@ -108,18 +90,6 @@ const AppSidebar: React.FC = () => {
       path: `${basePath}/doctors`,
       roles: ["A"],
     },
-    // {
-    //   icon: <CalendarIcon />,
-    //   name: t("sidebar.medicines"),
-    //   path: `${basePath}/medicines`,
-    //   roles: ["A"],
-    // },
-    // {
-    //   icon: <BoxCubeIcon />,
-    //   name: t("sidebar.healthServices"),
-    //   path: `${basePath}/health-services`,
-    //   roles: ["A"],
-    // },
     {
       icon: <CalendarIcon />,
       name: t("sidebar.workSchedule"),
@@ -176,15 +146,19 @@ const AppSidebar: React.FC = () => {
       icon: <UserCircleIcon />,
       name: t("sidebar.account"),
       path: `${basePath}/profile`,
-      roles: ["A", "RECEPTIONIST", "D", "P"],
+      roles: ["A", "D", "P"],
     },
-  ]
+  ];
 
-  const filteredNavItems = navItems.filter((item) => item.roles && item.roles.includes(role))
+  const filteredNavItems = navItems.filter(
+    (item) => item.roles && item.roles.includes(role)
+  );
 
-  const [openSubmenu, setOpenSubmenu] = useState<number | null>(null)
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<number, number>>({})
-  const subMenuRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<number, number>>(
+    {}
+  );
+  const subMenuRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   const isActive = useCallback(
     (path: string) => {
@@ -193,9 +167,8 @@ const AppSidebar: React.FC = () => {
         return location.pathname === path
       }
 
-      // Xử lý cho base path
       if (path === basePath) {
-        return location.pathname === path
+        return location.pathname === path;
       }
 
       // Xử lý đặc biệt cho các detail routes
@@ -268,11 +241,11 @@ const AppSidebar: React.FC = () => {
       if (nav.subItems) {
         nav.subItems.forEach((subItem) => {
           if (isActive(subItem.path)) {
-            activeSubmenuIndex = index
+            activeSubmenuIndex = index;
           }
-        })
+        });
       }
-    })
+    });
 
     // Xử lý đặc biệt cho medical record với from parameter
     if (activeSubmenuIndex === null && currentPath.match(/\/medical-record\/\d+$/)) {
@@ -289,7 +262,7 @@ const AppSidebar: React.FC = () => {
 
     // Chỉ set submenu active nếu tìm thấy
     if (activeSubmenuIndex !== null) {
-      setOpenSubmenu(activeSubmenuIndex)
+      setOpenSubmenu(activeSubmenuIndex);
     }
   }, [location.pathname, location.search, filteredNavItems, isActive, t])
 
@@ -300,18 +273,18 @@ const AppSidebar: React.FC = () => {
         setSubMenuHeight((prevHeights) => ({
           ...prevHeights,
           [openSubmenu]: subMenuRefs.current[openSubmenu]?.scrollHeight || 0,
-        }))
+        }));
       }
     }
-  }, [openSubmenu])
+  }, [openSubmenu]);
 
   const handleSubmenuToggle = (index: number) => {
     console.log("Toggle submenu:", index, "Current open:", openSubmenu) // Debug log
     setOpenSubmenu((prevOpen) => {
       // Nếu đang mở cùng submenu thì đóng, nếu không thì mở submenu mới
-      return prevOpen === index ? null : index
-    })
-  }
+      return prevOpen === index ? null : index;
+    });
+  };
 
   const renderMenuItems = (items: NavItem[]) => (
     <ul className="flex flex-col gap-4">
@@ -347,11 +320,14 @@ const AppSidebar: React.FC = () => {
               {(isExpanded || isHovered || isMobileOpen) && (
                 <div
                   ref={(el) => {
-                    subMenuRefs.current[index] = el
+                    subMenuRefs.current[index] = el;
                   }}
                   className="overflow-hidden transition-all duration-300"
                   style={{
-                    height: openSubmenu === index ? `${subMenuHeight[index]}px` : "0px",
+                    height:
+                      openSubmenu === index
+                        ? `${subMenuHeight[index]}px`
+                        : "0px",
                   }}
                 >
                   <ul className="mt-2 space-y-1 ml-9">
@@ -360,7 +336,9 @@ const AppSidebar: React.FC = () => {
                         <Link
                           to={subItem.path}
                           className={`menu-dropdown-item ${
-                            isActive(subItem.path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"
+                            isActive(subItem.path)
+                              ? "menu-dropdown-item-active"
+                              : "menu-dropdown-item-inactive"
                           }`}
                         >
                           {subItem.name}
@@ -368,7 +346,9 @@ const AppSidebar: React.FC = () => {
                             {subItem.new && (
                               <span
                                 className={`ml-auto ${
-                                  isActive(subItem.path) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
+                                  isActive(subItem.path)
+                                    ? "menu-dropdown-badge-active"
+                                    : "menu-dropdown-badge-inactive"
                                 } menu-dropdown-badge`}
                               >
                                 {t("sidebar.new")}
@@ -377,7 +357,9 @@ const AppSidebar: React.FC = () => {
                             {subItem.pro && (
                               <span
                                 className={`ml-auto ${
-                                  isActive(subItem.path) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
+                                  isActive(subItem.path)
+                                    ? "menu-dropdown-badge-active"
+                                    : "menu-dropdown-badge-inactive"
                                 } menu-dropdown-badge`}
                               >
                                 {t("sidebar.pro")}
@@ -395,23 +377,29 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 to={nav.path}
-                className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"}`}
+                className={`menu-item group ${
+                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                }`}
               >
                 <span
                   className={`menu-item-icon-size ${
-                    isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                    isActive(nav.path)
+                      ? "menu-item-icon-active"
+                      : "menu-item-icon-inactive"
                   }`}
                 >
                   {nav.icon}
                 </span>
-                {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <span className="menu-item-text">{nav.name}</span>
+                )}
               </Link>
             )
           )}
         </li>
       ))}
     </ul>
-  )
+  );
 
   return (
     <aside
@@ -421,12 +409,18 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
+      <div
+        className={`py-8 flex ${
+          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+        }`}
+      >
         <Link to={basePath}>
           <img
             src="/public/images/logo/Logo.png"
             alt="Wecare Logo"
-            className={`transition-all duration-300 ${isExpanded || isHovered || isMobileOpen ? "w-32" : "w-10"}`}
+            className={`transition-all duration-300 ${
+              isExpanded || isHovered || isMobileOpen ? "w-32" : "w-10"
+            }`}
           />
         </Link>
       </div>
@@ -437,11 +431,15 @@ const AppSidebar: React.FC = () => {
             <div>
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center"
+                    : "justify-start"
                 }`}
               >
                 {(isExpanded || isHovered || isMobileOpen) && t("sidebar.menu")}
-                {!isExpanded && !isHovered && !isMobileOpen && <HorizontaLDots className="size-6" />}
+                {!isExpanded && !isHovered && !isMobileOpen && (
+                  <HorizontaLDots className="size-6" />
+                )}
               </h2>
               {renderMenuItems(filteredNavItems)}
             </div>
@@ -449,7 +447,7 @@ const AppSidebar: React.FC = () => {
         </nav>
       </div>
     </aside>
-  )
-}
+  );
+};
 
-export default AppSidebar
+export default AppSidebar;

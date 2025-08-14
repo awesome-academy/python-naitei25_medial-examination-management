@@ -412,8 +412,9 @@
   },
   "shifts": {
     "morning": "Buổi sáng",
-    "afternoon": "Buổi chiều",
-    "evening": "Buổi tối"
+    "afternoon": "Buổi trưa",
+    "evening": "Buổi chiều",
+    "night": "Buổi tối"
   },
   "empty": {
     "loading": "Đang tải...",
