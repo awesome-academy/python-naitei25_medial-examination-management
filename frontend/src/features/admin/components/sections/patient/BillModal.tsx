@@ -1,5 +1,5 @@
 import { Bill, BillDetail } from "../../../types/payment";
-import { ServiceOrder } from "../../../types/serviceOrder"; // ✅ Thêm import type
+import { ServiceOrder } from "../../../types/serviceOrder";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import { paymentService } from "../../../services/paymentService";
@@ -16,7 +16,7 @@ interface Transaction {
 interface BillModalProps extends Bill {
   isOpen: boolean;
   onClose: () => void;
-  services?: ServiceOrder[]; // ✅ Thêm prop để nhận dịch vụ
+  services?: ServiceOrder[];
 }
 
 export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModalProps) {
@@ -62,7 +62,6 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
 
   if (!isOpen) return null;
 
-  // ✅ Tính tổng giá dịch vụ từ services
   const totalServiceCost = services.reduce((sum, svc) => sum + (svc.service?.price || 0), 0);
 
   return (

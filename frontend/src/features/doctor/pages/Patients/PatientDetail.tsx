@@ -121,38 +121,6 @@ const PatientDetail: React.FC = () => {
         }
     }, [patientDetail, prescription, appointments, form, t])
 
-    // const changeToPendingTestStatus = async () => {
-    //     if (!appointmentId) {
-    //         message.error(t("errors.noAppointmentFound"))
-    //         return
-    //     }
-    //
-    //     setPendingTestStatusLoading(true)
-    //
-    //     try {
-    //         const appointment = appointments.find((appt) => appt.appointmentId === patientDetail.id)
-    //         const updateAppointmentData = {
-    //             appointmentId: patientDetail.id,
-    //             patientId: appointment?.patientInfo?.id || patientDetail.patient,
-    //             scheduleId: appointment?.schedule?.scheduleId || patientDetail.schedule,
-    //             symptoms: patientDetail.symptoms,
-    //             slot_start: patientDetail.slot_start,
-    //             slot_end: patientDetail.slot_end,
-    //             status: "PENDING_TEST_RESULT",
-    //         }
-    //
-    //         await appointmentService.updateAppointmentById(appointmentId, updateAppointmentData)
-    //
-    //         message.success(t("success.pendingTestResult"))
-    //         await refreshAll(appointmentId)
-    //     } catch (error) {
-    //         console.error(t("errors.failedToChangeStatus"), error)
-    //         message.error(t("errors.statusChangeFailed"))
-    //     } finally {
-    //         setPendingTestStatusLoading(false)
-    //     }
-    // }
-
     const handleCompleteExamination = async () => {
         if (!appointmentId) {
             message.error(t("errors.noAppointmentFound"))
