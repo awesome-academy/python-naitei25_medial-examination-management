@@ -384,12 +384,13 @@ const PatientDetail: React.FC = () => {
                                     ) : (
                                         <div className="space-y-4">
                                             {serviceOrders.map((order) => (
+                                                console.log("order", order),
                                                 <div key={order.orderId} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
                                                     <div>
                                                         <p className="text-sm font-medium">{t("labels.serviceName")}: {order.service_name}</p>
                                                         <p className="text-sm text-gray-500">{t("labels.room")}: {order.room_id || t("labels.notSpecified")}</p>
                                                         <p className="text-sm text-gray-500 mt-1">
-                                                            {t("labels.status")}: {order.order_status === "D" ? t("status.completed") : t("status.pending")}
+                                                            {t("labels.status")}: {order.order_status === "C" ? t("status.completed") : t("status.pending")}
                                                         </p>
                                                     </div>
                                                     <Button
