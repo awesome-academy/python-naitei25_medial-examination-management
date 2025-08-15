@@ -13,9 +13,9 @@ import type { Patient, EmergencyContact, PatientUpdateDto, EmergencyContactDto }
 import { useParams, useNavigate } from "react-router-dom"
 import { appointmentService } from "../../../services/appointmentService"
 import type { Appointment, AppointmentUpdateRequest } from "../../../types/appointment"
-import { AppointmentModal, DeleteAppointmentModal } from "./AppointmentModal"
 import type { Bill } from "../../../types/payment"
 import { paymentService } from "../../../services/paymentService"
+import type { ServiceOrder } from "../../../types/serviceOrder"
 import { BillModal } from "./BillModal"
 import type { PrescriptionResponse, UpdatePrescriptionRequest } from "../../../types/pharmacy"
 import { pharmacyService } from "../../../services/pharmacyService"
@@ -23,6 +23,10 @@ import { DeleteConfirmationModal } from "../../ui/modal/DeleteConfirmationModal"
 import { useModal } from "../../../hooks/useModal"
 import { Loader2 } from "lucide-react"
 import type { CreatePrescriptionRequest } from "../../../types/pharmacy"
+import { AppointmentModal } from "./AppointmentModal"
+import { getServiceOrdersByAppointmentId } from "../../../services/serviceOrderService";
+import { servicesService } from "../../../services/servicesService";
+
 
 export function MedicalRecordsContent() {
   const { patientId } = useParams()
@@ -81,22 +85,21 @@ export function MedicalRecordsContent() {
   }, [patientId])
 
   const handleAddMedicalRecord = async (appointmentId: number, prescriptionData: CreatePrescriptionRequest) => {
-  try {
-    const finalData = {
-      ...prescriptionData,
-      appointment_id: appointmentId,
-      patient_id: Number(patientId) 
-    };
+    try {
+      const finalData = {
+        ...prescriptionData,
+        appointment_id: appointmentId,
+        patient_id: Number(patientId),
+      }
 
-    await pharmacyService.createPrescription(finalData);
-    await fetchMedicalRecords();
-    closeAddModal();
-  } catch (err) {
-    console.error("Lỗi khi thêm bệnh án:", err);
-    alert("Thêm bệnh án thất bại! Vui lòng kiểm tra lại thông tin.");
+      await pharmacyService.createPrescription(finalData)
+      await fetchMedicalRecords()
+      closeAddModal()
+    } catch (err) {
+      console.error("Lỗi khi thêm bệnh án:", err)
+      alert("Thêm bệnh án thất bại! Vui lòng kiểm tra lại thông tin.")
+    }
   }
-};
-
 
   const handleEditMedicalRecord = (prescriptionId: number) => {
     const prescriptionToEdit = prescriptions.find((p) => p.prescriptionId === prescriptionId)
@@ -180,8 +183,8 @@ export function MedicalRecordsContent() {
         onClose={closeAddModal} // Sử dụng closeModal từ useModal
         onSubmit={handleAddMedicalRecord}
         patientId={Number(patientId)}
-        // Nếu có appointmentId từ context, bạn có thể truyền vào đây
-        // appointmentId={someAppointmentId}
+      // Nếu có appointmentId từ context, bạn có thể truyền vào đây
+      // appointmentId={someAppointmentId}
       />
       <EditMedicalRecordModal
         isOpen={isEditModalOpen} // Sử dụng isEditModalOpen từ useModal
@@ -220,7 +223,7 @@ export function AppointmentsContent() {
   const reloadAppointments = async () => {
     if (!patientId) return
     try {
-      const data = await appointmentService.getAppointmentsByPatientId(Number(patientId))
+      const data = await appointmentService.getAppointmentsByPatientId(Number(patientId), 1, 50)
       setAppointments(Array.isArray(data) ? data : data.content || [])
     } catch (error) {
       console.error("Failed to fetch appointments:", error)
@@ -384,7 +387,7 @@ export function AppointmentsContent() {
         <AppointmentModal {...selectedAppointment} isOpen={true} onClose={() => setSelectedAppointment(null)} />
       )}
       {editModal && (
-        <AppointmentEditModal
+        <AppointmentEditModalComponent
           appointment={{
             ...editModal,
           }}
@@ -428,28 +431,105 @@ export function AppointmentsContent() {
 
 // InvoicesContent
 export function InvoicesContent() {
-  const [bills, setBills] = useState<Bill[]>([])
-  const { patientId } = useParams()
-  const [selectedBill, setSelectedBill] = useState<Bill | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [billServices, setBillServices] = useState<Record<number, ServiceOrder[]>>({});
+  const { patientId } = useParams();
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const reloadBills = async () => {
-    if (!patientId) return
     try {
-      setLoading(true)
-      const data = await paymentService.getBillsByPatientId(Number(patientId))
-      setBills(data)
-    } catch (error: any) {
-      setError(error.message || "Không thể tải danh sách hóa đơn")
+      setLoading(true);
+      console.log("Fetching bills for patient:", patientId);
+
+      // 1️⃣ Lấy dữ liệu bill từ backend
+      const billsDataRaw = await paymentService.getBillsByPatientId(Number(patientId));
+
+      const billsData: Bill[] = billsDataRaw.map((b: any) => {
+        let appointmentObj = null;
+
+        if (typeof b.appointment === "number") {
+          appointmentObj = { appointmentId: b.appointment };
+        } else if (b.appointment && typeof b.appointment === "object" && "appointmentId" in b.appointment) {
+          appointmentObj = b.appointment;
+        }
+
+        return {
+          billId: b.id,
+          appointment: appointmentObj,
+          patientId: b.patient,
+          totalCost: Number(b.total_cost),
+          insuranceDiscount: Number(b.insurance_discount),
+          amount: Number(b.amount),
+          status: b.status === "P" ? "PAID" : b.status === "U" ? "UNPAID" : b.status,
+          createdAt: b.created_at,
+          updatedAt: b.updated_at,
+          billDetails: b.billDetails || []
+        };
+      });
+
+      console.log("Bills data:", billsData);
+
+      // 2️⃣ Lấy danh sách dịch vụ của từng bill
+      const servicesData = await Promise.all(
+        billsData.map(async (bill) => {
+          if (bill.appointment?.appointmentId) {
+            const serviceOrders = await getServiceOrdersByAppointmentId(
+              bill.appointment.appointmentId
+            );
+
+            // 3️⃣ Lấy thêm thông tin chi tiết dịch vụ
+            const serviceOrdersWithInfo = await Promise.all(
+              serviceOrders.map(async (order: any) => {
+                try {
+                  const serviceInfo = await servicesService.getServiceById(order.service_id);
+                  return {
+                    ...order,
+                    serviceName: serviceInfo.service_name, // lấy đúng field từ backend
+                    price: Number(serviceInfo.price)
+                  };
+                } catch (err) {
+                  console.error(`Lỗi lấy dịch vụ id=${order.service_id}`, err);
+                  return {
+                    ...order,
+                    serviceName: "Không xác định",
+                    price: 0
+                  };
+                }
+              })
+            );
+
+            return { billId: bill.billId, services: serviceOrdersWithInfo };
+          } else {
+            return { billId: bill.billId, services: [] };
+          }
+        })
+      );
+
+      console.log("Services data:", servicesData);
+
+      // 4️⃣ Map billId -> list services
+      const servicesMap = Object.fromEntries(
+        servicesData.map(item => [item.billId, item.services])
+      );
+
+      setBillServices(servicesMap);
+      setBills(billsData);
+
+    } catch (err) {
+      console.error("Error loading bills:", err);
+      setError("Không thể tải danh sách hóa đơn");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    reloadBills()
-  }, [patientId])
+    if (patientId) {
+      reloadBills();
+    }
+  }, [patientId]);
 
   const handlePayment = async (bill: Bill, method: "online" | "cash") => {
     try {
@@ -486,6 +566,11 @@ export function InvoicesContent() {
     }
   }
 
+  const calculateTotalFromServices = (billId: number) => {
+    const services = billServices[billId] || []
+    return services.reduce((total, service) => total + (service.service?.price || 0), 0)
+  }
+
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4 ml-1">Hóa đơn</h2>
@@ -505,6 +590,12 @@ export function InvoicesContent() {
                   className="px-4 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
                 >
                   Ngày tạo
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
+                >
+                  Dịch vụ
                 </TableCell>
                 <TableCell
                   isHeader
@@ -530,73 +621,121 @@ export function InvoicesContent() {
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {loading ? (
                 <TableRow>
-                  <TableCell className="text-center py-4" colSpan={5}>
+                  <TableCell className="text-center py-4" colSpan={6}>
                     Đang tải...
                   </TableCell>
                 </TableRow>
               ) : error ? (
                 <TableRow>
-                  <TableCell className="text-center text-red-500 py-4" colSpan={5}>
+                  <TableCell className="text-center text-red-500 py-4" colSpan={6}>
                     {error}
                   </TableCell>
                 </TableRow>
               ) : bills.length === 0 ? (
                 <TableRow>
-                  <TableCell className="text-center text-gray-500 py-4" colSpan={5}>
+                  <TableCell className="text-center text-gray-500 py-4" colSpan={6}>
                     Không có hóa đơn nào
                   </TableCell>
                 </TableRow>
               ) : (
-                bills.map((bill) => (
-                  <TableRow key={bill.billId}>
-                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
-                      #{bill.billId.toString().padStart(4, "0")}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
-                      {format(new Date(bill.createdAt), "dd-MM-yyyy")}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
-                      <Badge
-                        size="sm"
-                        color={bill.status === "PAID" ? "success" : bill.status === "UNPAID" ? "error" : "cancel"}
-                      >
-                        {bill.status === "PAID"
-                          ? "Đã thanh toán"
-                          : bill.status === "UNPAID"
-                            ? "Chưa thanh toán"
-                            : "Đã hủy"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-700 text-start text-xs text-green-700 font-semibold">
-                      {bill.amount.toLocaleString("vi-VN")} VNĐ
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-theme-md dark:text-gray-400">
-                      <div className="flex gap-2">
-                        {bill.status === "UNPAID" ? (
-                          <>
-                            <button
-                              onClick={() => handlePayment(bill, "online")}
-                              className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              Online
-                            </button>
+                bills.map((bill) => {
+                  const services = billServices[bill.billId || 0] || []
+                  const totalFromServices = calculateTotalFromServices(bill.billId || 0)
 
+                  return (
+                    <TableRow key={bill.billId || Math.random()}>
+                      <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
+                        #{(bill.billId || 0).toString().padStart(4, "0")}
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
+                        {bill.createdAt ? format(new Date(bill.createdAt), "dd-MM-yyyy") : "N/A"}
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
+                        {services.length > 0 ? (
+                          <div className="space-y-1">
+                            {services.slice(0, 2).map((service, index) => (
+                              <div key={index} className="text-xs">
+                                <span className="font-medium">{service.service?.serviceName}</span>
+                                <span className="text-gray-500 ml-1">
+                                  ({(service.service?.price || 0).toLocaleString("vi-VN")} VNĐ)
+                                </span>
+                              </div>
+                            ))}
+                            {services.length > 2 && (
+                              <div className="text-xs text-gray-500">+{services.length - 2} dịch vụ khác</div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">Không có dịch vụ</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
+                        <Badge
+                          size="sm"
+                          color={bill.status === "PAID" ? "success" : bill.status === "UNPAID" ? "error" : "cancel"}
+                        >
+                          {bill.status === "PAID"
+                            ? "Đã thanh toán"
+                            : bill.status === "UNPAID"
+                              ? "Chưa thanh toán"
+                              : "Đã hủy"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-700 text-start text-xs text-green-700 font-semibold">
+                        {totalFromServices.toLocaleString("vi-VN")} VNĐ
+                        {totalFromServices !== (bill.amount || 0) && (
+                          <div className="text-gray-400 text-xs line-through">
+                            {(bill.amount || 0).toLocaleString("vi-VN")} VNĐ
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-500 text-theme-md dark:text-gray-400">
+                        <div className="flex gap-2">
+                          {bill.status === "UNPAID" ? (
+                            <>
+                              <button
+                                onClick={() => handlePayment(bill, "online")}
+                                className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                Online
+                              </button>
+
+                              <button
+                                onClick={() => handlePayment(bill, "cash")}
+                                className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                Tiền mặt
+                              </button>
+                            </>
+                          ) : (
                             <button
-                              onClick={() => handlePayment(bill, "cash")}
-                              className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors"
+                              onClick={() => setSelectedBill(bill)}
+                              className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-sky-200 transition-colors"
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -604,40 +743,21 @@ export function InvoicesContent() {
                                 viewBox="0 0 20 20"
                                 fill="currentColor"
                               >
+                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                 <path
                                   fillRule="evenodd"
-                                  d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
                                   clipRule="evenodd"
                                 />
                               </svg>
-                              Tiền mặt
+                              Xem chi tiết
                             </button>
-                          </>
-                        ) : (
-                          <button
-                            onClick={() => setSelectedBill(bill)}
-                            className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-sky-200 transition-colors"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                              <path
-                                fillRule="evenodd"
-                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            Xem chi tiết
-                          </button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
               )}
             </TableBody>
           </Table>
@@ -647,6 +767,7 @@ export function InvoicesContent() {
       {selectedBill && (
         <BillModal
           {...selectedBill}
+          services={billServices[selectedBill.billId || 0] || []}
           isOpen={true}
           onClose={() => {
             setSelectedBill(null)
