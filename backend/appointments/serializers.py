@@ -31,8 +31,28 @@ class DoctorSerializer(serializers.ModelSerializer):
         return f"{obj.first_name} {obj.last_name}"
 
 
-class ServiceSerializer(serializers.Serializer):
-    service_id = serializers.IntegerField(required=False)
+class DoctorSerializer(serializers.ModelSerializer):
+    fullName = serializers.SerializerMethodField()
+    academicDegree = serializers.CharField(source='academic_degree', read_only=True)
+    specialization = serializers.CharField(read_only=True)
+    price = serializers.DecimalField(
+        max_digits=DECIMAL_MAX_DIGITS,
+        decimal_places=DECIMAL_DECIMAL_PLACES,
+        read_only=True,
+        allow_null=True
+    )
+    # avatar_url = serializers.CharField(source='avatar', read_only=True, allow_null=True)
+
+    class Meta:
+        model = Doctor
+        fields = ['id', 'fullName', 'academicDegree', 'specialization', 'price']
+
+    def get_fullName(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    service_id = serializers.IntegerField(source='id', read_only=True)
     service_name = serializers.CharField(required=True)
     service_type = serializers.ChoiceField(
         choices=[(item.value, item.name) for item in ServiceType],
@@ -47,6 +67,10 @@ class ServiceSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         return Service.objects.create(**validated_data)
+
+    class Meta:
+        model = Service
+        fields = ['service_id', 'service_name', 'service_type', 'price', 'created_at', 'service_orders']
 
 
 class ServiceOrderSerializer(serializers.Serializer):
@@ -80,6 +104,35 @@ class ServiceOrderSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         return ServiceOrder.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        if 'appointment_id' in validated_data:
+            instance.appointment_id = validated_data['appointment_id']
+        if 'room_id' in validated_data:
+            instance.room_id = validated_data['room_id']
+        if 'service_id' in validated_data:
+            instance.service_id = validated_data['service_id']
+        if 'status' in validated_data:
+            instance.status = validated_data['status']
+        if 'result' in validated_data:
+            instance.result = validated_data['result']
+        if 'number' in validated_data:
+            instance.number = validated_data['number']
+        if 'order_time' in validated_data:
+            instance.order_time = validated_data['order_time']
+        if 'result_time' in validated_data:
+            instance.result_time = validated_data['result_time']
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        for key in ['result', 'result_file_url']:
+            val = data.get(key)
+            if val and isinstance(val, str) and val.startswith('/') and request:
+                data[key] = request.build_absolute_uri(val)
+        return data
 
     def update(self, instance, validated_data):
         if 'appointment_id' in validated_data:
@@ -181,7 +234,6 @@ class AppointmentUpdateSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = [
             'id', 'doctor', 'patient', 'schedule', 'symptoms',
-            'number',
             'status', 'slot_start', 'slot_end'
         ]
 

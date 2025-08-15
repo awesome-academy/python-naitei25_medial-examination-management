@@ -112,8 +112,8 @@ class PayOSService:
     def __init__(self):
         payos_config = settings.PAYOS
         self.payos = payos.PayOS(client_id=payos_config['client_id'], 
-                          api_key=payos_config['api_key'], 
-                          checksum_key=payos_config['checksum_key'])
+                            api_key=payos_config['api_key'], 
+                            checksum_key=payos_config['checksum_key'])
 
     def create_payment_link(self, bill_id):
         bill = get_object_or_404(Bill, pk=bill_id)

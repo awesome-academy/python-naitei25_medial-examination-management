@@ -23,6 +23,19 @@ export enum AppointmentStatus {
 }
 
 // Định nghĩa AppointmentStatus enum
+<<<<<<< HEAD
+=======
+export enum AppointmentStatus {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  CANCELLED = "CANCELLED",
+  COMPLETED = "COMPLETED",
+  NO_SHOW = "NO_SHOW",
+  IN_PROGRESS = "IN_PROGRESS",
+}
+
+// Định nghĩa AppointmentStatus enum
+>>>>>>> 5cfda96 (feat: tổng hợp toàn bộ thay đổi)
 export enum AppointmentStatus {
   PENDING = "PENDING",
   CONFIRMED = "CONFIRMED",
