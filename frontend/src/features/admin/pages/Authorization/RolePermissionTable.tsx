@@ -45,25 +45,11 @@ export default function RolePermissionTable() {
           "Lễ tân": "RECEPTIONIST",
           "Bệnh nhân": "PATIENT",
         };
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> 1dd6461 (Doctor: Thêm trang schedule, patient detail, upload kết quả khám pdf. Patient: Thêm Dashboard, lịch sử đặt lịch khám, xem lịch khám. Admin: Chỉnh sửa xem lịch khám trong tháng, thêm lịch trực cho bác sĩ, chỉnh sửa danh sách bệnh nhân, thêm bệnh án cho bệnh nhân)
-=======
->>>>>>> 5cfda96 (feat: tổng hợp toàn bộ thay đổi)
         const rolesWithUserCount = res.roles.map((role) => {
           const backendRole = nameToRole[role.name as keyof typeof nameToRole];
           const userCount = users.filter((u) => u.role === backendRole).length;
           return { ...role, userCount };
         });
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> 1dd6461 (Doctor: Thêm trang schedule, patient detail, upload kết quả khám pdf. Patient: Thêm Dashboard, lịch sử đặt lịch khám, xem lịch khám. Admin: Chỉnh sửa xem lịch khám trong tháng, thêm lịch trực cho bác sĩ, chỉnh sửa danh sách bệnh nhân, thêm bệnh án cho bệnh nhân)
-=======
->>>>>>> 5cfda96 (feat: tổng hợp toàn bộ thay đổi)
         setRoles(rolesWithUserCount);
         setTotalItems(res.total);
         setTotalPages(res.totalPages);

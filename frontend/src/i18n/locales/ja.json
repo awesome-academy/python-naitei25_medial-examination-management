@@ -301,22 +301,6 @@
     "patientDetails": "患者詳細",
     "prescriptionHistory": "処方箋の詳細"
   },
-  "tabs": {
-    "testResults": "検査結果",
-    "notes": "メモ",
-    "prescriptions": "処方箋"
-  },
-  "headers": {
-    "testResults": "検査結果",
-    "notes": "メモ",
-    "prescriptions": "処方箋"
-  },
-  "titles": {
-    "createPrescription": "処方箋の作成",
-    "prescriptionPDF": "処方箋PDF",
-    "patientDetails": "患者詳細",
-    "prescriptionHistory": "処方箋の詳細"
-  },
   "layout": {
     "toggleSidebar": "サイドバー切り替え",
     "searchPlaceholder": "検索... (Ctrl+K)",

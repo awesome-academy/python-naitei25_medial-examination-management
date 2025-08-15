@@ -301,22 +301,6 @@
     "patientDetails": "Patient Details",
     "prescriptionHistory": "Prescription Details"
   },
-  "tabs": {
-    "testResults": "Test Results",
-    "notes": "Notes",
-    "prescriptions": "Prescriptions"
-  },
-  "headers": {
-    "testResults": "Test Results",
-    "notes": "Notes",
-    "prescriptions": "Prescriptions"
-  },
-  "titles": {
-    "createPrescription": "Create Prescription",
-    "prescriptionPDF": "Prescription PDF",
-    "patientDetails": "Patient Details",
-    "prescriptionHistory": "Prescription Details"
-  },
   "layout": {
     "toggleSidebar": "Toggle Sidebar",
     "searchPlaceholder": "Search... (Ctrl+K)",

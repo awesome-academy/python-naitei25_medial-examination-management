@@ -1,17 +1,6 @@
-<<<<<<< HEAD
 "use client"
 
 import type React from "react"
-=======
-<<<<<<< HEAD
-"use client"
-
-import type React from "react"
-=======
-import type React from "react";
-
->>>>>>> repoB/master
->>>>>>> 5cfda96 (feat: tổng hợp toàn bộ thay đổi)
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -76,35 +65,10 @@ const AppSidebar: React.FC = () => {
       roles: ["A", "D"], // Chỉ hiển thị cho bác sĩ loại E
     },
     {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-      // name: t("sidebar.examination"),
-      // icon: <CalendarIcon />,
-      // subItems: [
-      //   {
->>>>>>> repoB/master
->>>>>>> 5cfda96 (feat: tổng hợp toàn bộ thay đổi)
           icon: <CalendarIcon />,
           name: t("sidebar.calendar"),
           path: `${basePath}/calendar`,
           roles: ["A"],
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-          // pro: false,
-      //   },
-      //   {
-      //     name: t("sidebar.outpatientClinics"),
-      //     path: `${basePath}/outpatient-clinics`,
-      //     pro: false,
-      //   },
-      // ],
-      // roles: ["A", "RECEPTIONIST"],
->>>>>>> repoB/master
->>>>>>> 5cfda96 (feat: tổng hợp toàn bộ thay đổi)
     },
     {
       icon: <AdminIcon />,
@@ -118,24 +82,6 @@ const AppSidebar: React.FC = () => {
       path: `${basePath}/doctors`,
       roles: ["A"],
     },
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-    // {
-    //   icon: <CalendarIcon />,
-    //   name: t("sidebar.medicines"),
-    //   path: `${basePath}/medicines`,
-    //   roles: ["A"],
-    // },
-    // {
-    //   icon: <BoxCubeIcon />,
-    //   name: t("sidebar.healthServices"),
-    //   path: `${basePath}/health-services`,
-    //   roles: ["A"],
-    // },
->>>>>>> repoB/master
->>>>>>> 5cfda96 (feat: tổng hợp toàn bộ thay đổi)
     {
       icon: <CalendarIcon />,
       name: t("sidebar.workSchedule"),
@@ -213,7 +159,6 @@ const AppSidebar: React.FC = () => {
         return location.pathname === path;
       }
 
-<<<<<<< HEAD
       if (path === basePath) {
         return location.pathname === path;
       }
@@ -227,28 +172,6 @@ const AppSidebar: React.FC = () => {
       if (currentPath.match(/\/prescriptions\/\d+$/) && path.endsWith("/prescriptions")) {
         return true
       }
-=======
-<<<<<<< HEAD
-      if (path === basePath) {
-        return location.pathname === path;
-      }
-
-      // Xử lý đặc biệt cho các detail routes
-      const currentPath = location.pathname
-      const searchParams = new URLSearchParams(location.search)
-      const fromParam = searchParams.get("from")
-
-      // Nếu đang ở trang chi tiết prescription, highlight menu prescriptions
-      if (currentPath.match(/\/prescriptions\/\d+$/) && path.endsWith("/prescriptions")) {
-        return true
-      }
-=======
-      // Xử lý cho các route khác
-      if (path === basePath) {
-        return location.pathname === path;
-      }
->>>>>>> repoB/master
->>>>>>> 5cfda96 (feat: tổng hợp toàn bộ thay đổi)
       return (
         location.pathname === path || location.pathname.startsWith(path + "/")
       );
@@ -270,7 +193,6 @@ const AppSidebar: React.FC = () => {
         });
       }
     });
-<<<<<<< HEAD
 
     // Xử lý đặc biệt cho medical record với from parameter
     if (
@@ -291,8 +213,6 @@ const AppSidebar: React.FC = () => {
         }
       }
     }
-=======
->>>>>>> repoB/master
 
     // Xử lý đặc biệt cho medical record với from parameter
     if (
@@ -512,12 +432,4 @@ const AppSidebar: React.FC = () => {
   );
 };
 
-<<<<<<< HEAD
 export default AppSidebar;
-=======
-<<<<<<< HEAD
-export default AppSidebar;
-=======
-export default AppSidebar;
->>>>>>> repoB/master
->>>>>>> 5cfda96 (feat: tổng hợp toàn bộ thay đổi)

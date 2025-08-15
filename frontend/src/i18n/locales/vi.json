@@ -299,22 +299,6 @@
     "patientDetails": "Chi tiết bệnh nhân",
     "prescriptionHistory": "Chi tiết đơn thuốc"
   },
-  "tabs": {
-    "testResults": "Kết quả xét nghiệm",
-    "notes": "Ghi chú",
-    "prescriptions": "Đơn thuốc"
-  },
-  "headers": {
-    "testResults": "Kết quả xét nghiệm",
-    "notes": "Ghi chú",
-    "prescriptions": "Đơn thuốc"
-  },
-  "titles": {
-    "createPrescription": "Tạo đơn thuốc",
-    "prescriptionPDF": "Đơn thuốc PDF",
-    "patientDetails": "Chi tiết bệnh nhân",
-    "prescriptionHistory": "Chi tiết đơn thuốc"
-  },
   "layout": {
     "toggleSidebar": "Bật/tắt thanh bên",
     "searchPlaceholder": "Tìm kiếm... (Ctrl+K)",
