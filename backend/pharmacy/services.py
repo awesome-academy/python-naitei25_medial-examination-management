@@ -111,7 +111,7 @@ class PharmacyService:
 
     def get_prescription_details(self, prescription_id):
         prescription = self.get_prescription_by_id(prescription_id)
-        return prescription.prescription_details.all()
+        return prescription.prescriptiondetail_set.all()
 
     def update_prescription_detail(self, detail_id, data):
         detail = self.get_prescription_detail_by_id(detail_id)
