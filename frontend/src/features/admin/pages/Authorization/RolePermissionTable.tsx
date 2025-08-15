@@ -45,13 +45,11 @@ export default function RolePermissionTable() {
           "Lễ tân": "RECEPTIONIST",
           "Bệnh nhân": "PATIENT",
         };
-
         const rolesWithUserCount = res.roles.map((role) => {
           const backendRole = nameToRole[role.name as keyof typeof nameToRole];
           const userCount = users.filter((u) => u.role === backendRole).length;
           return { ...role, userCount };
         });
-
         setRoles(rolesWithUserCount);
         setTotalItems(res.total);
         setTotalPages(res.totalPages);

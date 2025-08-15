@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Doctor, Department, ExaminationRoom, Schedule, ScheduleStatus
 from common.enums import Gender, AcademicDegree, DoctorType, Shift # Import Shift enum
-from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH, USER_LENGTH, DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES
+from common.constants import DOCTOR_LENGTH, COMMON_LENGTH, PATIENT_LENGTH, ENUM_LENGTH, USER_LENGTH, DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES, REGEX_PATTERNS
 from users.serializers import UserResponseSerializer
 from django.utils.translation import gettext_lazy as _
 
@@ -136,3 +136,64 @@ class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
         fields = '__all__' # Đã thêm lại dòng này
+
+class DoctorPartialUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Doctor
+        fields = [
+            'first_name', 'last_name', 'identity_number', 'birthday', 
+            'gender', 'address', 'academic_degree', 'specialization', 
+            'type', 'department', 'price', 'avatar'
+        ]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Đánh dấu tất cả fields là không bắt buộc cho partial update
+        for field_name, field in self.fields.items():
+            field.required = False
+
+class DoctorUpdateSerializer(serializers.Serializer):
+    """
+    Serializer để cập nhật thông tin bác sĩ và user liên quan
+    """
+    # Doctor fields
+    first_name = serializers.CharField(max_length=COMMON_LENGTH["NAME"], required=False)
+    last_name = serializers.CharField(max_length=COMMON_LENGTH["NAME"], required=False)
+    identity_number = serializers.CharField(max_length=PATIENT_LENGTH["IDENTITY"], required=False)
+    birthday = serializers.DateField(required=False)
+    gender = serializers.ChoiceField(choices=[(g.value, g.name) for g in Gender], required=False)
+    address = serializers.CharField(max_length=COMMON_LENGTH["ADDRESS"], required=False)
+    academic_degree = serializers.ChoiceField(choices=[(a.value, a.name) for a in AcademicDegree], required=False)
+    specialization = serializers.CharField(max_length=DOCTOR_LENGTH["SPECIALIZATION"], required=False)
+    type = serializers.ChoiceField(choices=[(d.value, d.name) for d in DoctorType], required=False)
+    department_id = serializers.IntegerField(required=False)
+    price = serializers.DecimalField(max_digits=DECIMAL_MAX_DIGITS, decimal_places=DECIMAL_DECIMAL_PLACES, required=False, allow_null=True)
+    avatar = serializers.CharField(max_length=DOCTOR_LENGTH["AVATAR"], required=False, allow_blank=True, allow_null=True)
+    
+    # User fields
+    email = serializers.EmailField(max_length=USER_LENGTH["EMAIL"], required=False)
+    phone = serializers.CharField(max_length=USER_LENGTH["PHONE"], required=False)
+
+    def validate(self, data):
+        # Validate that at least one field is provided
+        if not data:
+            raise serializers.ValidationError(_("Ít nhất một trường phải được cung cấp để cập nhật"))
+        
+        # Validate email format if provided
+        if 'email' in data and data['email']:
+            from django.core.validators import validate_email
+            try:
+                validate_email(data['email'])
+            except:
+                raise serializers.ValidationError(_("Email không hợp lệ"))
+        
+        # Validate phone format if provided
+        if 'phone' in data and data['phone']:
+            from django.core.validators import RegexValidator
+            phone_validator = RegexValidator(REGEX_PATTERNS["PHONE"], message=_("Số điện thoại không hợp lệ"))
+            try:
+                phone_validator(data['phone'])
+            except:
+                raise serializers.ValidationError(_("Số điện thoại không hợp lệ"))
+        
+        return data
