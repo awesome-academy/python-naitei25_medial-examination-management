@@ -151,7 +151,7 @@ export const appointmentService = {
   },
 
   async updateAppointmentById(appointmentId: number, updateData: Partial<Appointment>): Promise<Appointment> {
-    const response = await api.put(`/appointments/${appointmentId}`, updateData)
+    const response = await api.put(`/appointments/${appointmentId}/`, updateData)
     return response.data
   },
 

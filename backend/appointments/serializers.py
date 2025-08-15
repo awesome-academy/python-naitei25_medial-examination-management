@@ -31,8 +31,8 @@ class DoctorSerializer(serializers.ModelSerializer):
         return f"{obj.first_name} {obj.last_name}"
 
 
-class ServiceSerializer(serializers.Serializer):
-    service_id = serializers.IntegerField(required=False)
+class ServiceSerializer(serializers.ModelSerializer):
+    service_id = serializers.IntegerField(source='id', read_only=True)
     service_name = serializers.CharField(required=True)
     service_type = serializers.ChoiceField(
         choices=[(item.value, item.name) for item in ServiceType],
@@ -47,6 +47,10 @@ class ServiceSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         return Service.objects.create(**validated_data)
+
+    class Meta:
+        model = Service
+        fields = ['service_id', 'service_name', 'service_type', 'price', 'created_at', 'service_orders']
 
 
 class ServiceOrderSerializer(serializers.Serializer):
@@ -181,7 +185,6 @@ class AppointmentUpdateSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = [
             'id', 'doctor', 'patient', 'schedule', 'symptoms',
-            'number',
             'status', 'slot_start', 'slot_end'
         ]
 

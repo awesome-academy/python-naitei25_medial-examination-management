@@ -68,3 +68,7 @@ class PatientSerializer(serializers.ModelSerializer):
             'birthday', 'gender', 'address', 'allergies', 'height', 'weight', 'blood_type',
             'avatar', 'created_at', 'emergency_contacts'
         ]
+        extra_kwargs = {
+            'user': {'read_only': True},
+            'created_at': {'read_only': True},
+        }

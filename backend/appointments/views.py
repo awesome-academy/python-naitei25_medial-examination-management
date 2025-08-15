@@ -220,7 +220,7 @@ class AppointmentNoteViewSet(viewsets.ModelViewSet):
       serializer = self.get_serializer(notes, many=True)
       return Response(serializer.data)
 
-  @action(detail=False, methods=['post'], url_path='appointment/(?P<appointment_id>[^/.]+)/notes')
+  @action(detail=False, methods=['post'], url_path='appointment/(?P<appointment_id>[^/.]+)/notes/create')
   def create_note(self, request, appointment_id=None):
       data = request.data.copy()
       data['appointment'] = appointment_id

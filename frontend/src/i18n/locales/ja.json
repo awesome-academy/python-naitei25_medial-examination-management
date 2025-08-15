@@ -216,7 +216,11 @@
     "selectWorkingDate": "勤務日を選択",
     "selectRoom": "部屋を選択",
     "shift": "シフト",
-    "status": "ステータス"
+    "status": "ステータス",
+    "searchMedicine": "薬を検索...",
+    "doctorNotes": "医師のメモを入力",
+    "addNewNote": "新しいメモを追加...",
+    "duration": "期間（日）を入力"
   },
   "language": {
     "selectLanguage": "言語を選択",
@@ -280,6 +284,22 @@
     "appointments": "予約一覧",
     "upcomingAppointments": "今後の予約",
     "pastAppointments": "過去の予約"
+  },
+  "tabs": {
+    "testResults": "検査結果",
+    "notes": "メモ",
+    "prescriptions": "処方箋"
+  },
+  "headers": {
+    "testResults": "検査結果",
+    "notes": "メモ",
+    "prescriptions": "処方箋"
+  },
+  "titles": {
+    "createPrescription": "処方箋の作成",
+    "prescriptionPDF": "処方箋PDF",
+    "patientDetails": "患者詳細",
+    "prescriptionHistory": "処方箋の詳細"
   },
   "layout": {
     "toggleSidebar": "サイドバー切り替え",
@@ -345,7 +365,8 @@
     "otpVerificationFailed": "OTP認証に失敗しました",
     "forgotPasswordFailed": "OTPリクエストに失敗しました",
     "resetPasswordFailed": "パスワードリセットに失敗しました",
-    "resendOtpFailed": "OTP再送信に失敗しました"
+    "resendOtpFailed": "OTP再送信に失敗しました",
+    "noPatientInfo": "患者情報がありません"
   },
   "api": {
     "loading": "読み込み中...",
@@ -363,7 +384,8 @@
     "manageAndTrack": "患者情報を管理・追跡する",
     "date": "日付",
     "shift": "シフト",
-    "patients": "患者"
+    "patients": "患者",
+    "schedule": "スケジュール"
   },
   "table": {
     "no": "番号",
@@ -388,12 +410,36 @@
     "orderId": "注文ID",
     "viewPDF": "PDFを表示",
     "download": "ダウンロード",
-    "unknown": "不明"
+    "unknown": "不明",
+    "medicine": "薬",
+    "dosage": "用量",
+    "frequency": "服用頻度",
+    "instructions": "指示",
+    "duration": "期間",
+    "unit": "単位",
+    "quantity": "数量"
+  },
+  "units": {
+    "mmHg": "mmHg",
+    "bpm": "bpm",
+    "mgPerDl": "mg/dL"
+  },
+  "currency": {
+    "vnd": "VND"
   },
   "buttons": {
     "clearFilters": "フィルターをクリア",
     "today": "今日",
-    "refresh": "更新"
+    "refresh": "更新",
+    "cancel": "キャンセル",
+    "savePrescription": "処方箋を保存",
+    "addNote": "メモを追加",
+    "addPrescription": "処方箋を追加",
+    "completeExamination": "診察を完了",
+    "refreshAll": "すべて更新",
+    "pendingTestResult": "検査結果待ち",
+    "retry": "再試行",
+    "close": "閉じる"
   },
   "stats": {
     "totalAppointments": "総予約数",
@@ -419,11 +465,22 @@
   },
   "empty": {
     "loading": "読み込み中...",
-    "noPatientsFound": "患者が見つかりません"
+    "noPatientsFound": "患者が見つかりません",
+    "noMedicinesInPrescription": "この処方箋には薬がありません",
+    "noTestResults": "検査結果がありません",
+    "noNotes": "メモがありません"
   },
   "options": {
     "allShifts": "すべてのシフト",
-    "allStatuses": "すべてのステータス"
+    "allStatuses": "すべてのステータス",
+    "frequency": {
+      "onceMorning": "朝に1回",
+      "onceNoon": "正午に1回",
+      "onceAfternoon": "午後に1回",
+      "onceEvening": "夕方に1回",
+      "twiceMorningEvening": "朝と夕方の1日2回",
+      "thriceMorningNoonAfternoon": "朝・昼・夕の1日3回"
+    }
   },
   "pagination": {
     "showing": "{{total}}人中{{start}}〜{{end}}人を表示中"
@@ -475,8 +532,42 @@
     "shareText": "処方箋の詳細 #{{id}}",
     "linkCopied": "リンクをクリップボードにコピーしました"
   },
+  "prescriptionHistory": {
+    "totalMedicineTypes": "薬の種類の合計",
+    "totalPrescriptionValue": "処方箋の合計金額"
+  },
   "labels": {
-    "noNotes": "メモなし"
+    "noNotes": "メモなし",
+    "patient": "患者",
+    "patientCode": "患者コード",
+    "date": "日付",
+    "time": "時間",
+    "doctorNotes": "医師のメモ",
+    "prescription": "処方箋",
+    "prescriptionDate": "処方日",
+    "diagnosis": "診断",
+    "followUpAppointment": "再診予約",
+    "status": "ステータス",
+    "patientName": "患者名",
+    "clinic": "クリニック",
+    "appointmentTime": "診察時間",
+    "appointmentDate": "診察日",
+    "symptoms": "症状",
+    "followUp": "フォローアップ",
+    "followUpCheckbox": "再診を予約する",
+    "followUpDate": "フォローアップ日",
+    "systolicBloodPressure": "収縮期血圧",
+    "diastolicBloodPressure": "拡張期血圧",
+    "heartRate": "心拍数",
+    "bloodSugar": "血糖値",
+    "unknownPatient": "不明な患者",
+    "unknownClinic": "不明なクリニック",
+    "currency": "通貨",
+    "available": "残り",
+    "orderId": "注文ID",
+    "room": "部屋",
+    "notSpecified": "指定なし",
+    "unknownPatientCode": "不明な患者コード"
   },
   "medicalRecord": {
     "noAppointmentFound": "予約が見つかりません。",
@@ -686,5 +777,28 @@
     "noResultsText": "フィルターや検索条件を変更してみてください。",
     "previous": "前へ",
     "next": "次へ"
+  },
+  "meta": {
+    "title": "スケジュール",
+    "description": "スケジュールを表示および管理する"
+  },
+  "modal": {
+    "scheduleDetails": "スケジュールの詳細",
+    "error": "エラーが発生しました",
+    "success": "操作が正常に完了しました"
+  },
+  "months": {
+    "january": "1月",
+    "february": "2月",
+    "march": "3月",
+    "april": "4月",
+    "may": "5月",
+    "june": "6月",
+    "july": "7月",
+    "august": "8月",
+    "september": "9月",
+    "october": "10月",
+    "november": "11月",
+    "december": "12月"
   }
 }
