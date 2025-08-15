@@ -10,6 +10,25 @@ from common.constants import DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES, PAGE_NO
 from django.utils.translation import gettext_lazy as _
 from datetime import date, datetime, timedelta
 
+class DoctorSerializer(serializers.ModelSerializer):
+    fullName = serializers.SerializerMethodField()
+    academicDegree = serializers.CharField(source='academic_degree', read_only=True)
+    specialization = serializers.CharField(read_only=True)
+    price = serializers.DecimalField(
+        max_digits=DECIMAL_MAX_DIGITS,
+        decimal_places=DECIMAL_DECIMAL_PLACES,
+        read_only=True,
+        allow_null=True
+    )
+    # avatar_url = serializers.CharField(source='avatar', read_only=True, allow_null=True)
+
+    class Meta:
+        model = Doctor
+        fields = ['id', 'fullName', 'academicDegree', 'specialization', 'price']
+
+    def get_fullName(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+
 
 class DoctorSerializer(serializers.ModelSerializer):
     fullName = serializers.SerializerMethodField()
@@ -368,6 +387,7 @@ class AppointmentFilterSerializer(serializers.Serializer):
     roomId = serializers.IntegerField(required=False, source='room_id')
     pageNo = serializers.IntegerField(default=PAGE_NO_DEFAULT, min_value=MIN_VALUE, source='page_no')
     pageSize = serializers.IntegerField(default=PAGE_SIZE_DEFAULT, min_value=MIN_VALUE, source='page_size')
+
 
 
 class AppointmentPatientFilterSerializer(serializers.Serializer):
