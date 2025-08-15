@@ -284,7 +284,6 @@
     "appointments": "予約一覧",
     "upcomingAppointments": "今後の予約",
     "pastAppointments": "過去の予約"
-<<<<<<< HEAD
   },
   "tabs": {
     "testResults": "検査結果",
@@ -301,8 +300,6 @@
     "prescriptionPDF": "処方箋PDF",
     "patientDetails": "患者詳細",
     "prescriptionHistory": "処方箋の詳細"
-=======
->>>>>>> repoB/master
   },
   "layout": {
     "toggleSidebar": "サイドバー切り替え",
@@ -535,7 +532,6 @@
     "shareText": "処方箋の詳細 #{{id}}",
     "linkCopied": "リンクをクリップボードにコピーしました"
   },
-<<<<<<< HEAD
   "prescriptionHistory": {
     "totalMedicineTypes": "薬の種類の合計",
     "totalPrescriptionValue": "処方箋の合計金額"
@@ -572,10 +568,6 @@
     "room": "部屋",
     "notSpecified": "指定なし",
     "unknownPatientCode": "不明な患者コード"
-=======
-  "labels": {
-    "noNotes": "メモなし"
->>>>>>> repoB/master
   },
   "medicalRecord": {
     "noAppointmentFound": "予約が見つかりません。",
@@ -785,7 +777,6 @@
     "noResultsText": "フィルターや検索条件を変更してみてください。",
     "previous": "前へ",
     "next": "次へ"
-<<<<<<< HEAD
   },
   "meta": {
     "title": "スケジュール",
@@ -809,7 +800,5 @@
     "october": "10月",
     "november": "11月",
     "december": "12月"
-=======
->>>>>>> repoB/master
   }
 }

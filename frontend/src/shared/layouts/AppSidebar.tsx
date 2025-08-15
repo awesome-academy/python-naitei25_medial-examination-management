@@ -1,11 +1,6 @@
-<<<<<<< HEAD
 "use client"
 
 import type React from "react"
-=======
-import type React from "react";
-
->>>>>>> repoB/master
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -70,53 +65,11 @@ const AppSidebar: React.FC = () => {
       roles: ["A", "D"], // Chỉ hiển thị cho bác sĩ loại E
     },
     {
-<<<<<<< HEAD
-=======
-      // name: t("sidebar.examination"),
-      // icon: <CalendarIcon />,
-      // subItems: [
-      //   {
->>>>>>> repoB/master
           icon: <CalendarIcon />,
           name: t("sidebar.calendar"),
           path: `${basePath}/calendar`,
           roles: ["A"],
-<<<<<<< HEAD
-=======
-          // pro: false,
-      //   },
-      //   {
-      //     name: t("sidebar.outpatientClinics"),
-      //     path: `${basePath}/outpatient-clinics`,
-      //     pro: false,
-      //   },
-      // ],
-      // roles: ["A", "RECEPTIONIST"],
->>>>>>> repoB/master
     },
-    // {
-    //   name: t("sidebar.inpatient"),
-    //   icon: <InpatientIcon />,
-    //   subItems: [
-    //     {
-    //       name: t("sidebar.inpatientRooms"),
-    //       path: `${basePath}/inpatients-rooms`,
-    //       pro: false,
-    //     },
-    //     {
-    //       name: t("sidebar.inpatientPatients"),
-    //       path: `${basePath}/inpatients`,
-    //       pro: false,
-    //     },
-    //   ],
-    //   roles: ["A", "RECEPTIONIST"],
-    // },
-    // {
-    //   icon: <DepartmentIcon />,
-    //   name: t("sidebar.departments"),
-    //   path: `${basePath}/departments`,
-    //   roles: ["A", "RECEPTIONIST"],
-    // },
     {
       icon: <AdminIcon />,
       name: t("sidebar.authorization"),
@@ -129,21 +82,6 @@ const AppSidebar: React.FC = () => {
       path: `${basePath}/doctors`,
       roles: ["A"],
     },
-<<<<<<< HEAD
-=======
-    // {
-    //   icon: <CalendarIcon />,
-    //   name: t("sidebar.medicines"),
-    //   path: `${basePath}/medicines`,
-    //   roles: ["A"],
-    // },
-    // {
-    //   icon: <BoxCubeIcon />,
-    //   name: t("sidebar.healthServices"),
-    //   path: `${basePath}/health-services`,
-    //   roles: ["A"],
-    // },
->>>>>>> repoB/master
     {
       icon: <CalendarIcon />,
       name: t("sidebar.workSchedule"),
@@ -221,7 +159,6 @@ const AppSidebar: React.FC = () => {
         return location.pathname === path;
       }
 
-<<<<<<< HEAD
       if (path === basePath) {
         return location.pathname === path;
       }
@@ -235,12 +172,6 @@ const AppSidebar: React.FC = () => {
       if (currentPath.match(/\/prescriptions\/\d+$/) && path.endsWith("/prescriptions")) {
         return true
       }
-=======
-      // Xử lý cho các route khác
-      if (path === basePath) {
-        return location.pathname === path;
-      }
->>>>>>> repoB/master
       return (
         location.pathname === path || location.pathname.startsWith(path + "/")
       );
@@ -262,7 +193,6 @@ const AppSidebar: React.FC = () => {
         });
       }
     });
-<<<<<<< HEAD
 
     // Xử lý đặc biệt cho medical record với from parameter
     if (
@@ -283,8 +213,6 @@ const AppSidebar: React.FC = () => {
         }
       }
     }
-=======
->>>>>>> repoB/master
 
     // Chỉ set submenu active nếu tìm thấy
     if (activeSubmenuIndex !== null) {
@@ -484,8 +412,4 @@ const AppSidebar: React.FC = () => {
   );
 };
 
-<<<<<<< HEAD
 export default AppSidebar;
-=======
-export default AppSidebar;
->>>>>>> repoB/master
