@@ -103,52 +103,6 @@ class AppointmentService:
       }
 
   @staticmethod
-  def get_appointments_by_patient_id_optimized(patient_id, page_no, page_size, appointment_type='all', appointment_status=None, current_datetime=None):
-        queryset = Appointment.objects.filter(patient_id=patient_id).select_related('doctor', 'schedule').prefetch_related('prescription_set')
-
-        if current_datetime is None:
-            current_datetime = datetime.now()
-        
-        today_date = current_datetime.date()
-        current_time = current_datetime.time()
-
-        if appointment_type == 'upcoming':
-            queryset = queryset.filter(
-                Q(schedule__work_date__gt=today_date) |
-                Q(schedule__work_date=today_date, slot_start__gte=current_time)
-            )
-            if appointment_status:
-                if isinstance(appointment_status, (list, tuple)):
-                    queryset = queryset.filter(status__in=appointment_status)
-                else:
-                    queryset = queryset.filter(status=appointment_status)
-            else:
-                queryset = queryset.filter(status__in=[
-                    AppointmentStatus.PENDING.value,
-                    AppointmentStatus.CONFIRMED.value,
-                    AppointmentStatus.IN_PROGRESS.value
-                ])
-            queryset = queryset.order_by('schedule__work_date', 'slot_start')
-        elif appointment_type == 'past':
-            queryset = queryset.filter(
-                Q(schedule__work_date__lt=today_date) |
-                Q(schedule__work_date=today_date, slot_start__lt=current_time)
-            )
-            if appointment_status and appointment_status != '':
-                if isinstance(appointment_status, (list, tuple)):
-                    queryset = queryset.filter(status__in=appointment_status)
-                else:
-                    queryset = queryset.filter(status=appointment_status)
-            queryset = queryset.order_by('-schedule__work_date', '-slot_start')
-        else:
-            if appointment_status:
-                if isinstance(appointment_status, (list, tuple)):
-                    queryset = queryset.filter(status__in=appointment_status)
-                else:
-                    queryset = queryset.filter(status=appointment_status)
-            queryset = queryset.order_by('-created_at')
-
-  @staticmethod
   def get_all_appointments(page_no=PAGE_NO_DEFAULT, page_size=PAGE_SIZE_DEFAULT):
       appointments = Appointment.objects.all().order_by('-created_at')
       paginator = Paginator(appointments, page_size)
