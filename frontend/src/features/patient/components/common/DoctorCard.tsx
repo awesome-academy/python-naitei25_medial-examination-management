@@ -27,40 +27,43 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow duration-200 border border-gray-200"
-      onClick={goToBooking}   // 🔹 Chuyển thẳng sang trang đặt lịch
+      className="overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 border-none bg-white"
+      onClick={goToBooking}
     >
       <CardHeader className="p-0">
         <div 
-          className="h-32 w-full bg-cover bg-center"
+          className="h-48 w-full bg-cover bg-center relative"
           style={{ backgroundImage: `url(${avatarUrl})` }}
           role="img"
           aria-label={`${doctor.first_name} ${doctor.last_name} avatar`}
-        />
-      </CardHeader>
-      <CardContent className="pt-4 text-center">
-        <div className="flex items-center justify-center mb-2">
-          <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-2">
-            BS. {doctor.first_name} {doctor.last_name}
-          </CardTitle>
-          <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 ml-2" />
+        >
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+            <CardTitle className="text-white text-xl font-bold line-clamp-1">
+              BS. {doctor.first_name} {doctor.last_name}
+            </CardTitle>
+          </div>
         </div>
-        <CardDescription className="text-sm text-gray-600 line-clamp-2 mb-2">
-          {t('common.specialization')}: {doctor.specialization}
-        </CardDescription>
-        <div className="flex items-center justify-center text-sm text-cyan-600 mb-2">
-          <Stethoscope className="h-4 w-4 mr-1" />
+      </CardHeader>
+      <CardContent className="p-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <CardDescription className="text-sm text-gray-600 font-medium">
+            {t('common.specialization')}: {doctor.specialization}
+          </CardDescription>
+          <ChevronRight className="h-5 w-5 text-gray-400" />
+        </div>
+        <div className="flex items-center text-sm text-cyan-600">
+          <Stethoscope className="h-4 w-4 mr-2" />
           <span>{ACADEMIC_DEGREE_LABELS[doctor.academic_degree] || doctor.academic_degree}</span>
         </div>
-        <div className="text-sm text-gray-600 mb-3">
+        <div className="text-sm font-semibold text-gray-800">
           {t('common.price')}: {formatPrice(doctor.price)}
         </div>
         <Button 
           onClick={(e) => {
-            e.stopPropagation(); // tránh gọi onClick của Card
+            e.stopPropagation();
             goToBooking();
           }}
-          className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 rounded-lg"
+          className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 rounded-lg mt-2"
         >
           {t('common.bookAppointment')}
         </Button>

@@ -26,94 +26,6 @@ type NavItem = {
   roles?: string[];
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
-
-// const navItems: NavItem[] = [
-//   {
-//     icon: <GridIcon />,
-//     name: "Tổng quan",
-//     path: "/admin",
-//     roles: ["admin", "receptionist"],
-//   },
-//   {
-//     name: "Khám bệnh",
-//     icon: <CalendarIcon />,
-//     subItems: [
-//       { name: "Lịch khám", path: "/admin/calendar", pro: false },
-//       { name: "Phòng khám", path: "/admin/outpatient-clinics", pro: false },
-//     ],
-//     roles: ["admin", "receptionist"],
-//   },
-//   {
-//     icon: <PatientIcon />,
-//     name: "Bệnh nhân",
-//     path: "/admin/patients",
-//     roles: ["admin", "receptionist"],
-//   },
-//   {
-//     name: "Nội trú",
-//     icon: <InpatientIcon />,
-//     subItems: [
-//       { name: "Phòng bệnh", path: "/admin/inpatients-rooms", pro: false },
-//       { name: "Bệnh nhân nội trú", path: "/admin/inpatients", pro: false },
-//     ],
-//     roles: ["admin", "receptionist"],
-//   },
-//   {
-//     icon: <DoctorIcon />,
-//     name: "Bác sĩ",
-//     path: "/admin/doctors",
-//     roles: ["admin", "receptionist"],
-//   },
-//   {
-//     icon: <CalendarIcon />,
-//     name: "Kho thuốc",
-//     path: "/admin/medicines",
-//     roles: ["admin", "receptionist"],
-//   },
-//   {
-//     icon: <BoxCubeIcon />,
-//     name: "Dịch vụ",
-//     path: "/admin/health-services",
-//     roles: ["admin", "receptionist"],
-//   },
-//   {
-//     name: "Phòng ban",
-//     icon: <DepartmentIcon />,
-//     path: "/admin/departments",
-//     roles: ["admin", "receptionist"],
-//   },
-//   {
-//     icon: <AdminIcon />,
-//     name: "Phân quyền",
-//     path: "/admin/authorization",
-//     roles: ["admin"],
-//   },
-//   {
-//     icon: <UserCircleIcon />,
-//     name: "Hồ sơ",
-//     path: "/admin/profile",
-//     roles: ["admin", "receptionist"],
-//   },
-
-// {
-//   name: "Forms",
-//   icon: <ListIcon />,
-//   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-// },
-// {
-//   name: "Tables",
-//   icon: <TableIcon />,
-//   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-// },
-// {
-//   name: "Pages",
-//   icon: <PageIcon />,
-//   subItems: [
-//     { name: "Blank Page", path: "/blank", pro: false },
-//     { name: "404 Error", path: "/error-404", pro: false },
-//   ],
-// },
-
 const othersItems: NavItem[] = [
   {
     icon: <PieChartIcon />,
@@ -178,29 +90,6 @@ const AppSidebar: React.FC = () => {
       roles: ["admin", "receptionist"],
     },
     {
-      name: "Nội trú",
-      icon: <InpatientIcon />,
-      subItems: [
-        {
-          name: "Phòng bệnh",
-          path: `${basePath}/inpatients-rooms`,
-          pro: false,
-        },
-        {
-          name: "Bệnh nhân nội trú",
-          path: `${basePath}/inpatients`,
-          pro: false,
-        },
-      ],
-      roles: ["admin", "receptionist"],
-    },
-    {
-      name: "Phòng ban",
-      icon: <DepartmentIcon />,
-      path: `${basePath}/departments`,
-      roles: ["admin", "receptionist"],
-    },
-    {
       icon: <AdminIcon />,
       name: "Phân quyền",
       path: `${basePath}/authorization`,
@@ -210,18 +99,6 @@ const AppSidebar: React.FC = () => {
       icon: <DoctorIcon />,
       name: "Bác sĩ",
       path: `${basePath}/doctors`,
-      roles: ["admin"],
-    },
-    {
-      icon: <CalendarIcon />,
-      name: "Kho thuốc",
-      path: `${basePath}/medicines`,
-      roles: ["admin"],
-    },
-    {
-      icon: <BoxCubeIcon />,
-      name: "Dịch vụ",
-      path: `${basePath}/health-services`,
       roles: ["admin"],
     },
     {
