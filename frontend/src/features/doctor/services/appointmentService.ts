@@ -53,7 +53,7 @@ export interface PaginationParams {
 // Interface cho filter parameters
 export interface AppointmentFilterParams {
   shift?: string
-  workDate?: string // YYYY-MM-DD format
+  work_date?: string // YYYY-MM-DD format
   appointmentStatus?: string
   roomId?: number
 }
@@ -113,8 +113,25 @@ export const appointmentService = {
         pageSize: queryParams.size,
       }
 
-      if (queryParams.shift) params.shift = queryParams.shift
-      if (queryParams.workDate) params.workDate = queryParams.workDate
+      // Normalize shift values to backend codes (accepts 'M', 'A', 'E' or 'MORNING', 'AFTERNOON', 'EVENING')
+      if (queryParams.shift) {
+        const raw = String(queryParams.shift).toUpperCase()
+        const shiftMap: Record<string, string> = {
+          M: "M",
+          A: "A",
+          E: "E",
+          MORNING: "M",
+          AFTERNOON: "A",
+          EVENING: "E",
+          NIGHT: "N",
+          SURGERY: "S",
+          MEETING: "T",
+        }
+        params.shift = shiftMap[raw] ?? raw
+      }
+
+      // Backend expects snake_case 'work_date'
+      if (queryParams.work_date) params.workDate = queryParams.work_date
       if (queryParams.appointmentStatus) params.appointmentStatus = queryParams.appointmentStatus
       if (queryParams.roomId) params.roomId = queryParams.roomId
 
@@ -134,7 +151,7 @@ export const appointmentService = {
   },
 
   async updateAppointmentById(appointmentId: number, updateData: Partial<Appointment>): Promise<Appointment> {
-    const response = await api.put(`/appointments/${appointmentId}`, updateData)
+    const response = await api.put(`/appointments/${appointmentId}/`, updateData)
     return response.data
   },
 

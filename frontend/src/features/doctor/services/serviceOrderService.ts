@@ -28,17 +28,19 @@ export const getServiceOrderById = async (serviceId: number, orderId: number): P
 }
 
 export const createServiceOrder = async (
-  appointmentId: number,
-  serviceId: number,
-  roomId: number,
+  appointment_id: number,
+  service_id: number,
+  room_id: number,
+  order_status: "O"
 ): Promise<ServiceOrder> => {
   try {
     const serviceOrder = {
-      appointmentId,
-      serviceId,
-      roomId,
+      appointment_id,
+      service_id,
+      room_id,
+      order_status
     }
-    const response = await api.post(`/appointments/services/service-orders`, serviceOrder)
+    const response = await api.post(`/service-orders/`, serviceOrder)
     return response.data
   } catch (error) {
     console.error("Lỗi khi tạo đơn dịch vụ:", error)
@@ -52,7 +54,18 @@ export const updateServiceOrder = async (
   serviceOrder: ServiceOrder,
 ): Promise<ServiceOrder> => {
   try {
-    const response = await api.put(`/appointments/services/service-orders/${orderId}`, serviceOrder)
+    // Backend ServiceOrderViewSet.update expects field names in snake_case
+    const payload: any = {
+      appointment_id: serviceOrder.appointmentId,
+      room_id: serviceOrder.roomId,
+      service_id: serviceOrder.serviceId,
+      order_status: serviceOrder.orderStatus, // mapped to status via serializer source
+      result: serviceOrder.result,
+      number: serviceOrder.number,
+      order_time: serviceOrder.orderTime,
+      result_time: serviceOrder.resultTime,
+    }
+    const response = await api.put(`/service-orders/${orderId}/`, payload)
     return response.data
   } catch (error) {
     console.error("Lỗi khi cập nhật đơn dịch vụ:", error)
@@ -72,7 +85,7 @@ export const deleteServiceOrder = async (serviceId: number, orderId: number): Pr
 
 export const getServiceOrdersByAppointmentId = async (appointmentId: number): Promise<ServiceOrder[]> => {
   try {
-    const response = await api.get(`/appointments/services/appointments/${appointmentId}/orders`)
+    const response = await api.get(`/service-orders/appointments/${appointmentId}/orders`)
     return response.data
   } catch (error) {
     console.error("Lỗi khi lấy danh sách đơn dịch vụ theo appointmentId:", error)

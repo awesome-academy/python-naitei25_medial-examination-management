@@ -6,6 +6,8 @@ import AppLayout from "../../shared/layouts/AppLayout";
 import { ScrollToTop } from "../../shared/components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import Patient from "./pages/Patients/Patient";
+import PatientDetail from "./pages/Patients/PatientDetail"
+import PatientAddForm from "./pages/Patients/PatientAddForm";
 import Doctor from "./pages/Doctors/Doctor";
 import Medicines from "./pages/Medicines/Medicines";
 import Services from "./pages/HealthServices/Service";
@@ -51,6 +53,8 @@ const AdminApp: React.FC = () => {
 
           {/* Patients Pages */}
           <Route path="patients" element={<Patient />} />
+          <Route path="patients/add" element={<PatientAddForm />} />
+          <Route path="patients/:patientId" element={<PatientDetail />} />
 
           {/* Doctors Page */}
           <Route path="doctors" element={<Doctor />} />

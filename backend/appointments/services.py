@@ -1,9 +1,11 @@
 from datetime import datetime, date, timedelta
 from django.core.paginator import Paginator
 from django.core.files.uploadedfile import UploadedFile
+from django.core.files.storage import default_storage
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Q # Import Q object for complex queries
+from uuid import uuid4
 from common.constants import PAGE_NO_DEFAULT, PAGE_SIZE_DEFAULT
 from doctors.models import Schedule, ScheduleStatus
 from .models import Appointment, AppointmentNote, ServiceOrder, Service
@@ -92,13 +94,59 @@ class AppointmentService:
         page = paginator.get_page(page_no + 1)
 
         return {
-            "results": list(page),
-            "pageNo": page_no,
-            "pageSize": page_size,
-            "totalElements": paginator.count,
-            "totalPages": paginator.num_pages,
-            "last": not page.has_next()
-        }
+          "results": list(page),
+          "pageNo": page_no,
+          "pageSize": page_size,
+          "totalElements": paginator.count,
+          "totalPages": paginator.num_pages,
+          "last": not page.has_next()
+      }
+
+  @staticmethod
+  def get_appointments_by_patient_id_optimized(patient_id, page_no, page_size, appointment_type='all', appointment_status=None, current_datetime=None):
+        queryset = Appointment.objects.filter(patient_id=patient_id).select_related('doctor', 'schedule').prefetch_related('prescription_set')
+
+        if current_datetime is None:
+            current_datetime = datetime.now()
+        
+        today_date = current_datetime.date()
+        current_time = current_datetime.time()
+
+        if appointment_type == 'upcoming':
+            queryset = queryset.filter(
+                Q(schedule__work_date__gt=today_date) |
+                Q(schedule__work_date=today_date, slot_start__gte=current_time)
+            )
+            if appointment_status:
+                if isinstance(appointment_status, (list, tuple)):
+                    queryset = queryset.filter(status__in=appointment_status)
+                else:
+                    queryset = queryset.filter(status=appointment_status)
+            else:
+                queryset = queryset.filter(status__in=[
+                    AppointmentStatus.PENDING.value,
+                    AppointmentStatus.CONFIRMED.value,
+                    AppointmentStatus.IN_PROGRESS.value
+                ])
+            queryset = queryset.order_by('schedule__work_date', 'slot_start')
+        elif appointment_type == 'past':
+            queryset = queryset.filter(
+                Q(schedule__work_date__lt=today_date) |
+                Q(schedule__work_date=today_date, slot_start__lt=current_time)
+            )
+            if appointment_status and appointment_status != '':
+                if isinstance(appointment_status, (list, tuple)):
+                    queryset = queryset.filter(status__in=appointment_status)
+                else:
+                    queryset = queryset.filter(status=appointment_status)
+            queryset = queryset.order_by('-schedule__work_date', '-slot_start')
+        else:
+            if appointment_status:
+                if isinstance(appointment_status, (list, tuple)):
+                    queryset = queryset.filter(status__in=appointment_status)
+                else:
+                    queryset = queryset.filter(status=appointment_status)
+            queryset = queryset.order_by('-created_at')
 
   @staticmethod
   def get_all_appointments(page_no=PAGE_NO_DEFAULT, page_size=PAGE_SIZE_DEFAULT):
@@ -213,31 +261,36 @@ class AppointmentService:
   def update_appointment(appointment_id, data):
       appointment = get_object_or_404(Appointment, id=appointment_id)
 
-      if 'appointmentStatus' in data:
-          old_status = appointment.status
-          new_status = data['appointmentStatus']
+      # Save old status for transition logic
+      old_status = appointment.status
+      new_status = data.get('status', old_status)
 
+      # Update all fields provided in data
+      for field, value in data.items():
+          if hasattr(appointment, field):
+              setattr(appointment, field, value)
+
+      # Custom logic for status transitions
+      if old_status != new_status:
+          schedule = appointment.schedule
+          # If moving from active to completed/cancelled/no_show, decrement current_patients
           if old_status in [AppointmentStatus.PENDING.value, AppointmentStatus.CONFIRMED.value, AppointmentStatus.IN_PROGRESS.value] and \
                   new_status in [AppointmentStatus.CANCELLED.value, AppointmentStatus.NO_SHOW.value, AppointmentStatus.COMPLETED.value]:
-              schedule = appointment.schedule
               if schedule.current_patients > 0:
                   schedule.current_patients -= 1
               if schedule.current_patients < schedule.max_patients:
                   schedule.status = ScheduleStatus.AVAILABLE.value
               schedule.save()
+          # If moving from cancelled/no_show to active, increment current_patients
           elif old_status in [AppointmentStatus.CANCELLED.value, AppointmentStatus.NO_SHOW.value] and \
                   new_status in [AppointmentStatus.PENDING.value, AppointmentStatus.CONFIRMED.value, AppointmentStatus.IN_PROGRESS.value]:
-              schedule = appointment.schedule
               if schedule.current_patients < schedule.max_patients:
                   schedule.current_patients += 1
               if schedule.current_patients >= schedule.max_patients:
                   schedule.status = ScheduleStatus.FULL.value
               schedule.save()
 
-          appointment.status = new_status
-          appointment.save()
-          return appointment
-
+      appointment.save()
       return appointment
 
   @staticmethod
@@ -260,6 +313,7 @@ class AppointmentService:
 
           return appointment
 
+          return appointment
 
 class AppointmentNoteService:
 
@@ -299,6 +353,9 @@ class ServiceOrderService:
 
   @staticmethod 
   def create_order(data):
+      if 'order_time' not in data or not data.get('order_time'):
+          from django.utils import timezone
+          data['order_time'] = timezone.now()
       return ServiceOrder.objects.create(**data)
 
   @staticmethod
@@ -325,16 +382,40 @@ class ServiceOrderService:
       if status:
           filters["status"] = status
       if order_date:
-          filters["created_at__date"] = order_date
+          filters["order_time__date"] = order_date
 
-      return ServiceOrder.objects.filter(**filters)
+      return ServiceOrder.objects.filter(**filters).order_by("-order_time", "-created_at")
 
   @staticmethod
   def upload_test_result(order_id, file: UploadedFile):
       order = get_object_or_404(ServiceOrder, id=order_id)
-      order.test_result_file = file
+            # Persist file using default storage and record URL
+      unique_name = f"service_results/{uuid4()}_{file.name}"
+      stored_path = default_storage.save(unique_name, file)
+      try:
+          file_url = default_storage.url(stored_path)
+      except Exception:
+          file_url = stored_path
+      from django.conf import settings
+      if settings.DEBUG and not file_url.startswith('http'):
+          if not file_url.startswith('/'):
+              file_url = f"/{file_url}"
+          if settings.MEDIA_URL and not file_url.startswith(settings.MEDIA_URL):
+              media_url = settings.MEDIA_URL
+              if not media_url.startswith('/'):
+                  media_url = '/' + media_url
+              if not media_url.endswith('/'):
+                  media_url += '/'
+              cleaned_path = file_url.lstrip('/')
+              file_url = media_url + cleaned_path.split('media/', 1)[-1] if 'media/' in cleaned_path else media_url + cleaned_path
+      order.result_file_url = file_url
+      order.result_file_public_id = stored_path
+      order.result = file_url
+      if not order.result_time:
+          order.result_time = datetime.now()
       order.save()
       return order
+
 
 class ServicesService:
 

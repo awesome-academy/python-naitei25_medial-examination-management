@@ -209,6 +209,76 @@ class AppointmentViewSet(viewsets.ModelViewSet):
           logger.exception("Error updating appointment:")
           return Response({"message": _("Đã xảy ra lỗi khi cập nhật cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+  @action(detail=False, methods=['get'], url_path='upcoming')
+  def upcoming_appointments(self, request):
+      patient_id = request.user.patient.id
+
+      queryset_data = AppointmentService.get_appointments_by_patient_id_optimized(
+          patient_id,
+          page_no=PAGE_NO_DEFAULT,
+          page_size=1000,
+          appointment_type='upcoming',
+          appointment_status=[AppointmentStatus.PENDING.value, AppointmentStatus.CONFIRMED.value, AppointmentStatus.IN_PROGRESS.value]
+      )['results']
+
+      serializer = AppointmentPatientViewSerializer(queryset_data, many=True)
+      return Response({"results": serializer.data})
+
+  @action(detail=False, methods=['post'], url_path='schedule/available-slots')
+  def available_slots(self, request):
+      serializer = self.get_serializer(data=request.data)
+      serializer.is_valid(raise_exception=True)
+      schedule_id = serializer.validated_data.get('schedule_id')
+      if schedule_id is None:
+          return Response({"message": _("Thiếu schedule_id trong yêu cầu.")}, status=status.HTTP_400_BAD_REQUEST)
+
+      result = AppointmentService.get_available_time_slots(schedule_id)
+      return Response(result)
+
+  @action(detail=False, methods=['get'], url_path='schedule/(?P<schedule_id>[^/.]+)')
+  def get_by_schedule(self, request, schedule_id):
+      result = AppointmentService.get_appointments_by_schedule_ordered(schedule_id)
+      serializer = AppointmentSerializer(result, many=True)
+      return Response(serializer.data)
+
+  @action(detail=True, methods=['post'], url_path='cancel')
+  def cancel_appointment(self, request, pk=None):
+      try:
+          appointment = AppointmentService.cancel_appointment(pk)
+          serializer = AppointmentSerializer(appointment) 
+          return Response(serializer.data, status=status.HTTP_200_OK)
+      except ValueError as e: 
+          return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+      except Exception as e: 
+          logger.exception("Error cancelling appointment:")
+          return Response({"message": _("Đã xảy ra lỗi khi hủy cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+  def create(self, request, *args, **kwargs):
+      serializer = self.get_serializer(data=request.data)
+      serializer.is_valid(raise_exception=True)
+      try:
+          appointment = AppointmentService.create_appointment(serializer.validated_data)
+          return Response(AppointmentSerializer(appointment).data, status=status.HTTP_201_CREATED)
+      except ValueError as e: 
+          return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+      except Exception as e: 
+          logger.exception("Error creating appointment:")
+          return Response({"message": _("Đã xảy ra lỗi khi tạo cuộc hẹn. Chi tiết: ") + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+  def update(self, request, *args, **kwargs):
+      partial = kwargs.pop('partial', False)
+      instance = self.get_object()
+      serializer = self.get_serializer(instance, data=request.data, partial=partial)
+      serializer.is_valid(raise_exception=True)
+      try:
+          updated_appointment = AppointmentService.update_appointment(instance.id, serializer.validated_data)
+          return Response(AppointmentSerializer(updated_appointment).data)
+      except ValueError as e:
+          return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+      except Exception as e:
+          logger.exception("Error updating appointment:")
+          return Response({"message": _("Đã xảy ra lỗi khi cập nhật cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class AppointmentNoteViewSet(viewsets.ModelViewSet):
   queryset = AppointmentNote.objects.all()
@@ -220,7 +290,7 @@ class AppointmentNoteViewSet(viewsets.ModelViewSet):
       serializer = self.get_serializer(notes, many=True)
       return Response(serializer.data)
 
-  @action(detail=False, methods=['post'], url_path='appointment/(?P<appointment_id>[^/.]+)/notes')
+  @action(detail=False, methods=['post'], url_path='appointment/(?P<appointment_id>[^/.]+)/notes/create')
   def create_note(self, request, appointment_id=None):
       data = request.data.copy()
       data['appointment'] = appointment_id
@@ -230,70 +300,71 @@ class AppointmentNoteViewSet(viewsets.ModelViewSet):
       return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class ServiceOrderViewSet(viewsets.ViewSet):
-  parser_classes = [MultiPartParser, JSONParser]
+    parser_classes = [MultiPartParser, JSONParser]
 
-  def list(self, request):
-      orders = ServiceOrderService.get_all_orders()
-      serializer = ServiceOrderSerializer(orders, many=True)
-      return Response(serializer.data)
+    def list(self, request):
+        orders = ServiceOrderService.get_all_orders()
+        serializer = ServiceOrderSerializer(orders, many=True, context={'request': request})
+        return Response(serializer.data)
 
-  def retrieve(self, request, pk=None):
-      order = ServiceOrderService.get_order_by_id(pk)
-      serializer = ServiceOrderSerializer(order)
-      return Response(serializer.data)
+    def retrieve(self, request, pk=None):
+        order = ServiceOrderService.get_order_by_id(pk)
+        serializer = ServiceOrderSerializer(order, context={'request': request})
+        return Response(serializer.data)
 
-  def create(self, request):
-      serializer = ServiceOrderSerializer(data=request.data)
-      serializer.is_valid(raise_exception=True)
-      order = serializer.save()
-      return Response(ServiceOrderSerializer(order).data)
+    def create(self, request):
+        serializer = ServiceOrderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        return Response(ServiceOrderSerializer(order, context={'request': request}).data)
 
-  def update(self, request, pk=None):
-      serializer = ServiceOrderSerializer(data=request.data)
-      serializer.is_valid(raise_exception=True)
-      updated = ServiceOrderService.update_order(pk, serializer.validated_data)
-      return Response(ServiceOrderSerializer(updated).data)
+    def update(self, request, pk=None):
+        order = ServiceOrderService.get_order_by_id(pk)
+        serializer = ServiceOrderSerializer(order, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        updated_order = serializer.save()
+        return Response(ServiceOrderSerializer(updated_order, context={'request': request}).data)
 
-  def destroy(self, request, pk=None):
-      ServiceOrderService.delete_order(pk)
-      return Response({"message": _("Đặt dịch vụ đã xóa thành công")})
+    def destroy(self, request, pk=None):
+        ServiceOrderService.delete_order(pk)
+        return Response({"message": _("Đặt dịch vụ đã xóa thành công")})
 
-  @action(detail=False, methods=['get'], url_path='appointments/(?P<appointment_id>[^/.]+)/orders')
-  def by_appointment(self, request, appointment_id=None):
-      orders = ServiceOrderService.get_orders_by_appointment_id(appointment_id)
-      serializer = ServiceOrderSerializer(orders, many=True)
-      return Response(serializer.data)
+    @action(detail=False, methods=['get'], url_path='appointments/(?P<appointment_id>[^/.]+)/orders')
+    def by_appointment(self, request, appointment_id=None):
+        orders = ServiceOrderService.get_orders_by_appointment_id(appointment_id)
+        serializer = ServiceOrderSerializer(orders, many=True, context={'request': request})
+        return Response(serializer.data)
 
-  @action(detail=False, methods=['get'], url_path='rooms/(?P<room_id>[^/.]+)/orders')
-  def by_room(self, request, room_id=None):
-      status_param = request.query_params.get('status')
-      order_date_str = request.query_params.get('orderDate')
+    @action(detail=False, methods=['get'], url_path='rooms/(?P<room_id>[^/.]+)/orders')
+    def by_room(self, request, room_id=None):
+        status_param = request.query_params.get('status')
+        order_date_str = request.query_params.get('orderDate')
 
-      order_date = None
-      if order_date_str:
-          order_date = parse_date(order_date_str)
-          if not order_date:
-              return Response({"error": _("Ngày không hợp lệ. Định dạng đúng: YYYY-MM-DD")}, status=400)
+        order_date = None
+        if order_date_str:
+            order_date = parse_date(order_date_str)
+            if not order_date:
+                return Response({"error": _("Ngày không hợp lệ. Định dạng đúng: YYYY-MM-DD")}, status=400)
 
-      orders = ServiceOrderService.get_orders_by_room_and_status_and_date(
-          room_id=room_id,
-          status=status_param,
-          order_date=order_date
-      )
-      serializer = ServiceOrderSerializer(orders, many=True)
-      return Response(serializer.data)
+        orders = ServiceOrderService.get_orders_by_room_and_status_and_date(
+            room_id=room_id,
+            status=status_param,
+            order_date=order_date
+        )
+        serializer = ServiceOrderSerializer(orders, many=True, context={'request': request})
+        return Response(serializer.data)
 
-  @action(detail=True, methods=['post'], url_path='result')
-  def upload_result(self, request, pk=None):
-      file = request.FILES.get('file')
-      if not file:
-          return Response({"message": _("Thiếu tệp kết quả.")}, status=status.HTTP_400_BAD_REQUEST)
+    @action(detail=True, methods=['post'], url_path='result')
+    def upload_result(self, request, pk=None):
+        file = request.FILES.get('file')
+        if not file:
+            return Response({"message": _("Thiếu tệp kết quả.")}, status=status.HTTP_400_BAD_REQUEST)
 
-      updated_order = ServiceOrderService.upload_test_result(pk, file)
-      return Response({
-          "message": _("Tải lên kết quả thành công."),
-          "data": ServiceOrderSerializer(updated_order).data
-      })
+        updated_order = ServiceOrderService.upload_test_result(pk, file)
+        return Response({
+            "message": _("Tải lên kết quả thành công."),
+            "data": ServiceOrderSerializer(updated_order, context={'request': request}).data
+        })
 
 class ServiceViewSet(viewsets.ViewSet):
   def list(self, request):

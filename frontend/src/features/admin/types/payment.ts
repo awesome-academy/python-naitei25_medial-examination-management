@@ -1,7 +1,7 @@
-export type BillStatus = "PAID" | "UNPAID" | "CANCELLED";
-export type BillDetailItemType = "CONSULTATION" | "MEDICINE" | "SERVICE";
-export type PaymentMethod = "CASH" | "ONLINE BANKING" | "CARD";
-export type TransactionStatus = "SUCCESS" | "FAILED" | "PENDING";
+export type BillStatus = "P" | "U" | "C";
+export type BillDetailItemType = "C" | "M" | "S";
+export type PaymentMethod = "C" | "B";
+export type TransactionStatus = "S" | "F" | "P";
 
 export interface Bill {
   billId: number;
