@@ -112,6 +112,8 @@ class ServiceOrderSerializer(serializers.Serializer):
             'required': _('Mã dịch vụ không được để trống')
         }
     )
+    service_name = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
     order_status = serializers.CharField(source='status', required=False)
     result = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     number = serializers.IntegerField(required=False)
@@ -120,6 +122,23 @@ class ServiceOrderSerializer(serializers.Serializer):
     created_at = serializers.CharField(required=False)
     result_file_url = serializers.CharField(read_only=True)
     result_file_public_id = serializers.CharField(read_only=True)
+
+    def _get_service_attr(self, obj, attr):
+        # Helper to fetch attribute from related service, fallback to DB lookup
+        try:
+            return getattr(obj.service, attr)
+        except AttributeError:
+            from .models import Service
+            try:
+                return getattr(Service.objects.get(id=obj.service_id), attr)
+            except Service.DoesNotExist:
+                return None
+
+    def get_service_name(self, obj):
+        return self._get_service_attr(obj, 'service_name')
+
+    def get_price(self, obj):
+        return self._get_service_attr(obj, 'price')
 
     def create(self, validated_data):
         return ServiceOrder.objects.create(**validated_data)

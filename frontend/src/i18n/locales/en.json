@@ -196,7 +196,8 @@
     "completeInfo": "Please enter personal information to complete registration.",
     "enterEmailOrPhone": "Enter email or phone number to receive OTP",
     "enterNewPassword": "Enter new password for",
-    "enterOtpSentTo": "Enter OTP sent to"
+    "enterOtpSentTo": "Enter OTP sent to",
+    "testPending": "Test results are pending"
   },
   "placeholders": {
     "enterEmail": "Enter your email",
@@ -299,7 +300,10 @@
     "createPrescription": "Create Prescription",
     "prescriptionPDF": "Prescription PDF",
     "patientDetails": "Patient Details",
-    "prescriptionHistory": "Prescription Details"
+    "prescriptionHistory": "Prescription Details",
+    "testResultDetail": "Test Result Details",
+    "generalInfo": "General Information",
+    "result": "Result"
   },
   "layout": {
     "toggleSidebar": "Toggle Sidebar",
@@ -467,6 +471,7 @@
   "empty": {
     "loading": "Loading...",
     "noPatientsFound": "No patients found",
+    "noPrescriptions": "No prescriptions found",
     "noMedicinesInPrescription": "No medicines in this prescription",
     "noTestResults": "No test results",
     "noNotes": "No notes"
@@ -563,12 +568,21 @@
     "bloodSugar": "Blood Sugar",
     "unknownPatient": "Unknown patient",
     "unknownClinic": "Unknown clinic",
-    "currency": "Currency",
+    "currency": "VND",
     "available": "Available",
     "orderId": "Order ID",
     "room": "Room",
     "notSpecified": "Not specified",
-    "unknownPatientCode": "Unknown patient code"
+    "unknownPatientCode": "Unknown patient code",
+    "serviceName": "Service Name",
+    "patientId": "Patient ID",
+    "allergies": "Allergies",
+    "service": "Service",
+    "orderTime": "Order Time",
+    "currentStatus": "Current Status",
+    "servicePrice": "Service Price",
+    "note": "Note",
+    "notAvailable": "Not available"
   },
   "medicalRecord": {
     "noAppointmentFound": "No appointment found.",
