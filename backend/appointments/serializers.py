@@ -50,6 +50,26 @@ class DoctorSerializer(serializers.ModelSerializer):
         return f"{obj.first_name} {obj.last_name}"
 
 
+class DoctorSerializer(serializers.ModelSerializer):
+    fullName = serializers.SerializerMethodField()
+    academicDegree = serializers.CharField(source='academic_degree', read_only=True)
+    specialization = serializers.CharField(read_only=True)
+    price = serializers.DecimalField(
+        max_digits=DECIMAL_MAX_DIGITS,
+        decimal_places=DECIMAL_DECIMAL_PLACES,
+        read_only=True,
+        allow_null=True
+    )
+    # avatar_url = serializers.CharField(source='avatar', read_only=True, allow_null=True)
+
+    class Meta:
+        model = Doctor
+        fields = ['id', 'fullName', 'academicDegree', 'specialization', 'price']
+
+    def get_fullName(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+
+
 class ServiceSerializer(serializers.ModelSerializer):
     service_id = serializers.IntegerField(source='id', read_only=True)
     service_name = serializers.CharField(required=True)

@@ -2,8 +2,8 @@ import PageMeta from "../../components/common/PageMeta";
 import { PatientTable } from "../../components/sections/patient";
 import AddButton from "../../components/ui/button/AddButton";
 import { Link } from "react-router-dom";
-
 export default function Patient() {
+
   return (
     <>
       <PageMeta
