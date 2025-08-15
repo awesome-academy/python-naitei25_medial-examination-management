@@ -111,20 +111,38 @@ export const doctorService = {
   },
 
   // Create doctor
-  async createDoctor(doctorData: CreateDoctorRequest): Promise<Doctor> {
+  async createDoctor(doctorData: any): Promise<Doctor> {
     try {
-      const requestBody = {
-        ...doctorData,
-        first_name: doctorData.first_name,
-        last_name: doctorData.last_name,
-        gender: doctorData.gender === "MALE" ? "M" : "F",
-        type: doctorData.type === "EXAMINATION" ? "EXAMINATION" : "SERVICE",
+      // Data is already in the correct API format from AddDoctor component
+      const response = await api.post<any>("/doctors/", doctorData);
+      
+      // Transform response back to frontend format
+      const item = response.data;
+      return {
+        doctorId: item.id,
+        userId: item.user?.id,
+        identityNumber: item.identity_number,
+        fullName: `${item.first_name || ""} ${item.last_name || ""}`.trim(),
+        birthday: item.birthday,
+        gender: item.gender === "M" ? "MALE" : "FEMALE",
+        address: item.address,
+        academicDegree: item.academic_degree,
+        specialization: item.specialization,
+        avatar: item.avatar,
+        type: item.type === "E" ? "EXAMINATION" : "SERVICE",
+        department: {
+          id: item.department?.id,
+          department_name: item.department?.department_name,
+          description: item.department?.description,
+          created_at: item.department?.created_at,
+        },
+        departmentId: item.department?.id,
+        departmentName: item.department?.department_name,
+        createdAt: item.created_at,
       };
-      const response = await api.post<Doctor>("/doctors/", requestBody);
-      return response.data;
     } catch (error: any) {
       console.error("Error creating doctor:", error);
-      throw new Error("Không thể tạo bác sĩ mới");
+      throw error;
     }
   },
 
