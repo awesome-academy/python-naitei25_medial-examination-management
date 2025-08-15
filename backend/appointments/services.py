@@ -94,13 +94,13 @@ class AppointmentService:
         page = paginator.get_page(page_no + 1)
 
         return {
-            "results": list(page),
-            "pageNo": page_no,
-            "pageSize": paginator.per_page,
-            "totalElements": paginator.count,
-            "totalPages": paginator.num_pages,
-            "last": not page.has_next()
-        }
+          "results": list(page),
+          "pageNo": page_no,
+          "pageSize": page_size,
+          "totalElements": paginator.count,
+          "totalPages": paginator.num_pages,
+          "last": not page.has_next()
+      }
 
   @staticmethod
   def get_all_appointments(page_no=PAGE_NO_DEFAULT, page_size=PAGE_SIZE_DEFAULT):
@@ -215,31 +215,36 @@ class AppointmentService:
   def update_appointment(appointment_id, data):
       appointment = get_object_or_404(Appointment, id=appointment_id)
 
-      if 'appointmentStatus' in data:
-          old_status = appointment.status
-          new_status = data['appointmentStatus']
+      # Save old status for transition logic
+      old_status = appointment.status
+      new_status = data.get('status', old_status)
 
+      # Update all fields provided in data
+      for field, value in data.items():
+          if hasattr(appointment, field):
+              setattr(appointment, field, value)
+
+      # Custom logic for status transitions
+      if old_status != new_status:
+          schedule = appointment.schedule
+          # If moving from active to completed/cancelled/no_show, decrement current_patients
           if old_status in [AppointmentStatus.PENDING.value, AppointmentStatus.CONFIRMED.value, AppointmentStatus.IN_PROGRESS.value] and \
                   new_status in [AppointmentStatus.CANCELLED.value, AppointmentStatus.NO_SHOW.value, AppointmentStatus.COMPLETED.value]:
-              schedule = appointment.schedule
               if schedule.current_patients > 0:
                   schedule.current_patients -= 1
               if schedule.current_patients < schedule.max_patients:
                   schedule.status = ScheduleStatus.AVAILABLE.value
               schedule.save()
+          # If moving from cancelled/no_show to active, increment current_patients
           elif old_status in [AppointmentStatus.CANCELLED.value, AppointmentStatus.NO_SHOW.value] and \
                   new_status in [AppointmentStatus.PENDING.value, AppointmentStatus.CONFIRMED.value, AppointmentStatus.IN_PROGRESS.value]:
-              schedule = appointment.schedule
               if schedule.current_patients < schedule.max_patients:
                   schedule.current_patients += 1
               if schedule.current_patients >= schedule.max_patients:
                   schedule.status = ScheduleStatus.FULL.value
               schedule.save()
 
-          appointment.status = new_status
-          appointment.save()
-          return appointment
-
+      appointment.save()
       return appointment
 
   @staticmethod

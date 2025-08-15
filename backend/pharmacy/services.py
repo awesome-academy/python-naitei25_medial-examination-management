@@ -85,13 +85,13 @@ class PharmacyService:
         with transaction.atomic():
             prescription = self.get_prescription_by_id(id)
 
-            if prescription.prescriptiondetail_set.exists():
+            if prescription.prescription_details.exists():
                 raise ValueError(_("Không thể xóa đơn thuốc vì có chi tiết đơn thuốc liên kết"))
 
             if hasattr(prescription, 'appointment') and prescription.appointment.exists():
                 raise ValueError(_("Không thể xóa đơn thuốc vì được sử dụng trong lịch sử khám bệnh."))
 
-            prescription.prescriptiondetail_set.all().delete()
+            prescription.prescription_details.all().delete()
             prescription.delete()
 
     def add_medicine_to_prescription(self, data):

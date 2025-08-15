@@ -20,7 +20,7 @@ export const appointmentNoteService = {
   // Tạo lời dặn bác sĩ theo appointmentId
   async createNote(appointmentId: number, note: CreateAppointmentNoteRequest): Promise<AppointmentNote> {
     try {
-      const response = await api.post(`/appointments/${appointmentId}/notes`, note)
+      const response = await api.post(`/appointments/${appointmentId}/notes/create`, note)
       return response.data
     } catch (error) {
       console.error(`[${new Date().toLocaleString("vi-VN")}] Error creating note for appointment ${appointmentId}:`, error)

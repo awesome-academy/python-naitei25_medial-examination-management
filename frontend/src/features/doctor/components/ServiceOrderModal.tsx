@@ -66,14 +66,19 @@ export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appoi
   }, [])
 
   const addIndication = (service: Services) => {
+    console.log("Adding indication for service:", service)
     const newIndication: MedicalOrderItem = {
-      serviceId: service.serviceId,
+      serviceId: service.service_id,
       expectedTime: new Date().toISOString(),
       appointmentId: appointmentId!,
-      roomId: examinationRooms[0]?.roomId || null,
+      roomId: null, // Let user choose, use null for empty
       price: service.price,
       orderStatus: "ORDERED",
-      service,
+      service: {
+        ...service,
+        service_id: service.id, // Add service_id field for backend compatibility
+        serviceName: service.serviceName || (service as any).service_name
+      },
     }
     setIndications([...indications, newIndication])
     setSearchInput("")
@@ -94,7 +99,9 @@ export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appoi
     try {
       setLoading(true)
       for (const indication of indications) {
-        await createServiceOrderService(appointmentId, indication.serviceId, indication.roomId)
+        console.log("Creating service order:", indication)
+        // Pass order_status: 'O' to match backend expectations
+        await createServiceOrderService(appointmentId, indication.serviceId, indication.roomId, "O")
       }
       message.success("Lưu chỉ định thành công")
       onClose()
@@ -135,11 +142,32 @@ export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appoi
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  const handleRoomChange = (index: number, roomId: number) => {
+    setIndications((prev) => prev.map((item, i) => i === index ? { ...item, roomId } : item))
+  }
+
   const columns = [
-    { title: "Tên dịch vụ", dataIndex: ["service", "serviceName"], key: "serviceName" },
-    { title: "Phòng", dataIndex: "roomId", key: "roomId", render: (text) => examinationRooms.find(r => r.roomId === text)?.note || "Chưa chọn" },
-    { title: "Giá", dataIndex: "price", key: "price", render: (text) => `${text.toLocaleString("vi-VN")} VNĐ` },
-    { title: "Hành động", key: "action", render: (_, __, index) => (
+    { title: "Chỉ định", dataIndex: ["service", "serviceName"], key: "serviceName" },
+    {
+      title: "Nơi thực hiện",
+      dataIndex: "roomId",
+      key: "roomId",
+      render: (roomId: number | null, record: MedicalOrderItem, index: number) => (
+        <Select
+          placeholder="Chọn nơi thực hiện"
+          style={{ width: '100%' }}
+          value={roomId === undefined ? null : roomId}
+          onChange={(value) => handleRoomChange(index, value)}
+          allowClear
+        >
+          {examinationRooms.map(room => (
+            <Select.Option key={room.roomId} value={room.roomId}>{room.note}</Select.Option>
+          ))}
+        </Select>
+      ),
+    },
+    { title: "Giá", dataIndex: "price", key: "price", render: (text: number) => `${text.toLocaleString("vi-VN")} VNĐ` },
+    { title: "", key: "action", render: (_: any, __: any, index: number) => (
       <Button icon={<DeleteOutlined />} onClick={() => handleDeleteIndication(index)} danger />
     )},
   ]
@@ -155,8 +183,8 @@ export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appoi
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <Text strong>Bệnh nhân: {appointmentData?.patientInfo?.fullName || "Đang tải..."}</Text>
-            <div><Text type="secondary">Mã bệnh nhân: {appointmentData?.patientInfo?.patientId || "Đang tải..."}</Text></div>
+            <Text strong>Bệnh nhân: {appointmentData?.patientInfo?.first_name} {appointmentData?.patientInfo?.last_name}</Text>
+            <div><Text type="secondary">Mã bệnh nhân: {appointmentData?.patientInfo?.id}</Text></div>
           </div>
           <div className="text-right">
             <Text strong>Ngày: {new Date().toLocaleDateString("vi-VN")}</Text>
@@ -178,11 +206,11 @@ export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appoi
             <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
               {filteredServices.map((service) => (
                 <div
-                  key={service.serviceId}
+                  key={service.id || service.serviceId}
                   className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                  onClick={() => addIndication(service)}
+                  onMouseDown={() => addIndication(service)}
                 >
-                  <div className="font-medium">{service.serviceName}</div>
+                  <div className="font-medium">{service.service_name || service.serviceName}</div>
                   <div className="text-xs text-gray-400">{service.price.toLocaleString("vi-VN")} VNĐ</div>
                 </div>
               ))}

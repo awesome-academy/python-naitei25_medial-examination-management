@@ -1,20 +1,17 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { Modal, Form, Input, Button, Typography, message, Row, Col, Card } from "antd"
-import { SaveOutlined, ReloadOutlined, ExperimentOutlined, CalendarOutlined, EnvironmentOutlined } from "@ant-design/icons"
+import { SaveOutlined, ReloadOutlined, ExperimentOutlined } from "@ant-design/icons"
 import type { ServiceOrder } from "../types/serviceOrder"
 import type { ExaminationRoom } from "../types/examinationRoom"
 import { updateServiceOrder } from "../services/serviceOrderService"
 
-const { Title, Text } = Typography
+const { Text } = Typography
 const { TextArea } = Input
-
-interface TestResultDetailModalProps {
-  isOpen: boolean
   onClose: () => void
-  serviceOrder: ServiceOrder | null
   appointment?: any
   examinationRoom?: ExaminationRoom | null
   onUpdate?: (updatedOrder: ServiceOrder) => void
@@ -25,11 +22,11 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
   onClose,
   serviceOrder,
   appointment,
-  examinationRoom,
   onUpdate,
 }) => {
   const [form] = Form.useForm()
   const [saving, setSaving] = useState(false)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (isOpen && serviceOrder) {
@@ -42,7 +39,7 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
 
   const handleSave = async () => {
     if (!serviceOrder) {
-      message.error("Không tìm thấy thông tin đơn xét nghiệm")
+  message.error(t("errors.noServiceOrderInfo"))
       return
     }
 
@@ -67,11 +64,11 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
         onUpdate(updatedOrder)
       }
 
-      message.success("Cập nhật kết quả xét nghiệm thành công")
-      onClose()
+  message.success(t("success.updateTestResult"))
+  onClose()
     } catch (error) {
       console.error("Error updating service order:", error)
-      message.error("Có lỗi xảy ra khi cập nhật kết quả")
+  message.error(t("errors.updateTestResultFailed"))
     } finally {
       setSaving(false)
     }
@@ -79,9 +76,9 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "ORDERED":
+      case "O":
         return "#d97706"
-      case "COMPLETED":
+      case "C":
         return "#059669"
       default:
         return "#6b7280"
@@ -89,18 +86,14 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
   }
 
   const formatDateTime = (dateString?: string) => {
-    if (!dateString) return "Chưa có"
+    if (!dateString) return t("labels.notAvailable")
     try {
       return new Date(dateString).toLocaleString("vi-VN")
     } catch (e) {
-      return "Định dạng không hợp lệ"
+      return t("errors.invalidDateFormat")
     }
   }
 
-  const getRoomDisplayName = useMemo(() => {
-    if (!examinationRoom) return `Phòng ${serviceOrder?.roomId}`
-    return `${examinationRoom.note} - Tòa ${examinationRoom.building} - Tầng ${examinationRoom.floor}`
-  }, [examinationRoom, serviceOrder?.roomId])
 
   if (!serviceOrder) {
     return null
@@ -111,7 +104,7 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
       title={
         <div className="flex items-center">
           <ExperimentOutlined style={{ marginRight: 8 }} />
-          <span>Chi tiết kết quả thực hiện chỉ định</span>
+          <span>{t("titles.testResultDetail")}</span>
         </div>
       }
       open={isOpen}
@@ -121,36 +114,41 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
       style={{ top: 20 }}
     >
       <div className="p-4">
-        <Card title={<div style={{ color: "#036672" }}>Thông tin chung</div>}>
+        <Card title={<div style={{ color: "#036672" }}>{t("titles.generalInfo")}</div>}>
           <Row gutter={24}>
             <Col span={12}>
               <div>
-                <Text type="secondary">Tên bệnh nhân:</Text>
-                <div className="font-medium">{appointment?.patientInfo?.fullName || "Đang tải..."}</div>
+                <Text type="secondary">{t("labels.patientName")}</Text>
+                <div className="font-medium">{appointment?.patientInfo?.first_name} {appointment?.patientInfo?.last_name}</div>
               </div>
               <div>
-                <Text type="secondary">Mã bệnh nhân:</Text>
-                <div className="font-medium">{appointment?.patientInfo?.patientId || "Đang tải..."}</div>
+                <Text type="secondary">{t("labels.patientId")}</Text>
+                <div className="font-medium">{appointment?.patientInfo?.id || t("labels.loading")}</div>
               </div>
               {appointment?.patientInfo?.allergies && (
                 <div className="text-sm">
-                  <Text type="secondary">Dị ứng:</Text>
+                  <Text type="secondary">{t("labels.allergies")}</Text>
                   <div className="font-medium">{appointment.patientInfo.allergies}</div>
                 </div>
               )}
             </Col>
             <Col span={12}>
               <div>
-                <Text type="secondary">Dịch vụ:</Text>
-                <div className="font-medium">{serviceOrder.service.serviceName}</div>
+                <Text type="secondary">{t("labels.service")}</Text>
+                <div className="font-medium">{
+                  serviceOrder.serviceName
+                  || serviceOrder.service_name
+                  || (serviceOrder.service && (serviceOrder.service.serviceName || serviceOrder.service.service_name))
+                  || t("labels.notAvailable")
+                }</div>
               </div>
               <div>
-                <Text type="secondary">Phòng:</Text>
-                <div className="font-medium">{getRoomDisplayName}</div>
+                <Text type="secondary">{t("labels.room")}</Text>
+                <div className="font-medium">{serviceOrder.room_id ?? ""}</div>
               </div>
               <div>
-                <Text type="secondary">Thời gian đặt:</Text>
-                <div className="font-medium">{formatDateTime(serviceOrder.orderTime)}</div>
+                <Text type="secondary">{t("labels.orderTime")}</Text>
+                <div className="font-medium">{formatDateTime(serviceOrder.order_time)}</div>
               </div>
             </Col>
           </Row>
@@ -158,79 +156,70 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <Text type="secondary">Trạng thái hiện tại:</Text>
+                <Text type="secondary">{t("labels.currentStatus")}</Text>
                 <span
                   className="ml-2 px-3 py-1 rounded-full text-sm font-medium"
                   style={{
-                    color: getStatusColor(serviceOrder.orderStatus),
-                    backgroundColor: `${getStatusColor(serviceOrder.orderStatus)}20`,
+                    color: getStatusColor(serviceOrder.order_status),
+                    backgroundColor: `${getStatusColor(serviceOrder.order_status)}20`,
                   }}
                 >
-                  {serviceOrder.orderStatus === "ORDERED" ? "Đang chờ" : "Đã hoàn thành"}
+                  {serviceOrder.order_status === "O" ? t("status.pending") : t("status.completed")}
                 </span>
               </div>
               <div className="text-right">
-                <Text type="secondary">Giá dịch vụ:</Text>
-                <div className="font-bold text-lg text-blue-600">{serviceOrder.price.toLocaleString("vi-VN")} VNĐ</div>
+                <Text type="secondary">{t("labels.servicePrice")}</Text>
+                <div className="font-bold text-lg text-blue-600">
+                  {typeof serviceOrder.price === "number" && !isNaN(serviceOrder.price)
+                    ? serviceOrder.price.toLocaleString("vi-VN") + ` ${t("labels.currency")}`
+                    : typeof serviceOrder.price === "string" && serviceOrder.price !== ""
+                      ? Number(serviceOrder.price).toLocaleString("vi-VN") + ` ${t("labels.currency")}`
+                      : t("labels.notAvailable")}
+                </div>
               </div>
             </div>
           </div>
         </Card>
 
-        <Card title={<div style={{ color: "#036672" }}>Kết quả</div>} className="mt-4">
+        <Card title={<div style={{ color: "#036672" }}>{t("titles.result")}</div>} className="mt-4">
           <Form form={form} layout="vertical" onFinish={handleSave}>
             <Form.Item
               name="result"
-              rules={[
-                {
-                  required: serviceOrder.orderStatus === "COMPLETED",
-                  message: "Vui lòng nhập kết quả xét nghiệm!",
-                },
-              ]}
+              rules={[]}
             >
               <TextArea
                 rows={8}
-                placeholder="Nhập kết quả xét nghiệm chi tiết..."
-                disabled={serviceOrder.orderStatus === "COMPLETED"}
+                readOnly
               />
             </Form.Item>
 
-            {serviceOrder.orderStatus === "ORDERED" && (
+            {serviceOrder.order_status === "O" && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                 <Text type="warning">
-                  <strong>Lưu ý:</strong> Xét nghiệm này đang trong trạng thái chờ kết quả. Bạn có thể cập nhật kết quả
-                  khi đã có thông tin từ phòng xét nghiệm.
+                  <strong>{t("labels.note")}</strong> {t("messages.testPending")}
                 </Text>
               </div>
             )}
 
-            {serviceOrder.orderStatus === "COMPLETED" && (
+            {serviceOrder.order_status === "C" && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                 <Text type="success">
-                  <strong>Hoàn thành:</strong> Kết quả xét nghiệm đã được cập nhật vào lúc{" "}
-                  {formatDateTime(serviceOrder.resultTime)}
+                  <strong>{t("status.completed")}</strong> {t("messages.testResultUpdatedAt")} {formatDateTime(serviceOrder.result_time)}
                 </Text>
               </div>
             )}
-
-            <Form.Item name="orderStatus" label="Trạng thái" rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}>
-              <Select disabled={serviceOrder.orderStatus === "COMPLETED"}>
-                <Select.Option value="ORDERED">Đang chờ</Select.Option>
-                <Select.Option value="COMPLETED">Hoàn thành</Select.Option>
-              </Select>
-            </Form.Item>
           </Form>
         </Card>
 
         <div className="flex justify-end space-x-3 mt-4">
-          <Button onClick={onClose}>Đóng</Button>
+          <Button onClick={onClose}>{t("buttons.close")}</Button>
           {serviceOrder.orderStatus === "ORDERED" && (
             <Button type="primary" icon={<SaveOutlined />} onClick={handleSave} loading={saving}>
-              Cập nhật kết quả
+              {t("buttons.updateResult")}
             </Button>
           )}
           <Button icon={<ReloadOutlined />} onClick={() => window.location.reload()}>
-            Làm mới
+            {t("buttons.refresh")}
           </Button>
         </div>
       </div>

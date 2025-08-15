@@ -6,7 +6,7 @@ from django.http import Http404
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import get_object_or_404
 from .models import Bill, BillDetail, Transaction
-from .serializers import NewBillRequestSerializer, UpdateBillRequestSerializer, BillResponseSerializer, NewBillDetailRequestSerializer, BillDetailResponseSerializer, TransactionDTOSerializer
+from .serializers import NewBillRequestSerializer, UpdateBillRequestSerializer, BillResponseSerializer, NewBillDetailRequestSerializer, BillDetailResponseSerializer, TransactionDTOSerializer, BillSerializer
 from .services import BillService, PayOSService, TransactionService
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
@@ -84,9 +84,9 @@ class BillViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'], url_path=r'patient/(?P<patient_id>\d+)')
     def get_bills_by_patient_id(self, request, patient_id=None):
-        bills = BillService().get_bills_by_patient_id(patient_id)
-        serializer = BillResponseSerializer(bills, many=True)
-        return Response(serializer.data)
+            bills = BillService().get_bills_by_patient_id(patient_id)
+            serializer = BillSerializer(bills, many=True)
+            return Response(serializer.data)
 
 class TransactionViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]

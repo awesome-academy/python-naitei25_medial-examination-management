@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from .models import Patient, EmergencyContact
-
+import cloudinary.uploader
 class PatientService:
     def create_patient(self, data):
         # Logic tạo patient từ CreatePatientRequest
@@ -38,6 +38,32 @@ class PatientService:
                 )
 
         return patient
+    
+    def upload_avatar(self, patient, file):
+        try:
+            # Upload file lên Cloudinary
+            upload_result = cloudinary.uploader.upload(
+                file,
+                folder=f"patients/{patient.id}/avatars",
+                resource_type="image",
+                public_id=f"avatar_{patient.id}"
+            )
+            patient.avatar = upload_result['secure_url']
+            patient.save()
+            return patient
+        except Exception as e:
+            raise Exception(f"Không thể upload ảnh: {str(e)}")
+
+    def delete_avatar(self, patient):
+        try:
+            if patient.avatar:
+                public_id = f"patients/{patient.id}/avatars/avatar_{patient.id}"
+                cloudinary.uploader.destroy(public_id, resource_type="image")
+                patient.avatar = None
+                patient.save()
+            return patient
+        except Exception as e:
+            raise Exception(f"Không thể xóa ảnh: {str(e)}")
 
 
 class EmergencyContactService:

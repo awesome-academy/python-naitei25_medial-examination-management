@@ -28,19 +28,17 @@ export const getServiceOrderById = async (serviceId: number, orderId: number): P
 }
 
 export const createServiceOrder = async (
-  appointment_id: number,
-  service_id: number,
-  room_id: number,
-  order_status: "O"
+  appointmentId: number,
+  serviceId: number,
+  roomId: number,
 ): Promise<ServiceOrder> => {
   try {
     const serviceOrder = {
-      appointment_id,
-      service_id,
-      room_id,
-      order_status
+      appointmentId,
+      serviceId,
+      roomId,
     }
-    const response = await api.post(`/service-orders/`, serviceOrder)
+    const response = await api.post(`/appointments/services/service-orders`, serviceOrder)
     return response.data
   } catch (error) {
     console.error("Lỗi khi tạo đơn dịch vụ:", error)

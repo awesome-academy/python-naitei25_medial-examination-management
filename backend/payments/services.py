@@ -6,9 +6,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
 from appointments.models import Appointment 
-
 from .models import Bill, BillDetail, Transaction
 from .serializers import TransactionDTOSerializer
 from common.enums import PaymentStatus, TransactionStatus, ServiceType, PaymentMethod, AppointmentStatus # THÊM AppointmentStatus
@@ -112,8 +110,8 @@ class PayOSService:
     def __init__(self):
         payos_config = settings.PAYOS
         self.payos = payos.PayOS(client_id=payos_config['client_id'], 
-                          api_key=payos_config['api_key'], 
-                          checksum_key=payos_config['checksum_key'])
+                            api_key=payos_config['api_key'], 
+                            checksum_key=payos_config['checksum_key'])
 
     def create_payment_link(self, bill_id):
         bill = get_object_or_404(Bill, pk=bill_id)

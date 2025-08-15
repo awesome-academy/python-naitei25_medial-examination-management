@@ -120,7 +120,7 @@ const paymentService = {
       console.error('Lỗi khi retry payment:', error.response?.data || error.message);
       throw error;
     }
-  }
+  },
 };
 
 export { paymentService };
