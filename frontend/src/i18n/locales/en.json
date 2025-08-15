@@ -284,6 +284,7 @@
     "appointments": "Appointments",
     "upcomingAppointments": "Upcoming Appointments",
     "pastAppointments": "Past Appointments"
+<<<<<<< HEAD
   },
   "tabs": {
     "testResults": "Test Results",
@@ -300,6 +301,8 @@
     "prescriptionPDF": "Prescription PDF",
     "patientDetails": "Patient Details",
     "prescriptionHistory": "Prescription Details"
+=======
+>>>>>>> repoB/master
   },
   "layout": {
     "toggleSidebar": "Toggle Sidebar",
@@ -533,6 +536,7 @@
     "shareText": "Prescription details #{{id}}",
     "linkCopied": "Link copied to clipboard"
   },
+<<<<<<< HEAD
   "prescriptionHistory": {
     "totalMedicineTypes": "Total medicine types",
     "totalPrescriptionValue": "Total prescription value"
@@ -569,6 +573,10 @@
     "room": "Room",
     "notSpecified": "Not specified",
     "unknownPatientCode": "Unknown patient code"
+=======
+  "labels": {
+    "noNotes": "No notes"
+>>>>>>> repoB/master
   },
   "medicalRecord": {
     "noAppointmentFound": "No appointment found.",
@@ -778,6 +786,7 @@
     "noResultsText": "Try changing filters or search terms.",
     "previous": "Previous",
     "next": "Next"
+<<<<<<< HEAD
   },
   "meta": {
     "title": "Schedule",
@@ -801,5 +810,7 @@
     "october": "October",
     "november": "November",
     "december": "December"
+=======
+>>>>>>> repoB/master
   }
 }

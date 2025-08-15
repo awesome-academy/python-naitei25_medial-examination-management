@@ -30,7 +30,7 @@
     "department": "Khoa khám",
     "type": "Loại",
     "bookAppointment": "Đặt lịch hẹn",
-    "departmentList": "Danh sách khoa khám",
+    "departmentList": "D danh sách khoa khám",
     "searchDepartmentsPlaceholder": "Tìm kiếm khoa khám...",
     "noDepartmentsFound": "Không tìm thấy khoa khám nào phù hợp.",
     "noDepartmentsAvailable": "Không có khoa khám nào.",
@@ -282,6 +282,7 @@
     "appointments": "Lịch khám",
     "upcomingAppointments": "Lịch khám sắp tới",
     "pastAppointments": "Lịch khám đã qua"
+<<<<<<< HEAD
   },
   "tabs": {
     "testResults": "Kết quả xét nghiệm",
@@ -298,6 +299,8 @@
     "prescriptionPDF": "Đơn thuốc PDF",
     "patientDetails": "Chi tiết bệnh nhân",
     "prescriptionHistory": "Chi tiết đơn thuốc"
+=======
+>>>>>>> repoB/master
   },
   "layout": {
     "toggleSidebar": "Bật/tắt thanh bên",
@@ -574,6 +577,7 @@
     "shareText": "Chi tiết đơn thuốc #{{id}}",
     "linkCopied": "Đã sao chép link vào clipboard"
   },
+<<<<<<< HEAD
   "prescriptionHistory": {
     "totalMedicineTypes": "Tổng số loại thuốc",
     "totalPrescriptionValue": "Tổng giá trị đơn thuốc"
@@ -610,6 +614,10 @@
     "room": "Phòng",
     "notSpecified": "Không xác định",
     "unknownPatientCode": "Mã bệnh nhân không xác định"
+=======
+  "labels": {
+    "noNotes": "Không có ghi chú"
+>>>>>>> repoB/master
   },
   "medicalRecord": {
     "noAppointmentFound": "Không tìm thấy cuộc hẹn.",
@@ -775,6 +783,7 @@
     "showNotes": "Hiển thị ghi chú",
     "hideNotes": "Ẩn ghi chú",
     "downloadPrescription": "Tải đơn thuốc"
+<<<<<<< HEAD
   },
   "meta": {
     "title": "Lịch",
@@ -798,5 +807,7 @@
     "october": "Tháng 10",
     "november": "Tháng 11",
     "december": "Tháng 12"
+=======
+>>>>>>> repoB/master
   }
 }

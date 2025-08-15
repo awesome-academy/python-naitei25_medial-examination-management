@@ -32,6 +32,16 @@ export enum AppointmentStatus {
   IN_PROGRESS = "IN_PROGRESS",
 }
 
+// Định nghĩa AppointmentStatus enum
+export enum AppointmentStatus {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  CANCELLED = "CANCELLED",
+  COMPLETED = "COMPLETED",
+  NO_SHOW = "NO_SHOW",
+  IN_PROGRESS = "IN_PROGRESS",
+}
+
 // Interface cho sự kiện lịch
 export interface CalendarEvent extends EventInput {
   extendedProps: {
