@@ -121,38 +121,37 @@ const PatientDetail: React.FC = () => {
         }
     }, [patientDetail, prescription, appointments, form, t])
 
-    const changeToPendingTestStatus = async () => {
-        if (!appointmentId) {
-            message.error(t("errors.noAppointmentFound"))
-            return
-        }
-
-        setPendingTestStatusLoading(true)
-
-        try {
-            const appointment = appointments.find((appt) => appt.appointmentId === patientDetail.id)
-            const updateAppointmentData = {
-                appointmentId: patientDetail.id,
-                patientId: appointment?.patientInfo?.id || patientDetail.patient,
-                scheduleId: appointment?.schedule?.scheduleId || patientDetail.schedule,
-                symptoms: patientDetail.symptoms,
-                number: patientDetail.number,
-                slot_start: patientDetail.slot_start,
-                slot_end: patientDetail.slot_end,
-                status: "PENDING_TEST_RESULT",
-            }
-
-            await appointmentService.updateAppointmentById(appointmentId, updateAppointmentData)
-
-            message.success(t("success.pendingTestResult"))
-            await refreshAll(appointmentId)
-        } catch (error) {
-            console.error(t("errors.failedToChangeStatus"), error)
-            message.error(t("errors.statusChangeFailed"))
-        } finally {
-            setPendingTestStatusLoading(false)
-        }
-    }
+    // const changeToPendingTestStatus = async () => {
+    //     if (!appointmentId) {
+    //         message.error(t("errors.noAppointmentFound"))
+    //         return
+    //     }
+    //
+    //     setPendingTestStatusLoading(true)
+    //
+    //     try {
+    //         const appointment = appointments.find((appt) => appt.appointmentId === patientDetail.id)
+    //         const updateAppointmentData = {
+    //             appointmentId: patientDetail.id,
+    //             patientId: appointment?.patientInfo?.id || patientDetail.patient,
+    //             scheduleId: appointment?.schedule?.scheduleId || patientDetail.schedule,
+    //             symptoms: patientDetail.symptoms,
+    //             slot_start: patientDetail.slot_start,
+    //             slot_end: patientDetail.slot_end,
+    //             status: "PENDING_TEST_RESULT",
+    //         }
+    //
+    //         await appointmentService.updateAppointmentById(appointmentId, updateAppointmentData)
+    //
+    //         message.success(t("success.pendingTestResult"))
+    //         await refreshAll(appointmentId)
+    //     } catch (error) {
+    //         console.error(t("errors.failedToChangeStatus"), error)
+    //         message.error(t("errors.statusChangeFailed"))
+    //     } finally {
+    //         setPendingTestStatusLoading(false)
+    //     }
+    // }
 
     const handleCompleteExamination = async () => {
         if (!appointmentId) {
@@ -179,27 +178,21 @@ const PatientDetail: React.FC = () => {
                 message.error(t("errors.missingRequiredFields"))
                 return
             }
-
+            
             const appointment = appointments.find((appt) => appt.appointmentId === patientDetail.id)
+            console.log("heheheh", appointment)
             const updateData = {
-                appointmentId: patientDetail.id,
-                patientId: appointment?.patientInfo?.id || patientDetail.patient,
-                scheduleId: appointment?.schedule?.scheduleId || patientDetail.schedule,
+                id: patientDetail.id,
+                doctor: appointment?.schedule?.doctor || patientDetail.doctor,
+                patient: appointment?.patientInfo?.id || patientDetail.patient,
+                schedule: appointment?.schedule?.scheduleId || patientDetail.schedule,
                 symptoms: patientDetail.symptoms,
-                number: patientDetail.number,
                 slot_start: patientDetail.slot_start,
                 slot_end: patientDetail.slot_end,
-                status: "COMPLETED",
-                diagnosis: values.diagnosis || "",
-                note: values.doctorNotes || "",
-                is_follow_up: values.isFollowUp || false,
-                follow_up_date: values.followUpDate ? dateToString(values.followUpDate) : null,
-                systolic_blood_pressure: values.systolicBloodPressure || undefined,
-                diastolic_blood_pressure: values.diastolicBloodPressure || undefined,
-                heart_rate: values.heartRate || undefined,
-                blood_sugar: values.bloodSugar || undefined,
+                status: "D", // Set status to 'D' for Completed
             }
-
+            console.log("updateData", updateData)
+            console.log("appointmentId", appointmentId)
             await appointmentService.updateAppointmentById(appointmentId, updateData)
 
             message.success(t("success.examinationCompleted"))
@@ -383,10 +376,8 @@ const PatientDetail: React.FC = () => {
                         <Row gutter={24}>
                             <Col span={12}>
                                 <Button
-                                    type="primary"
-                                    loading={pendingTestStatusLoading}
-                                    onClick={changeToPendingTestStatus}
-                                    style={{ marginRight: 8 }}
+                                    icon={<PlusOutlined />}
+                                    onClick={() => setIsMedicalModalOpen(true)}
                                 >
                                     {t("buttons.pendingTestResult")}
                                 </Button>

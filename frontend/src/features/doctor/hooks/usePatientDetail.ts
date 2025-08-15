@@ -20,8 +20,8 @@ import { stringToDate, dateToString } from "../services/dateHelpServices"
 const statusMap: { [key: string]: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" } = {
     P: "PENDING",
     C: "CONFIRMED",
-    X: "COMPLETED",
-    H: "CANCELLED",
+    D: "COMPLETED",
+    X: "CANCELLED",
 }
 
 interface UsePatientDetailReturn {

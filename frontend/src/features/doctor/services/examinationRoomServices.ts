@@ -5,7 +5,7 @@ export const examinationRoomService = {
   // Lấy tất cả phòng khám
   async getAllExaminationRooms(): Promise<ExaminationRoom[]> {
     try {
-      const response = await api.get<ExaminationRoom[]>("/doctors/examination-rooms")
+      const response = await api.get<ExaminationRoom[]>("/examination-rooms/")
       return response.data
     } catch (error) {
       console.error(`[${new Date().toLocaleString("vi-VN")}] Error fetching all examination rooms:`, error)
@@ -16,7 +16,7 @@ export const examinationRoomService = {
   // Lấy phòng khám theo ID
   async getExaminationRoomById(roomId: number): Promise<ExaminationRoom> {
     try {
-      const response = await api.get<ExaminationRoom>(`/doctors/examination-rooms/${roomId}`)
+      const response = await api.get<ExaminationRoom>(`/examination-rooms/${roomId}`)
       return response.data
     } catch (error) {
       console.error(`[${new Date().toLocaleString("vi-VN")}] Error fetching examination room ${roomId}:`, error)
@@ -32,7 +32,7 @@ export const examinationRoomService = {
       if (building) params.append("building", building)
       if (floor) params.append("floor", floor.toString())
 
-      const response = await api.get<ExaminationRoom[]>(`/doctors/examination-rooms/search?${params.toString()}`)
+      const response = await api.get<ExaminationRoom[]>(`/examination-rooms/search/?${params.toString()}`)
       return response.data
     } catch (error) {
       console.error(`[${new Date().toLocaleString("vi-VN")}] Error filtering rooms:`, error)
@@ -43,7 +43,7 @@ export const examinationRoomService = {
   // Lấy các phòng xét nghiệm (type = TEST)
   async getTestRooms(): Promise<ExaminationRoom[]> {
     try {
-      const rooms = await this.filterRooms("TEST")
+      const rooms = await this.filterRooms("T")
       return rooms
     } catch (error) {
       console.error(`[${new Date().toLocaleString("vi-VN")}] Error fetching test rooms:`, error)
@@ -54,7 +54,7 @@ export const examinationRoomService = {
   // Lấy các phòng khám bệnh (type = EXAMINATION)
   async getExaminationRooms(): Promise<ExaminationRoom[]> {
     try {
-      const rooms = await this.filterRooms("EXAMINATION")
+      const rooms = await this.filterRooms("E")
       return rooms
     } catch (error) {
       console.error(`[${new Date().toLocaleString("vi-VN")}] Error fetching examination rooms:`, error)
