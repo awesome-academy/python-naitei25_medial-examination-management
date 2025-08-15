@@ -1,8 +1,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { Calendar, ChevronDown, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Calendar, ChevronDown, CheckCircle2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { CreatePatientRequest } from "../../types/patient";
 import { patientService } from "../../services/patientService";
 import { parse, format } from "date-fns";
 import ReturnButton from "../../components/ui/button/ReturnButton";
@@ -10,22 +9,22 @@ import ReturnButton from "../../components/ui/button/ReturnButton";
 export default function PatientAddForm() {
   const navigate = useNavigate();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [formData, setFormData] = useState<CreatePatientRequest>({
+  const [formData, setFormData] = useState({
     email: "",
     phone: "",
     password: "",
-    identityNumber: "",
-    insuranceNumber: "",
-    fullName: "",
+    identity_number: "",
+    insurance_number: "",
+    first_name: "",
+    last_name: "",
     birthday: "",
     avatar: "",
-    gender: "OTHER",
+    gender: "M",
     address: "",
     allergies: "",
     height: undefined,
     weight: undefined,
-    bloodType: "O+",
-    emergencyContactDtos: [],
+    blood_type: "O",
   });
 
   const handleChange = (
@@ -52,6 +51,7 @@ export default function PatientAddForm() {
             )
           : formData.birthday;
       const dataToSend = { ...formData, birthday };
+      console.log("📤 Data being sent to API:", dataToSend);
       await patientService.createPatient(dataToSend);
       setShowSuccessModal(true);
       setTimeout(() => {
@@ -73,7 +73,7 @@ export default function PatientAddForm() {
         <div className="absolute inset-0 flex items-center justify-center z-50">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
-          
+
           {/* Modal Content */}
           <div className="relative bg-white rounded-lg p-6 w-[320px] shadow-lg animate-fadeIn">
             <div className="flex flex-col items-center text-center">
@@ -106,19 +106,35 @@ export default function PatientAddForm() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="block text-base-600 font-medium">
-                Họ và tên <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="VD: Nguyễn Văn A..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-base-600 font-medium">
+                  Họ <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  placeholder="VD: Nguyễn"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-base-600 font-medium">
+                  Tên <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  placeholder="VD: Văn A"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
+                  required
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-base-600 font-medium">
@@ -168,8 +184,8 @@ export default function PatientAddForm() {
               </label>
               <input
                 type="text"
-                name="identityNumber"
-                value={formData.identityNumber}
+                name="identity_number"
+                value={formData.identity_number}
                 onChange={handleChange}
                 placeholder="VD: 0123456789"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
@@ -180,8 +196,8 @@ export default function PatientAddForm() {
               <label className="block text-base-600 font-medium">BHYT</label>
               <input
                 type="text"
-                name="insuranceNumber"
-                value={formData.insuranceNumber}
+                name="insurance_number"
+                value={formData.insurance_number}
                 onChange={handleChange}
                 placeholder="VD: ytaucsonns"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
@@ -239,7 +255,7 @@ export default function PatientAddForm() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
               />
             </div>
-            
+
             <div className="space-y-2">
               <label className="block text-base-600 font-medium">Dị ứng</label>
               <input
@@ -282,8 +298,8 @@ export default function PatientAddForm() {
                 Nhóm máu
               </label>
               <select
-                name="bloodType"
-                value={formData.bloodType}
+                name="blood_type"
+                value={formData.blood_type}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500"
               >

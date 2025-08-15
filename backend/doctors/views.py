@@ -3,7 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action, permission_classes as drf_permission_classes
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, JSONParser
 from django.http import Http404
 from django.utils.dateparse import parse_date
 from .models import Doctor, Department, ExaminationRoom, Schedule
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class DoctorViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser]
+    parser_classes = [MultiPartParser, JSONParser]
     
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'search', 'filter', 'get_doctor_by_user_id']:

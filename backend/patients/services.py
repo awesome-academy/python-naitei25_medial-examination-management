@@ -13,7 +13,12 @@ class PatientService:
         # Tạo User trước
         with transaction.atomic():
             from users.services import UserService
-            user = UserService().create_user(user_data)
+            # Thêm role cho user_data
+            user_data['role'] = 'PATIENT'
+            user_response = UserService().add_user(user_data)
+            # Lấy user object từ response
+            from users.models import User
+            user = User.objects.get(id=user_response['userId'])
             
             patient = Patient.objects.create(
                 user=user,

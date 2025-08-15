@@ -156,7 +156,9 @@ const AddDoctor: React.FC = () => {
         last_name: lastName,
         birthday: formData.birthday,
         gender: formData.gender === "MALE" ? "M" : "F",
-        academic_degree: ACADEMIC_DEGREE_TO_BACKEND[formData.academicDegree] || formData.academicDegree,
+        academic_degree:
+          ACADEMIC_DEGREE_TO_BACKEND[formData.academicDegree] ||
+          formData.academicDegree,
         specialization: formData.specialization,
         type: formData.type === "EXAMINATION" ? "E" : "S",
         department_id: formData.departmentId,
