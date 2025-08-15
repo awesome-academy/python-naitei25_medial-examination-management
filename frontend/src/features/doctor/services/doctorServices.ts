@@ -56,16 +56,33 @@ export const doctorService = {
 
     async updateDoctor(doctorId: number, doctorData: Partial<DoctorInfo>): Promise<DoctorInfo> {
         try {
-            const response = await api.put(`/doctors/${doctorId}`, doctorData)
-            return response.data as DoctorInfo
+            // Convert doctorData to FormData for multipart/form-data
+            const formData = new FormData();
+            Object.entries(doctorData).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, value as any);
+                }
+            });
+            // Log FormData content for debugging
+            console.log("[doctorService.updateDoctor] Submitting FormData:");
+            for (const [key, value] of formData.entries()) {
+                console.log(`  ${key}:`, value);
+            }
+            const response = await api.put(`/doctors/${doctorId}/`, formData, {
+                headers: {
+                    // Let axios set Content-Type
+                },
+            });
+            return response.data as DoctorInfo;
         } catch (error) {
-            const axiosError = error as AxiosError
+            const axiosError = error as AxiosError;
             console.error(`Failed to update doctor with ID ${doctorId}:`, {
                 message: axiosError.message,
                 status: axiosError.response?.status,
                 data: axiosError.response?.data,
-            })
-            throw new Error(`Unable to update doctor details for ID ${doctorId}: ${axiosError.message}`)
+                sentData: doctorData
+            });
+            throw new Error(`Unable to update doctor details for ID ${doctorId}: ${axiosError.message}`);
         }
     },
 
