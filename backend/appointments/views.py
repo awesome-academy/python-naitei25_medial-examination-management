@@ -216,7 +216,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
       queryset_data = AppointmentService.get_appointments_by_patient_id_optimized(
           patient_id,
           page_no=PAGE_NO_DEFAULT,
-          page_size=1000,
+          page_size=50,
           appointment_type='upcoming',
           appointment_status=[AppointmentStatus.PENDING.value, AppointmentStatus.CONFIRMED.value, AppointmentStatus.IN_PROGRESS.value]
       )['results']
