@@ -418,48 +418,10 @@ const PatientDetail: React.FC = () => {
                                             {serviceOrders.map((order) => (
                                                 <div key={order.orderId} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
                                                     <div>
-                                                        <p className="text-sm font-medium">{t("labels.orderId")}: {order.orderId}</p>
-                                                        <p className="text-sm text-gray-500">{t("labels.room")}: {order.roomId || t("labels.notSpecified")}</p>
-                                                        {order.orderTime && (
-                                                            <p className="text-sm text-gray-500">
-                                                                {t("labels.orderTime")}: {new Date(order.orderTime).toLocaleString("vi-VN")}
-                                                            </p>
-                                                        )}
-                                                        {order.resultTime && (
-                                                            <p className="text-sm text-gray-500">
-                                                                {t("labels.resultTime")}: {new Date(order.resultTime).toLocaleString("vi-VN")}
-                                                            </p>
-                                                        )}
-                                                        {order.result === "COMPLETED" && (
-                                                            <div className="mt-2">
-                                                                <p className="text-sm font-medium">{t("labels.results")}:</p>
-                                                                <div className="flex items-center space-x-2 mt-1">
-                                                                    <Button
-                                                                        size="small"
-                                                                        type="default"
-                                                                        onClick={() => window.open(order.result, "_blank")}
-                                                                    >
-                                                                        {t("buttons.viewPDF")}
-                                                                    </Button>
-                                                                    <Button
-                                                                        size="small"
-                                                                        type="primary"
-                                                                        onClick={() => {
-                                                                            const link = document.createElement("a")
-                                                                            link.href = order.result!
-                                                                            link.download = `ket-qua-dinh-${order.orderId}.pdf`
-                                                                            document.body.appendChild(link)
-                                                                            link.click()
-                                                                            document.body.removeChild(link)
-                                                                        }}
-                                                                    >
-                                                                        {t("buttons.download")}
-                                                                    </Button>
-                                                                </div>
-                                                            </div>
-                                                        )}
+                                                        <p className="text-sm font-medium">{t("labels.serviceName")}: {order.service_name}</p>
+                                                        <p className="text-sm text-gray-500">{t("labels.room")}: {order.room_id || t("labels.notSpecified")}</p>
                                                         <p className="text-sm text-gray-500 mt-1">
-                                                            {t("labels.status")}: {order.orderStatus === "D" ? t("status.completed") : t("status.pending")}
+                                                            {t("labels.status")}: {order.order_status === "D" ? t("status.completed") : t("status.pending")}
                                                         </p>
                                                     </div>
                                                     <Button
