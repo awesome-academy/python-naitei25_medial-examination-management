@@ -29,12 +29,12 @@ class PatientViewSet(viewsets.ViewSet):
                         {"error": _("Không tìm thấy bệnh nhân với user_id này")},
                         status=status.HTTP_404_NOT_FOUND
                     )
-            patients = Patient.objects.all()
+            patients = Patient.objects.select_related('user').all()
             serializer = PatientSerializer(patients, many=True)
             return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        patient = self.get_object(pk)
+        patient = Patient.objects.select_related('user').get(pk=pk)
         serializer = PatientSerializer(patient)
         return Response(serializer.data)
 
@@ -65,7 +65,7 @@ class PatientViewSet(viewsets.ViewSet):
 
     def destroy(self, request, pk=None):
         patient = self.get_object(pk)
-        patient.delete()
+        PatientService().delete_patient(patient)
         return Response({"message": _("Bệnh nhân được xóa thành công")}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_path='me')

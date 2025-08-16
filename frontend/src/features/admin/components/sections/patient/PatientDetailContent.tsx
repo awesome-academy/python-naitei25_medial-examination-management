@@ -1851,11 +1851,14 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
   }
 
   useEffect(() => {
-    if (patientId) {
+    // Use emergency contacts from patient data first, then fallback to API call if needed
+    if (patient.emergencyContacts && patient.emergencyContacts.length > 0) {
+      setContacts(patient.emergencyContacts)
+    } else if (patientId) {
       reloadContacts()
     }
     // eslint-disable-next-line
-  }, [patientId])
+  }, [patient.emergencyContacts, patientId])
 
   const handleView = (contact: EmergencyContact) => {
     setSelectedContact(contact)

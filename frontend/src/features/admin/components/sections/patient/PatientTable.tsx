@@ -217,6 +217,18 @@ export default function PatientTable() {
                     isHeader
                     className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
                   >
+                    Số điện thoại
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
+                  >
+                    Email
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
+                  >
                     Giới tính
                   </TableCell>
 
@@ -248,6 +260,12 @@ export default function PatientTable() {
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       {patient.insuranceNumber}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {patient.phone}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {patient.email || "Chưa có"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       <Badge
