@@ -7,9 +7,11 @@ import { getServiceOrdersByRoomId } from "../../services/serviceOrderService";
 import { servicesService } from "../../services/servicesService";
 import { appointmentService } from "../../services/appointmentService";
 import { api } from "../../../../shared/services/api";
+import { useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 
 const HomeService: React.FC = () => {
+  const navigate = useNavigate();
   const [serviceOrders, setServiceOrders] = useState<any[]>([]);
   const [appointmentsData, setAppointmentsData] = useState<{ [key: number]: any }>({});
   const [loading, setLoading] = useState(true);
@@ -282,12 +284,13 @@ const HomeService: React.FC = () => {
                     <CalendarOutlined className="mr-2 text-teal-600" />
                     <h3 className="text-lg font-semibold text-gray-900">Lịch sự kiện</h3>
                   </div>
-                  <a
-                    href="/schedule"
-                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors"
+                  <button
+                    type="button"
+                    onClick={() => navigate("/doctor/service/schedule")}
+                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors bg-transparent border-0 p-0 cursor-pointer"
                   >
                     Xem chi tiết →
-                  </a>
+                  </button>
                 </div>
               </div>
               <div className="p-6">
@@ -306,12 +309,13 @@ const HomeService: React.FC = () => {
                     <ClockCircleOutlined className="mr-2 text-teal-600" />
                     <h3 className="text-lg font-semibold text-gray-900">Lịch hẹn sắp tới</h3>
                   </div>
-                  <a
-                    href="/tasks"
-                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors"
+                  <button
+                    type="button"
+                    onClick={() => navigate("/doctor/service/patients")}
+                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors bg-transparent border-0 p-0 cursor-pointer"
                   >
                     Xem tất cả →
-                  </a>
+                  </button>
                 </div>
               </div>
               <div className="p-6">

@@ -458,11 +458,17 @@ const AccountInfo = () => {
       setSaving(true)
       await form.validateFields()
 
-      // Get form values and update birthday to ISO format
+      // Get all form values and update profile state ONCE before save
       const values = form.getFieldsValue()
       if (values.birthday) {
-        handleChange("birthday", formatDateForAPI(values.birthday))
+        values.birthday = formatDateForAPI(values.birthday)
       }
+      // Update all fields in profile (simulate handleChange for all fields at once)
+      Object.keys(values).forEach((key) => {
+        if (profile && values[key] !== undefined) {
+          profile[key] = values[key]
+        }
+      })
 
       const success = await handleSave()
       if (success) {
@@ -695,12 +701,11 @@ const AccountInfo = () => {
               },
             ]}
           >
-            <Input onChange={(e) => handleChange("fullName", e.target.value)} placeholder={t("placeholders.enterFullName")} />
+            <Input placeholder={t("placeholders.enterFullName")} />
           </Form.Item>
 
           <Form.Item label={t("forms.gender")} name="gender">
             <Select
-              onChange={(value) => handleChange("gender", value)}
               placeholder={t("placeholders.select")}
               options={[
                 { value: "M", label: t("forms.male") },
@@ -734,7 +739,6 @@ const AccountInfo = () => {
             <Input
               placeholder="DD/MM/YYYY"
               prefix={<CalendarOutlined />}
-              onChange={handleBirthdayChange}
               maxLength={10}
               onKeyPress={(e) => {
                 if (!/[\d/]/.test(e.key) && e.key !== "Backspace" && e.key !== "Delete") {
@@ -755,7 +759,7 @@ const AccountInfo = () => {
           </Form.Item>
 
           <Form.Item label={t("forms.cccd", "Số CCCD")} name="identityNumber">
-            <Input onChange={(e) => handleChange("identityNumber", e.target.value)} placeholder={t("placeholders.enterCccd")} />
+            <Input placeholder={t("placeholders.enterCccd")} />
           </Form.Item>
         </div>
 
@@ -765,7 +769,6 @@ const AccountInfo = () => {
           rules={[{ max: 200, message: t("validation.addressTooLong") }]}
         >
           <Input.TextArea
-            onChange={(e) => handleChange("address", e.target.value)}
             placeholder={t("placeholders.enterAddress")}
             rows={2}
           />
@@ -773,7 +776,7 @@ const AccountInfo = () => {
 
         <div className="grid grid-cols-2 gap-6">
           <Form.Item label={t("common.specialization")} name="specialization">
-            <Input onChange={(e) => handleChange("specialization", e.target.value)} placeholder={t("placeholders.select")} />
+            <Input placeholder={t("placeholders.select")} />
           </Form.Item>
 
           <Form.Item label={t("common.department")}> 
