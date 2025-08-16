@@ -445,7 +445,10 @@
     "instructions": "指示",
     "duration": "期間",
     "unit": "単位",
-    "quantity": "数量"
+    "quantity": "数量",
+    "appointmentTime": "診察時間",
+    "appointmentDate": "診察日",
+    "serviceName": "サービス名"
   },
   "units": {
     "mmHg": "mmHg",
@@ -844,5 +847,22 @@
     "october": "10月",
     "november": "11月",
     "december": "12月"
+  },
+  "dashboard": {
+    "welcome": "ようこそ",
+    "overviewToday": "今日の概要",
+    "totalAppointments": "総予約数",
+    "total": "合計",
+    "todayAppointments": "今日の予約",
+    "today": "今日",
+    "completed": "完了",
+    "done": "完了",
+    "pending": "保留中",
+    "recentAppointments": "最近の予約",
+    "viewAll": "すべて表示",
+    "eventCalendar": "イベントカレンダー",
+    "viewDetails": "詳細を見る",
+    "upcomingAppointments": "今後の予約",
+    "systemInfo": "システム情報"
   }
 }
