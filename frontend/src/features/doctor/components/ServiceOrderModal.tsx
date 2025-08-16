@@ -22,7 +22,7 @@ interface ModalProps {
 
 interface MedicalOrderItem extends Omit<ServiceOrder, "orderId" | "createdAt"> {
   serviceId: number
-  expectedTime: string
+  order_time: string
 }
 
 export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appointmentId }) => {
@@ -56,7 +56,8 @@ export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appoi
   const fetchExaminationRooms = useCallback(async () => {
     try {
       setRoomsLoading(true)
-      const rooms = await examinationRoomService.getExaminationRooms()
+      // Only fetch rooms with type = 'S'
+      const rooms = await examinationRoomService.filterRooms('S')
       setExaminationRooms(rooms)
     } catch (error) {
       console.error("Error fetching examination rooms:", error)
@@ -69,7 +70,7 @@ export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appoi
     console.log("Adding indication for service:", service)
     const newIndication: MedicalOrderItem = {
       serviceId: service.service_id,
-      expectedTime: new Date().toISOString(),
+      order_time: new Date().toISOString(),
       appointmentId: appointmentId!,
       roomId: null, // Let user choose, use null for empty
       price: service.price,
@@ -100,8 +101,8 @@ export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appoi
       setLoading(true)
       for (const indication of indications) {
         console.log("Creating service order:", indication)
-        // Pass order_status: 'O' to match backend expectations
-        await createServiceOrderService(appointmentId, indication.serviceId, indication.roomId, "O")
+        // Pass order_status: 'O' and order_time from indication
+        await createServiceOrderService(appointmentId, indication.serviceId, indication.roomId, "O", indication.order_time)
       }
       message.success("Lưu chỉ định thành công")
       onClose()

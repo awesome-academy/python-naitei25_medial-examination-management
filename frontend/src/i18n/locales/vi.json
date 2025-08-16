@@ -429,11 +429,11 @@
     "building": "Tòa nhà",
     "floor": "Tầng",
     "service": "Dịch vụ",
-    "orderTime": "Thời gian chi định",
+    "orderTime": "Thời gian chỉ định",
     "patientId": "Mã bệnh nhân",
     "male": "Nam",
     "female": "Nữ",
-    "orderId": "Mã đơn hàng",
+    "orderId": "Mã chỉ định",
     "viewPDF": "Xem PDF",
     "download": "Tải xuống",
     "unknown": "Không rõ",
@@ -443,7 +443,10 @@
     "instructions": "Hướng dẫn",
     "duration": "Thời gian",
     "unit": "Đơn vị",
-    "quantity": "Số lượng"
+    "quantity": "Số lượng",
+    "appointmentTime": "Giờ khám",
+    "appointmentDate": "Ngày khám",
+    "serviceName": "Tên dịch vụ"
   },
   "units": {
     "mmHg": "mmHg",
@@ -842,5 +845,22 @@
     "october": "Tháng 10",
     "november": "Tháng 11",
     "december": "Tháng 12"
+  },
+  "dashboard": {
+    "welcome": "Chào mừng",
+    "overviewToday": "Tổng quan hôm nay",
+    "totalAppointments": "Tổng số cuộc hẹn",
+    "total": "Tổng",
+    "todayAppointments": "Cuộc hẹn hôm nay",
+    "today": "Hôm nay",
+    "completed": "Đã hoàn thành",
+    "done": "Đã xong",
+    "pending": "Đang chờ",
+    "recentAppointments": "Cuộc hẹn gần đây",
+    "viewAll": "Xem tất cả",
+    "eventCalendar": "Lịch sự kiện",
+    "viewDetails": "Xem chi tiết",
+    "upcomingAppointments": "Cuộc hẹn sắp tới",
+    "systemInfo": "Thông tin hệ thống"
   }
 }

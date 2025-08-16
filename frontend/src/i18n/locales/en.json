@@ -456,7 +456,10 @@
     "instructions": "Instructions",
     "duration": "Duration",
     "unit": "Unit",
-    "quantity": "Quantity"
+    "quantity": "Quantity",
+    "appointmentTime": "Appointment Time",
+    "appointmentDate": "Appointment Date",
+    "serviceName": "Service Name"
   },
   "units": {
     "mmHg": "mmHg",
@@ -849,5 +852,22 @@
     "october": "October",
     "november": "November",
     "december": "December"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "overviewToday": "Overview Today",
+    "totalAppointments": "Total Appointments",
+    "total": "Total",
+    "todayAppointments": "Today's Appointments",
+    "today": "Today",
+    "completed": "Completed",
+    "done": "Done",
+    "pending": "Pending",
+    "recentAppointments": "Recent Appointments",
+    "viewAll": "View All",
+    "eventCalendar": "Event Calendar",
+    "viewDetails": "View Details",
+    "upcomingAppointments": "Upcoming Appointments",
+    "systemInfo": "System Information"
   }
 }

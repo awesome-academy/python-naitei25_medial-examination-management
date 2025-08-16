@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
+from django.db.models.functions import TruncDate
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from common.constants import PAGE_NO_DEFAULT, PAGE_SIZE_DEFAULT
@@ -338,7 +339,8 @@ class ServiceOrderViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_path='rooms/(?P<room_id>[^/.]+)/orders')
     def by_room(self, request, room_id=None):
         status_param = request.query_params.get('status')
-        order_date_str = request.query_params.get('orderDate')
+        # Accept both 'orderDate' and 'order_time__date'
+        order_date_str = request.query_params.get('orderDate') or request.query_params.get('order_time__date')
 
         order_date = None
         if order_date_str:
@@ -346,11 +348,13 @@ class ServiceOrderViewSet(viewsets.ViewSet):
             if not order_date:
                 return Response({"error": _("Ngày không hợp lệ. Định dạng đúng: YYYY-MM-DD")}, status=400)
 
-        orders = ServiceOrderService.get_orders_by_room_and_status_and_date(
-            room_id=room_id,
-            status=status_param,
-            order_date=order_date
-        )
+        # Queryset filtering
+        orders = ServiceOrder.objects.filter(room_id=room_id)
+        if status_param:
+            orders = orders.filter(status=status_param)
+        if order_date:
+            orders = orders.annotate(order_date_only=TruncDate('order_time')).filter(order_date_only=order_date)
+
         serializer = ServiceOrderSerializer(orders, many=True, context={'request': request})
         return Response(serializer.data)
 
