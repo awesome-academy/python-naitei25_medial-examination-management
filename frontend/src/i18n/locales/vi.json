@@ -468,7 +468,8 @@
     "refreshAll": "Làm mới tất cả",
     "pendingTestResult": "Chờ kết quả xét nghiệm",
     "retry": "Thử lại",
-    "close": "Đóng"
+    "close": "Đóng",
+    "edit": "Chỉnh sửa"
   },
   "stats": {
     "totalAppointments": "Tổng số cuộc hẹn",
@@ -862,5 +863,20 @@
     "viewDetails": "Xem chi tiết",
     "upcomingAppointments": "Cuộc hẹn sắp tới",
     "systemInfo": "Thông tin hệ thống"
+  },
+  "log": {
+    "eventDetails": "Chi tiết sự kiện",
+    "setSelectedEvent": "Chọn sự kiện",
+    "modalStateAfter": "Trạng thái hộp thoại sau",
+    "selectedEventAfter": "Sự kiện đã chọn sau"
+  },
+  "fields": {
+    "activity": "Hoạt động",
+    "workingDate": "Ngày làm việc",
+    "startTime": "Thời gian bắt đầu",
+    "endTime": "Thời gian kết thúc",
+    "location": "Địa điểm",
+    "building": "Tòa nhà",
+    "status": "Trạng thái"
   }
 }

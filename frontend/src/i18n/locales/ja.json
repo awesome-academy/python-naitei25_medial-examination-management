@@ -470,7 +470,8 @@
     "refreshAll": "すべて更新",
     "pendingTestResult": "検査結果待ち",
     "retry": "再試行",
-    "close": "閉じる"
+    "close": "閉じる",
+    "edit": "編集"
   },
   "stats": {
     "totalAppointments": "総予約数",
@@ -864,5 +865,20 @@
     "viewDetails": "詳細を見る",
     "upcomingAppointments": "今後の予約",
     "systemInfo": "システム情報"
+  },
+  "log": {
+    "eventDetails": "イベント詳細",
+    "setSelectedEvent": "選択したイベントを設定",
+    "modalStateAfter": "モーダルの状態（後）",
+    "selectedEventAfter": "選択されたイベント（後）"
+  },
+  "fields": {
+    "activity": "活動",
+    "workingDate": "勤務日",
+    "startTime": "開始時間",
+    "endTime": "終了時間",
+    "location": "場所",
+    "building": "建物",
+    "status": "状態"
   }
 }

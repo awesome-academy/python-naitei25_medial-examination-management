@@ -481,7 +481,8 @@
     "refreshAll": "Refresh All",
     "pendingTestResult": "Pending Test Result",
     "retry": "Retry",
-    "close": "Close"
+    "close": "Close",
+    "edit": "Edit"
   },
   "stats": {
     "totalAppointments": "Total Appointments",
@@ -869,5 +870,20 @@
     "viewDetails": "View Details",
     "upcomingAppointments": "Upcoming Appointments",
     "systemInfo": "System Information"
+  },
+  "log": {
+    "eventDetails": "Event Details",
+    "setSelectedEvent": "Set Selected Event",
+    "modalStateAfter": "Modal State After",
+    "selectedEventAfter": "Selected Event After"
+  },
+    "fields": {
+    "activity": "Activity",
+    "workingDate": "Working Date",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "location": "Location",
+    "building": "Building",
+    "status": "Status"
   }
 }

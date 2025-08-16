@@ -17,9 +17,9 @@ export const getAllServiceOrders = async (serviceId: number): Promise<ServiceOrd
   }
 }
 
-export const getServiceOrderById = async (serviceId: number, orderId: number): Promise<ServiceOrder> => {
+export const getServiceOrderById = async (orderId: number): Promise<ServiceOrder> => {
   try {
-    const response = await api.get(`/appointments/services/${serviceId}/service-orders/${orderId}`)
+    const response = await api.get(`service-orders/${orderId}/`)
     return response.data
   } catch (error) {
     console.error("Lỗi khi lấy chi tiết đơn dịch vụ:", error)

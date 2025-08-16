@@ -9,6 +9,7 @@ import {
 } from "../../services/appointmentService";
 import type { Appointment } from "../../types/appointment";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
@@ -17,6 +18,7 @@ const { Title, Text } = Typography;
 
 const Home: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -202,12 +204,13 @@ const Home: React.FC = () => {
                     <TeamOutlined className="mr-2 text-teal-600" />
                     <h3 className="text-lg font-semibold text-gray-900">{t("dashboard.recentAppointments")}</h3>
                   </div>
-                  <a
-                    href="/activities"
-                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors"
+                  <button
+                    type="button"
+                    onClick={() => navigate("/doctor/examination/patients")}
+                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors bg-transparent border-0 p-0 cursor-pointer"
                   >
                     {t("dashboard.viewAll")} →
-                  </a>
+                  </button>
                 </div>
               </div>
               <div className="p-6">
@@ -230,12 +233,13 @@ const Home: React.FC = () => {
                     <CalendarOutlined className="mr-2 text-teal-600" />
                     <h3 className="text-lg font-semibold text-gray-900">{t("dashboard.eventCalendar")}</h3>
                   </div>
-                  <a
-                    href="/schedule"
-                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors"
+                  <button
+                    type="button"
+                    onClick={() => navigate("/doctor/examination/schedule")}
+                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors bg-transparent border-0 p-0 cursor-pointer"
                   >
                     {t("dashboard.viewDetails")} →
-                  </a>
+                  </button>
                 </div>
               </div>
               <div className="p-6">
@@ -254,12 +258,13 @@ const Home: React.FC = () => {
                     <ClockCircleOutlined className="mr-2 text-teal-600" />
                     <h3 className="text-lg font-semibold text-gray-900">{t("dashboard.upcomingAppointments")}</h3>
                   </div>
-                  <a
-                    href="/tasks"
-                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors"
+                  <button
+                    type="button"
+                    onClick={() => navigate("/doctor/examination/patients")}
+                    className="text-teal-600 font-medium hover:text-teal-700 transition-colors bg-transparent border-0 p-0 cursor-pointer"
                   >
                     {t("dashboard.viewAll")} →
-                  </a>
+                  </button>
                 </div>
               </div>
               <div className="p-6">
