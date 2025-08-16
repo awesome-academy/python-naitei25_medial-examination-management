@@ -224,7 +224,23 @@ export function AppointmentsContent() {
     if (!patientId) return
     try {
       const data = await appointmentService.getAppointmentsByPatientId(Number(patientId), 1, 50)
-      setAppointments(Array.isArray(data) ? data : data.content || [])
+      // Map API response to frontend format
+      const mappedAppointments = data.map((appt: any) => ({
+        appointmentId: appt.id,
+        doctorId: appt.doctorId,
+        doctorInfo: appt.doctorInfo,
+        schedule: appt.schedule,
+        symptoms: appt.symptoms,
+        slotStart: appt.slot_start,
+        slotEnd: appt.slot_end,
+        appointmentStatus: appt.status === "P" ? "PENDING" : 
+                          appt.status === "C" ? "CONFIRMED" : 
+                          appt.status === "X" ? "CANCELLED" : 
+                          appt.status === "D" ? "COMPLETED" : "PENDING",
+        createdAt: appt.createdAt,
+        prescriptionId: appt.prescriptionId
+      }))
+      setAppointments(mappedAppointments)
     } catch (error) {
       console.error("Failed to fetch appointments:", error)
     }

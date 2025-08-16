@@ -103,7 +103,9 @@ export const appointmentService = {
       const response = await api.get(
         `/appointments/patient/${patientId}?pageNo=${pageNo}&pageSize=${pageSize}`
       );
-      return response.data;
+      // Backend returns {content: [...], pageNo, pageSize, etc}
+      // Return the content array directly for the component
+      return response.data.content || [];
     } catch (error) {
       console.error(
         `Error fetching appointments for patient ${patientId}:`,
