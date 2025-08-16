@@ -108,6 +108,12 @@ export const patientService = {
             : patientData.gender === "FEMALE"
             ? "F"
             : "O",
+        // Map emergency contacts to snake_case for backend
+        emergencyContactDtos: patientData.emergencyContactDtos?.map(contact => ({
+          contact_name: contact.contactName,
+          contact_phone: contact.contactPhone,
+          relationship: contact.relationship
+        })) || []
       };
       const { data } = await api.post<RawPatientFromAPI>(
         "/patients/",
