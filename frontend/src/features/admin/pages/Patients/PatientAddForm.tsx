@@ -1,32 +1,33 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { Calendar, ChevronDown, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Calendar, ChevronDown, CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { CreatePatientRequest } from "../../types/patient";
 import { patientService } from "../../services/patientService";
 import { parse, format } from "date-fns";
 import ReturnButton from "../../components/ui/button/ReturnButton";
+import type { EmergencyContactDto } from "../../types/patient";
 
 export default function PatientAddForm() {
   const navigate = useNavigate();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [formData, setFormData] = useState<CreatePatientRequest>({
+  const [formData, setFormData] = useState({
     email: "",
     phone: "",
     password: "",
-    identityNumber: "",
-    insuranceNumber: "",
-    fullName: "",
+    identity_number: "",
+    insurance_number: "",
+    first_name: "",
+    last_name: "",
     birthday: "",
     avatar: "",
-    gender: "OTHER",
+    gender: "M",
     address: "",
     allergies: "",
     height: undefined,
     weight: undefined,
-    bloodType: "O+",
-    emergencyContactDtos: [],
+    blood_type: "O",
   });
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContactDto[]>([]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -41,6 +42,27 @@ export default function PatientAddForm() {
     }));
   };
 
+  const addEmergencyContact = () => {
+    setEmergencyContacts([
+      ...emergencyContacts,
+      {
+        contactName: "",
+        contactPhone: "",
+        relationship: "FAMILY",
+      },
+    ]);
+  };
+
+  const removeEmergencyContact = (index: number) => {
+    setEmergencyContacts(emergencyContacts.filter((_, i) => i !== index));
+  };
+
+  const updateEmergencyContact = (index: number, field: keyof EmergencyContactDto, value: string) => {
+    const updated = [...emergencyContacts];
+    updated[index] = { ...updated[index], [field]: value };
+    setEmergencyContacts(updated);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
@@ -51,7 +73,27 @@ export default function PatientAddForm() {
               "yyyy-MM-dd"
             )
           : formData.birthday;
-      const dataToSend = { ...formData, birthday };
+      const dataToSend = { 
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        identity_number: formData.identity_number,
+        insurance_number: formData.insurance_number,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        birthday,
+        avatar: formData.avatar,
+        gender: formData.gender as "MALE" | "FEMALE" | "OTHER",
+        address: formData.address,
+        allergies: formData.allergies,
+        height: formData.height,
+        weight: formData.weight,
+        bloodType: formData.blood_type,
+        emergencyContactDtos: emergencyContacts.filter(contact => 
+          contact.contactName.trim() && contact.contactPhone.trim()
+        )
+      };
+      console.log("📤 Data being sent to API:", dataToSend);
       await patientService.createPatient(dataToSend);
       setShowSuccessModal(true);
       setTimeout(() => {
@@ -73,7 +115,7 @@ export default function PatientAddForm() {
         <div className="absolute inset-0 flex items-center justify-center z-50">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
-          
+
           {/* Modal Content */}
           <div className="relative bg-white rounded-lg p-6 w-[320px] shadow-lg animate-fadeIn">
             <div className="flex flex-col items-center text-center">
@@ -106,19 +148,35 @@ export default function PatientAddForm() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="block text-base-600 font-medium">
-                Họ và tên <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="VD: Nguyễn Văn A..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-base-600 font-medium">
+                  Họ <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  placeholder="VD: Nguyễn"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-base-600 font-medium">
+                  Tên <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  placeholder="VD: Văn A"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
+                  required
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-base-600 font-medium">
@@ -168,8 +226,8 @@ export default function PatientAddForm() {
               </label>
               <input
                 type="text"
-                name="identityNumber"
-                value={formData.identityNumber}
+                name="identity_number"
+                value={formData.identity_number}
                 onChange={handleChange}
                 placeholder="VD: 0123456789"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
@@ -180,8 +238,8 @@ export default function PatientAddForm() {
               <label className="block text-base-600 font-medium">BHYT</label>
               <input
                 type="text"
-                name="insuranceNumber"
-                value={formData.insuranceNumber}
+                name="insurance_number"
+                value={formData.insurance_number}
                 onChange={handleChange}
                 placeholder="VD: ytaucsonns"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
@@ -239,7 +297,7 @@ export default function PatientAddForm() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
               />
             </div>
-            
+
             <div className="space-y-2">
               <label className="block text-base-600 font-medium">Dị ứng</label>
               <input
@@ -282,8 +340,8 @@ export default function PatientAddForm() {
                 Nhóm máu
               </label>
               <select
-                name="bloodType"
-                value={formData.bloodType}
+                name="blood_type"
+                value={formData.blood_type}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500"
               >
@@ -297,6 +355,88 @@ export default function PatientAddForm() {
                 <option value="O-">O-</option>
               </select>
             </div>
+          </div>
+
+          {/* Emergency Contacts Section */}
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-base-600">
+                Thông tin liên lạc khẩn cấp
+              </h3>
+              <button
+                type="button"
+                onClick={addEmergencyContact}
+                className="flex items-center gap-2 px-4 py-2 bg-base-600 text-white rounded-md hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-base-500"
+              >
+                <Plus size={16} />
+                Thêm liên hệ
+              </button>
+            </div>
+            
+            {emergencyContacts.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">
+                Chưa có thông tin liên lạc khẩn cấp. Nhấn "Thêm liên hệ" để thêm.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {emergencyContacts.map((contact, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-medium text-gray-700">
+                        Liên hệ khẩn cấp #{index + 1}
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => removeEmergencyContact(index)}
+                        className="text-red-600 hover:text-red-800 p-1"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Tên người liên hệ <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={contact.contactName}
+                          onChange={(e) => updateEmergencyContact(index, 'contactName', e.target.value)}
+                          placeholder="VD: Nguyễn Văn A"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Số điện thoại <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={contact.contactPhone}
+                          onChange={(e) => updateEmergencyContact(index, 'contactPhone', e.target.value)}
+                          placeholder="VD: 0987654321"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500/20 focus:border-base-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Mối quan hệ
+                        </label>
+                        <select
+                          value={contact.relationship}
+                          onChange={(e) => updateEmergencyContact(index, 'relationship', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-base-500"
+                        >
+                          <option value="FAMILY">Gia đình</option>
+                          <option value="FRIEND">Bạn bè</option>
+                          <option value="OTHERS">Khác</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}

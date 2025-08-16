@@ -26,17 +26,25 @@ const mapRawPatientToFrontend = (rawPatient: RawPatientFromAPI): Patient => {
     }
   }
 
+  // Map emergency contacts
+  const emergencyContacts: EmergencyContact[] = rawPatient.emergency_contacts?.map(contact => ({
+    contactId: contact.id,
+    patientId: contact.patient_id,
+    contactName: contact.contact_name,
+    contactPhone: contact.contact_phone,
+    relationship: contact.relationship as "FAMILY" | "FRIEND" | "OTHERS",
+    createdAt: contact.created_at,
+  })) || [];
+
   return {
     patientId: rawPatient.id,
     userId: rawPatient.user,
-    identityNumber: rawPatient.identity_number || "",
-    insuranceNumber: rawPatient.insurance_number || "",
-    fullName: `${rawPatient.first_name || ""} ${
-      rawPatient.last_name || ""
-    }`.trim(),
-    birthday: rawPatient.birthday || "",
-    phone: rawPatient.phone_number || "",
-    email: rawPatient.email || "",
+    identityNumber: rawPatient.identity_number,
+    insuranceNumber: rawPatient.insurance_number,
+    fullName: `${rawPatient.first_name} ${rawPatient.last_name}`.trim(),
+    birthday: rawPatient.birthday,
+    phone: rawPatient.phone,
+    email: rawPatient.email,
     avatar: rawPatient.avatar || "",
     gender:
       rawPatient.gender === "M"
@@ -44,7 +52,7 @@ const mapRawPatientToFrontend = (rawPatient: RawPatientFromAPI): Patient => {
         : rawPatient.gender === "F"
         ? "FEMALE"
         : "OTHER",
-    address: rawPatient.address || "",
+    address: rawPatient.address,
     allergies: rawPatient.allergies || "",
     height: rawPatient.height || undefined,
     weight: rawPatient.weight || undefined,
@@ -58,7 +66,8 @@ const mapRawPatientToFrontend = (rawPatient: RawPatientFromAPI): Patient => {
       | "O+"
       | "O-"
       | undefined,
-    createdAt: rawPatient.created_at || "",
+    createdAt: rawPatient.created_at,
+    emergencyContacts: emergencyContacts,
     age: age,
   };
 };
@@ -99,6 +108,12 @@ export const patientService = {
             : patientData.gender === "FEMALE"
             ? "F"
             : "O",
+        // Map emergency contacts to snake_case for backend
+        emergencyContactDtos: patientData.emergencyContactDtos?.map(contact => ({
+          contact_name: contact.contactName,
+          contact_phone: contact.contactPhone,
+          relationship: contact.relationship
+        })) || []
       };
       const { data } = await api.post<RawPatientFromAPI>(
         "/patients/",

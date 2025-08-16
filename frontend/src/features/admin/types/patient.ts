@@ -1,22 +1,31 @@
 export interface RawPatientFromAPI {
   id: number;
-  created_at?: string;
-  updated_at?: string;
-  identity_number?: string;
-  insurance_number?: string;
-  first_name?: string;
-  last_name?: string;
-  phone_number?: string;
-  email?: string;
-  birthday?: string;
-  gender: string;
-  address?: string;
+  user: number;
+  identity_number: string;
+  insurance_number: string;
+  first_name: string;
+  last_name: string;
+  birthday: string;
+  gender: "M" | "F";
+  address: string;
   allergies?: string | null;
   height?: number | null;
   weight?: number | null;
   blood_type?: string | null;
-  user?: number;
-  avatar?: string;
+  avatar?: string | null;
+  created_at: string;
+  phone: string;
+  email: string;
+  emergency_contacts: RawEmergencyContact[];
+}
+
+export interface RawEmergencyContact {
+  id: number;
+  contact_name: string;
+  contact_phone: string;
+  relationship: string;
+  created_at: string;
+  patient_id: number;
 }
 
 export interface Patient {
@@ -36,7 +45,7 @@ export interface Patient {
   weight?: number;
   bloodType?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
   createdAt: string;
-  contacts?: EmergencyContact[];
+  emergencyContacts?: EmergencyContact[];
   age?: number;
 }
 
