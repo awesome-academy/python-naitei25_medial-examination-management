@@ -15,15 +15,26 @@ import { DeleteConfirmationModal } from "../../ui/modal/DeleteConfirmationModal"
 import { patientService } from "../../../services/patientService";
 import type { Patient } from "../../../types/patient";
 import { format } from "date-fns";
+import { Pagination } from "../../ui/Pagination";
+
+const PAGE_SIZE = 10;
 
 export default function PatientTable() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setModalOpen] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Enhanced filter and sort state
+  const [genderFilter, setGenderFilter] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"name" | "birthday" | "createdAt" | "gender">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [searchField, setSearchField] = useState<"all" | "name" | "phone" | "email" | "identity" | "insurance">("all");
   const navigate = useNavigate();
 
   const fetchPatients = async () => {
@@ -31,9 +42,11 @@ export default function PatientTable() {
     try {
       const data = await patientService.getAllPatients();
       setPatients(data);
+      setFilteredPatients(data);
     } catch (err) {
       console.error("API error:", err);
       setPatients([]);
+      setFilteredPatients([]);
     } finally {
       setLoading(false);
     }
@@ -56,9 +69,9 @@ export default function PatientTable() {
     if (patientToDelete === null) return;
     try {
       await patientService.deletePatient(patientToDelete);
-      setPatients((prev) =>
-        prev.filter((patient) => patient.patientId !== patientToDelete)
-      );
+      const updatedPatients = patients.filter((patient) => patient.patientId !== patientToDelete);
+      setPatients(updatedPatients);
+      // Filters will be applied automatically via useEffect
       // Hiển thị thông báo thành công
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
@@ -70,27 +83,85 @@ export default function PatientTable() {
     }
   };
 
+  // Apply comprehensive filters and sorting
+  const applyFiltersAndSort = () => {
+    let filtered = [...patients];
+    
+    // Search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(patient => {
+        switch (searchField) {
+          case "name":
+            return patient.fullName.toLowerCase().includes(searchLower);
+          case "phone":
+            return patient.phone?.toLowerCase().includes(searchLower);
+          case "email":
+            return patient.email?.toLowerCase().includes(searchLower);
+          case "identity":
+            return patient.identityNumber.includes(searchTerm);
+          case "insurance":
+            return patient.insuranceNumber?.includes(searchTerm);
+          default: // "all"
+            return (
+              patient.fullName.toLowerCase().includes(searchLower) ||
+              patient.identityNumber.includes(searchTerm) ||
+              (patient.insuranceNumber && patient.insuranceNumber.includes(searchTerm)) ||
+              (patient.phone && patient.phone.toLowerCase().includes(searchLower)) ||
+              (patient.email && patient.email.toLowerCase().includes(searchLower))
+            );
+        }
+      });
+    }
+    
+    // Gender filter
+    if (genderFilter) {
+      filtered = filtered.filter(patient => patient.gender === genderFilter);
+    }
+    
+    // Sort
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+      if (sortBy === "name") {
+        compareValue = a.fullName.localeCompare(b.fullName);
+      } else if (sortBy === "birthday") {
+        compareValue = new Date(a.birthday).getTime() - new Date(b.birthday).getTime();
+      } else if (sortBy === "createdAt") {
+        compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sortBy === "gender") {
+        compareValue = a.gender.localeCompare(b.gender);
+      }
+      return sortOrder === "asc" ? compareValue : -compareValue;
+    });
+    
+    setFilteredPatients(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Apply filters whenever any filter criteria changes
+  useEffect(() => {
+    applyFiltersAndSort();
+  }, [patients, searchTerm, searchField, genderFilter, sortBy, sortOrder]);
+
   const handleSearch = async () => {
     setLoading(true);
     try {
-      if (!searchTerm.trim()) {
-        await fetchPatients();
-      } else {
-        const allPatients = await patientService.getAllPatients();
-        const filtered = allPatients.filter(patient => 
-          patient.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          patient.identityNumber.includes(searchTerm) ||
-          (patient.insuranceNumber && patient.insuranceNumber.includes(searchTerm))
-        );
-        setPatients(filtered);
-      }
+      applyFiltersAndSort();
     } catch (err) {
-      setPatients([]);
+      setFilteredPatients([]);
       console.error("Error during search:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  // Calculate pagination values
+  const totalItems = filteredPatients.length;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  const paginatedPatients = filteredPatients.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
 
   return (
@@ -100,7 +171,7 @@ export default function PatientTable() {
           Danh sách bệnh nhân
         </h2>
         <span className="ml-5 text-sm bg-base-600/20 text-base-600 py-1 px-4 rounded-full font-bold">
-          {patients.length} bệnh nhân
+          {totalItems} bệnh nhân
         </span>
       </div>
       {loading && (
@@ -113,24 +184,142 @@ export default function PatientTable() {
       )}
       {!loading && (
         <>
-          <div className="flex items-center p-4 gap-2">
-            <div className="flex-1">
-              <SearchInput
-                inputRef={inputRef}
-                placeholder="Tìm kiếm theo CCCD, BHYT hoặc Họ tên"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
-                }}
-              />
+          {/* Enhanced Search and Filter Controls */}
+          <div className="p-4 space-y-4">
+            {/* Search Controls */}
+            <div className="flex flex-wrap gap-4 items-end">
+              <div className="flex-1 min-w-[300px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tìm kiếm
+                </label>
+                <SearchInput
+                  inputRef={inputRef}
+                  placeholder="Nhập từ khóa tìm kiếm..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSearch();
+                  }}
+                />
+              </div>
+              
+              <div className="min-w-[150px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tìm trong
+                </label>
+                <select
+                  value={searchField}
+                  onChange={(e) => setSearchField(e.target.value as typeof searchField)}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Tất cả trường</option>
+                  <option value="name">Họ tên</option>
+                  <option value="phone">Số điện thoại</option>
+                  <option value="email">Email</option>
+                  <option value="identity">CCCD</option>
+                  <option value="insurance">BHYT</option>
+                </select>
+              </div>
+              
+              <button
+                className="h-11 px-6 rounded-lg bg-base-700 text-white text-sm font-medium shadow-theme-xs hover:bg-base-600 focus:outline-hidden focus:ring-3 focus:ring-base-600/50"
+                onClick={handleSearch}
+              >
+                Tìm kiếm
+              </button>
             </div>
-            <button
-              className="h-11 w-20 rounded-lg bg-base-700 text-white text-sm font-medium shadow-theme-xs hover:bg-base-600 focus:outline-hidden focus:ring-3 focus:ring-base-600/50"
-              onClick={handleSearch}
-            >
-              Lọc
-            </button>
+            
+            {/* Filter and Sort Controls */}
+            <div className="flex flex-wrap gap-4 items-center bg-gray-50 p-3 rounded-lg">
+              {/* Gender Filter */}
+              <div className="min-w-[120px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Giới tính
+                </label>
+                <select
+                  value={genderFilter}
+                  onChange={(e) => setGenderFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="MALE">Nam</option>
+                  <option value="FEMALE">Nữ</option>
+                  <option value="OTHER">Khác</option>
+                </select>
+              </div>
+              
+              {/* Sort By */}
+              <div className="min-w-[140px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sắp xếp theo
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="name">Họ tên</option>
+                  <option value="birthday">Ngày sinh</option>
+                  <option value="createdAt">Ngày tạo</option>
+                  <option value="gender">Giới tính</option>
+                </select>
+              </div>
+              
+              {/* Sort Order */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSortOrder("asc")}
+                  className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                    sortOrder === "asc"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  ↑ Tăng dần
+                </button>
+                <button
+                  onClick={() => setSortOrder("desc")}
+                  className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                    sortOrder === "desc"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  ↓ Giảm dần
+                </button>
+              </div>
+              
+              {/* Clear Filters */}
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSearchField("all");
+                  setGenderFilter("");
+                  setSortBy("name");
+                  setSortOrder("asc");
+                }}
+                className="px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Xóa bộ lọc
+              </button>
+            </div>
+            
+            {/* Results Summary */}
+            {(searchTerm || genderFilter) && (
+              <div className="text-sm text-gray-600">
+                Hiển thị {filteredPatients.length} / {patients.length} bệnh nhân
+                {searchTerm && (
+                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                    Tìm kiếm: "{searchTerm}"
+                  </span>
+                )}
+                {genderFilter && (
+                  <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                    Giới tính: {genderFilter === "MALE" ? "Nam" : genderFilter === "FEMALE" ? "Nữ" : "Khác"}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <div className="max-w-full overflow-x-auto">
             <Table>
@@ -189,7 +378,14 @@ export default function PatientTable() {
               </TableHeader>
 
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                {patients.map((patient) => (
+                {paginatedPatients.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-10 text-gray-500">
+                      Không tìm thấy bệnh nhân phù hợp.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedPatients.map((patient) => (
                   <TableRow key={patient.patientId}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
@@ -272,10 +468,23 @@ export default function PatientTable() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-4 py-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={PAGE_SIZE}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
           {/* Thông báo thành công */}
           {showSuccessMessage && (
             <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
