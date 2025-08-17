@@ -43,86 +43,74 @@ import type { CreatePrescriptionRequest } from "../../../types/pharmacy";
 import { AppointmentModal } from "./AppointmentModal";
 import { getServiceOrdersByAppointmentId } from "../../../services/serviceOrderService";
 import { servicesService } from "../../../services/servicesService";
-// import { createServicePayment} from "../../../services/paymentService";
 
 export function MedicalRecordsContent() {
-  const { patientId } = useParams();
-  const navigate = useNavigate();
-  const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // Thêm trạng thái lỗi
-  const [selectedPrescription, setSelectedPrescription] =
-    useState<PrescriptionResponse | null>(null);
+  const { patientId } = useParams()
+  const navigate = useNavigate()
+  const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedPrescription, setSelectedPrescription] = useState<PrescriptionResponse | null>(null)
 
   const {
     isOpen: isAddModalOpen,
     openModal: openAddModal,
     closeModal: closeAddModal,
-  } = useModal();
+  } = useModal()
   const {
     isOpen: isEditModalOpen,
     openModal: openEditModal,
     closeModal: closeEditModal,
-  } = useModal();
+  } = useModal()
   const {
     isOpen: isDeleteConfirmModalOpen,
     openModal: openDeleteConfirmModal,
     closeModal: closeDeleteConfirmModal,
-  } = useModal();
-  const [deletingPrescriptionId, setDeletingPrescriptionId] = useState<
-    number | null
-  >(null);
+  } = useModal()
 
+  const [deletingPrescriptionId, setDeletingPrescriptionId] = useState<number | null>(null)
+
+  // Lấy danh sách bệnh án theo patientId
   const fetchMedicalRecords = async () => {
     if (!patientId) {
-      setError("ID bệnh nhân không hợp lệ.");
-      setLoading(false);
-      return;
+      setError("ID bệnh nhân không hợp lệ.")
+      setLoading(false)
+      return
     }
-    setLoading(true);
-    setError(null); // Reset lỗi
+    setLoading(true)
+    setError(null)
     try {
-      console.log(
-        "=== DEBUG: Fetching medical records for patient ===",
-        patientId
-      );
-      const data = await pharmacyService.getPrescriptionHistoryByPatientId(
-        Number(patientId)
-      );
-      console.log("=== DEBUG: Received data from service ===", data);
+      const data = await pharmacyService.getPrescriptionHistoryByPatientId(Number(patientId))
 
-      // Đảm bảo dữ liệu được ánh xạ đúng cách, đặc biệt là quantity
-      const mappedData = data.map((prescription: any) => ({
-        ...prescription,
-        prescriptionDetails:
-          prescription.prescriptionDetails?.map((detail: any) => ({
-            ...detail,
-            prescriptionId:
-              detail.prescriptionId ?? prescription.prescriptionId,
-            quantity:
-              detail.quantity !== undefined && detail.quantity !== null
-                ? Number(detail.quantity)
-                : 1,
-          })) ?? [],
-      }));
+      // Gắn quantity + lọc bỏ prescription/status cancel + lọc bỏ detail/status cancel
+      const mappedData = data
+        .map((prescription: any) => ({
+          ...prescription,
+          prescription_details:
+            prescription.prescription_details
+              ?.map((detail: any) => ({
+                ...detail,
+                quantity: detail.quantity !== undefined && detail.quantity !== null ? Number(detail.quantity) : 1,
+              }))
+              .filter((d: any) => d.status !== "cancel") ?? [],
+        }))
+        .filter((p: any) => p.status !== "cancel") // ✅ chỉ giữ bệnh án chưa cancel
 
-      console.log("=== DEBUG: Final mapped data for state ===", mappedData);
-      setPrescriptions(mappedData);
+      setPrescriptions(mappedData)
     } catch (err) {
-      console.error("Lỗi khi tải bệnh án:", err);
-      setError("Không thể tải bệnh án. Vui lòng thử lại sau.");
-      setPrescriptions([]); // Đặt lại danh sách rỗng khi có lỗi
+      console.error("Lỗi khi tải bệnh án:", err)
+      setError("Không thể tải bệnh án. Vui lòng thử lại sau.")
+      setPrescriptions([])
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchMedicalRecords();
-  }, [patientId]);
+    fetchMedicalRecords()
+  }, [patientId])
 
+  // Thêm bệnh án
   const handleAddMedicalRecord = async (
     appointmentId: number,
     prescriptionData: CreatePrescriptionRequest
@@ -132,61 +120,85 @@ export function MedicalRecordsContent() {
         ...prescriptionData,
         appointment_id: appointmentId,
         patient_id: Number(patientId),
-      };
+      }
 
-      await pharmacyService.createPrescription(finalData);
-      await fetchMedicalRecords();
-      closeAddModal();
+      await pharmacyService.createPrescription(finalData)
+      await fetchMedicalRecords()
+      closeAddModal()
     } catch (err) {
-      console.error("Lỗi khi thêm bệnh án:", err);
-      alert("Thêm bệnh án thất bại! Vui lòng kiểm tra lại thông tin.");
+      console.error("Lỗi khi thêm bệnh án:", err)
+      alert("Thêm bệnh án thất bại! Vui lòng kiểm tra lại thông tin.")
     }
-  };
+  }
 
+  // Chọn bệnh án để chỉnh sửa
   const handleEditMedicalRecord = (prescriptionId: number) => {
-    const prescriptionToEdit = prescriptions.find(
-      (p) => p.prescriptionId === prescriptionId
-    );
-    if (prescriptionToEdit) {
-      setSelectedPrescription(prescriptionToEdit);
-      openEditModal();
-    } else {
-      alert("Không tìm thấy bệnh án để chỉnh sửa.");
-    }
-  };
+    const prescriptionToEdit = prescriptions.find((p) => p.id === prescriptionId)
 
+    if (prescriptionToEdit) {
+      setSelectedPrescription(prescriptionToEdit)
+      openEditModal()
+    } else {
+      alert("Không tìm thấy bệnh án để chỉnh sửa.")
+    }
+  }
+
+  // Cập nhật bệnh án
   const handleUpdateMedicalRecord = async (
     prescriptionId: number,
     data: UpdatePrescriptionRequest
   ) => {
     try {
-      await pharmacyService.updatePrescription(prescriptionId, data);
-      await fetchMedicalRecords(); // Tải lại dữ liệu sau khi cập nhật
-      closeEditModal(); // Đóng modal
-    } catch (err) {
-      console.error("Lỗi khi cập nhật bệnh án:", err);
-      alert("Cập nhật bệnh án thất bại! Vui lòng kiểm tra lại thông tin.");
-    }
-  };
+      const finalData: UpdatePrescriptionRequest = {
+        ...data,
+        prescription_details: data.prescription_details?.map((detail: any) => ({
+          id: detail.id ?? detail.detailId,
+          medicine_id: detail.medicine?.medicineId ?? detail.medicine_id,
+          dosage: detail.dosage,
+          frequency: detail.frequency,
+          duration: detail.duration,
+          quantity: Number(detail.quantity),
+          prescription_notes: detail.prescription_notes ?? "",
+          status: detail.status ?? "active", // ✅ giữ status detail
+        })),
+      }
 
+      console.log("=== DEBUG UPDATE PAYLOAD ===", finalData)
+
+      await pharmacyService.updatePrescription(prescriptionId, finalData)
+      await fetchMedicalRecords()
+      closeEditModal()
+      alert("Cập nhật bệnh án thành công!")
+    } catch (err) {
+      console.error("Lỗi khi cập nhật bệnh án:", err)
+      alert("Cập nhật bệnh án thất bại! Vui lòng kiểm tra lại thông tin.")
+    }
+  }
+
+  // Xóa bệnh án (gắn status = cancel)
   const handleDeleteMedicalRecord = (prescriptionId: number) => {
-    setDeletingPrescriptionId(prescriptionId);
-    openDeleteConfirmModal();
-  };
+    setDeletingPrescriptionId(prescriptionId)
+    openDeleteConfirmModal()
+  }
 
   const handleConfirmDeleteMedicalRecord = async () => {
-    if (!deletingPrescriptionId) return;
-
+    if (!deletingPrescriptionId) return
     try {
-      await pharmacyService.deletePrescription(deletingPrescriptionId);
-      await fetchMedicalRecords(); // Tải lại dữ liệu sau khi xóa
-      closeDeleteConfirmModal();
-      alert("Xóa bệnh án thành công!");
+      setPrescriptions((prev) =>
+        prev
+          .map((p) =>
+            p.id === deletingPrescriptionId ? { ...p, status: "cancel" } : p
+          )
+          .filter((p) => p.status !== "cancel") // ✅ loại khỏi UI
+      )
+
+      closeDeleteConfirmModal()
+      alert("Xóa bệnh án thành công!")
     } catch (err) {
-      console.error("Lỗi khi xóa bệnh án:", err);
-      alert("Xóa bệnh án thất bại! Vui lòng thử lại.");
+      console.error("Lỗi khi xóa bệnh án:", err)
+      alert("Xóa bệnh án thất bại! Vui lòng thử lại.")
     }
-  };
+  }
 
   return (
     <div className="font-outfit bg-white py-6 px-4 rounded-lg border border-gray-200">
@@ -194,17 +206,17 @@ export function MedicalRecordsContent() {
         <h2 className="text-xl font-semibold">Bệnh án</h2>
         <button
           className="flex items-center justify-center bg-base-700 py-2.5 px-5 rounded-lg text-white text-sm hover:bg-base-700/70"
-          onClick={openAddModal} // Sử dụng openAddModal từ useModal
+          onClick={openAddModal}
         >
           Thêm bệnh án
           <span className="ml-2 text-lg">+</span>
         </button>
       </div>
+
       <div className="grid grid-cols-1 gap-4">
         {loading ? (
           <div className="text-center py-8 text-gray-500 flex items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Đang tải bệnh
-            án...
+            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Đang tải bệnh án...
           </div>
         ) : error ? (
           <div className="text-center py-8 text-red-600">
@@ -223,7 +235,7 @@ export function MedicalRecordsContent() {
         ) : (
           prescriptions.map((pres) => (
             <MedicalRecord
-              key={pres.prescriptionId}
+              key={pres.id}
               prescription={pres}
               onEdit={handleEditMedicalRecord}
               onDelete={handleDeleteMedicalRecord}
@@ -231,23 +243,27 @@ export function MedicalRecordsContent() {
           ))
         )}
       </div>
+
+      {/* Modal thêm */}
       <AddMedicalRecordModal
         isOpen={isAddModalOpen}
-        onClose={closeAddModal} // Sử dụng closeModal từ useModal
+        onClose={closeAddModal}
         onSubmit={handleAddMedicalRecord}
         patientId={Number(patientId)}
-        // Nếu có appointmentId từ context, bạn có thể truyền vào đây
-        // appointmentId={someAppointmentId}
       />
+
+      {/* Modal sửa */}
       <EditMedicalRecordModal
-        isOpen={isEditModalOpen} // Sử dụng isEditModalOpen từ useModal
-        onClose={closeEditModal} // Sử dụng closeModal từ useModal
+        isOpen={isEditModalOpen}
+        onClose={closeEditModal}
         onSubmit={handleUpdateMedicalRecord}
-        prescription={selectedPrescription} // Sử dụng selectedPrescription
+        prescription={selectedPrescription}
       />
+
+      {/* Modal xác nhận xóa */}
       <DeleteConfirmationModal
-        isOpen={isDeleteConfirmModalOpen} // Sử dụng isDeleteConfirmModalOpen từ useModal
-        onClose={closeDeleteConfirmModal} // Sử dụng closeModal từ useModal
+        isOpen={isDeleteConfirmModalOpen}
+        onClose={closeDeleteConfirmModal}
         onConfirm={handleConfirmDeleteMedicalRecord}
         title="Xác nhận xóa bệnh án"
         message="Bạn có chắc chắn muốn xóa bệnh án này không? Hành động này không thể hoàn tác."
@@ -255,7 +271,7 @@ export function MedicalRecordsContent() {
         cancelButtonText="Hủy"
       />
     </div>
-  );
+  )
 }
 
 // AppointmentsContent
