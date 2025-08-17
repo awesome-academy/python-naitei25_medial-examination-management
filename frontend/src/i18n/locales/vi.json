@@ -129,7 +129,6 @@
     "noAccount": "Chưa có tài khoản?",
     "haveAccount": "Đã có tài khoản?",
     "welcomeBack": "Chào mừng bạn trở lại với WeCare!",
-    "joinUs": "Tham gia để sử dụng dịch vụ của Heart2Heart!",
     "hospitalSystem": "Hệ thống quản lý bệnh viện",
     "forAdminDoctor": "Dành cho Admin và Bác sĩ",
     "weAreHere": "Vì bạn, chúng tôi luôn ở đây",
@@ -476,7 +475,8 @@
     "pendingTestResult": "Chờ kết quả xét nghiệm",
     "retry": "Thử lại",
     "close": "Đóng",
-    "edit": "Chỉnh sửa"
+    "edit": "Chỉnh sửa",
+    "viewPDF": "Xem PDF"
   },
   "stats": {
     "totalAppointments": "Tổng số cuộc hẹn",
@@ -677,7 +677,7 @@
     "servicesAndResults": "Dịch vụ và Kết quả",
     "serviceName": "Tên dịch vụ",
     "serviceType": "Loại dịch vụ",
-    "orderStatus": "Trạng thái đơn hàng",
+    "orderStatus": "Trạng thái đặt",
     "result": "Kết quả",
     "resultFile": "Tệp kết quả",
     "viewFile": "Xem tệp",
@@ -856,7 +856,7 @@
   },
   "dashboard": {
     "welcome": "Chào mừng",
-    "overviewToday": "Tổng quan hôm nay",
+    "overviewToday": "Đây là tổng quan về hoạt động hôm nay của bạn",
     "totalAppointments": "Tổng số cuộc hẹn",
     "total": "Tổng",
     "todayAppointments": "Cuộc hẹn hôm nay",
@@ -870,6 +870,10 @@
     "viewDetails": "Xem chi tiết",
     "upcomingAppointments": "Cuộc hẹn sắp tới",
     "systemInfo": "Thông tin hệ thống",
+    "totalServiceOrders": "Tổng số đơn dịch vụ",
+    "ordered": "Đã chỉ định",
+    "todayServiceOrders": "Đơn dịch vụ hôm nay",
+    "systemInfoPlaceholder": "Thông tin hệ thống sẽ được hiển thị ở đây",
     "defaultPatient": "Bệnh nhân",
     "subtitle": "Chào mừng bạn quay trở lại. Đây là tổng quan về tình trạng sức khỏe của bạn.",
     "stats": {
@@ -914,6 +918,29 @@
     "location": "Địa điểm",
     "building": "Tòa nhà",
     "status": "Trạng thái"
+  },
+    "serviceOrder": {
+    "table": {
+      "indication": "Chỉ định",
+      "room": "Phòng",
+      "price": "Giá"
+    },
+    "titles": {
+      "addIndication": "Thêm chỉ định"
+    },
+    "labels": {
+      "patient": "Bệnh nhân",
+      "patientCode": "Mã bệnh nhân",
+      "date": "Ngày",
+      "time": "Giờ"
+    },
+    "placeholders": {
+      "searchIndication": "Tìm kiếm chỉ định"
+    },
+    "buttons": {
+      "cancel": "Hủy",
+      "save": "Lưu"
+    }
   },
     "footer": {
     "companyDescription": "Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất với đội ngũ bác sĩ chuyên nghiệp và công nghệ hiện đại.",

@@ -129,7 +129,6 @@
     "noAccount": "アカウントをお持ちでないですか？",
     "haveAccount": "既にアカウントをお持ちですか？",
     "welcomeBack": "WeCareへようこそ！",
-    "joinUs": "Heart2Heartサービスをご利用ください！",
     "hospitalSystem": "病院管理システム",
     "forAdminDoctor": "管理者・医師向け",
     "weAreHere": "あなたのために、私たちはいつもここにいます",
@@ -478,7 +477,8 @@
     "pendingTestResult": "検査結果待ち",
     "retry": "再試行",
     "close": "閉じる",
-    "edit": "編集"
+    "edit": "編集",
+    "viewPDF": "PDFを表示"
   },
   "stats": {
     "totalAppointments": "総予約数",
@@ -858,7 +858,7 @@
   },
   "dashboard": {
     "welcome": "ようこそ",
-    "overviewToday": "今日の概要",
+    "overviewToday": "これは今日のあなたの活動の概要です",
     "totalAppointments": "総予約数",
     "total": "合計",
     "todayAppointments": "今日の予約",
@@ -900,7 +900,11 @@
       "findDoctorSubtitle": "適切な医師を検索する",
       "myAppointments": "私の予約",
       "myAppointmentsSubtitle": "予約を表示・管理する"
-    }
+    },
+    "totalServiceOrders": "総サービス注文数",
+    "ordered": "注文済み",
+    "todayServiceOrders": "今日のサービス注文",
+    "systemInfoPlaceholder": "システム情報がここに表示されます"
   },
   "log": {
     "eventDetails": "イベント詳細",
@@ -916,6 +920,29 @@
     "location": "場所",
     "building": "建物",
     "status": "状態"
+  },
+    "serviceOrder": {
+    "table": {
+      "indication": "適応症",
+      "room": "部屋",
+      "price": "価格"
+    },
+    "titles": {
+      "addIndication": "適応症を追加"
+    },
+    "labels": {
+      "patient": "患者",
+      "patientCode": "患者コード",
+      "date": "日付",
+      "time": "時間"
+    },
+    "placeholders": {
+      "searchIndication": "適応症を検索"
+    },
+    "buttons": {
+      "cancel": "キャンセル",
+      "save": "保存"
+    }
   },
     "footer": {
     "companyDescription": "私たちは、専門医チームと最新技術により最高の医療サービスを提供することをお約束します。",

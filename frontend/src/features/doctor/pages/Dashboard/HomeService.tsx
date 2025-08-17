@@ -8,9 +8,11 @@ import { servicesService } from "../../services/servicesService";
 import { appointmentService } from "../../services/appointmentService";
 import { api } from "../../../../shared/services/api";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 const { Title, Text } = Typography;
 
 const HomeService: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [serviceOrders, setServiceOrders] = useState<any[]>([]);
   const [appointmentsData, setAppointmentsData] = useState<{ [key: number]: any }>({});
@@ -112,7 +114,7 @@ const HomeService: React.FC = () => {
 
   const columns = [
     {
-      title: "Bệnh nhân",
+      title: t("labels.patient"),
       dataIndex: "appointmentId",
       key: "patient",
       render: (appointmentId: number, record: any) => {
@@ -137,7 +139,7 @@ const HomeService: React.FC = () => {
       },
     },
     {
-      title: "Dịch vụ",
+      title: t("table.service"),
       dataIndex: "serviceName",
       key: "serviceName",
       render: (serviceName: string, record: any) => (
@@ -147,7 +149,7 @@ const HomeService: React.FC = () => {
       ),
     },
     {
-      title: "Thời gian đặt",
+      title: t("labels.orderTime"),
       dataIndex: "orderTime",
       key: "orderTime",
       render: (orderTime: string) => (
@@ -160,18 +162,18 @@ const HomeService: React.FC = () => {
       ),
     },
     {
-      title: "Trạng thái",
+      title: t("medicalRecord.orderStatus"),
       dataIndex: "orderStatus",
-      key: "orderStatus",
+      key: "orderStatus", 
       render: (status: string) => {
         const statusConfig = {
-          O: { color: "#b45309", bgColor: "#fef3c7", text: "Đã đặt" },
-          C: { color: "#15803d", bgColor: "#d1fae5", text: "Hoàn thành" },
+          O: { color: "#b45309", bgColor: "#fef3c7", text: t("statuses.ordered") },
+          C: { color: "#15803d", bgColor: "#d1fae5", text: t("statuses.completed") },
         };
         const config = statusConfig[status as keyof typeof statusConfig] || {
           color: "#6b7280",
           bgColor: "#f3f4f6",
-          text: "Không rõ",
+          text: t("statuses.unknown"),
         };
         return (
           <span
@@ -191,25 +193,15 @@ const HomeService: React.FC = () => {
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex-1 h-screen w-full bg-slate-50">
-        <div className="flex items-center justify-center h-full">
-          <Text>Loading...</Text>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-slate-50 min-h-screen">
       <div className="p-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Chào mừng trở lại
+            {t("dashboard.welcome")}
           </h1>
-          <p className="text-gray-600 text-base">Đây là tổng quan về hoạt động hôm nay của bạn</p>
+          <p className="text-gray-600 text-base">{t("dashboard.overviewToday")}</p>
         </div>
 
         {/* Stats Cards */}
@@ -217,9 +209,9 @@ const HomeService: React.FC = () => {
           <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white">
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-sm opacity-90 mb-2">Tổng số đơn dịch vụ</div>
+                <div className="text-sm opacity-90 mb-2">{t("dashboard.totalServiceOrders")}</div>
                 <div className="text-3xl font-bold">{stats.total}</div>
-                <div className="text-xs opacity-80 mt-1">Tổng cộng</div>
+                <div className="text-xs opacity-80 mt-1">{t("dashboard.total")}</div>
               </div>
               <UserOutlined className="text-5xl opacity-30" />
             </div>
@@ -227,10 +219,10 @@ const HomeService: React.FC = () => {
           <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 text-white">
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-sm opacity-90 mb-2">Đã đặt</div>
+                <div className="text-sm opacity-90 mb-2">{t("dashboard.ordered")}</div>
                 <div className="text-3xl font-bold">{stats.ordered}</div>
                 <div className="text-xs opacity-80 mt-1 flex items-center">
-                  <ClockCircleOutlined className="mr-1" /> Đã đặt
+                  <ClockCircleOutlined className="mr-1" /> {t("dashboard.ordered")}
                 </div>
               </div>
               <ClockCircleOutlined className="text-5xl opacity-30" />
@@ -239,10 +231,10 @@ const HomeService: React.FC = () => {
           <div className="bg-gradient-to-br from-sky-400 to-cyan-500 rounded-2xl p-6 text-white">
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-sm opacity-90 mb-2">Hoàn thành</div>
+                <div className="text-sm opacity-90 mb-2">{t("dashboard.completed")}</div>
                 <div className="text-3xl font-bold">{stats.completed}</div>
                 <div className="text-xs opacity-80 mt-1 flex items-center">
-                  <CheckCircleOutlined className="mr-1" /> Hoàn thành
+                  <CheckCircleOutlined className="mr-1" /> {t("dashboard.done")}
                 </div>
               </div>
               <CheckCircleOutlined className="text-5xl opacity-30" />
@@ -260,7 +252,7 @@ const HomeService: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <TeamOutlined className="mr-2 text-teal-600" />
-                    <h3 className="text-lg font-semibold text-gray-900">Đơn dịch vụ hôm nay</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">{t("dashboard.todayServiceOrders")}</h3>
                   </div>
                 </div>
               </div>
@@ -282,14 +274,14 @@ const HomeService: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <CalendarOutlined className="mr-2 text-teal-600" />
-                    <h3 className="text-lg font-semibold text-gray-900">Lịch sự kiện</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">{t("dashboard.eventCalendar")}</h3>
                   </div>
                   <button
                     type="button"
                     onClick={() => navigate("/doctor/service/schedule")}
                     className="text-teal-600 font-medium hover:text-teal-700 transition-colors bg-transparent border-0 p-0 cursor-pointer"
                   >
-                    Xem chi tiết →
+                    {t("dashboard.viewDetails")} →
                   </button>
                 </div>
               </div>
@@ -307,21 +299,21 @@ const HomeService: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <ClockCircleOutlined className="mr-2 text-teal-600" />
-                    <h3 className="text-lg font-semibold text-gray-900">Lịch hẹn sắp tới</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">{t("dashboard.upcomingAppointments")}</h3>
                   </div>
                   <button
                     type="button"
                     onClick={() => navigate("/doctor/service/patients")}
                     className="text-teal-600 font-medium hover:text-teal-700 transition-colors bg-transparent border-0 p-0 cursor-pointer"
                   >
-                    Xem tất cả →
+                    {t("dashboard.viewAll")} →
                   </button>
                 </div>
               </div>
               <div className="p-6">
                 {/* Upcoming appointments UI placeholder */}
                 <div className="h-40 bg-slate-100 rounded-xl flex items-center justify-center text-gray-400">
-                  (Lịch hẹn sắp tới sẽ hiển thị ở đây)
+                  ({t("dashboard.systemInfoPlaceholder")})
                 </div>
               </div>
             </div>
@@ -329,11 +321,11 @@ const HomeService: React.FC = () => {
             {/* System Info (layout only, no logic) */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
               <div className="p-6 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900">Thông tin hệ thống</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{t("dashboard.systemInfo")}</h3>
               </div>
               <div className="p-6">
                 <div className="h-40 bg-slate-100 rounded-xl flex items-center justify-center text-gray-400">
-                  (Thông tin hệ thống sẽ hiển thị ở đây)
+                  ({t("dashboard.systemInfoPlaceholder")})
                 </div>
               </div>
             </div>
