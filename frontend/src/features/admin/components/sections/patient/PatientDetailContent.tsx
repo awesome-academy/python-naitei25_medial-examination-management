@@ -2224,9 +2224,23 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
 
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
-      <h2 className="text-xl font-semibold mb-4 ml-1">
+      <h2 className="text-xl font-semibold mb-4 ml-1 flex justify-between items-center">
         Thông tin liên lạc khẩn cấp
+        <button
+          onClick={() =>
+            setEditContact({
+              contactId: 0, // contact mới
+              contactName: "",
+              contactPhone: "",
+              relationship: "FAMILY",
+            } as EmergencyContact)
+          }
+          className="ml-4 px-3 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors"
+        >
+          + Thêm mới
+        </button>
       </h2>
+
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto">
           <Table>
@@ -2339,23 +2353,11 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell className="pl-4 py-2 text-gray-500 text-theme-sm dark:text-gray-400">
+                  <TableCell
+                    colSpan={4}
+                    className="pl-4 py-2 text-gray-500 text-theme-sm dark:text-gray-400 text-center"
+                  >
                     Không có liên hệ khẩn cấp
-                  </TableCell>
-                  <TableCell colSpan={3} className="py-2">
-                    <button
-                      onClick={() =>
-                        setEditContact({
-                          contactId: 0, // contact mới tạm thời
-                          contactName: "",
-                          contactPhone: "",
-                          relationship: "FAMILY",
-                        } as EmergencyContact)
-                      }
-                      className="ml-4 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors"
-                    >
-                      + Thêm mới
-                    </button>
                   </TableCell>
                 </TableRow>
               </TableBody>

@@ -130,9 +130,11 @@ export default function PatientSidebar({
     if (!patientId) return;
     const fetchPatient = async () => {
       try {
-        const response = await patientService.getPatientById(Number(patientId));
-        console.log("Patient data:", response);
-        setPatient(response.data);
+        const patientData = await patientService.getPatientById(
+          Number(patientId)
+        );
+        console.log("Patient data:", patientData);
+        setPatient(patientData); // ✅ không phải response.data
       } catch (error) {
         console.error("Failed to fetch patient data:", error);
       }
@@ -157,24 +159,29 @@ export default function PatientSidebar({
 
   return (
     <div className="w-full bg-white py-6 px-3 rounded-lg border border-gray-200">
+      {/* Patient Info */}
       <div className="flex flex-col items-center">
-        {/* Patient Image */}
+        {/* Avatar */}
         <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
           <img
-            src={patient?.avatar || "https://photos.hancinema.net/photos/photo1769662.jpg"}
+            src={
+              patient?.avatar ||
+              "https://photos.hancinema.net/photos/photo1769662.jpg"
+            }
             alt="Patient"
             className="w-full h-full object-cover"
           />
         </div>
 
-        {/* Patient Info */}
+        {/* Name */}
         <h3 className="mt-4 text-lg font-bold text-gray-800">
           {patient ? patient.fullName : "Đang tải..."}
         </h3>
+
+        {/* Patient Code */}
         <p className="text-gray-500 text-sm my-1">
           BN{patient ? patient.patientId?.toString().padStart(4, "0") : ""}
         </p>
-        {/* <p className="text-gray-700 text-sm">{patient?.phone || ""}</p> */}
       </div>
 
       {/* Sidebar Menu */}
