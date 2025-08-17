@@ -233,28 +233,6 @@ export const PrescriptionModal: React.FC<ModalProps> = ({
             ),
         },
         {
-            title: t("table.instructions"),
-            dataIndex: "prescriptionNotes",
-            key: "prescriptionNotes",
-            width: 150,
-            render: (text: string, record: PrescriptionDetail, index: number) => (
-                <Select
-                    value={text || t("options.instructions.beforeMeal")}
-                    onChange={(value) => updateMedicationField(index, "prescriptionNotes", value)}
-                    style={{ width: "100%" }}
-                    options={[
-                        { value: t("options.instructions.beforeMeal"), label: t("options.instructions.beforeMeal") },
-                        { value: t("options.instructions.beforeMeal30Min"), label: t("options.instructions.beforeMeal30Min") },
-                        { value: t("options.instructions.afterMeal"), label: t("options.instructions.afterMeal") },
-                        { value: t("options.instructions.afterMeal30Min"), label: t("options.instructions.afterMeal30Min") },
-                        { value: t("options.instructions.duringMeal"), label: t("options.instructions.duringMeal") },
-                        { value: t("options.instructions.beforeSleep30Min"), label: t("options.instructions.beforeSleep30Min") },
-                        { value: t("options.instructions.asNeeded"), label: t("options.instructions.asNeeded") },
-                    ]}
-                />
-            ),
-        },
-        {
             title: t("table.duration"),
             dataIndex: "duration",
             key: "duration",

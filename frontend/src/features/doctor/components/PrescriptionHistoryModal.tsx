@@ -1,7 +1,7 @@
 "use client"
 
-import type React from "react"
-import { Modal, Typography, Row, Col, Divider, Table } from "antd"
+import React from "react"
+import { Modal, Typography, Row, Col, Divider, Table, Button } from "antd"
 import { CalendarOutlined, UserOutlined } from "@ant-design/icons"
 import type { Prescription } from "../types/prescription"
 import { PrescriptionPDF } from "./PrescriptionPDF"
@@ -23,7 +23,29 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
   prescription,
   patientInfo,
 }) => {
+  // Map patientInfo to ensure all fields for PDF
+  console.log("Patient Info:", patientInfo)
+  const pdfPatientInfo = patientInfo
+    ? {
+        ...patientInfo,
+        fullName:
+          patientInfo.fullName && patientInfo.fullName.trim() !== ""
+            ? patientInfo.fullName
+            : `${(
+                ((patientInfo as any).firstName || (patientInfo as any).first_name || "")
+              ).toString().trim()} ${(
+                ((patientInfo as any).lastName || (patientInfo as any).last_name || "")
+              ).toString().trim()}`.trim(),
+        address: patientInfo.address || "",
+        insuranceNumber: patientInfo.insurance_number || "",
+        patientId:
+          (patientInfo as any).patientId || (patientInfo as any).patient_id || (patientInfo as any).id || "",
+        gender: (patientInfo as any).gender,
+        birthday: patientInfo.birthday || "",
+      }
+    : undefined
   const { t } = useTranslation()
+  const [showPDF, setShowPDF] = React.useState(false)
   if (!prescription) return null
   // Normalize possible API shapes (camelCase vs snake_case) and guard undefineds
   const createdAt: string | undefined = (prescription as any).createdAt || (prescription as any).created_at
@@ -60,11 +82,11 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
       key: "medicineName",
       render: (_: any, record: any) => {
         const med = record.medicine || {}
-        // console.log("Medicine record:", record)
+        console.log("Medicine record:", med)
         const medName = med.medicineName || med.medicine_name || med.name || "—"
-        const category = med.category || "—"
+        const category = med.category
         const price = typeof med.price === "number" ? med.price : Number(med.price) || 0
-        const unit = med.unit || med.unit_name || "—"
+        const unit = med.unit || med.unit_name
         return (
           <div>
             <div className="font-medium">{medName}</div>
@@ -100,7 +122,7 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
             <Col span={12}>
               <div className="flex items-center">
                 <UserOutlined style={{ marginRight: 8 }} />
-                <Text strong>{t("labels.patient")}: {patientInfo?.first_name } {patientInfo?.last_name}</Text>
+                <Text strong>{t("labels.patient")}: {pdfPatientInfo?.fullName || t("table.unknown")}</Text>
               </div>
               <div><Text type="secondary">{t("labels.patientCode")}: {(patientInfo as any)?.id || t("table.unknown")}</Text></div>
             </Col>
@@ -197,6 +219,14 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
           </Row>
         </div>
 
+        {/* View PDF Button */}
+        <div className="flex justify-end mt-4">
+          <Button type="default" onClick={() => setShowPDF(true)}>
+            {t("buttons.viewPDF")}
+          </Button>
+        </div>
+
+        {/* Hidden PDF for print/download (legacy, can be removed if not needed) */}
         <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
           <PrescriptionPDF
             prescription={{
@@ -208,12 +238,36 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
               bloodSugar: bloodSugar as any,
               prescriptionDetails: details as any,
             } as any}
-            patientName={patientInfo?.fullName}
-            patientInfo={patientInfo}
+            patientName={pdfPatientInfo?.fullName}
+            patientInfo={pdfPatientInfo}
             showControls={false}
           />
         </div>
+        {/* PDF Modal */}
+        <Modal
+          title={t("titles.prescriptionPDF")}
+          open={showPDF}
+          onCancel={() => setShowPDF(false)}
+          footer={null}
+          width={1000}
+          style={{ top: 20 }}
+        >
+          <PrescriptionPDF
+            prescription={{
+              ...prescription,
+              createdAt: createdAt as any,
+              systolicBloodPressure: systolicBP as any,
+              diastolicBloodPressure: diastolicBP as any,
+              heartRate: heartRate as any,
+              bloodSugar: bloodSugar as any,
+              prescriptionDetails: details as any,
+            } as any}
+            patientName={pdfPatientInfo?.fullName}
+            patientInfo={pdfPatientInfo}
+            showControls={true}
+          />
+        </Modal>
       </div>
-    </Modal>
+  </Modal>
   )
 }
