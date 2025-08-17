@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Edit, Save, X, Upload, User, MapPin } from "lucide-react"
+import { Edit, Save, X } from "lucide-react"
 import { useToast } from "../../../hooks/useToast"
 import { patientService } from "../../../../../shared/services/patientService"
+import { useTranslation } from "react-i18next"
 
 interface PersonalInfo {
   id: number
@@ -50,6 +51,7 @@ export function PersonalInfoTab() {
   })
   const [originalInfo, setOriginalInfo] = useState<PersonalInfo>(personalInfo)
   const { toast } = useToast()
+  const { t } = useTranslation()
 
   useEffect(() => {
     loadPersonalInfo()
@@ -78,8 +80,8 @@ export function PersonalInfoTab() {
       setOriginalInfo(personalData)
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Không thể tải thông tin cá nhân",
+        title: t("common.error"),
+        description: t("personalInfo.loadError"),
         variant: "destructive",
       })
     } finally {
@@ -87,122 +89,117 @@ export function PersonalInfoTab() {
     }
   }
 
-    const handleSave = async () => {
+  const handleSave = async () => {
     try {
-        setLoading(true)
+      setLoading(true)
 
-        const updateData = {
+      const updateData = {
         first_name: personalInfo.first_name,
         last_name: personalInfo.last_name,
         birthday: personalInfo.birthday,
         gender: personalInfo.gender as "M" | "F" | "O",
         address: personalInfo.address,
         identity_number: personalInfo.identity_number,
-        }
+      }
 
-        const updated = await patientService.updatePatient(
+      const updated = await patientService.updatePatient(
         personalInfo.id.toString(),
         updateData
-        )
+      )
 
-        setPersonalInfo(updated)
-        setOriginalInfo(updated)
-        setIsEditing(false)
-        toast({
-        title: "Thành công",
-        description: "Thông tin cá nhân đã được cập nhật",
-        })
+      setPersonalInfo(updated)
+      setOriginalInfo(updated)
+      setIsEditing(false)
+      toast({
+        title: t("common.success"),
+        description: t("personalInfo.updateSuccess"),
+      })
     } catch (error) {
-        toast({
-        title: "Lỗi",
-        description: "Không thể cập nhật thông tin",
+      toast({
+        title: t("common.error"),
+        description: t("personalInfo.updateError"),
         variant: "destructive",
-        })
+      })
     } finally {
-        setLoading(false)
+      setLoading(false)
     }
-}
-
+  }
 
   const handleCancel = () => {
     setPersonalInfo(originalInfo)
     setIsEditing(false)
   }
 
-    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
 
     if (!personalInfo.id || personalInfo.id <= 0) {
-        console.error("Invalid patientId:", personalInfo.id)
-        toast({
-        title: "Lỗi",
-        description: "Thông tin bệnh nhân chưa được tải, vui lòng thử lại sau.",
+      toast({
+        title: t("common.error"),
+        description: t("personalInfo.invalidPatient"),
         variant: "destructive",
-        })
-        return
+      })
+      return
     }
 
     if (file) {
-        try {
-        console.log("Uploading avatar for patientId:", personalInfo.id)
+      try {
         setLoading(true)
-
         const result = await patientService.uploadAvatar(personalInfo.id.toString(), file)
         setPersonalInfo((prev) => ({
-            ...prev,
-            avatar: result.avatar,
+          ...prev,
+          avatar: result.avatar,
         }))
 
         toast({
-            title: "Thành công",
-            description: "Ảnh đại diện đã được cập nhật",
+          title: t("common.success"),
+          description: t("personalInfo.avatarUpdated"),
         })
-        } catch (error) {
-        console.error("Upload avatar error:", error)
+      } catch (error) {
         toast({
-            title: "Lỗi",
-            description: "Không thể tải ảnh lên",
-            variant: "destructive",
+          title: t("common.error"),
+          description: t("personalInfo.avatarUploadError"),
+          variant: "destructive",
         })
-        } finally {
+      } finally {
         setLoading(false)
-        }
+      }
     }
-    }
+  }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Thông tin cá nhân</CardTitle>
-        <CardDescription>Quản lý thông tin cá nhân của bạn</CardDescription>
+        <CardTitle>{t("personalInfo.title")}</CardTitle>
+        <CardDescription>{t("personalInfo.subtitle")}</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
           <TabsList>
-            <TabsTrigger value="basic">Thông tin cơ bản</TabsTrigger>
-            {/* <TabsTrigger value="contact">Thông tin liên lạc</TabsTrigger> */}
-            <TabsTrigger value="address">Địa chỉ</TabsTrigger>
+            <TabsTrigger value="basic">{t("personalInfo.basicInfo")}</TabsTrigger>
+            {/* <TabsTrigger value="contact">{t("personalInfo.contactInfo")}</TabsTrigger> */}
+            <TabsTrigger value="address">{t("personalInfo.addressInfo")}</TabsTrigger>
           </TabsList>
           <div className="mt-4">
             {isEditing ? (
               <div className="flex justify-end gap-2">
                 <Button onClick={handleSave} disabled={loading}>
-                  <Save className="mr-2 h-4 w-4" /> Lưu
+                  <Save className="mr-2 h-4 w-4" /> {t("common.save")}
                 </Button>
                 <Button variant="outline" onClick={handleCancel} disabled={loading}>
-                  <X className="mr-2 h-4 w-4" /> Hủy
+                  <X className="mr-2 h-4 w-4" /> {t("common.cancel")}
                 </Button>
               </div>
             ) : (
               <Button onClick={() => setIsEditing(true)} disabled={loading}>
-                <Edit className="mr-2 h-4 w-4" /> Chỉnh sửa
+                <Edit className="mr-2 h-4 w-4" /> {t("common.edit")}
               </Button>
             )}
           </div>
           {activeSubTab === "basic" && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="avatar" className="text-right">Ảnh đại diện</Label>
+                <Label htmlFor="avatar" className="text-right">{t("personalInfo.avatar")}</Label>
                 <div className="col-span-3">
                   <Avatar className="h-24 w-24">
                     <AvatarImage src={personalInfo.avatar} alt="Avatar" />
@@ -222,7 +219,7 @@ export function PersonalInfoTab() {
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="first_name" className="text-right">Tên</Label>
+                <Label htmlFor="first_name" className="text-right">{t("personalInfo.firstName")}</Label>
                 <Input
                   id="first_name"
                   value={personalInfo.first_name}
@@ -234,7 +231,7 @@ export function PersonalInfoTab() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="last_name" className="text-right">Họ</Label>
+                <Label htmlFor="last_name" className="text-right">{t("personalInfo.lastName")}</Label>
                 <Input
                   id="last_name"
                   value={personalInfo.last_name}
@@ -246,7 +243,7 @@ export function PersonalInfoTab() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="birthday" className="text-right">Ngày sinh</Label>
+                <Label htmlFor="birthday" className="text-right">{t("personalInfo.birthday")}</Label>
                 <Input
                   id="birthday"
                   type="date"
@@ -259,7 +256,7 @@ export function PersonalInfoTab() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="gender" className="text-right">Giới tính</Label>
+                <Label htmlFor="gender" className="text-right">{t("personalInfo.gender")}</Label>
                 <Select
                   value={personalInfo.gender}
                   onValueChange={(value) =>
@@ -268,17 +265,17 @@ export function PersonalInfoTab() {
                   disabled={!isEditing || loading}
                 >
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Chọn giới tính" />
+                    <SelectValue placeholder={t("personalInfo.selectGender")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="M">Nam</SelectItem>
-                    <SelectItem value="F">Nữ</SelectItem>
-                    <SelectItem value="O">Khác</SelectItem>
+                    <SelectItem value="M">{t("personalInfo.male")}</SelectItem>
+                    <SelectItem value="F">{t("personalInfo.female")}</SelectItem>
+                    <SelectItem value="O">{t("personalInfo.other")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="identity_number" className="text-right">CCCD</Label>
+                <Label htmlFor="identity_number" className="text-right">{t("personalInfo.identityNumber")}</Label>
                 <Input
                   id="identity_number"
                   value={personalInfo.identity_number}
@@ -294,7 +291,7 @@ export function PersonalInfoTab() {
           {activeSubTab === "contact" && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">Email</Label>
+                <Label htmlFor="email" className="text-right">{t("personalInfo.email")}</Label>
                 <Input
                   id="email"
                   value={personalInfo.email}
@@ -306,7 +303,7 @@ export function PersonalInfoTab() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="phone" className="text-right">Số điện thoại</Label>
+                <Label htmlFor="phone" className="text-right">{t("personalInfo.phone")}</Label>
                 <Input
                   id="phone"
                   value={personalInfo.phone}
@@ -322,7 +319,7 @@ export function PersonalInfoTab() {
           {activeSubTab === "address" && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="address" className="text-right">Địa chỉ</Label>
+                <Label htmlFor="address" className="text-right">{t("personalInfo.address")}</Label>
                 <Textarea
                   id="address"
                   value={personalInfo.address}
@@ -334,7 +331,7 @@ export function PersonalInfoTab() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="city" className="text-right">Thành phố</Label>
+                <Label htmlFor="city" className="text-right">{t("personalInfo.city")}</Label>
                 <Input
                   id="city"
                   value={personalInfo.city}
@@ -346,7 +343,7 @@ export function PersonalInfoTab() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="district" className="text-right">Quận/Huyện</Label>
+                <Label htmlFor="district" className="text-right">{t("personalInfo.district")}</Label>
                 <Input
                   id="district"
                   value={personalInfo.district}
@@ -358,7 +355,7 @@ export function PersonalInfoTab() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="ward" className="text-right">Phường/Xã</Label>
+                <Label htmlFor="ward" className="text-right">{t("personalInfo.ward")}</Label>
                 <Input
                   id="ward"
                   value={personalInfo.ward}

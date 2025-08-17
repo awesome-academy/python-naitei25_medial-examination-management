@@ -17,9 +17,9 @@ export const getAllServiceOrders = async (serviceId: number): Promise<ServiceOrd
   }
 }
 
-export const getServiceOrderById = async (serviceId: number, orderId: number): Promise<ServiceOrder> => {
+export const getServiceOrderById = async (orderId: number): Promise<ServiceOrder> => {
   try {
-    const response = await api.get(`/appointments/services/${serviceId}/service-orders/${orderId}`)
+    const response = await api.get(`service-orders/${orderId}/`)
     return response.data
   } catch (error) {
     console.error("Lỗi khi lấy chi tiết đơn dịch vụ:", error)
@@ -31,14 +31,16 @@ export const createServiceOrder = async (
   appointment_id: number,
   service_id: number,
   room_id: number,
-  order_status: "O"
+  order_status: "O",
+  order_time: string
 ): Promise<ServiceOrder> => {
   try {
     const serviceOrder = {
       appointment_id,
       service_id,
       room_id,
-      order_status
+      order_status,
+      order_time
     }
     const response = await api.post(`/service-orders/`, serviceOrder)
     return response.data
@@ -61,7 +63,7 @@ export const updateServiceOrder = async (
       service_id: serviceOrder.serviceId,
       order_status: serviceOrder.orderStatus, // mapped to status via serializer source
       result: serviceOrder.result,
-      number: serviceOrder.number,
+      number: serviceOrder.number ?? 1,
       order_time: serviceOrder.orderTime,
       result_time: serviceOrder.resultTime,
     }
@@ -101,7 +103,7 @@ export const getServiceOrdersByRoomId = async (
   try {
     const params: ServiceOrderFilterParams = {}
     if (status) params.status = status
-    if (orderDate) params.orderDate = orderDate
+    if (orderDate) params.order_time__date = orderDate
 
     const response = await api.get(`/service-orders/rooms/${roomId}/orders`, { params })
     console.log("Request URL:", response.config.url);

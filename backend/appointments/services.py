@@ -267,7 +267,6 @@ class AppointmentService:
 
           return appointment
 
-          return appointment
 
 class AppointmentNoteService:
 

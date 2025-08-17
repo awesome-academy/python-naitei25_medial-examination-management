@@ -117,8 +117,8 @@ const ServicePatients: React.FC = () => {
             console.log("Services data:", servicesData);
             const serviceMap = new Map();
             if (Array.isArray(servicesData)) {
-                servicesData.forEach((service, index) => {
-                    serviceMap.set(index, service.service_name);
+                servicesData.forEach((service) => {
+                    serviceMap.set(service.service_id, service.service_name);
                 });
             } else {
                 console.warn("servicesData is not an array:", servicesData);
@@ -182,34 +182,57 @@ const ServicePatients: React.FC = () => {
         }
     }, [selectedRoomId, statusFilter, selectedDate, fetchServiceOrders])
 
+    // Build room filter options with room.note
     const getRoomsForSelectedDate = useMemo(() => {
-        if (!selectedDate || !Array.isArray(workSchedules)) return []
+        if (!selectedDate || !Array.isArray(workSchedules)) return [];
+        // Find all schedules for the selected date
         const roomsToday = workSchedules
-            .filter((schedule) => schedule.workDate === selectedDate)
-            .map((schedule) => schedule.roomId)
-        const uniqueRoomIds = [...new Set(roomsToday)]
-        return uniqueRoomIds.map((roomId) => ({
-            roomId,
-            displayName: `${t("table.room")} ${roomId}`,
-        }))
-    }, [selectedDate, workSchedules, t])
+            .filter((schedule) => schedule.work_date === selectedDate)
+            .map((schedule) => {
+                // Use room_id and room_note directly if present
+                const roomId = (schedule as any).room_id ?? (typeof schedule.room === "object" && schedule.room !== null ? (schedule.room as any).id : schedule.room);
+                const roomNote = (schedule as any).room_note ?? (typeof schedule.room === "object" && schedule.room !== null ? (schedule.room as any).note : undefined);
+                return { roomId, roomNote };
+            });
+        // Remove duplicate roomId
+        console.log("Rooms for selected date:", roomsToday);
+        const uniqueRooms = roomsToday.filter((room, idx, arr) =>
+            room.roomId !== undefined && arr.findIndex(r => r.roomId === room.roomId) === idx
+        );
+        return uniqueRooms.map(room => ({
+            roomId: room.roomId,
+            displayName: room.roomNote ? `${room.roomNote}` : `${t("table.room")} ${room.roomId}`,
+        }));
+    }, [selectedDate, workSchedules, t]);
 
+    // Filter and search logic similar to Patient.tsx
     const filteredServiceOrders = useMemo(() => {
-        if (!Array.isArray(serviceOrders)) return []
-        if (!searchTerm) return serviceOrders
+        if (!Array.isArray(serviceOrders)) return [];
+        let filtered = serviceOrders;
 
-        const searchLower = searchTerm.toLowerCase()
-        return serviceOrders.filter((order) => {
-            const appointment = appointmentsData[order.appointmentId]
-            const patientInfo = appointment?.patientInfo
-            return (
-                order.serviceName?.toLowerCase().includes(searchLower) ||
-                order.orderId.toString().includes(searchLower) ||
-                patientInfo?.fullName?.toLowerCase().includes(searchLower) ||
-                patientInfo?.patientId?.toLowerCase().includes(searchLower)
-            )
-        })
-    }, [serviceOrders, searchTerm, appointmentsData])
+        // Filter by status
+        if (statusFilter && statusFilter !== "all") {
+            filtered = filtered.filter(order => order.orderStatus === statusFilter);
+        }
+
+        // Search by patient name, phone, id, service name, orderId
+        if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
+            filtered = filtered.filter(order => {
+                const appointment = appointmentsData[order.appointmentId];
+                const patientInfo = appointment?.patientInfo;
+                return (
+                    order.serviceName?.toLowerCase().includes(searchLower) ||
+                    order.orderId?.toString().includes(searchLower) ||
+                    patientInfo?.first_name?.toLowerCase().includes(searchLower) ||
+                    patientInfo?.last_name?.toLowerCase().includes(searchLower) ||
+                    patientInfo?.phoneNumber?.includes(searchLower) ||
+                    patientInfo?.id?.toString().includes(searchLower)
+                );
+            });
+        }
+        return filtered;
+    }, [serviceOrders, searchTerm, statusFilter, appointmentsData]);
 
     const stats = useMemo(() => {
         const orders = Array.isArray(filteredServiceOrders) ? filteredServiceOrders : []
@@ -224,10 +247,6 @@ const ServicePatients: React.FC = () => {
         const dateStr = date ? date.format("YYYY-MM-DD") : null
         setSelectedDate(dateStr)
         setSelectedRoomId(undefined)
-    }
-
-    const handleRoomChange = (value: number) => {
-        setSelectedRoomId(value)
     }
 
     const handleStatusChange = (value: string) => {
@@ -487,16 +506,19 @@ const ServicePatients: React.FC = () => {
                         <Select
                             placeholder={t("placeholders.selectRoom")}
                             value={selectedRoomId}
-                            onChange={handleRoomChange}
                             style={{ width: 300 }}
-                            loading={scheduleLoading}
-                            disabled={!selectedDate || getRoomsForSelectedDate.length === 0}
+                            disabled
                         >
-                            {getRoomsForSelectedDate.map((room) => (
-                                <Option key={room.roomId} value={room.roomId}>
-                                    {room.displayName}
-                                </Option>
-                            ))}
+                            {selectedRoomId && (
+                                (() => {
+                                    const room = getRoomsForSelectedDate.find(r => r.roomId === selectedRoomId);
+                                    return room ? (
+                                        <Option key={room.roomId} value={room.roomId}>
+                                            {room.displayName}
+                                        </Option>
+                                    ) : null;
+                                })()
+                            )}
                         </Select>
                         <Select
                             placeholder={t("placeholders.status")}

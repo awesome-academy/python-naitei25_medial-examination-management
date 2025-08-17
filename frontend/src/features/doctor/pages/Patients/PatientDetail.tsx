@@ -121,38 +121,6 @@ const PatientDetail: React.FC = () => {
         }
     }, [patientDetail, prescription, appointments, form, t])
 
-    // const changeToPendingTestStatus = async () => {
-    //     if (!appointmentId) {
-    //         message.error(t("errors.noAppointmentFound"))
-    //         return
-    //     }
-    //
-    //     setPendingTestStatusLoading(true)
-    //
-    //     try {
-    //         const appointment = appointments.find((appt) => appt.appointmentId === patientDetail.id)
-    //         const updateAppointmentData = {
-    //             appointmentId: patientDetail.id,
-    //             patientId: appointment?.patientInfo?.id || patientDetail.patient,
-    //             scheduleId: appointment?.schedule?.scheduleId || patientDetail.schedule,
-    //             symptoms: patientDetail.symptoms,
-    //             slot_start: patientDetail.slot_start,
-    //             slot_end: patientDetail.slot_end,
-    //             status: "PENDING_TEST_RESULT",
-    //         }
-    //
-    //         await appointmentService.updateAppointmentById(appointmentId, updateAppointmentData)
-    //
-    //         message.success(t("success.pendingTestResult"))
-    //         await refreshAll(appointmentId)
-    //     } catch (error) {
-    //         console.error(t("errors.failedToChangeStatus"), error)
-    //         message.error(t("errors.statusChangeFailed"))
-    //     } finally {
-    //         setPendingTestStatusLoading(false)
-    //     }
-    // }
-
     const handleCompleteExamination = async () => {
         if (!appointmentId) {
             message.error(t("errors.noAppointmentFound"))
@@ -416,12 +384,13 @@ const PatientDetail: React.FC = () => {
                                     ) : (
                                         <div className="space-y-4">
                                             {serviceOrders.map((order) => (
+                                                console.log("order", order),
                                                 <div key={order.orderId} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
                                                     <div>
                                                         <p className="text-sm font-medium">{t("labels.serviceName")}: {order.service_name}</p>
                                                         <p className="text-sm text-gray-500">{t("labels.room")}: {order.room_id || t("labels.notSpecified")}</p>
                                                         <p className="text-sm text-gray-500 mt-1">
-                                                            {t("labels.status")}: {order.order_status === "D" ? t("status.completed") : t("status.pending")}
+                                                            {t("labels.status")}: {order.order_status === "C" ? t("status.completed") : t("status.pending")}
                                                         </p>
                                                     </div>
                                                     <Button

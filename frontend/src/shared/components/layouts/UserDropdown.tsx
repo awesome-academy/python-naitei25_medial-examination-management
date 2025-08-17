@@ -8,11 +8,13 @@ import { authService } from "../../services/authService"
 import { patientService } from "../../services/patientService"
 import type { AuthUser } from "../../types/user"
 import type { PatientInfo } from "../../services/patientService"
+import { el } from "node_modules/@fullcalendar/core/internal-common"
 
 export default function UserDropdown() {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<AuthUser | null>(null)
+  const [doctorInfo, setDoctorInfo] = useState<any>(null)
   const [patient, setPatient] = useState<PatientInfo | null>(null)
 
   useEffect(() => {
@@ -26,6 +28,10 @@ export default function UserDropdown() {
         if (userData?.role === "P") {
           const patientData = await patientService.getCurrentPatient()
           setPatient(patientData)
+        }
+        else if (userData?.role === "D") {
+          const { user: userData, doctorInfo } = await authService.getCurrentUserWithDoctorInfo()
+          setDoctorInfo(doctorInfo)
         }
       } catch (error) {
         console.error("Lỗi khi lấy thông tin:", error)
@@ -45,11 +51,22 @@ export default function UserDropdown() {
         return t("roles.doctor")
       case "P":
         return t("roles.patient")
-      case "RECEPTIONIST":
-        return t("roles.receptionist")
       default:
         return t("roles.user")
     }
+  }
+
+  // Xác định avatar và tên hiển thị cho patient và doctor
+  let avatarUrl = "/images/user/owner.jpg";
+  let displayName = getRoleText(user?.role || "");
+  if (user?.role === "P" && patient) {
+    avatarUrl = patient.avatar || avatarUrl;
+    displayName = `${patient.first_name} ${patient.last_name}`;
+  } else if (user?.role === "D" && doctorInfo) {
+    avatarUrl = doctorInfo.avatar || avatarUrl;
+    displayName = `Dr. ${doctorInfo.first_name} ${doctorInfo.last_name}`;
+  } else if (user) {
+    displayName = user.full_name || getRoleText(user?.role || "");
   }
 
   return (
@@ -60,20 +77,14 @@ export default function UserDropdown() {
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
           <img
-            src={
-              patient?.avatar ||
-              user?.avatar ||
-              "/images/user/owner.jpg"
-            }
+            src={avatarUrl}
             alt="User"
             className="object-cover w-full h-full"
           />
         </span>
 
         <span className="block mr-1 font-medium text-theme-sm">
-          {patient
-            ? `${patient.first_name} ${patient.last_name}`
-            : user?.full_name || getRoleText(user?.role || "")}
+          {displayName}
         </span>
 
         <svg

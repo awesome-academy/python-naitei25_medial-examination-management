@@ -31,7 +31,7 @@ class CreatePatientRequestSerializer(serializers.Serializer):
         max_length=PATIENT_LENGTH["BLOOD_TYPE"],
         required=False
     )
-    emergency_contact_dtos = EmergencyContactSerializer(many=True, required=False)
+    emergencyContactDtos = EmergencyContactSerializer(many=True, required=False)
     avatar = serializers.CharField(max_length=PATIENT_LENGTH["AVATAR"], required=False, allow_blank=True, allow_null=True)
 
     def validate(self, data):
@@ -59,16 +59,22 @@ class CreatePatientRequestSerializer(serializers.Serializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    emergency_contacts = EmergencyContactSerializer(many=True, read_only=True)
+    emergency_contacts = serializers.SerializerMethodField()
+    phone = serializers.CharField(source='user.phone', read_only=True)
+    email = serializers.CharField(source='user.email', read_only=True)
     
     class Meta:
         model = Patient
         fields = [
             'id', 'user', 'identity_number', 'insurance_number', 'first_name', 'last_name',
             'birthday', 'gender', 'address', 'allergies', 'height', 'weight', 'blood_type',
-            'avatar', 'created_at', 'emergency_contacts'
+            'avatar', 'created_at', 'phone', 'email', 'emergency_contacts'
         ]
         extra_kwargs = {
             'user': {'read_only': True},
             'created_at': {'read_only': True},
         }
+    
+    def get_emergency_contacts(self, obj):
+        emergency_contacts = EmergencyContact.objects.filter(patient=obj)
+        return EmergencyContactSerializer(emergency_contacts, many=True).data

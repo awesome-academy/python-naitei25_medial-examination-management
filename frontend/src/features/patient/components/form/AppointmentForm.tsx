@@ -14,12 +14,14 @@ import LoadingSpinner from "../../../../shared/components/common/LoadingSpinner"
 import ErrorMessage from "../../../../shared/components/common/ErrorMessage";
 import { Button } from "@/components/ui/button";
 import type { BackendCreateAppointmentPayload } from "../../../../shared/types/appointment";
+import { useTranslation } from "react-i18next";
 
 interface AppointmentFormProps {
   doctorId: number;
 }
 
 const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
+  const { t } = useTranslation();
   const { getCurrentUserId } = useAuth();
   const navigate = useNavigate();
   const userId = getCurrentUserId();
@@ -38,15 +40,15 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
   const [error, setError] = useState<string | null>(null);
 
   const symptomsList = [
-    { value: "fever", label: "Sốt" },
-    { value: "cough", label: "Ho" },
-    { value: "headache", label: "Đau đầu" },
-    { value: "other", label: "Khác" },
+    { value: "fever", label: t("appointment.symptomFever") },
+    { value: "cough", label: t("appointment.symptomCough") },
+    { value: "headache", label: t("appointment.symptomHeadache") },
+    { value: "other", label: t("appointment.symptomOther") },
   ];
 
   const sessions = [
-    { value: "M", label: "Buổi sáng" },
-    { value: "A", label: "Buổi chiều" },
+    { value: "M", label: t("appointment.morning") },
+    { value: "A", label: t("appointment.afternoon") },
   ];
 
   useEffect(() => {
@@ -58,13 +60,13 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
           setPatientId(data.id);
           setLoadingSchedules(false);
         })
-        .catch((err) => {
-          setError("Không tìm thấy thông tin bệnh nhân.");
-          message.error("Không tìm thấy thông tin bệnh nhân.");
+        .catch(() => {
+          setError(t("appointment.noPatientInfo"));
+          message.error(t("appointment.noPatientInfo"));
           setLoadingSchedules(false);
         });
     }
-  }, [userId]);
+  }, [userId, t]);
 
   useEffect(() => {
     if (appointmentForm.date) {
@@ -143,18 +145,18 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
     e.preventDefault();
 
     if (!userId) {
-      message.error("Vui lòng đăng nhập.");
+      message.error(t("auth.pleaseLogin"));
       navigate("/login");
       return;
     }
 
     if (!patientId) {
-      message.error("Không tìm thấy thông tin bệnh nhân.");
+      message.error(t("appointment.noPatientInfo"));
       return;
     }
 
     if (!appointmentForm.time) {
-      message.error("Vui lòng chọn thời gian.");
+      message.error(t("appointment.selectTime"));
       return;
     }
 
@@ -162,17 +164,16 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
       (slot) => slot.time === appointmentForm.time
     );
     if (!selectedSlot) {
-      message.error("Vui lòng chọn thời gian.");
+      message.error(t("appointment.selectTime"));
       return;
     }
 
     const now = new Date();
-    // Sửa lỗi "ReferenceError: slot is not defined"
     const slotDateTime = new Date(
       appointmentForm.date + "T" + selectedSlot.time
     );
     if (slotDateTime <= now) {
-      message.error("Không thể đặt lịch trong quá khứ.");
+      message.error(t("appointment.pastNotAllowed"));
       return;
     }
 
@@ -186,7 +187,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
       );
 
       if (!schedule) {
-        message.error("Không tìm thấy lịch trình phù hợp.");
+        message.error(t("appointment.noScheduleFound"));
         setLoadingSlots(false);
         return;
       }
@@ -203,13 +204,9 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
         status: "PENDING",
       };
 
-      console.log("Sending payload:", payload);
-
       const appointment = await appointmentService.createAppointment(payload);
 
-      console.log("Appointment created successfully:", appointment);
-
-      message.success("Đặt lịch hẹn thành công!");
+      message.success(t("appointment.success"));
 
       setTimeout(() => {
         navigate(
@@ -219,7 +216,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
     } catch (error: any) {
       console.error("Error submitting appointment:", error);
 
-      let errorMessage = "Đã xảy ra lỗi khi đặt lịch hẹn.";
+      let errorMessage = t("appointment.errorGeneric");
 
       if (error?.response?.data) {
         const apiError = error.response.data;
@@ -229,37 +226,15 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
           errorMessage = apiError.message;
         } else if (apiError.error) {
           errorMessage = apiError.error;
-        } else {
-          const validationErrors = [];
-          for (const [field, messages] of Object.entries(apiError)) {
-            if (Array.isArray(messages)) {
-              validationErrors.push(`${field}: ${messages.join(", ")}`);
-            } else if (typeof messages === "string") {
-              validationErrors.push(`${field}: ${messages}`);
-            }
-          }
-          if (validationErrors.length > 0) {
-            errorMessage = validationErrors.join("; ");
-          }
         }
       } else if (error?.message) {
-        try {
-          const parsedError = JSON.parse(error.message);
-          if (typeof parsedError === "object") {
-            errorMessage = JSON.stringify(parsedError);
-          } else {
-            errorMessage = parsedError;
-          }
-        } catch {
-          errorMessage = error.message;
-        }
+        errorMessage = error.message;
       }
 
       message.error(errorMessage);
 
       if (error?.response?.status === 201 || error?.response?.status === 200) {
-        console.log("Appointment might have been created despite error");
-        message.warning("Vui lòng kiểm tra trạng thái lịch hẹn.");
+        message.warning(t("appointment.checkStatus"));
       }
     } finally {
       setLoadingSlots(false);
@@ -270,18 +245,19 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
     <Card className="shadow-lg border border-gray-200 rounded-lg">
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-900">
-          Đặt lịch hẹn
+          {t("appointment.title")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {loadingSchedules || loadingSlots ? <LoadingSpinner /> : null}
         {error && <ErrorMessage message={error} />}
         <form onSubmit={handleFormSubmit} className="space-y-4">
+          {/* Date */}
           <div className="flex items-center space-x-3">
             <Calendar className="h-5 w-5 text-cyan-600" />
             <div className="flex-1">
               <label className="block text-sm font-semibold text-gray-700">
-                Ngày
+                {t("appointment.date")}
               </label>
               <DatePicker
                 selected={new Date(appointmentForm.date)}
@@ -298,11 +274,12 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
             </div>
           </div>
 
+          {/* Session */}
           <div className="flex items-center space-x-3">
             <Clock className="h-5 w-5 text-cyan-600" />
             <div className="flex-1">
               <label className="block text-sm font-semibold text-gray-700">
-                Ca làm việc
+                {t("appointment.session")}
               </label>
               <div className="flex space-x-2 mt-1">
                 {sessions.map((session) => (
@@ -323,16 +300,17 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
             </div>
           </div>
 
+          {/* Time */}
           <div className="flex items-center space-x-3">
             <Clock className="h-5 w-5 text-cyan-600" />
             <div className="flex-1">
               <label className="block text-sm font-semibold text-gray-700">
-                Thời gian
+                {t("appointment.time")}
               </label>
               <div className="flex flex-wrap gap-2 mt-1">
                 {availableSlots.length === 0 ? (
                   <span className="text-gray-500">
-                    Không có khung giờ nào khả dụng.
+                    {t("appointment.noAvailableSlots")}
                   </span>
                 ) : (
                   availableSlots.map((slot) => {
@@ -368,9 +346,10 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
             </div>
           </div>
 
+          {/* Symptoms */}
           <div className="flex flex-col space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
-              Triệu chứng
+              {t("appointment.symptoms")}
             </label>
             <Select
               isMulti
@@ -388,31 +367,33 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
                   )
                 )
               }
-              placeholder="Chọn triệu chứng"
+              placeholder={t("appointment.selectSymptoms")}
             />
           </div>
 
+          {/* Note */}
           <div className="flex items-center space-x-3">
             <div className="flex-1">
               <label className="block text-sm font-semibold text-gray-700">
-                Ghi chú
+                {t("appointment.note")}
               </label>
               <textarea
                 value={appointmentForm.note}
                 onChange={(e) => handleInputChange("note", e.target.value)}
                 className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-cyan-600 focus:border-cyan-600"
                 rows={4}
-                placeholder="Nhập ghi chú thêm..."
+                placeholder={t("appointment.notePlaceholder")}
               />
             </div>
           </div>
 
+          {/* Buttons */}
           <div className="grid grid-cols-2 gap-3">
             <Button
               type="submit"
               className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 rounded-lg w-full"
             >
-              Gửi
+              {t("appointment.submit")}
             </Button>
             <Button
               type="button"
@@ -421,7 +402,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
               }
               className="bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold py-2 rounded-lg w-full"
             >
-              Hủy
+              {t("appointment.cancel")}
             </Button>
           </div>
         </form>

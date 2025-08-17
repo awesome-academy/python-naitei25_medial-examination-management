@@ -4,6 +4,7 @@ import NotFound from "./pages/OtherPage/NotFound"
 import AppLayout from "../../shared/layouts/AppLayout"
 import { ScrollToTop } from "../../shared/components/common/ScrollToTop"
 import Home from "./pages/Dashboard/Home"
+import HomeService from "./pages/Dashboard/HomeService"
 import Patient from "./pages/Patients/Patient"
 import ServicePatient from "./pages/Patients/ServicePatient"
 import PatientDetail from "./pages/Patients/PatientDetail"
@@ -64,8 +65,8 @@ const DoctorApp: React.FC = () => {
                         </RequireDoctor>
                     }
                 >
-                    <Route index element={<Home />} />
-                    <Route path="dashboard" element={<Home />} />
+                    <Route index element={<HomeService />} />
+                    <Route path="dashboard" element={<HomeService />} />
                     <Route path="appointment" element={<Appointment />} />
                     <Route path="schedule" element={<Schedule />} />
                     <Route path="profile" element={<Profile />} />

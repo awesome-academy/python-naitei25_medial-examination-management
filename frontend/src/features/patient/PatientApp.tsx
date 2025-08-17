@@ -6,7 +6,6 @@ import AuthenticatedPatientLayout from "./layouts/AuthenticatedPatientLayout"
 import HomePage from "../public/pages/HomePage"
 import DashboardPage from "./pages/DashboardPage"
 import DoctorListPage from "./pages/DoctorListPage"
-import DoctorBookingPage from "./pages/DoctorBookingPage"
 import AppointmentsPage from "./pages/AppointmentsPage"
 import AppointmentConfirmationPage from "./pages/AppointmentConfirmationPage"
 import PaymentPage from "./pages/PaymentPage"
@@ -41,7 +40,6 @@ export const PatientApp: React.FC = () => {
         <Route element={<AuthenticatedPatientLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="doctors/:id" element={<DoctorDetailPage />} />
-          <Route path="doctors/:id/book" element={<DoctorBookingPage />} />
           <Route path="book-appointment" element={<DepartmentListPage />} />
           <Route path="departments/:id/doctors" element={<DepartmentDetailPage />} />
           <Route path="appointments" element={<AppointmentsPage />} />

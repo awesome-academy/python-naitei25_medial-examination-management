@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { departmentService } from '../../../shared/services/departmentService';
-import type { DepartmentDetail } from '../../../shared/types/department';
-import type { Doctor } from '../../../shared/types/doctor';
 import SearchBar from '../components/form/SearchBar';
 import DoctorCard from '../components/common/DoctorCard';
 import LoadingSpinner from '../../../shared/components/common/LoadingSpinner';
@@ -14,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Filter } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/Collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const DepartmentDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -84,9 +82,6 @@ const DepartmentDetailPage: React.FC = () => {
     <div className="space-y-6">
       {/* Department Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={handleBack}>
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">{department.department_name}</h2>
           {department.description && (

@@ -23,7 +23,7 @@ export interface Doctor {
   fullName: string;
   birthday: string;
   gender: "MALE" | "FEMALE" | "OTHER";
-  ress: string;
+  address: string;
   academicDegree:
     | "BS"
     | "BS_CKI"
@@ -56,7 +56,7 @@ export interface DoctorDto {
   last_name?: string;
   birthday?: string;
   gender?: "MALE" | "FEMALE" | "OTHER";
-  ress?: string;
+  address?: string;
   academicDegree?:
     | "BS"
     | "BS_CKI"

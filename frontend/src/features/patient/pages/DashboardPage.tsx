@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../shared/context/AuthContext";
 import { patientApiService } from "../services/patientApiService";
-import { Calendar, Clock, FileText, User, Activity, Bell } from "lucide-react";
+import { Calendar, Clock, User, Activity } from "lucide-react";
 import { patientService } from "../../../shared/services/patientService";
+import { useTranslation } from "react-i18next";
 
 interface DashboardStats {
   upcomingAppointments: number;
@@ -25,6 +26,7 @@ const DashboardPage: React.FC = () => {
   const [patient, setPatient] = useState<PatientInfo | null>(null);
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
 
   const [stats, setStats] = useState<DashboardStats>({
     upcomingAppointments: 0,
@@ -51,13 +53,10 @@ const DashboardPage: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        console.log("Bắt đầu fetch dashboard data...");
-
         let myAppointments = [];
         let upcomingAppointments = [];
 
         try {
-          console.log("Fetching my appointments...");
           const myAppointmentsData =
             await patientApiService.appointments.getMy();
 
@@ -68,28 +67,16 @@ const DashboardPage: React.FC = () => {
           } else if (Array.isArray(myAppointmentsData)) {
             myAppointments = myAppointmentsData;
           }
-
-          console.log(
-            "My appointments loaded:",
-            myAppointments.length,
-            "items"
-          );
         } catch (error) {
           console.error("Failed to fetch my appointments:", error);
         }
 
         try {
-          console.log("Fetching upcoming appointments...");
           const upcomingData =
             await patientApiService.appointments.getUpcoming();
           upcomingAppointments = Array.isArray(upcomingData)
             ? upcomingData
             : [];
-          console.log(
-            "Upcoming appointments loaded:",
-            upcomingAppointments.length,
-            "items"
-          );
         } catch (error) {
           console.error("Failed to fetch upcoming appointments:", error);
         }
@@ -101,27 +88,21 @@ const DashboardPage: React.FC = () => {
             (appt: any) => appt?.status === "COMPLETED" || appt?.status === "C"
           )?.length || 0;
 
-        console.log("Calculated stats:", {
-          upcomingCount,
-          totalCount,
-          completedVisitsCount,
-        });
-
         setStats({
           upcomingAppointments: upcomingCount,
           totalAppointments: totalCount,
-          pendingBills: 0, // Không lấy bills nên để 0
+          pendingBills: 0,
           completedVisits: completedVisitsCount,
         });
 
         const formattedAppointments: RecentAppointment[] =
           upcomingAppointments?.slice(0, 2)?.map((appt: any) => ({
             id: appt?.id || Math.random(),
-            doctorName: appt?.doctorInfo?.fullName || "Bác sĩ không xác định",
+            doctorName: appt?.doctorInfo?.fullName || t("dashboard.unknownDoctor"),
             specialization:
               appt?.doctorInfo?.specialization ||
               appt?.doctorInfo?.department ||
-              "Không xác định",
+              t("dashboard.unknownSpecialty"),
             date:
               appt?.schedule?.work_date ||
               appt?.date ||
@@ -135,7 +116,6 @@ const DashboardPage: React.FC = () => {
           })) || [];
 
         setRecentAppointments(formattedAppointments);
-        console.log("Dashboard data loaded successfully");
       } catch (error) {
         console.error("Unexpected error in fetchDashboardData:", error);
       } finally {
@@ -146,7 +126,7 @@ const DashboardPage: React.FC = () => {
     if (isAuthenticated) {
       fetchDashboardData();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, t]);
 
   if (loading) {
     return (
@@ -182,11 +162,11 @@ const DashboardPage: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "upcoming":
-        return "Sắp tới";
+        return t("dashboard.status.upcoming");
       case "completed":
-        return "Hoàn thành";
+        return t("dashboard.status.completed");
       case "cancelled":
-        return "Đã hủy";
+        return t("dashboard.status.cancelled");
       default:
         return status;
     }
@@ -199,16 +179,13 @@ const DashboardPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Xin chào,{" "}
+              {t("dashboard.welcome")},{" "}
               {patient
                 ? `${patient.first_name} ${patient.last_name}`
-                : user?.name || user?.email || "Bệnh nhân"}
+                : user?.name || user?.email || t("dashboard.defaultPatient")}
               !
             </h1>
-            <p className="text-gray-600 mt-1">
-              Chào mừng bạn quay trở lại. Đây là tổng quan về tình trạng sức
-              khỏe của bạn.
-            </p>
+            <p className="text-gray-600 mt-1">{t("dashboard.subtitle")}</p>
           </div>
         </div>
       </div>
@@ -223,7 +200,7 @@ const DashboardPage: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">
-                  Lịch hẹn sắp tới
+                  {t("dashboard.stats.upcoming")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.upcomingAppointments}
@@ -239,7 +216,7 @@ const DashboardPage: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">
-                  Tổng lượt khám
+                  {t("dashboard.stats.total")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.totalAppointments}
@@ -255,7 +232,7 @@ const DashboardPage: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">
-                  Lượt khám hoàn thành
+                  {t("dashboard.stats.completed")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.completedVisits}
@@ -271,13 +248,13 @@ const DashboardPage: React.FC = () => {
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Lịch hẹn gần đây
+                  {t("dashboard.recentAppointments")}
                 </h3>
                 <button
                   onClick={() => navigate("/patient/appointments/upcoming")}
                   className="text-cyan-600 hover:text-cyan-700 text-sm font-medium"
                 >
-                  Xem tất cả
+                  {t("dashboard.viewAll")}
                 </button>
               </div>
             </div>
@@ -322,12 +299,14 @@ const DashboardPage: React.FC = () => {
               ) : (
                 <div className="text-center py-8">
                   <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-600">Chưa có lịch hẹn nào</p>
+                  <p className="text-gray-600">
+                    {t("dashboard.noAppointments")}
+                  </p>
                   <button
                     onClick={() => navigate("/patient/book-appointment")}
                     className="mt-2 text-cyan-600 hover:text-cyan-700 font-medium"
                   >
-                    Đặt lịch khám ngay
+                    {t("dashboard.bookNow")}
                   </button>
                 </div>
               )}
@@ -338,7 +317,7 @@ const DashboardPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">
-                Thao tác nhanh
+                {t("dashboard.quickActions")}
               </h3>
             </div>
             <div className="p-6">
@@ -351,9 +330,11 @@ const DashboardPage: React.FC = () => {
                     <User className="h-5 w-5 text-cyan-600" />
                   </div>
                   <div className="ml-4 text-left">
-                    <p className="font-semibold text-gray-900">Tìm bác sĩ</p>
+                    <p className="font-semibold text-gray-900">
+                      {t("dashboard.findDoctor")}
+                    </p>
                     <p className="text-sm text-gray-600">
-                      Tìm kiếm bác sĩ phù hợp
+                      {t("dashboard.findDoctorDesc")}
                     </p>
                   </div>
                 </button>
@@ -367,10 +348,10 @@ const DashboardPage: React.FC = () => {
                   </div>
                   <div className="ml-4 text-left">
                     <p className="font-semibold text-gray-900">
-                      Lịch khám của tôi
+                      {t("dashboard.myAppointments")}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Xem và quản lý lịch hẹn
+                      {t("dashboard.myAppointmentsDesc")}
                     </p>
                   </div>
                 </button>
