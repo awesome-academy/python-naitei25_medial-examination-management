@@ -27,22 +27,22 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
   console.log("Patient Info:", patientInfo)
   const pdfPatientInfo = patientInfo
     ? {
-        ...patientInfo,
-        fullName:
-          patientInfo.fullName && patientInfo.fullName.trim() !== ""
-            ? patientInfo.fullName
-            : `${(
-                ((patientInfo as any).firstName || (patientInfo as any).first_name || "")
-              ).toString().trim()} ${(
-                ((patientInfo as any).lastName || (patientInfo as any).last_name || "")
-              ).toString().trim()}`.trim(),
-        address: patientInfo.address || "",
-        insuranceNumber: patientInfo.insurance_number || "",
-        patientId:
-          (patientInfo as any).patientId || (patientInfo as any).patient_id || (patientInfo as any).id || "",
-        gender: (patientInfo as any).gender,
-        birthday: patientInfo.birthday || "",
-      }
+      ...patientInfo,
+      fullName:
+        patientInfo.fullName && patientInfo.fullName.trim() !== ""
+          ? patientInfo.fullName
+          : `${(
+            ((patientInfo as any).firstName || (patientInfo as any).first_name || "")
+          ).toString().trim()} ${(
+            ((patientInfo as any).lastName || (patientInfo as any).last_name || "")
+          ).toString().trim()}`.trim(),
+      address: patientInfo.address || "",
+      insuranceNumber: patientInfo.insurance_number || "",
+      patientId:
+        (patientInfo as any).patientId || (patientInfo as any).patient_id || (patientInfo as any).id || "",
+      gender: (patientInfo as any).gender,
+      birthday: patientInfo.birthday || "",
+    }
     : undefined
   const { t } = useTranslation()
   const [showPDF, setShowPDF] = React.useState(false)
@@ -69,11 +69,11 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
     return isNaN(d.getTime())
       ? "—"
       : d.toLocaleTimeString("vi-VN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        })
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      })
   }
 
   const columns = [
@@ -221,53 +221,32 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
 
         {/* View PDF Button */}
         <div className="flex justify-end mt-4">
-          <Button type="default" onClick={() => setShowPDF(true)}>
+          <Button
+            type="default"
+            onClick={async () => {
+              if ((prescription as any)?.id) {
+                const id = (prescription as any).id;
+                const response = await fetch(`http://127.0.0.1:8000/api/v1/prescriptions/${id}/pdf/`, {
+                  method: "GET",
+                  credentials: "include"
+                });
+                if (!response.ok) return;
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `prescription_${id}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+              }
+            }}
+          >
             {t("buttons.viewPDF")}
           </Button>
         </div>
-
-        {/* Hidden PDF for print/download (legacy, can be removed if not needed) */}
-        <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
-          <PrescriptionPDF
-            prescription={{
-              ...prescription,
-              createdAt: createdAt as any,
-              systolicBloodPressure: systolicBP as any,
-              diastolicBloodPressure: diastolicBP as any,
-              heartRate: heartRate as any,
-              bloodSugar: bloodSugar as any,
-              prescriptionDetails: details as any,
-            } as any}
-            patientName={pdfPatientInfo?.fullName}
-            patientInfo={pdfPatientInfo}
-            showControls={false}
-          />
-        </div>
-        {/* PDF Modal */}
-        <Modal
-          title={t("titles.prescriptionPDF")}
-          open={showPDF}
-          onCancel={() => setShowPDF(false)}
-          footer={null}
-          width={1000}
-          style={{ top: 20 }}
-        >
-          <PrescriptionPDF
-            prescription={{
-              ...prescription,
-              createdAt: createdAt as any,
-              systolicBloodPressure: systolicBP as any,
-              diastolicBloodPressure: diastolicBP as any,
-              heartRate: heartRate as any,
-              bloodSugar: bloodSugar as any,
-              prescriptionDetails: details as any,
-            } as any}
-            patientName={pdfPatientInfo?.fullName}
-            patientInfo={pdfPatientInfo}
-            showControls={true}
-          />
-        </Modal>
       </div>
-  </Modal>
+    </Modal>
   )
 }
