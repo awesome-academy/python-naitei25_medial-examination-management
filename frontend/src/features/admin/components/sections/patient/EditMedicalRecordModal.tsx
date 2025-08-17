@@ -230,7 +230,7 @@ export default function EditMedicalRecordModal({
     }))
   }
 
-  const removePrescriptionDetail = (index: number) => {
+  const softDeletePrescriptionDetail = (index: number) => {
     // Remove the frequency input for this index
     setFrequencyInputs((prev) => {
       const newFrequencyInputs = { ...prev }
@@ -256,10 +256,12 @@ export default function EditMedicalRecordModal({
       return reindexed
     })
 
-    setForm((prev) => ({
-      ...prev,
-      prescription_details: prev.prescription_details?.filter((_, i) => i !== index) || [], // CHANGED: from prescriptionDetails
-    }))
+  setForm((prev) => ({
+    ...prev,
+    prescription_details: prev.prescription_details?.map((detail, i) =>
+      i === index ? { ...detail, status: "cancel" } : detail
+    ) || [],
+  }))
   }
 
   // Helper functions for frequency
@@ -445,139 +447,155 @@ export default function EditMedicalRecordModal({
             )}
 
             {/* Prescription Details Section */}
+{/* Prescription Details Section */}
+<div>
+  <div className="flex justify-between items-center mb-2">
+    <label className="block text-sm font-medium text-gray-700">Chi tiết đơn thuốc</label>
+    <button
+      type="button"
+      onClick={addPrescriptionDetail}
+      className="px-3 py-2 text-sm font-medium text-white bg-rose-800 rounded-lg hover:bg-rose-900"
+    >
+      + Thêm thuốc
+    </button>
+  </div>
+
+  {form.prescription_details && form.prescription_details.length > 0 ? (
+    form.prescription_details
+      .filter((detail) => detail.status !== "cancel") // ẩn chi tiết bị xóa mềm
+      .map((detail, index) => (
+        <div key={index} className="p-4 mb-4 bg-gray-50 rounded-lg border">
+          <div className="flex justify-between items-start mb-3">
+            <h6 className="font-medium text-gray-700">Thuốc {index + 1}</h6>
+            <button
+              type="button"
+              onClick={() => softDeletePrescriptionDetail(index)}
+              className="text-red-500 hover:text-red-700 text-sm"
+            >
+              Xóa
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Thuốc */}
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-gray-700">Chi tiết đơn thuốc</label>
-                <button
-                  type="button"
-                  onClick={addPrescriptionDetail}
-                  className="px-3 py-2 text-sm font-medium text-white bg-rose-800 rounded-lg hover:bg-rose-900"
-                >
-                  + Thêm thuốc
-                </button>
-              </div>
-              {form.prescription_details && form.prescription_details.length > 0 ? ( // CHANGED: from prescriptionDetails
-                form.prescription_details.map(
-                  (
-                    detail,
-                    index, // CHANGED: from prescriptionDetails
-                  ) => (
-                    <div key={index} className="p-4 mb-4 bg-gray-50 rounded-lg border">
-                      <div className="flex justify-between items-start mb-3">
-                        <h6 className="font-medium text-gray-700">Thuốc {index + 1}</h6>
-                        <button
-                          type="button"
-                          onClick={() => removePrescriptionDetail(index)}
-                          className="text-red-500 hover:text-red-700 text-sm"
-                        >
-                          Xóa
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Thuốc</label>
-                          <select
-                            value={detail.medicine_id} // CHANGED: from medicineId
-                            onChange={(e) => updatePrescriptionDetail(index, "medicine_id", Number(e.target.value))} // CHANGED: from medicineId
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                            title="Chọn thuốc từ danh sách"
-                          >
-                            <option value={0}>Chọn thuốc</option>
-                            {medicines.map((med) => (
-                              <option key={med.medicineId} value={med.medicineId}>
-                                {med.medicineName}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Liều lượng</label>
-                          <input
-                            type="text"
-                            value={detail.dosage}
-                            onChange={(e) => updatePrescriptionDetail(index, "dosage", e.target.value)}
-                            placeholder="VD: 500mg"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                            title="Nhập liều lượng thuốc"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Số lần</label>
-                          <div className="flex gap-2">
-                            <input
-                              type="number"
-                              value={getFrequencyTimes(index)}
-                              onChange={(e) => updateFrequencyTimes(index, e.target.value)}
-                              placeholder="2"
-                              className="w-20 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                              min="1"
-                              title="Nhập số lần dùng"
-                            />
-
-                            <select
-                              value={getFrequencyUnit(index)}
-                              onChange={(e) => updateFrequencyUnit(index, e.target.value)}
-                              className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                              title="Chọn đơn vị thời gian"
-                            >
-                              <option value="ngày">ngày</option>
-                              <option value="tuần">tuần</option>
-                              <option value="tháng">tháng</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Thời gian</label>
-                          <input
-                            type="text"
-                            value={detail.duration}
-                            onChange={(e) => updatePrescriptionDetail(index, "duration", e.target.value)}
-                            placeholder="VD: 7 ngày"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                            title="Nhập thời gian dùng thuốc"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Số lượng <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            value={detail.quantity || 1} // Đảm bảo hiển thị 1 nếu quantity là 0 hoặc null/undefined
-                            onChange={(e) => {
-                              const inputValue = e.target.value
-                              const quantity = inputValue === "" ? 1 : Math.max(1, Number.parseInt(inputValue, 10) || 1)
-                              console.log("Updating quantity for index", index + ":", quantity, typeof quantity)
-                              updatePrescriptionDetail(index, "quantity", quantity)
-                            }}
-                            min="1"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                            title="Nhập số lượng thuốc"
-                            placeholder="1" // Thêm placeholder
-                            required // Đảm bảo trường này là bắt buộc
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-                          <textarea
-                            value={detail.prescription_notes || ""} // CHANGED: from prescriptionNotes
-                            onChange={(e) => updatePrescriptionDetail(index, "prescription_notes", e.target.value)} // CHANGED: from prescriptionNotes
-                            placeholder="Ghi chú thêm về cách dùng thuốc"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0 min-h-[80px] resize-none"
-                            title="Nhập ghi chú về cách dùng"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ),
-                )
-              ) : (
-                <p className="text-gray-500 text-center py-4 bg-gray-50 rounded-lg border">
-                  Chưa có thuốc nào trong đơn. Nhấn "Thêm thuốc" để thêm.
-                </p>
-              )}
+              <label className="block text-sm font-medium text-gray-700 mb-1">Thuốc</label>
+              <select
+                value={detail.medicine_id}
+                onChange={(e) =>
+                  updatePrescriptionDetail(index, "medicine_id", Number(e.target.value))
+                }
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
+                title="Chọn thuốc từ danh sách"
+              >
+                <option value={0}>Chọn thuốc</option>
+                {medicines.map((med) => (
+                  <option key={med.medicineId} value={med.medicineId}>
+                    {med.medicineName}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* Liều lượng */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Liều lượng</label>
+              <input
+                type="text"
+                value={detail.dosage}
+                onChange={(e) => updatePrescriptionDetail(index, "dosage", e.target.value)}
+                placeholder="VD: 500mg"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
+                title="Nhập liều lượng thuốc"
+              />
+            </div>
+
+            {/* Số lần */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Số lần</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={getFrequencyTimes(index)}
+                  onChange={(e) => updateFrequencyTimes(index, e.target.value)}
+                  placeholder="2"
+                  className="w-20 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
+                  min="1"
+                  title="Nhập số lần dùng"
+                />
+                <select
+                  value={getFrequencyUnit(index)}
+                  onChange={(e) => updateFrequencyUnit(index, e.target.value)}
+                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
+                  title="Chọn đơn vị thời gian"
+                >
+                  <option value="ngày">ngày</option>
+                  <option value="tuần">tuần</option>
+                  <option value="tháng">tháng</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Thời gian */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Thời gian</label>
+              <input
+                type="text"
+                value={detail.duration}
+                onChange={(e) => updatePrescriptionDetail(index, "duration", e.target.value)}
+                placeholder="VD: 7 ngày"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
+                title="Nhập thời gian dùng thuốc"
+              />
+            </div>
+
+            {/* Số lượng */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Số lượng <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                value={detail.quantity || 1}
+                onChange={(e) => {
+                  const inputValue = e.target.value
+                  const quantity =
+                    inputValue === ""
+                      ? 1
+                      : Math.max(1, Number.parseInt(inputValue, 10) || 1)
+                  updatePrescriptionDetail(index, "quantity", quantity)
+                }}
+                min="1"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
+                title="Nhập số lượng thuốc"
+                placeholder="1"
+                required
+              />
+            </div>
+
+            {/* Ghi chú */}
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+              <textarea
+                value={detail.prescription_notes || ""}
+                onChange={(e) =>
+                  updatePrescriptionDetail(index, "prescription_notes", e.target.value)
+                }
+                placeholder="Ghi chú thêm về cách dùng thuốc"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0 min-h-[80px] resize-none"
+                title="Nhập ghi chú về cách dùng"
+              />
+            </div>
+          </div>
+        </div>
+      ))
+  ) : (
+    <p className="text-gray-500 text-center py-4 bg-gray-50 rounded-lg border">
+      Chưa có thuốc nào trong đơn. Nhấn "Thêm thuốc" để thêm.
+    </p>
+  )}
+</div>
+
           </form>
         </div>
 
