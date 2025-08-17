@@ -7,14 +7,10 @@ import type {
   PatientUpdateDto,
   EmergencyContact,
   EmergencyContactDto,
-  RoomDetail,
-  RoomDetailDto,
-  PatientRoom,
-  PatientRoomDto,
 } from "../types/patient";
 
 const mapRawPatientToFrontend = (rawPatient: RawPatientFromAPI): Patient => {
-  // Calculate age from birthday if available
+  // Calculate age
   let age: number | undefined;
   if (rawPatient.birthday) {
     const birthDate = new Date(rawPatient.birthday);
@@ -27,14 +23,15 @@ const mapRawPatientToFrontend = (rawPatient: RawPatientFromAPI): Patient => {
   }
 
   // Map emergency contacts
-  const emergencyContacts: EmergencyContact[] = rawPatient.emergency_contacts?.map(contact => ({
-    contactId: contact.id,
-    patientId: contact.patient_id,
-    contactName: contact.contact_name,
-    contactPhone: contact.contact_phone,
-    relationship: contact.relationship as "FAMILY" | "FRIEND" | "OTHERS",
-    createdAt: contact.created_at,
-  })) || [];
+  const emergencyContacts: EmergencyContact[] =
+    rawPatient.emergency_contacts?.map((contact) => ({
+      contactId: contact.id,
+      patientId: contact.patient_id,
+      contactName: contact.contact_name,
+      contactPhone: contact.contact_phone,
+      relationship: contact.relationship as "FAMILY" | "FRIEND" | "OTHERS",
+      createdAt: contact.created_at,
+    })) || [];
 
   return {
     patientId: rawPatient.id,
@@ -72,6 +69,61 @@ const mapRawPatientToFrontend = (rawPatient: RawPatientFromAPI): Patient => {
   };
 };
 
+const mapPatientToBackend = (patientData: any): any => {
+  const backendData: any = {};
+
+  // Map gender
+  if (patientData.gender !== undefined) {
+    backendData.gender =
+      patientData.gender === "MALE"
+        ? "M"
+        : patientData.gender === "FEMALE"
+        ? "F"
+        : patientData.gender === "F"
+        ? "F"
+        : "O";
+  }
+
+  // Map fullName → first_name + last_name
+  if (patientData.fullName) {
+    const parts = patientData.fullName.trim().split(" ");
+    backendData.first_name = parts[0];
+    backendData.last_name = parts.slice(1).join(" ");
+  }
+
+  // Map camelCase → snake_case
+  if (patientData.identityNumber !== undefined) {
+    backendData.identity_number = patientData.identityNumber;
+  }
+  if (patientData.insuranceNumber !== undefined) {
+    backendData.insurance_number = patientData.insuranceNumber;
+  }
+  if (patientData.bloodType !== undefined) {
+    backendData.blood_type = patientData.bloodType;
+  }
+
+  // Các field giữ nguyên
+  if (patientData.address !== undefined) backendData.address = patientData.address;
+  if (patientData.allergies !== undefined) backendData.allergies = patientData.allergies;
+  if (patientData.avatar !== undefined) backendData.avatar = patientData.avatar;
+  if (patientData.birthday !== undefined) backendData.birthday = patientData.birthday;
+  if (patientData.phone !== undefined) backendData.phone = patientData.phone;
+  if (patientData.email !== undefined) backendData.email = patientData.email;
+  if (patientData.height !== undefined) backendData.height = patientData.height;
+  if (patientData.weight !== undefined) backendData.weight = patientData.weight;
+
+  // Map emergency contacts
+  if (patientData.emergencyContactDtos) {
+    backendData.emergency_contacts = patientData.emergencyContactDtos.map((contact: any) => ({
+      contact_name: contact.contactName,
+      contact_phone: contact.contactPhone,
+      relationship: contact.relationship,
+    }));
+  }
+
+  return backendData;
+};
+
 export const patientService = {
   /** Get all patients */
   async getAllPatients(): Promise<Patient[]> {
@@ -100,21 +152,7 @@ export const patientService = {
   /** Create a new patient */
   async createPatient(patientData: CreatePatientRequest): Promise<Patient> {
     try {
-      const backendData = {
-        ...patientData,
-        gender:
-          patientData.gender === "MALE"
-            ? "M"
-            : patientData.gender === "FEMALE"
-            ? "F"
-            : "O",
-        // Map emergency contacts to snake_case for backend
-        emergencyContactDtos: patientData.emergencyContactDtos?.map(contact => ({
-          contact_name: contact.contactName,
-          contact_phone: contact.contactPhone,
-          relationship: contact.relationship
-        })) || []
-      };
+      const backendData = mapPatientToBackend(patientData);
       const { data } = await api.post<RawPatientFromAPI>(
         "/patients/",
         backendData
@@ -138,16 +176,8 @@ export const patientService = {
     patientData: Partial<PatientUpdateDto>
   ): Promise<Patient> {
     try {
-      const backendData: any = { ...patientData };
-      if (patientData.gender !== undefined) {
-        backendData.gender =
-          patientData.gender === "MALE"
-            ? "M"
-            : patientData.gender === "FEMALE"
-            ? "F"
-            : "O";
-      }
-      const { data } = await api.put<RawPatientFromAPI>(
+      const backendData = mapPatientToBackend(patientData);
+      const { data } = await api.patch<RawPatientFromAPI>(
         `/patients/${patientId}/`,
         backendData
       );
@@ -172,30 +202,6 @@ export const patientService = {
     } catch (error: any) {
       console.error(`Error deleting patient ${patientId}:`, error);
       throw new Error("Không thể xóa bệnh nhân");
-    }
-  },
-
-  /** Search patient by identityNumber, insuranceNumber, or fullName */
-  async searchPatient(params: {
-    identityNumber?: string;
-    insuranceNumber?: string;
-    fullName?: string;
-  }): Promise<Patient | null> {
-    try {
-      const query = new URLSearchParams(params).toString();
-      const { data } = await api.get<RawPatientFromAPI[]>(
-        `/patients/search?${query}`
-      ); // Backend search returns a list
-      if (data && data.length > 0) {
-        return mapRawPatientToFrontend(data[0]); // Return the first match
-      }
-      return null;
-    } catch (error: any) {
-      console.error(
-        `Error searching patient with params ${JSON.stringify(params)}:`,
-        error
-      );
-      throw new Error("Không thể tìm kiếm bệnh nhân");
     }
   },
 

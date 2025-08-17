@@ -1414,6 +1414,7 @@ export function PatientInfoContent({ patient }: { patient: Patient }) {
 // HealthInfoContent
 export function HealthInfoContent({ patient }: { patient: Patient }) {
   const { patientId } = useParams()
+  const [patientData, setPatientData] = useState<Patient>(patient) 
   const [showEditModal, setShowEditModal] = useState(false)
   const [editData, setEditData] = useState<PatientUpdateDto>({} as PatientUpdateDto)
   const [loading, setLoading] = useState(false)
@@ -1468,16 +1469,18 @@ export function HealthInfoContent({ patient }: { patient: Patient }) {
         weight: editData.weight,
         bloodType: editData.bloodType,
       })
-      setShowEditModal(false)
-      // Re-fetch patient data to update the parent component's state
       const updatedPatient = await patientService.getPatientById(Number(patientId))
-      // For now, relying on the parent (PatientDetail) to re-fetch if needed.
+
+      setPatientData(updatedPatient)
+
+      setShowEditModal(false)
     } catch (error: any) {
       setErrorModal("Cập nhật thông tin sức khỏe thất bại!")
     } finally {
       setLoading(false)
     }
   }
+
 
   return (
     <div className="bg-white py-6 px-5 rounded-lg border border-gray-200">

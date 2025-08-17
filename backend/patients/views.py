@@ -48,8 +48,9 @@ class PatientViewSet(viewsets.ViewSet):
     def update(self, request, pk=None):
         try:
             patient = self.get_object(pk)
-            if patient.user != request.user:
+            if patient.user != request.user and not request.user.role == "A":
                 return Response({"error": _("Không có quyền cập nhật")}, status=status.HTTP_403_FORBIDDEN)
+
 
             serializer = PatientSerializer(patient, data=request.data, partial=True)
             if serializer.is_valid():
