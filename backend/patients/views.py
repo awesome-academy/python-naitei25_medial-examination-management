@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
+from urllib3 import request
 from .models import Patient, EmergencyContact
 from .serializers import PatientSerializer, CreatePatientRequestSerializer, EmergencyContactSerializer
 from .services import PatientService, EmergencyContactService
@@ -123,7 +124,31 @@ class PatientViewSet(viewsets.ViewSet):
                 return Response(EmergencyContactSerializer(contact).data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=['patch'], url_path='contacts/(?P<contact_id>[^/.]+)')
+    def update_contact(self, request, pk=None, contact_id=None):
+        patient = self.get_object(pk)
+        contact = get_object_or_404(EmergencyContact, pk=contact_id, patient=patient)
+        serializer = EmergencyContactSerializer(contact, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['patch', 'delete'], url_path='contacts/(?P<contact_id>[^/.]+)')
+    def contact_detail(self, request, pk=None, contact_id=None):
+        patient = self.get_object(pk)
+        contact = get_object_or_404(EmergencyContact, pk=contact_id, patient=patient)
 
+        if request.method == 'PATCH':
+            serializer = EmergencyContactSerializer(contact, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'DELETE':
+            contact.delete()
+            return Response({"message": _("Liên hệ được xóa thành công")}, status=status.HTTP_200_OK)
 
 class EmergencyContactViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]

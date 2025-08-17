@@ -1,5 +1,6 @@
 import { api } from "../../../shared/services/api";
 import i18n from "../../../i18n";
+import { handleApiError } from "../../../shared/utils/errorHandler"
 import type {
   Patient,
   RawPatientFromAPI,
@@ -222,45 +223,49 @@ export const patientService = {
   },
 
   /** Add an emergency contact */
-  async addEmergencyContact(
-    patientId: number,
-    contactData: EmergencyContactDto
-  ): Promise<EmergencyContact> {
-    try {
-      const { data } = await api.post<EmergencyContact>(
-        `/patients/${patientId}/contacts/`,
-        contactData
-      );
-      return data;
-    } catch (error: any) {
-      console.error(
-        `Error adding emergency contact for patient ${patientId}:`,
-        error
-      );
-      throw new Error("Không thể thêm liên hệ khẩn cấp");
-    }
-  },
+async addEmergencyContact(
+  patientId: number,
+  contactData: EmergencyContactDto
+): Promise<EmergencyContact> {
+  const payload = {
+    contact_name: contactData.contactName,
+    contact_phone: contactData.contactPhone,
+    relationship: contactData.relationship,
+  };
+  const { data } = await api.post<EmergencyContact>(
+    `/patients/${patientId}/contacts/`,
+    payload
+  );
+  return data;
+},
 
   /** Update emergency contact */
-  async updateEmergencyContact(
-    contactId: number,
-    patientId: number,
-    contactData: EmergencyContactDto
-  ): Promise<EmergencyContact> {
-    try {
-      const { data } = await api.put<EmergencyContact>(
-        `/patients/${patientId}/contacts/${contactId}/`,
-        contactData
-      );
-      return data;
-    } catch (error: any) {
-      console.error(
-        `Error updating emergency contact ${contactId} for patient ${patientId}:`,
-        error
-      );
-      throw new Error("Không thể cập nhật liên hệ khẩn cấp");
-    }
-  },
+/** Update emergency contact */
+async updateEmergencyContact(
+  patientId: number,
+  contactId: number,
+  contactData: EmergencyContactDto
+): Promise<EmergencyContact> {
+  try {
+    const payload = {
+      contact_name: contactData.contactName,
+      contact_phone: contactData.contactPhone,
+      relationship: contactData.relationship,
+    };
+
+    const { data } = await api.patch<EmergencyContact>(
+      `/patients/${patientId}/contacts/${contactId}/`,
+      payload
+    );
+    return data;
+  } catch (error: any) {
+    console.error(
+      `Error updating emergency contact ${contactId} for patient ${patientId}:`,
+      error
+    );
+    throw new Error("Không thể cập nhật liên hệ khẩn cấp");
+  }
+},
 
   /** Delete an emergency contact */
   async deleteEmergencyContact(

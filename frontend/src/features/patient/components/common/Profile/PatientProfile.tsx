@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { User, Phone, Mail, Calendar, MapPin, Heart, Droplets, Ruler, Weight } from 'lucide-react'
+import { User, Phone, Heart, Droplets, Ruler, Weight, MapPin } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,7 +37,6 @@ const PatientProfile: React.FC = () => {
   const loadPatientData = async () => {
     try {
       setIsLoading(true)
-      // Assuming patient ID is same as user ID for simplicity
       const patientData = await patientService.getPatientById(user!.userId)
       setPatient(patientData)
       setEditForm(patientData)
@@ -51,7 +50,9 @@ const PatientProfile: React.FC = () => {
     }
   }
 
-  const handleSaveProfile = async () => {
+  /** Save profile changes */
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!patient) return
 
     try {
@@ -71,9 +72,9 @@ const PatientProfile: React.FC = () => {
     }
   }
 
+  /** Add new emergency contact */
   const handleAddContact = async () => {
     if (!patient || !newContact.contactName || !newContact.contactPhone) return
-
     try {
       const contact = await patientService.addEmergencyContact(patient.patientId, newContact)
       setEmergencyContacts([...emergencyContacts, contact])
@@ -85,9 +86,9 @@ const PatientProfile: React.FC = () => {
     }
   }
 
+  /** Delete emergency contact */
   const handleDeleteContact = async (contactId: number) => {
     if (!patient) return
-
     try {
       await patientService.deleteEmergencyContact(patient.patientId, contactId)
       setEmergencyContacts(emergencyContacts.filter(c => c.contactId !== contactId))
@@ -178,185 +179,190 @@ const PatientProfile: React.FC = () => {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Họ và tên</label>
-              {isEditing ? (
-                <Input
-                  value={editForm.fullName || ''}
-                  onChange={(e) => setEditForm({...editForm, fullName: e.target.value})}
-                />
-              ) : (
-                <p className="mt-1 text-sm text-gray-900">{patient.fullName}</p>
-              )}
+          {/* FORM START */}
+          <form onSubmit={handleSaveProfile}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Họ và tên</label>
+                {isEditing ? (
+                  <Input
+                    value={editForm.fullName || ''}
+                    onChange={(e) => setEditForm({...editForm, fullName: e.target.value})}
+                  />
+                ) : (
+                  <p className="mt-1 text-sm text-gray-900">{patient.fullName}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Số CCCD</label>
+                {isEditing ? (
+                  <Input
+                    value={editForm.identityNumber || ''}
+                    onChange={(e) => setEditForm({...editForm, identityNumber: e.target.value})}
+                  />
+                ) : (
+                  <p className="mt-1 text-sm text-gray-900">{patient.identityNumber}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Số BHYT</label>
+                {isEditing ? (
+                  <Input
+                    value={editForm.insuranceNumber || ''}
+                    onChange={(e) => setEditForm({...editForm, insuranceNumber: e.target.value})}
+                  />
+                ) : (
+                  <p className="mt-1 text-sm text-gray-900">{patient.insuranceNumber}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Ngày sinh</label>
+                {isEditing ? (
+                  <Input
+                    type="date"
+                    value={editForm.birthday || ''}
+                    onChange={(e) => setEditForm({...editForm, birthday: e.target.value})}
+                  />
+                ) : (
+                  <p className="mt-1 text-sm text-gray-900">
+                    {new Date(patient.birthday).toLocaleDateString('vi-VN')}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Giới tính</label>
+                {isEditing ? (
+                  <Select
+                    value={editForm.gender || ''}
+                    onValueChange={(value) => setEditForm({...editForm, gender: value as any})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MALE">Nam</SelectItem>
+                      <SelectItem value="FEMALE">Nữ</SelectItem>
+                      <SelectItem value="OTHER">Khác</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="mt-1 text-sm text-gray-900">{getGenderLabel(patient.gender)}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Nhóm máu</label>
+                {isEditing ? (
+                  <Select
+                    value={editForm.bloodType || ''}
+                    onValueChange={(value) => setEditForm({...editForm, bloodType: value as any})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(type => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
+                    <Droplets className="h-4 w-4 text-red-500" />
+                    {patient.bloodType}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Chiều cao (cm)</label>
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={editForm.height || ''}
+                    onChange={(e) => setEditForm({...editForm, height: Number(e.target.value)})}
+                  />
+                ) : (
+                  <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
+                    <Ruler className="h-4 w-4 text-blue-500" />
+                    {patient.height} cm
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Cân nặng (kg)</label>
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={editForm.weight || ''}
+                    onChange={(e) => setEditForm({...editForm, weight: Number(e.target.value)})}
+                  />
+                ) : (
+                  <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
+                    <Weight className="h-4 w-4 text-green-500" />
+                    {patient.weight} kg
+                  </p>
+                )}
+              </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700">Số CCCD</label>
+              <label className="text-sm font-medium text-gray-700">Địa chỉ</label>
               {isEditing ? (
-                <Input
-                  value={editForm.identityNumber || ''}
-                  onChange={(e) => setEditForm({...editForm, identityNumber: e.target.value})}
+                <Textarea
+                  value={editForm.address || ''}
+                  onChange={(e) => setEditForm({...editForm, address: e.target.value})}
+                  rows={2}
                 />
               ) : (
-                <p className="mt-1 text-sm text-gray-900">{patient.identityNumber}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">Số BHYT</label>
-              {isEditing ? (
-                <Input
-                  value={editForm.insuranceNumber || ''}
-                  onChange={(e) => setEditForm({...editForm, insuranceNumber: e.target.value})}
-                />
-              ) : (
-                <p className="mt-1 text-sm text-gray-900">{patient.insuranceNumber}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">Ngày sinh</label>
-              {isEditing ? (
-                <Input
-                  type="date"
-                  value={editForm.birthday || ''}
-                  onChange={(e) => setEditForm({...editForm, birthday: e.target.value})}
-                />
-              ) : (
-                <p className="mt-1 text-sm text-gray-900">
-                  {new Date(patient.birthday).toLocaleDateString('vi-VN')}
+                <p className="mt-1 text-sm text-gray-900 flex items-start gap-1">
+                  <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                  {patient.address}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700">Giới tính</label>
+              <label className="text-sm font-medium text-gray-700">Dị ứng</label>
               {isEditing ? (
-                <Select
-                  value={editForm.gender || ''}
-                  onValueChange={(value) => setEditForm({...editForm, gender: value as any})}
+                <Textarea
+                  value={editForm.allergies || ''}
+                  onChange={(e) => setEditForm({...editForm, allergies: e.target.value})}
+                  rows={2}
+                  placeholder="Mô tả các loại dị ứng (nếu có)"
+                />
+              ) : (
+                <p className="mt-1 text-sm text-gray-900 flex items-start gap-1">
+                  <Heart className="h-4 w-4 text-red-500 mt-0.5" />
+                  {patient.allergies || 'Không có'}
+                </p>
+              )}
+            </div>
+
+            {isEditing && (
+              <div className="flex gap-2 pt-4">
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEditForm(patient)
+                    setIsEditing(false)
+                  }}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MALE">Nam</SelectItem>
-                    <SelectItem value="FEMALE">Nữ</SelectItem>
-                    <SelectItem value="OTHER">Khác</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="mt-1 text-sm text-gray-900">{getGenderLabel(patient.gender)}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">Nhóm máu</label>
-              {isEditing ? (
-                <Select
-                  value={editForm.bloodType || ''}
-                  onValueChange={(value) => setEditForm({...editForm, bloodType: value as any})}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(type => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
-                  <Droplets className="h-4 w-4 text-red-500" />
-                  {patient.bloodType}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">Chiều cao (cm)</label>
-              {isEditing ? (
-                <Input
-                  type="number"
-                  value={editForm.height || ''}
-                  onChange={(e) => setEditForm({...editForm, height: Number(e.target.value)})}
-                />
-              ) : (
-                <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
-                  <Ruler className="h-4 w-4 text-blue-500" />
-                  {patient.height} cm
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">Cân nặng (kg)</label>
-              {isEditing ? (
-                <Input
-                  type="number"
-                  value={editForm.weight || ''}
-                  onChange={(e) => setEditForm({...editForm, weight: Number(e.target.value)})}
-                />
-              ) : (
-                <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
-                  <Weight className="h-4 w-4 text-green-500" />
-                  {patient.weight} kg
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">Địa chỉ</label>
-            {isEditing ? (
-              <Textarea
-                value={editForm.address || ''}
-                onChange={(e) => setEditForm({...editForm, address: e.target.value})}
-                rows={2}
-              />
-            ) : (
-              <p className="mt-1 text-sm text-gray-900 flex items-start gap-1">
-                <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
-                {patient.address}
-              </p>
+                  Hủy
+                </Button>
+              </div>
             )}
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">Dị ứng</label>
-            {isEditing ? (
-              <Textarea
-                value={editForm.allergies || ''}
-                onChange={(e) => setEditForm({...editForm, allergies: e.target.value})}
-                rows={2}
-                placeholder="Mô tả các loại dị ứng (nếu có)"
-              />
-            ) : (
-              <p className="mt-1 text-sm text-gray-900 flex items-start gap-1">
-                <Heart className="h-4 w-4 text-red-500 mt-0.5" />
-                {patient.allergies || 'Không có'}
-              </p>
-            )}
-          </div>
-
-          {isEditing && (
-            <div className="flex gap-2 pt-4">
-              <Button onClick={handleSaveProfile} disabled={isLoading}>
-                {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEditForm(patient)
-                  setIsEditing(false)
-                }}
-              >
-                Hủy
-              </Button>
-            </div>
-          )}
+          </form>
+          {/* FORM END */}
         </CardContent>
       </Card>
 
