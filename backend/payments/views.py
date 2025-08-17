@@ -6,7 +6,7 @@ from django.http import Http404
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import get_object_or_404
 from .models import Bill, BillDetail, Transaction
-from .serializers import NewBillRequestSerializer, UpdateBillRequestSerializer, BillResponseSerializer, NewBillDetailRequestSerializer, BillDetailResponseSerializer, TransactionDTOSerializer, BillSerializer
+from .serializers import NewBillRequestSerializer, UpdateBillRequestSerializer, BillResponseSerializer, NewBillDetailRequestSerializer, BillDetailResponseSerializer, BillSerializer, TransactionDTOSerializer
 from .services import BillService, PayOSService, TransactionService
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
@@ -84,9 +84,9 @@ class BillViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'], url_path=r'patient/(?P<patient_id>\d+)')
     def get_bills_by_patient_id(self, request, patient_id=None):
-            bills = BillService().get_bills_by_patient_id(patient_id)
-            serializer = BillSerializer(bills, many=True)
-            return Response(serializer.data)
+        bills = BillService().get_bills_by_patient_id(patient_id)
+        serializer = BillSerializer(bills, many=True)
+        return Response(serializer.data)
 
 class TransactionViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -104,10 +104,18 @@ class TransactionViewSet(viewsets.ViewSet):
     def process_cash_payment(self, request, bill_id=None):
         try:
             TransactionService().process_cash_payment(bill_id)
-            response = {"error": 0, "message": _("Thanh toán tiền mặt thành công"), "data": None}
+            bill = Bill.objects.get(pk=bill_id)  # ✅ Lấy lại bill sau khi cập nhật
+            response = {
+                "error": 0,
+                "message": _("Thanh toán tiền mặt thành công"),
+                "data": BillResponseSerializer(bill).data  # ✅ Trả bill mới nhất
+            }
             return Response(response)
         except Exception as e:
-            return Response({"error": -1, "message": str(e), "data": None}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": -1, "message": str(e), "data": None},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     @action(detail=False, methods=['post'], url_path='webhook', permission_classes=[])
     def handle_payment_webhook(self, request):

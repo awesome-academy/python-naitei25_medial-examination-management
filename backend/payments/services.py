@@ -33,30 +33,47 @@ class BillService:
         bill = Bill(
             appointment_id=data['appointment_id'],
             patient_id=data['patient_id'],
-            total_cost=data['total_cost'],
+            total_cost=0,   # sẽ tính lại
             insurance_discount=data['insurance_discount'],
-            amount=data['amount'],
+            amount=0,
             status=data['status']
         )
         bill.save()
-        bill_details = [
-            BillDetail(
-                bill=bill,
-                item_type=detail_data['item_type'],
-                quantity=detail_data['quantity'],
-                unit_price=detail_data['unit_price'],
-                insurance_discount=detail_data['insurance_discount'] or 0,
-                total_price=detail_data['unit_price'] * detail_data['quantity']
-            )
-            for detail_data in data.get('bill_details', [])
-        ]
-        if bill_details:
+
+        # Nếu có bill_details (luồng admin)
+        if data.get('bill_details'):
+            bill_details = [
+                BillDetail(
+                    bill=bill,
+                    item_type=detail_data['item_type'],
+                    quantity=detail_data['quantity'],
+                    unit_price=detail_data['unit_price'],
+                    insurance_discount=detail_data['insurance_discount'] or 0,
+                    total_price=detail_data['unit_price'] * detail_data['quantity']
+                )
+                for detail_data in data['bill_details']
+            ]
             BillDetail.objects.bulk_create(bill_details)
+
+            # ✅ Tính lại tổng tiền từ bill_details
             bill_details_qs = bill.details.all()
             bill.total_cost = sum(d.total_price for d in bill_details_qs)
             bill.insurance_discount = sum(d.insurance_discount or 0 for d in bill_details_qs)
             bill.amount = bill.total_cost - (bill.insurance_discount or 0)
-            bill.save()
+
+        else:
+            # ✅ Luồng booking (bệnh nhân đặt lịch, chưa có service)
+            appointment = Appointment.objects.get(pk=data['appointment_id'])
+            doctor_price = getattr(appointment.doctor, "price", 0) or 0
+            booking_fee = getattr(appointment, "booking_fee", 0) or 0
+
+            base_price = booking_fee if booking_fee > 0 else doctor_price
+
+            bill.total_cost = base_price
+            bill.insurance_discount = 0   # sau này nếu có tính bảo hiểm thì set vào đây
+            bill.amount = base_price - bill.insurance_discount
+
+        bill.save()
         return bill
 
     @django_transaction.atomic
@@ -120,85 +137,86 @@ class PayOSService:
         
         if bill.status == PaymentStatus.PAID.value:
             raise ValueError(_("Hóa đơn đã được thanh toán"))
-        if not bill.amount or bill.amount <= 0:
+            # Tính số tiền cần thanh toán (booking fee hoặc doctor.price)
+        # ✅ Luôn dùng bill.amount đã tính sẵn (có discount)
+        amount = int(bill.amount or 0)
+
+        if amount <= 0:
             raise ValueError(_("Số tiền thanh toán không hợp lệ"))
 
-        existing_transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
-        if existing_transaction and existing_transaction.status == TransactionStatus.PENDING.value:
-            try:
-                self.payos.cancelPaymentLink(orderId=bill_id)
-            except Exception as e:
-                logger.error(f"Error canceling old payment link for bill_id={bill_id}: {str(e)}")
-            existing_transaction.status = TransactionStatus.FAILED.value
-            existing_transaction.save()
 
-        # Create payment data
-        item = payos.ItemData(name=f"Hóa đơn #{bill_id}", quantity=1, price=int(bill.amount))
+        item = payos.ItemData(name=f"Hóa đơn #{bill_id}", quantity=1, price=amount)
         order_code = int(bill_id) * 1000 + (int(timezone.now().timestamp()) % 1000)
-        
+
         payment_data = payos.PaymentData(
             orderCode=order_code,
             description=f"Thanh toán hóa đơn #{bill_id}",
-            amount=int(bill.amount),
+            amount=amount,
             cancelUrl=f"{settings.PAYMENT_CANCEL_URL}/{bill_id}/cancel",
             returnUrl=f"{settings.PAYMENT_SUCCESS_URL}/{bill_id}/success",
             items=[item]
         )
 
         response = self.payos.createPaymentLink(paymentData=payment_data)
-        
-        # Create transaction record
+
+        # Ghi transaction với số tiền đúng
         transaction = Transaction.objects.create(
             bill=bill,
-            amount=bill.amount,
+            amount=amount,
             payment_method=PaymentMethod.ONLINE_BANKING.value,
             transaction_date=timezone.now(),
             status=TransactionStatus.PENDING.value
         )
-        
+
         return response.checkoutUrl
+
 
     def handle_payment_callback(self, webhook_data):
         try:
             data = self.payos.verifyPaymentWebhookData(webhook_data)
-            
+    
             bill_id = data.orderCode // 1000
             bill = get_object_or_404(Bill, pk=bill_id)
-            
             transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
-            
+
             logger.info(f"Processing webhook for bill_id: {bill_id}, orderCode: {data.orderCode}")
-            logger.info(f"Webhook success status: {webhook_data.get('success')}")
-            logger.info(f"Data status: {getattr(data, 'status', 'No status')}")
-            
+
             is_success = (
-                webhook_data.get('success') == True or 
+                webhook_data.get('success') is True or 
                 getattr(data, 'status', '') == 'PAID' or
                 webhook_data.get('status') == 'PAID'
             )
-            
+
+            paid_amount = int(transaction.amount or 0)
+
             if is_success:
-                bill.status = PaymentStatus.PAID.value
+                if paid_amount == int(bill.amount) and bill.details.count() == 0:
+                    bill.status = PaymentStatus.BOOKING_PAID.value
+                    if bill.appointment_id:
+                        appointment = get_object_or_404(Appointment, pk=bill.appointment_id)
+                        appointment.status = AppointmentStatus.CONFIRMED.value
+                        appointment.save()
+                    logger.info(f"Bill {bill_id} set to BOOKING_PAID and appointment confirmed.")
+                elif paid_amount >= int(bill.amount):
+                    bill.status = PaymentStatus.PAID.value
+                    logger.info(f"Bill {bill_id} set to PAID.")
+
                 if transaction:
                     transaction.status = TransactionStatus.SUCCESS.value
-                
-                logger.info(f"Payment successful - updating bill {bill_id} to PAID")
             else:
                 if transaction:
                     transaction.status = TransactionStatus.FAILED.value
-                logger.info(f"Payment failed - updating transaction for bill {bill_id}")
-            
+                logger.info(f"Payment failed for bill {bill_id}")
+
             bill.save()
             if transaction:
                 transaction.save()
-                
-            logger.info(f"Bill {bill_id} status after save: {bill.status}")
-            
+
             return data
-            
         except Exception as e:
             logger.error(f"Error in handle_payment_callback: {str(e)}")
             raise
+
 
     def get_payment_info(self, order_id):
             try:
@@ -246,43 +264,70 @@ class TransactionService:
     @django_transaction.atomic
     def process_cash_payment(self, bill_id):
         bill = get_object_or_404(Bill, pk=bill_id)
+
+        booking_fee = int(getattr(bill.appointment, "booking_fee", 0) or 0)
+        service_fee = int(sum(
+            float(o.service.price)
+            for o in bill.appointment.serviceorder_set.all()
+            if o.service and o.service.price
+        ))
+
+        # 🔹 Nếu bill chưa trả booking thì không cho thanh toán cash
+        if bill.status == PaymentStatus.UNPAID.value:
+            raise ValueError(_("Hóa đơn chưa thanh toán phí đặt chỗ (không thể trả tiền mặt)"))
+
+        # 🔹 Nếu bill đã trả full rồi thì không cho trả tiếp
         if bill.status == PaymentStatus.PAID.value:
-            raise ValueError(_("Hóa đơn đã được thanh toán"))
-        
-        transaction = Transaction(
-            bill=bill,
-            amount=bill.amount,
-            payment_method=PaymentMethod.CASH.value,
-            transaction_date=timezone.now(),
-            status=TransactionStatus.SUCCESS.value
-        )
-        transaction.save()
+            raise ValueError(_("Hóa đơn đã được thanh toán đầy đủ"))
 
-        bill.status = PaymentStatus.PAID.value
-        bill.save()
+        # 🔹 Nếu bill đang BOOKING_PAID → chỉ cần trả service fee
+        if bill.status == PaymentStatus.BOOKING_PAID.value:
+            if service_fee <= 0:
+                raise ValueError(_("Không có phí dịch vụ để thanh toán"))
 
-    @django_transaction.atomic # Đảm bảo tính toàn vẹn dữ liệu
+            Transaction.objects.create(
+                bill=bill,
+                amount=service_fee,
+                payment_method=PaymentMethod.CASH.value,
+                transaction_date=timezone.now(),
+                status=TransactionStatus.SUCCESS.value
+            )
+
+            # Cập nhật bill thành PAID
+            bill.status = PaymentStatus.PAID.value
+            bill.save(update_fields=["status"])
+            return bill
+
+        # 🔹 Nếu status khác thì báo lỗi
+        raise ValueError(_("Trạng thái hóa đơn không hợp lệ để thanh toán tiền mặt"))
+
+    @django_transaction.atomic
     def handle_payment_success(self, order_id):
         bill_id = int(order_id) // 1000 if int(order_id) > 1000 else int(order_id)
         bill = get_object_or_404(Bill, pk=bill_id)
         transaction = Transaction.objects.filter(bill=bill).order_by('-created_at').first()
-        
-        if transaction and transaction.status == TransactionStatus.PENDING.value:
-            bill.status = PaymentStatus.PAID.value
-            transaction.status = TransactionStatus.SUCCESS.value
-            
-            # ĐÃ SỬA ĐỔI Ở ĐÂY: Cập nhật trạng thái của Appointment
+
+        if not transaction or transaction.status != TransactionStatus.PENDING.value:
+            logger.warning(f"Payment success handler called for order {order_id} but transaction not in PENDING state or not found.")
+            return
+
+        paid_amount = int(transaction.amount or 0)
+
+        if paid_amount == int(bill.amount) and bill.details.count() == 0:
+            bill.status = PaymentStatus.BOOKING_PAID.value
             if bill.appointment_id:
                 appointment = get_object_or_404(Appointment, pk=bill.appointment_id)
-                appointment.status = AppointmentStatus.CONFIRMED.value # Đặt trạng thái là 'C'
+                appointment.status = AppointmentStatus.CONFIRMED.value
                 appointment.save()
-                logger.info(f"Appointment {appointment.id} status updated to CONFIRMED.")
-            
-            bill.save()
-            transaction.save()
-            logger.info(f"Bill {bill.id} and Transaction {transaction.id} updated to PAID/SUCCESS.")
-        else:
-            logger.warning(f"Payment success handler called for order {order_id} but transaction not in PENDING state or not found.")
+            logger.info(f"Bill {bill.id} set to BOOKING_PAID and appointment confirmed by booking payment.")
+        elif paid_amount >= int(bill.amount):
+            bill.status = PaymentStatus.PAID.value
+            logger.info(f"Bill {bill.id} set to PAID by full payment.")
+
+
+        transaction.status = TransactionStatus.SUCCESS.value
+        bill.save()
+        transaction.save()
 
 
     def handle_payment_cancel(self, order_id):

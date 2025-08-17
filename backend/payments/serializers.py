@@ -32,26 +32,68 @@ class BillDetailResponseSerializer(serializers.ModelSerializer):
         model = BillDetail
         fields = ['id', 'bill_id', 'item_type', 'quantity', 'unit_price', 'total_price', 'insurance_discount', 'created_at', 'updated_at']
 
+# serializers.py
+
 class BillResponseSerializer(serializers.ModelSerializer):
     bill_details = BillDetailResponseSerializer(many=True, read_only=True)
     appointment = serializers.PrimaryKeyRelatedField(read_only=True)
     patient = serializers.PrimaryKeyRelatedField(read_only=True)
+    amount = serializers.SerializerMethodField()  
 
     class Meta:
         model = Bill
-        fields = ['id', 'appointment', 'patient', 'total_cost', 'insurance_discount', 'amount', 'status', 'created_at', 'updated_at', 'bill_details']
+        fields = [
+            'id', 'appointment', 'patient',
+            'total_cost', 'insurance_discount', 'amount',
+            'status', 'created_at', 'updated_at', 'bill_details'
+        ]
 
-class CreatePaymentRequestSerializer(serializers.Serializer):
-    product_name = serializers.CharField(max_length=COMMON_LENGTH["NAME"])
-    description = serializers.CharField(max_length=COMMON_LENGTH["NOTE"])
-    return_url = serializers.URLField(max_length=COMMON_LENGTH["URL"])
-    cancel_url = serializers.URLField(max_length=COMMON_LENGTH["URL"])
-    price = serializers.DecimalField(max_digits=DECIMAL_MAX_DIGITS, decimal_places=DECIMAL_DECIMAL_PLACES)
+    def get_amount(self, obj):
+        return sum(
+            float(t.amount) for t in obj.transaction_set.all()
+            if t.status == "SUCCESS"
+        )
 
+
+# class BillSerializer(serializers.ModelSerializer):
+#     booking_fee = serializers.SerializerMethodField()
+#     service_fee = serializers.SerializerMethodField()
+#     amount = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Bill
+#         fields = [
+#             'id',
+#             'appointment',
+#             'patient',
+#             'total_cost',
+#             'insurance_discount',
+#             'amount',
+#             'status',           # ⚡️ lấy trực tiếp từ model
+#             'created_at',
+#             'updated_at',
+#             'booking_fee',
+#             'service_fee'
+#         ]
+
+#     def get_booking_fee(self, obj):
+#         return getattr(obj.appointment, "booking_fee", 0)
+
+#     def get_service_fee(self, obj):
+#         orders = obj.appointment.serviceorder_set.all()
+#         return sum(float(order.service.price) for order in orders if order.service and order.service.price)
+
+#     def get_amount(self, obj):
+#         return sum(
+#             float(t.amount) for t in obj.transaction_set.all()
+#             if t.status == "SUCCESS"
+#         )
+
+# serializers.py
 class BillSerializer(serializers.ModelSerializer):
     booking_fee = serializers.SerializerMethodField()
     service_fee = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()  # override status
+    amount = serializers.SerializerMethodField()  # vẫn giữ tính toán từ transaction
 
     class Meta:
         model = Bill
@@ -62,7 +104,7 @@ class BillSerializer(serializers.ModelSerializer):
             'total_cost',
             'insurance_discount',
             'amount',
-            'status',            # override logic
+            'status',           # ⚡️ dùng trực tiếp field trong model
             'created_at',
             'updated_at',
             'booking_fee',
@@ -76,14 +118,8 @@ class BillSerializer(serializers.ModelSerializer):
         orders = obj.appointment.serviceorder_set.all()
         return sum(float(order.service.price) for order in orders if order.service and order.service.price)
 
-    def get_status(self, obj):
-        booking_fee = self.get_booking_fee(obj)
-        service_fee = self.get_service_fee(obj)
-
-        # Nếu không có dịch vụ → chỉ cần trả booking_fee là PAID
-        if service_fee == 0:
-            return PaymentStatus.PAID.value if float(obj.amount) >= booking_fee else PaymentStatus.UNPAID.value
-
-        # Nếu có dịch vụ → cần trả đủ booking_fee + service_fee
-        total_needed = booking_fee + service_fee
-        return PaymentStatus.PAID.value if float(obj.amount) >= total_needed else PaymentStatus.UNPAID.value
+    def get_amount(self, obj):
+        return sum(
+            float(t.amount) for t in obj.transaction_set.all()
+            if t.status == "SUCCESS"
+        )

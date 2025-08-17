@@ -26,7 +26,7 @@ import type { CreatePrescriptionRequest } from "../../../types/pharmacy"
 import { AppointmentModal } from "./AppointmentModal"
 import { getServiceOrdersByAppointmentId } from "../../../services/serviceOrderService";
 import { servicesService } from "../../../services/servicesService";
-
+// import { createServicePayment} from "../../../services/paymentService";
 
 export function MedicalRecordsContent() {
   const { patientId } = useParams()
@@ -478,10 +478,18 @@ export function InvoicesContent() {
           totalCost: Number(b.total_cost),
           insuranceDiscount: Number(b.insurance_discount),
           amount: Number(b.amount),
-          status: b.status === "P" ? "PAID" : b.status === "U" ? "UNPAID" : b.status,
+          service_fee: Number(b.service_fee) || 0,
+          status: (() => {
+            switch (b.status) {
+              case "P": return "PAID";
+              case "U": return "UNPAID";
+              case "B": return "BOOKING_PAID";
+              default: return b.status || "UNKNOWN";
+            }
+          })(),
           createdAt: b.created_at,
           updatedAt: b.updated_at,
-          billDetails: b.billDetails || []
+          billDetails: b.bill_details || []
         };
       });
 
@@ -547,44 +555,54 @@ export function InvoicesContent() {
     }
   }, [patientId]);
 
-  const handlePayment = async (bill: Bill, method: "online" | "cash") => {
+  const handlePayment = async (bill: Bill, method: "cash") => {
     try {
       if (method === "online") {
-        const paymentUrl = await paymentService.createPayment(bill.billId)
-        window.open(paymentUrl, "_blank")
+        let paymentUrl: string;
 
+        if (bill.status === "UNPAID") {
+          // Thanh toán tiền đặt lịch
+          paymentUrl = await paymentService.createPayment(bill.billId);
+        } else if (bill.status === "BOOKING_PAID") {
+          // Thanh toán tiền dịch vụ
+          paymentUrl = await paymentService.createServicePayment(bill.billId);
+        } else {
+          alert("Hóa đơn này không cần thanh toán online");
+          return;
+        }
+
+        window.open(paymentUrl, "_blank");
+
+        // Check status sau khi thanh toán
         const checkPaymentStatus = setInterval(async () => {
           try {
-            const updatedBills = await paymentService.getBillsByPatientId(Number(patientId))
-            const currentBill = updatedBills.find((b) => b.billId === bill.billId)
+            const updatedBills = await paymentService.getBillsByPatientId(Number(patientId));
+            const currentBill = updatedBills.find((b) => b.billId === bill.billId);
 
             if (currentBill?.status === "PAID") {
-              clearInterval(checkPaymentStatus)
-              setBills(updatedBills)
+              clearInterval(checkPaymentStatus);
+              setBills(updatedBills);
             }
           } catch (error) {
-            console.error("Lỗi kiểm tra trạng thái thanh toán:", error)
+            console.error("Lỗi kiểm tra trạng thái thanh toán:", error);
           }
-        }, 2000)
+        }, 2000);
 
-        setTimeout(
-          () => {
-            clearInterval(checkPaymentStatus)
-          },
-          5 * 60 * 1000,
-        )
+        setTimeout(() => {
+          clearInterval(checkPaymentStatus);
+        }, 5 * 60 * 1000);
+
       } else {
-        await paymentService.processCashPayment(bill.billId)
-        reloadBills()
+        await paymentService.processCashPayment(bill.billId);
+        reloadBills();
       }
     } catch (error: any) {
-      alert(error.message || "Không thể thực hiện thanh toán")
+      alert(error.message || "Không thể thực hiện thanh toán");
     }
   }
 
-  const calculateTotalFromServices = (billId: number) => {
-    const services = billServices[billId] || []
-    return services.reduce((total, service) => total + (service.service?.price || 0), 0)
+  const calculateTotalFromServices = (bill: Bill) => {
+    return bill.service_fee || 0;
   }
 
   return (
@@ -607,27 +625,27 @@ export function InvoicesContent() {
                 >
                   Ngày tạo
                 </TableCell>
-                <TableCell
+                {/* <TableCell
                   isHeader
                   className="px-4 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
                 >
                   Dịch vụ
-                </TableCell>
+                </TableCell> */}
                 <TableCell
                   isHeader
-                  className="px-4 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
+                  className="px-8 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
                 >
                   Tình trạng
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-4 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
                 >
                   Trị giá
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-3 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
+                  className="px-16 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
                 >
                   Hành động
                 </TableCell>
@@ -654,26 +672,40 @@ export function InvoicesContent() {
                   </TableCell>
                 </TableRow>
               ) : (
-                bills.map((bill) => {
-                  const services = billServices[bill.billId || 0] || []
-                  const totalFromServices = calculateTotalFromServices(bill.billId || 0)
+                bills
+                  .filter((bill) => {
+                    const services = billServices[bill.billId || 0] || []
+                    return services.length > 0   // ✅ chỉ giữ bill có dịch vụ
+                  })
+                  .map((bill) => {
+                    const services = billServices[bill.billId || 0] || []
+                    const totalFromServices = calculateTotalFromServices(bill)
 
-                  return (
-                    <TableRow key={bill.billId || Math.random()}>
-                      <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
-                        #{(bill.billId || 0).toString().padStart(4, "0")}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
-                        {bill.createdAt ? format(new Date(bill.createdAt), "dd-MM-yyyy") : "N/A"}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
+                    return (
+                      <TableRow key={bill.billId || Math.random()}>
+                        <TableCell className="px-6 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
+                          #{(bill.billId || 0).toString().padStart(4, "0")}
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
+                          {services.length > 0
+                            ? format(
+                              new Date(
+                                services[0].order_time || services[0].created_at || bill.createdAt
+                              ),
+                              "dd-MM-yyyy"
+                            )
+                            : bill.createdAt
+                              ? format(new Date(bill.createdAt), "dd-MM-yyyy")
+                              : "N/A"}
+                        </TableCell>
+                        {/* <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
                         {services.length > 0 ? (
                           <div className="space-y-1">
                             {services.slice(0, 2).map((service, index) => (
                               <div key={index} className="text-xs">
-                                <span className="font-medium">{service.service?.serviceName}</span>
+                                <span className="font-medium">{service.serviceName}</span>
                                 <span className="text-gray-500 ml-1">
-                                  ({(service.service?.price || 0).toLocaleString("vi-VN")} VNĐ)
+                                  ({(Number(service.price) || 0).toLocaleString("vi-VN")} VNĐ)
                                 </span>
                               </div>
                             ))}
@@ -684,51 +716,36 @@ export function InvoicesContent() {
                         ) : (
                           <span className="text-gray-400 text-xs">Không có dịch vụ</span>
                         )}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
-                        <Badge
-                          size="sm"
-                          color={bill.status === "PAID" ? "success" : bill.status === "UNPAID" ? "error" : "cancel"}
-                        >
-                          {bill.status === "PAID"
-                            ? "Đã thanh toán"
-                            : bill.status === "UNPAID"
-                              ? "Chưa thanh toán"
-                              : "Đã hủy"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-700 text-start text-xs text-green-700 font-semibold">
-                        {totalFromServices.toLocaleString("vi-VN")} VNĐ
-                        {totalFromServices !== (bill.amount || 0) && (
-                          <div className="text-gray-400 text-xs line-through">
-                            {(bill.amount || 0).toLocaleString("vi-VN")} VNĐ
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-theme-md dark:text-gray-400">
-                        <div className="flex gap-2">
-                          {bill.status === "UNPAID" ? (
-                            <>
-                              <button
-                                onClick={() => handlePayment(bill, "online")}
-                                className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-4 w-4"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                >
-                                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                                Online
-                              </button>
+                      </TableCell> */}
+                        <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
+                          <Badge
+                            size="sm"
+                            color={
+                              bill.status === "PAID"
+                                ? "success"
+                                : bill.status === "UNPAID"
+                                  ? "error"
+                                  : bill.status === "BOOKING_PAID"
+                                    ? "warning"
+                                    : "cancel"
+                            }
+                          >
+                            {bill.status === "PAID"
+                              ? "Đã thanh toán"
+                              : bill.status === "UNPAID"
+                                ? "Chưa thanh toán"
+                                : bill.status === "BOOKING_PAID"
+                                  ? "Đã thanh toán tiền đặt lịch"
+                                  : "Đã hủy"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-gray-700 text-start text-xs text-green-700 font-semibold">
+                          {(bill.service_fee || 0).toLocaleString("vi-VN")} VNĐ
+                        </TableCell>
 
+                        <TableCell className="px-4 py-3 text-gray-500 text-theme-md dark:text-gray-400">
+                          <div className="flex gap-2">
+                            {bill.status === "BOOKING_PAID" ? (
                               <button
                                 onClick={() => handlePayment(bill, "cash")}
                                 className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors"
@@ -745,35 +762,34 @@ export function InvoicesContent() {
                                     clipRule="evenodd"
                                   />
                                 </svg>
-                                Tiền mặt
+                                Thanh toán tiền dịch vụ
                               </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => setSelectedBill(bill)}
-                              className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-sky-200 transition-colors"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
+                            ) : (
+                              <button
+                                onClick={() => setSelectedBill(bill)}
+                                className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-sky-200 transition-colors"
                               >
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              Xem chi tiết
-                            </button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                Xem chi tiết
+                              </button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
               )}
             </TableBody>
           </Table>
@@ -879,7 +895,7 @@ export function PaymentsContent() {
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-4 py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
+                  className="px-4 ml-30px py-3 font-medium text-gray-800 text-start text-theme-sm dark:text-gray-400"
                 >
                   Tình trạng
                 </TableCell>
