@@ -84,7 +84,7 @@
     "doctorsInDepartment": "doctors in department",
     "returnToDashboard": "Return to Dashboard",
     "saving": "Saving..."
-    },
+  },
   "navigation": {
     "home": "Home",
     "about": "About",
@@ -136,7 +136,6 @@
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
     "welcomeBack": "Welcome back to WeCare!",
-    "joinUs": "Join us to use Heart2Heart services!",
     "hospitalSystem": "Hospital Management System",
     "forAdminDoctor": "For Admin and Doctors",
     "weAreHere": "For you, we are always here",
@@ -489,7 +488,8 @@
     "pendingTestResult": "Pending Test Result",
     "retry": "Retry",
     "close": "Close",
-    "edit": "Edit"
+    "edit": "Edit",
+    "viewPDF": "View PDF"
   },
   "stats": {
     "totalAppointments": "Total Appointments",
@@ -863,7 +863,7 @@
   },
   "dashboard": {
     "welcome": "Welcome",
-    "overviewToday": "Overview Today",
+    "overviewToday": "This is an overview of your activities today",
     "totalAppointments": "Total Appointments",
     "total": "Total",
     "todayAppointments": "Today's Appointments",
@@ -905,7 +905,11 @@
       "findDoctorSubtitle": "Search for the right doctor",
       "myAppointments": "My Appointments",
       "myAppointmentsSubtitle": "View and manage your appointments"
-    }
+    },
+    "totalServiceOrders": "Total Service Orders",
+    "ordered": "Ordered",
+    "todayServiceOrders": "Today's Service Orders",
+    "systemInfoPlaceholder": "System information will be displayed here"
   },
   "log": {
     "eventDetails": "Event Details",
@@ -913,7 +917,7 @@
     "modalStateAfter": "Modal State After",
     "selectedEventAfter": "Selected Event After"
   },
-    "fields": {
+  "fields": {
     "activity": "Activity",
     "workingDate": "Working Date",
     "startTime": "Start Time",
@@ -922,7 +926,30 @@
     "building": "Building",
     "status": "Status"
   },
-    "footer": {
+  "serviceOrder": {
+    "table": {
+      "indication": "Indication",
+      "room": "Room",
+      "price": "Price"
+    },
+    "titles": {
+      "addIndication": "Add Indication"
+    },
+    "labels": {
+      "patient": "Patient",
+      "patientCode": "Patient Code",
+      "date": "Date",
+      "time": "Time"
+    },
+    "placeholders": {
+      "searchIndication": "Search indication"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save"
+    }
+  },
+  "footer": {
     "companyDescription": "We are committed to providing the best healthcare services with a team of professional doctors and modern technology.",
     "quickLinks": "Quick Links",
     "contactInfo": "Contact Information",
@@ -934,7 +961,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfUse": "Terms of Use"
   },
-    "about": {
+  "about": {
     "header": {
       "title": "About HealthCare",
       "subtitle": "We are committed to providing the best healthcare services with professional doctors and the most advanced medical technology."
@@ -985,11 +1012,26 @@
     "timeline": {
       "title": "Our Journey",
       "subtitle": "From the early days to today",
-      "2020": { "title": "Founded", "desc": "Launched with 50 doctors" },
-      "2021": { "title": "Expansion", "desc": "Grew to 200+ doctors, 15 departments" },
-      "2022": { "title": "Technology", "desc": "Applied AI in diagnosis and consultation" },
-      "2023": { "title": "International", "desc": "Partnered with top global hospitals" },
-      "2024": { "title": "Present", "desc": "500+ doctors, 50,000+ trusted patients" }
+      "2020": {
+        "title": "Founded",
+        "desc": "Launched with 50 doctors"
+      },
+      "2021": {
+        "title": "Expansion",
+        "desc": "Grew to 200+ doctors, 15 departments"
+      },
+      "2022": {
+        "title": "Technology",
+        "desc": "Applied AI in diagnosis and consultation"
+      },
+      "2023": {
+        "title": "International",
+        "desc": "Partnered with top global hospitals"
+      },
+      "2024": {
+        "title": "Present",
+        "desc": "500+ doctors, 50,000+ trusted patients"
+      }
     },
     "cta": {
       "title": "Join Us",
@@ -998,7 +1040,7 @@
       "learnMore": "Learn More"
     }
   },
-    "contact": {
+  "contact": {
     "header": {
       "title": "Contact Us",
       "subtitle": "We are always ready to listen and support you. Reach out to us anytime."
@@ -1006,19 +1048,31 @@
     "info": {
       "address": {
         "title": "Address",
-        "details": ["123 ABC Street, District 1", "Ho Chi Minh City, Vietnam"]
+        "details": [
+          "123 ABC Street, District 1",
+          "Ho Chi Minh City, Vietnam"
+        ]
       },
       "phone": {
         "title": "Phone",
-        "details": ["+84 123 456 789", "Hotline: 1900 1234"]
+        "details": [
+          "+84 123 456 789",
+          "Hotline: 1900 1234"
+        ]
       },
       "email": {
         "title": "Email",
-        "details": ["info@healthcare.vn", "support@healthcare.vn"]
+        "details": [
+          "info@healthcare.vn",
+          "support@healthcare.vn"
+        ]
       },
       "workingHours": {
         "title": "Working Hours",
-        "details": ["Mon - Fri: 8:00 - 20:00", "Sat - Sun: 8:00 - 17:00"]
+        "details": [
+          "Mon - Fri: 8:00 - 20:00",
+          "Sat - Sun: 8:00 - 17:00"
+        ]
       }
     },
     "form": {
@@ -1105,7 +1159,7 @@
       "chat": "Live Chat"
     }
   },
-    "doctors": {
+  "doctors": {
     "header": {
       "title": "Doctors List",
       "subtitle": "Search and book appointments with top doctors"
@@ -1123,7 +1177,7 @@
     },
     "empty": "No doctors found"
   },
-    "home": {
+  "home": {
     "hero": {
       "tagline": "Top healthcare service",
       "title": "Health is",
@@ -1179,7 +1233,7 @@
       "dashboard": "Go to Dashboard"
     }
   },
-    "specialties": {
+  "specialties": {
     "header": {
       "title": "Specialties",
       "subtitle": "Explore specialties and choose the one that fits your needs"
@@ -1190,7 +1244,7 @@
     },
     "empty": "No specialties found"
   },
-    "appointment": {
+  "appointment": {
     "title": "Book Appointment",
     "date": "Date",
     "session": "Session",
@@ -1282,7 +1336,7 @@
     "importantNoteTitle": "Important Note:",
     "importantNote": "Please arrive on time and bring identification documents. If you need to reschedule, please contact us at least 2 hours in advance."
   },
-    "drug": {
+  "drug": {
     "title": "Drug Information Lookup",
     "searchPlaceholder": "Search by drug name, ingredient, manufacturer...",
     "search": "Search",
@@ -1309,7 +1363,7 @@
     "selectMedicine": "Select a medicine to view details",
     "selectInstruction": "Choose a medicine from the list on the left to see details"
   },
-    "profile": {
+  "profile": {
     "title": "Profile",
     "subtitle": "Manage your personal and health information",
     "personalInfo": "Personal Information",
@@ -1321,7 +1375,7 @@
     "healthRecord": "Health Record",
     "healthRecordShort": "Health"
   },
-    "personalInfo": {
+  "personalInfo": {
     "title": "Personal Information",
     "subtitle": "Manage your personal information",
     "basicInfo": "Basic Information",
@@ -1350,20 +1404,17 @@
     "avatarUpdated": "Avatar has been updated",
     "avatarUploadError": "Unable to upload avatar"
   },
-    "insurance": {
+  "insurance": {
     "title": "Insurance Information",
     "description": "Manage your health insurance information",
     "defaultProvider": "Vietnam Social Insurance",
     "defaultPolicyType": "Basic Health Insurance",
-
     "social": "Social Insurance",
     "private": "Private Insurance",
-
     "cardTitle": "Health Insurance Card",
     "country": "Vietnam",
     "placeholderProvider": "Insurance Provider",
     "placeholderCompany": "Insurance Company",
-
     "insuranceNumber": "Insurance Number",
     "enterInsuranceNumber": "Enter insurance number",
     "provider": "Insurance Provider",
@@ -1373,7 +1424,6 @@
     "expiryDate": "Expiry Date",
     "coverageAmount": "Coverage Amount",
     "enterCoverageAmount": "Enter maximum coverage amount",
-
     "socialStatus": "Social Insurance Status",
     "privateTitle": "Private Insurance",
     "policyNumber": "Policy Number",
@@ -1386,38 +1436,32 @@
     "enterPremiumAmount": "Enter annual premium",
     "coverageLimit": "Coverage Limit",
     "enterCoverageLimit": "Enter maximum coverage limit",
-
     "privateStatus": "Private Insurance Status",
     "active": "Active",
     "notUpdated": "Not Updated",
     "notRegistered": "Not Registered",
     "validUntil": "Your insurance is valid until {{date}}",
-
     "loadError": "Unable to load insurance information",
     "updateSuccess": "Insurance information updated successfully",
     "updateError": "Unable to update insurance information"
   },
-    "emergency": {
+  "emergency": {
     "title": "Emergency Contacts",
     "description": "Manage your emergency contact list",
-
     "add": "Add Contact",
     "edit": "Edit Emergency Contact",
     "create": "Add Emergency Contact",
     "formDescription": "Enter information for emergency contact",
-
     "contactType": "Contact Type",
     "chooseContactType": "Select contact type",
     "family": "Family",
     "medical": "Medical",
-
     "contactName": "Full Name",
     "enterName": "Enter full name",
     "contactPhone": "Phone Number",
     "enterPhone": "Enter phone number",
     "relationship": "Relationship",
     "chooseRelationship": "Select relationship",
-
     "relationships": {
       "spouse": "Spouse",
       "child": "Child",
@@ -1430,31 +1474,28 @@
       "pharmacist": "Pharmacist",
       "nurse": "Nurse"
     },
-
     "emptyFamily": "No family contacts yet",
     "emptyMedical": "No medical contacts yet",
-
     "loadError": "Unable to load emergency contacts",
     "saveError": "Unable to save contact information",
     "deleteError": "Unable to delete contact",
-
     "updateSuccess": "Emergency contact updated successfully",
     "addSuccess": "Emergency contact added successfully",
     "deleteSuccess": "Emergency contact deleted successfully"
   },
   "health": {
-  "title": "Health Record",
-  "description": "Manage your health information",
-  "metricsTab": "Health Metrics",
-  "historyTab": "Medical History",
-  "height": "Height (cm)",
-  "weight": "Weight (kg)",
-  "bmi": "BMI Index",
-  "bloodType": "Blood Type",
-  "chooseBloodType": "Select blood type",
-  "allergies": "Allergies",
-  "loadError": "Unable to load health record",
-  "updateSuccess": "Health record has been updated",
-  "updateError": "Unable to update health record"
-}
+    "title": "Health Record",
+    "description": "Manage your health information",
+    "metricsTab": "Health Metrics",
+    "historyTab": "Medical History",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)",
+    "bmi": "BMI Index",
+    "bloodType": "Blood Type",
+    "chooseBloodType": "Select blood type",
+    "allergies": "Allergies",
+    "loadError": "Unable to load health record",
+    "updateSuccess": "Health record has been updated",
+    "updateError": "Unable to update health record"
+  }
 }

@@ -36,9 +36,30 @@ const Home: React.FC = () => {
   const fetchHomeData = async () => {
     try {
       setLoading(true);
-      // Fetch recent appointments (e.g. last 8)
-      const recentRes = await appointmentService.getAppointments({ page: 1, size: 8 });
-      setRecentAppointments(recentRes.content || []);
+      // Lấy nhiều appointment để lọc recent
+      const recentRes = await appointmentService.getAppointments({ page: 1, size: 50 });
+      const allAppointments = recentRes.content || [];
+
+      // Lấy ngày hôm qua
+      const now = new Date();
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+      // Lọc các appointment có schedule.workDate <= hôm qua
+      const filtered = allAppointments.filter(a => {
+        if (!a.schedule?.workDate) return false;
+        return a.schedule.workDate <= yesterdayStr;
+      });
+
+      // Sắp xếp giảm dần theo ngày workDate
+      filtered.sort((a, b) => {
+        if (!a.schedule?.workDate || !b.schedule?.workDate) return 0;
+        return b.schedule.workDate.localeCompare(a.schedule.workDate);
+      });
+
+      // Lấy 3 appointment gần nhất
+      setRecentAppointments(filtered.slice(0, 3));
 
       // Fetch upcoming appointments (e.g. next 5, status PENDING)
       const upcomingRes = await appointmentService.getAppointments({ page: 1, size: 5, appointmentStatus: "PENDING" });
@@ -117,16 +138,6 @@ const Home: React.FC = () => {
       },
     },
   ];
-
-  if (loading) {
-    return (
-      <div className="flex-1 h-screen w-full bg-slate-50">
-        <div className="flex items-center justify-center h-full">
-          <Text>{t("loading")}</Text>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-slate-50 min-h-screen">
