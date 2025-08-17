@@ -20,12 +20,14 @@ import { Plus, Edit, Trash2, Phone, User, Heart, Stethoscope, Users } from "luci
 import { useToast } from "../../../hooks/useToast"
 import { patientService } from "../../../../../shared/services/patientService"
 import type { EmergencyContact } from "../../../../../shared/types/patient"
+import { useTranslation } from "react-i18next"
 
 interface EmergencyContactWithCategory extends EmergencyContact {
   category: "family" | "medical"
 }
 
 export function EmergencyContactTab() {
+  const { t } = useTranslation()
   const [contacts, setContacts] = useState<EmergencyContactWithCategory[]>([])
   const [loading, setLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -60,8 +62,8 @@ export function EmergencyContactTab() {
       setContacts(contactsWithCategory)
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Không thể tải danh sách liên hệ khẩn cấp",
+        title: t("common.error"),
+        description: t("emergency.loadError"),
         variant: "destructive",
       })
     } finally {
@@ -69,7 +71,12 @@ export function EmergencyContactTab() {
     }
   }
 
-  const getMedicalRelationships = () => ["Bác sĩ gia đình", "Bác sĩ chuyên khoa", "Dược sĩ", "Y tá"]
+  const getMedicalRelationships = () => [
+    t("emergency.relationships.familyDoctor"),
+    t("emergency.relationships.specialist"),
+    t("emergency.relationships.pharmacist"),
+    t("emergency.relationships.nurse"),
+  ]
 
   const handleSave = async () => {
     try {
@@ -89,8 +96,8 @@ export function EmergencyContactTab() {
           ),
         )
         toast({
-          title: "Thành công",
-          description: "Liên hệ khẩn cấp đã được cập nhật",
+          title: t("common.success"),
+          description: t("emergency.updateSuccess"),
         })
       } else {
         const newContact = await patientService.addEmergencyContact(patient.id, {
@@ -101,16 +108,16 @@ export function EmergencyContactTab() {
 
         setContacts((prev) => [...prev, { ...newContact, category: formData.category }])
         toast({
-          title: "Thành công",
-          description: "Liên hệ khẩn cấp đã được thêm",
+          title: t("common.success"),
+          description: t("emergency.addSuccess"),
         })
       }
 
       handleCloseDialog()
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Không thể lưu thông tin liên hệ",
+        title: t("common.error"),
+        description: t("emergency.saveError"),
         variant: "destructive",
       })
     } finally {
@@ -125,13 +132,13 @@ export function EmergencyContactTab() {
 
       setContacts((prev) => prev.filter((contact) => contact.id !== contactId))
       toast({
-        title: "Thành công",
-        description: "Liên hệ khẩn cấp đã được xóa",
+        title: t("common.success"),
+        description: t("emergency.deleteSuccess"),
       })
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Không thể xóa liên hệ",
+        title: t("common.error"),
+        description: t("emergency.deleteError"),
         variant: "destructive",
       })
     }
@@ -159,13 +166,13 @@ export function EmergencyContactTab() {
 
   const getRelationshipIcon = (relationship: string) => {
     switch (relationship.toLowerCase()) {
-      case "vợ/chồng":
+      case t("emergency.relationships.spouse").toLowerCase():
       case "spouse":
         return <Heart className="w-4 h-4 text-red-500" />
-      case "con":
+      case t("emergency.relationships.child").toLowerCase():
       case "child":
         return <User className="w-4 h-4 text-blue-500" />
-      case "bác sĩ gia đình":
+      case t("emergency.relationships.familyDoctor").toLowerCase():
       case "doctor":
         return <Stethoscope className="w-4 h-4 text-green-500" />
       default:
@@ -184,7 +191,7 @@ export function EmergencyContactTab() {
           <h3 className="text-lg font-medium text-gray-900 mb-2">{emptyMessage}</h3>
           <Button onClick={() => setIsDialogOpen(true)} className="bg-red-600 hover:bg-red-700" disabled={loading}>
             <Plus className="w-4 h-4 mr-2" />
-            Thêm liên hệ
+            {t("emergency.add")}
           </Button>
         </div>
       )
@@ -235,90 +242,114 @@ export function EmergencyContactTab() {
         <div>
           <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
             <Phone className="w-5 h-5 text-red-600" />
-            Liên hệ khẩn cấp
+            {t("emergency.title")}
           </CardTitle>
-          <CardDescription>Quản lý danh sách người liên hệ khi có tình huống khẩn cấp</CardDescription>
+          <CardDescription>{t("emergency.description")}</CardDescription>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="bg-red-600 hover:bg-red-700" disabled={loading}>
               <Plus className="w-4 h-4 mr-2" />
-              Thêm liên hệ
+              {t("emergency.add")}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>{editingContact ? "Chỉnh sửa liên hệ khẩn cấp" : "Thêm liên hệ khẩn cấp"}</DialogTitle>
-              <DialogDescription>Nhập thông tin người liên hệ khi có tình huống khẩn cấp</DialogDescription>
+              <DialogTitle>{editingContact ? t("emergency.edit") : t("emergency.create")}</DialogTitle>
+              <DialogDescription>{t("emergency.formDescription")}</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="contact_category">Loại liên hệ</Label>
+                <Label htmlFor="contact_category">{t("emergency.contactType")}</Label>
                 <Select
                   value={formData.category}
-                  onValueChange={(value: "family" | "medical") => setFormData((prev) => ({ ...prev, category: value }))}
+                  onValueChange={(value: "family" | "medical") =>
+                    setFormData((prev) => ({ ...prev, category: value }))
+                  }
                   disabled={loading}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn loại liên hệ" />
+                    <SelectValue placeholder={t("emergency.chooseContactType")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="family">Người thân</SelectItem>
-                    <SelectItem value="medical">Y tế</SelectItem>
+                    <SelectItem value="family">{t("emergency.family")}</SelectItem>
+                    <SelectItem value="medical">{t("emergency.medical")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact_name">Họ và tên</Label>
+                <Label htmlFor="contact_name">{t("emergency.contactName")}</Label>
                 <Input
                   id="contact_name"
                   value={formData.contact_name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, contact_name: e.target.value }))}
-                  placeholder="Nhập họ và tên"
+                  placeholder={t("emergency.enterName") || ""}
                   disabled={loading}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact_phone">Số điện thoại</Label>
+                <Label htmlFor="contact_phone">{t("emergency.contactPhone")}</Label>
                 <Input
                   id="contact_phone"
                   value={formData.contact_phone}
                   onChange={(e) => setFormData((prev) => ({ ...prev, contact_phone: e.target.value }))}
-                  placeholder="Nhập số điện thoại"
+                  placeholder={t("emergency.enterPhone") || ""}
                   disabled={loading}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="relationship">Mối quan hệ</Label>
+                <Label htmlFor="relationship">{t("emergency.relationship")}</Label>
                 <Select
                   value={formData.relationship}
                   onValueChange={(value) => setFormData((prev) => ({ ...prev, relationship: value }))}
                   disabled={loading}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn mối quan hệ" />
+                    <SelectValue placeholder={t("emergency.chooseRelationship")} />
                   </SelectTrigger>
                   <SelectContent>
                     {formData.category === "family" ? (
                       <>
-                        <SelectItem value="Vợ/Chồng">Vợ/Chồng</SelectItem>
-                        <SelectItem value="Con">Con</SelectItem>
-                        <SelectItem value="Cha/Mẹ">Cha/Mẹ</SelectItem>
-                        <SelectItem value="Anh/Chị/Em">Anh/Chị/Em</SelectItem>
-                        <SelectItem value="Bạn bè">Bạn bè</SelectItem>
-                        <SelectItem value="Khác">Khác</SelectItem>
+                        <SelectItem value={t("emergency.relationships.spouse")}>
+                          {t("emergency.relationships.spouse")}
+                        </SelectItem>
+                        <SelectItem value={t("emergency.relationships.child")}>
+                          {t("emergency.relationships.child")}
+                        </SelectItem>
+                        <SelectItem value={t("emergency.relationships.parent")}>
+                          {t("emergency.relationships.parent")}
+                        </SelectItem>
+                        <SelectItem value={t("emergency.relationships.sibling")}>
+                          {t("emergency.relationships.sibling")}
+                        </SelectItem>
+                        <SelectItem value={t("emergency.relationships.friend")}>
+                          {t("emergency.relationships.friend")}
+                        </SelectItem>
+                        <SelectItem value={t("emergency.relationships.other")}>
+                          {t("emergency.relationships.other")}
+                        </SelectItem>
                       </>
                     ) : (
                       <>
-                        <SelectItem value="Bác sĩ gia đình">Bác sĩ gia đình</SelectItem>
-                        <SelectItem value="Bác sĩ chuyên khoa">Bác sĩ chuyên khoa</SelectItem>
-                        <SelectItem value="Dược sĩ">Dược sĩ</SelectItem>
-                        <SelectItem value="Y tá">Y tá</SelectItem>
-                        <SelectItem value="Khác">Khác</SelectItem>
+                        <SelectItem value={t("emergency.relationships.familyDoctor")}>
+                          {t("emergency.relationships.familyDoctor")}
+                        </SelectItem>
+                        <SelectItem value={t("emergency.relationships.specialist")}>
+                          {t("emergency.relationships.specialist")}
+                        </SelectItem>
+                        <SelectItem value={t("emergency.relationships.pharmacist")}>
+                          {t("emergency.relationships.pharmacist")}
+                        </SelectItem>
+                        <SelectItem value={t("emergency.relationships.nurse")}>
+                          {t("emergency.relationships.nurse")}
+                        </SelectItem>
+                        <SelectItem value={t("emergency.relationships.other")}>
+                          {t("emergency.relationships.other")}
+                        </SelectItem>
                       </>
                     )}
                   </SelectContent>
@@ -328,10 +359,10 @@ export function EmergencyContactTab() {
 
             <DialogFooter>
               <Button variant="outline" onClick={handleCloseDialog} disabled={loading}>
-                Hủy
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSave} disabled={loading}>
-                {loading ? "Đang lưu..." : editingContact ? "Cập nhật" : "Thêm"}
+                {loading ? t("common.saving") : editingContact ? t("common.update") : t("common.add")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -350,16 +381,21 @@ export function EmergencyContactTab() {
             <TabsList className="grid w-full grid-cols-2 bg-gray-50 mb-6">
               <TabsTrigger value="family" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                Người thân ({familyContacts.length})
+                {t("emergency.family")} ({familyContacts.length})
               </TabsTrigger>
               <TabsTrigger value="medical" className="flex items-center gap-2">
-                <Stethoscope className="w-4 h-4" />Y tế ({medicalContacts.length})
+                <Stethoscope className="w-4 h-4" />
+                {t("emergency.medical")} ({medicalContacts.length})
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="family">{renderContactList(familyContacts, "Chưa có liên hệ người thân")}</TabsContent>
+            <TabsContent value="family">
+              {renderContactList(familyContacts, t("emergency.emptyFamily"))}
+            </TabsContent>
 
-            <TabsContent value="medical">{renderContactList(medicalContacts, "Chưa có liên hệ y tế")}</TabsContent>
+            <TabsContent value="medical">
+              {renderContactList(medicalContacts, t("emergency.emptyMedical"))}
+            </TabsContent>
           </Tabs>
         )}
       </CardContent>

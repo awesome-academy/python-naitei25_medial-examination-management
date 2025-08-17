@@ -78,8 +78,13 @@
     "download": "Download",
     "noPrescriptionId": "Prescription ID is missing.",
     "unit": "Unit",
-    "invalidDate": "Invalid Date"
-  },
+    "invalidDate": "Invalid Date",
+    "filters": "Filters",
+    "searchResults": "search results",
+    "doctorsInDepartment": "doctors in department",
+    "returnToDashboard": "Return to Dashboard",
+    "saving": "Saving..."
+    },
   "navigation": {
     "home": "Home",
     "about": "About",
@@ -139,7 +144,8 @@
     "loginFailed": "Login failed",
     "logoutSuccess": "Logout successful",
     "refreshAuthError": "Unable to refresh authentication information",
-    "invalidCredentials": "Phone number or password is incorrect"
+    "invalidCredentials": "Phone number or password is incorrect",
+    "pleaseLogin": "Please log in to continue"
   },
   "forms": {
     "firstName": "First Name",
@@ -424,7 +430,8 @@
     "date": "Date",
     "shift": "Shift",
     "patients": "patients",
-    "schedule": "Schedule"
+    "schedule": "Schedule",
+    "dashboard": "Dashboard"
   },
   "table": {
     "no": "No.",
@@ -869,7 +876,36 @@
     "eventCalendar": "Event Calendar",
     "viewDetails": "View Details",
     "upcomingAppointments": "Upcoming Appointments",
-    "systemInfo": "System Information"
+    "systemInfo": "System Information",
+    "defaultPatient": "Patient",
+    "subtitle": "Welcome back. Here’s an overview of your health status.",
+    "stats": {
+      "upcoming": "Upcoming Appointments",
+      "total": "Total Appointments",
+      "completed": "Completed Visits"
+    },
+    "appointments": {
+      "recent": "Recent Appointments",
+      "empty": "No appointments yet",
+      "unknownDoctor": "Unknown Doctor",
+      "unknownSpecialization": "Unknown Specialization"
+    },
+    "status": {
+      "upcoming": "Upcoming",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "viewAll": "View All",
+      "bookNow": "Book Appointment Now"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "findDoctor": "Find a Doctor",
+      "findDoctorSubtitle": "Search for the right doctor",
+      "myAppointments": "My Appointments",
+      "myAppointmentsSubtitle": "View and manage your appointments"
+    }
   },
   "log": {
     "eventDetails": "Event Details",
@@ -885,5 +921,540 @@
     "location": "Location",
     "building": "Building",
     "status": "Status"
-  }
+  },
+    "footer": {
+    "companyDescription": "We are committed to providing the best healthcare services with a team of professional doctors and modern technology.",
+    "quickLinks": "Quick Links",
+    "contactInfo": "Contact Information",
+    "addressLine1": "Linh Trung Ward, Thu Duc City",
+    "addressLine2": "Ho Chi Minh City, Vietnam",
+    "phone": "+84 123 456 789",
+    "email": "info@healthcare.vn",
+    "rightsReserved": "All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use"
+  },
+    "about": {
+    "header": {
+      "title": "About HealthCare",
+      "subtitle": "We are committed to providing the best healthcare services with professional doctors and the most advanced medical technology."
+    },
+    "stats": {
+      "doctors": "Specialist Doctors",
+      "patients": "Trusted Patients",
+      "departments": "Departments",
+      "rating": "Average Rating"
+    },
+    "mission": {
+      "title": "Our Mission",
+      "desc": "HealthCare was founded with the mission to democratize healthcare - making high-quality healthcare more accessible to everyone."
+    },
+    "vision": {
+      "title": "Vision 2030",
+      "points": [
+        "Become Vietnam's No.1 digital healthcare platform",
+        "Serve 1 million patients annually",
+        "Expand to Southeast Asia",
+        "Integrate AI and IoT in healthcare"
+      ]
+    },
+    "commitment": {
+      "title": "Quality Commitment",
+      "desc": "We continuously improve service quality and invest in technology to deliver the best patient experience."
+    },
+    "values": {
+      "title": "Core Values",
+      "subtitle": "These values guide all of our actions",
+      "dedication": {
+        "title": "Dedication",
+        "desc": "We always put patients' health and satisfaction first"
+      },
+      "safety": {
+        "title": "Safety",
+        "desc": "Strictly following international medical standards and data protection"
+      },
+      "professional": {
+        "title": "Professionalism",
+        "desc": "Experienced doctors with high expertise"
+      },
+      "convenience": {
+        "title": "Convenience",
+        "desc": "24/7 service with a modern online booking system"
+      }
+    },
+    "timeline": {
+      "title": "Our Journey",
+      "subtitle": "From the early days to today",
+      "2020": { "title": "Founded", "desc": "Launched with 50 doctors" },
+      "2021": { "title": "Expansion", "desc": "Grew to 200+ doctors, 15 departments" },
+      "2022": { "title": "Technology", "desc": "Applied AI in diagnosis and consultation" },
+      "2023": { "title": "International", "desc": "Partnered with top global hospitals" },
+      "2024": { "title": "Present", "desc": "500+ doctors, 50,000+ trusted patients" }
+    },
+    "cta": {
+      "title": "Join Us",
+      "desc": "Be part of the HealthCare community and build a better future for healthcare with us",
+      "register": "Register Now",
+      "learnMore": "Learn More"
+    }
+  },
+    "contact": {
+    "header": {
+      "title": "Contact Us",
+      "subtitle": "We are always ready to listen and support you. Reach out to us anytime."
+    },
+    "info": {
+      "address": {
+        "title": "Address",
+        "details": ["123 ABC Street, District 1", "Ho Chi Minh City, Vietnam"]
+      },
+      "phone": {
+        "title": "Phone",
+        "details": ["+84 123 456 789", "Hotline: 1900 1234"]
+      },
+      "email": {
+        "title": "Email",
+        "details": ["info@healthcare.vn", "support@healthcare.vn"]
+      },
+      "workingHours": {
+        "title": "Working Hours",
+        "details": ["Mon - Fri: 8:00 - 20:00", "Sat - Sun: 8:00 - 17:00"]
+      }
+    },
+    "form": {
+      "title": "Send a Message",
+      "desc": "Fill in the form below and we will get back to you as soon as possible",
+      "fields": {
+        "name": "Full Name",
+        "phone": "Phone Number",
+        "email": "Email",
+        "subject": "Subject",
+        "message": "Message"
+      },
+      "placeholders": {
+        "name": "Enter your full name",
+        "phone": "Enter your phone number",
+        "email": "Enter your email address",
+        "subject": "Select a subject",
+        "message": "Enter your message..."
+      },
+      "subjects": {
+        "appointment": "Book an Appointment",
+        "consultation": "Medical Consultation",
+        "technical": "Technical Support",
+        "complaint": "Complaint",
+        "other": "Other"
+      },
+      "submit": "Send Message"
+    },
+    "services": {
+      "title": "Quick Services",
+      "subtitle": "Access popular services quickly",
+      "items": {
+        "consultation": {
+          "title": "Online Consultation",
+          "desc": "Get advice from doctors via video call or chat",
+          "action": "Start Consultation"
+        },
+        "appointment": {
+          "title": "Book Appointment",
+          "desc": "Schedule an appointment with the right specialist",
+          "action": "Book Now"
+        },
+        "support": {
+          "title": "Customer Support",
+          "desc": "24/7 support team ready to assist you",
+          "action": "Contact Now"
+        }
+      }
+    },
+    "map": {
+      "title": "Location",
+      "subtitle": "Find us in the city center",
+      "placeholder": {
+        "desc": "Map will be displayed here",
+        "address": "123 ABC Street, District 1, HCMC"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Some common questions customers often ask",
+      "items": [
+        {
+          "q": "How do I book an appointment?",
+          "a": "You can book an appointment online through our website or mobile app. Just choose a doctor, a suitable time, and confirm the booking."
+        },
+        {
+          "q": "How much does a consultation cost?",
+          "a": "The consultation fee depends on the department and doctor. You can view the detailed fee on each doctor's information page."
+        },
+        {
+          "q": "Can I cancel an appointment?",
+          "a": "Yes, you can cancel an appointment at least 24 hours in advance without a fee. Later cancellations may incur charges."
+        },
+        {
+          "q": "Do you accept health insurance?",
+          "a": "We accept payments through common health insurance providers. Please contact us for more details."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Need Emergency Support?",
+      "desc": "Our 24/7 support team is always ready to assist you",
+      "call": "Call Now: 1900 1234",
+      "chat": "Live Chat"
+    }
+  },
+    "doctors": {
+    "header": {
+      "title": "Doctors List",
+      "subtitle": "Search and book appointments with top doctors"
+    },
+    "search": {
+      "placeholder": "Search doctors...",
+      "button": "Search"
+    },
+    "prefix": "Dr.",
+    "labels": {
+      "fee": "Consultation Fee"
+    },
+    "actions": {
+      "book": "Book Appointment"
+    },
+    "empty": "No doctors found"
+  },
+    "home": {
+    "hero": {
+      "tagline": "Top healthcare service",
+      "title": "Health is",
+      "highlight": "Happiness",
+      "subtitle": "Book appointments with top doctors, easy and fast"
+    },
+    "search": {
+      "placeholder": "Search doctors, specialties...",
+      "button": "Search"
+    },
+    "doctorPrefix": "Dr.",
+    "labels": {
+      "fee": "Consultation Fee"
+    },
+    "actions": {
+      "book": "Book Appointment",
+      "viewAllDoctors": "View all doctors"
+    },
+    "emptyDoctors": "No doctors found",
+    "specialties": {
+      "title": "Specialties",
+      "subtitle": "Explore top specialties with highly qualified doctors",
+      "doctorCount": "doctors"
+    },
+    "emptySpecialties": "No specialties found",
+    "featured": {
+      "title": "Featured Doctors",
+      "subtitle": "Meet our experienced medical team"
+    },
+    "features": {
+      "title": "Why choose us?",
+      "subtitle": "We are committed to providing the best healthcare services with modern technology",
+      "items": {
+        "safe": {
+          "title": "Safe & Secure",
+          "description": "Personal information is fully protected with advanced encryption technology"
+        },
+        "booking": {
+          "title": "24/7 Booking",
+          "description": "Book appointments anytime, anywhere with our online system"
+        },
+        "support": {
+          "title": "Dedicated Support",
+          "description": "Our support team is ready to help you anytime, anywhere"
+        }
+      }
+    },
+    "cta": {
+      "title": "Start your healthcare journey",
+      "subtitle": "Sign up today to experience modern and professional healthcare services",
+      "login": "Login",
+      "register": "Register Now",
+      "dashboard": "Go to Dashboard"
+    }
+  },
+    "specialties": {
+    "header": {
+      "title": "Specialties",
+      "subtitle": "Explore specialties and choose the one that fits your needs"
+    },
+    "noDescription": "No description available",
+    "actions": {
+      "viewDoctors": "View Doctors"
+    },
+    "empty": "No specialties found"
+  },
+    "appointment": {
+    "title": "Book Appointment",
+    "date": "Date",
+    "session": "Session",
+    "time": "Time",
+    "symptoms": "Symptoms",
+    "note": "Note",
+    "notePlaceholder": "Enter additional notes...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "symptomFever": "Fever",
+    "symptomCough": "Cough",
+    "symptomHeadache": "Headache",
+    "symptomOther": "Other",
+    "selectSymptoms": "Select symptoms",
+    "noAvailableSlots": "No available time slots.",
+    "noPatientInfo": "Patient information not found.",
+    "selectTime": "Please select a time.",
+    "pastNotAllowed": "Cannot book appointments in the past.",
+    "noScheduleFound": "No matching schedule found.",
+    "success": "Appointment booked successfully!",
+    "errorGeneric": "An error occurred while booking the appointment.",
+    "checkStatus": "Please check the appointment status.",
+    "scheduleTime": "Working hours: {{start}} - {{end}}",
+    "viewAppointments": "View Appointments",
+    "confirmation": {
+      "title": "Appointment Confirmation",
+      "details": "Appointment Details",
+      "id": "ID",
+      "doctor": "Doctor",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status",
+      "patient": "Patient",
+      "session": "Session",
+      "price": "Price",
+      "symptoms": "Symptoms",
+      "location": "Location",
+      "room": "Room {{room}}",
+      "floor": "Floor {{floor}}",
+      "building": "Building {{building}}",
+      "missingInfo": "Required information is missing to load the confirmation page.",
+      "errorLoad": "An error occurred while loading confirmation details.",
+      "invalidData": "Invalid appointment data or missing doctor/patient information.",
+      "errorConfirm": "An error occurred during confirmation and payment.",
+      "loading": "Loading confirmation details...",
+      "incompleteInfo": "Unable to load complete appointment details.",
+      "processing": "Processing...",
+      "confirmAndPay": "Confirm and Pay",
+      "workingTime": "Working hours: {{start}} - {{end}}"
+    },
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed"
+    }
+  },
+  "payment": {
+    "paymentTitle": "Payment Information",
+    "successTitle": "Payment Successful",
+    "cancelTitle": "Payment Cancelled",
+    "paymentSuccess": "Payment successful",
+    "paymentCancelled": "Payment cancelled",
+    "noPaymentLink": "Unable to generate payment link",
+    "createPaymentLinkFailed": "Failed to create payment link",
+    "billNotFound": "Bill not found",
+    "doctorInfo": "Doctor Information",
+    "doctorName": "Doctor Name",
+    "specialty": "Specialty",
+    "consultationFee": "Consultation Fee",
+    "appointmentInfo": "Appointment Information",
+    "appointmentCode": "Appointment Code",
+    "date": "Date",
+    "time": "Time",
+    "shift": "Shift",
+    "status": "Status",
+    "location": "Location",
+    "symptoms": "Symptoms",
+    "billInfo": "Bill Information",
+    "billCode": "Bill Code",
+    "amount": "Amount",
+    "createdAt": "Created At",
+    "tryAgain": "Retry Payment",
+    "payNow": "Pay Now",
+    "cancel": "Cancel",
+    "successNote": "Payment successful! Your appointment has been confirmed.",
+    "cancelNote": "Payment was cancelled. You can try again or go back.",
+    "pendingNote": "Please complete the payment to confirm your appointment.",
+    "importantNoteTitle": "Important Note:",
+    "importantNote": "Please arrive on time and bring identification documents. If you need to reschedule, please contact us at least 2 hours in advance."
+  },
+    "drug": {
+    "title": "Drug Information Lookup",
+    "searchPlaceholder": "Search by drug name, ingredient, manufacturer...",
+    "search": "Search",
+    "searching": "Searching...",
+    "error": "An error occurred",
+    "searchError": "An error occurred while searching",
+    "listTitle": "Medicine List ({{count}})",
+    "notFound": "No medicines found",
+    "priceInsurance": "Price & Insurance",
+    "insuranceCovered": "Covered by insurance ({{discount}}% discount)",
+    "notCovered": "Not covered by insurance",
+    "productInfo": "Product Information",
+    "category": "Category",
+    "unit": "Unit",
+    "quantity": "Quantity",
+    "description": "Description",
+    "usage": "Usage",
+    "sideEffects": "Side Effects",
+    "warningTitle": "Important Warnings",
+    "warning1": "• Use only as directed by a doctor or pharmacist",
+    "warning2": "• Read instructions carefully before use",
+    "warning3": "• Stop use and consult a doctor if side effects occur",
+    "warning4": "• Store in a dry, cool place away from direct sunlight",
+    "selectMedicine": "Select a medicine to view details",
+    "selectInstruction": "Choose a medicine from the list on the left to see details"
+  },
+    "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your personal and health information",
+    "personalInfo": "Personal Information",
+    "personalInfoShort": "Personal",
+    "insurance": "Insurance",
+    "insuranceShort": "Ins",
+    "emergencyContact": "Emergency Contact",
+    "emergencyContactShort": "Emergency",
+    "healthRecord": "Health Record",
+    "healthRecordShort": "Health"
+  },
+    "personalInfo": {
+    "title": "Personal Information",
+    "subtitle": "Manage your personal information",
+    "basicInfo": "Basic Information",
+    "contactInfo": "Contact Information",
+    "addressInfo": "Address",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "birthday": "Birthday",
+    "gender": "Gender",
+    "selectGender": "Select gender",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "identityNumber": "Identity Number",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "city": "City",
+    "district": "District",
+    "ward": "Ward",
+    "avatar": "Avatar",
+    "loadError": "Unable to load personal information",
+    "updateSuccess": "Personal information has been updated",
+    "updateError": "Unable to update information",
+    "invalidPatient": "Patient information is not loaded, please try again later.",
+    "avatarUpdated": "Avatar has been updated",
+    "avatarUploadError": "Unable to upload avatar"
+  },
+    "insurance": {
+    "title": "Insurance Information",
+    "description": "Manage your health insurance information",
+    "defaultProvider": "Vietnam Social Insurance",
+    "defaultPolicyType": "Basic Health Insurance",
+
+    "social": "Social Insurance",
+    "private": "Private Insurance",
+
+    "cardTitle": "Health Insurance Card",
+    "country": "Vietnam",
+    "placeholderProvider": "Insurance Provider",
+    "placeholderCompany": "Insurance Company",
+
+    "insuranceNumber": "Insurance Number",
+    "enterInsuranceNumber": "Enter insurance number",
+    "provider": "Insurance Provider",
+    "enterProvider": "Enter provider name",
+    "policyType": "Policy Type",
+    "enterPolicyType": "Enter policy type",
+    "expiryDate": "Expiry Date",
+    "coverageAmount": "Coverage Amount",
+    "enterCoverageAmount": "Enter maximum coverage amount",
+
+    "socialStatus": "Social Insurance Status",
+    "privateTitle": "Private Insurance",
+    "policyNumber": "Policy Number",
+    "enterPolicyNumber": "Enter policy number",
+    "companyName": "Insurance Company",
+    "enterCompanyName": "Enter company name",
+    "planName": "Plan Name",
+    "enterPlanName": "Enter plan name",
+    "premiumAmount": "Premium Amount",
+    "enterPremiumAmount": "Enter annual premium",
+    "coverageLimit": "Coverage Limit",
+    "enterCoverageLimit": "Enter maximum coverage limit",
+
+    "privateStatus": "Private Insurance Status",
+    "active": "Active",
+    "notUpdated": "Not Updated",
+    "notRegistered": "Not Registered",
+    "validUntil": "Your insurance is valid until {{date}}",
+
+    "loadError": "Unable to load insurance information",
+    "updateSuccess": "Insurance information updated successfully",
+    "updateError": "Unable to update insurance information"
+  },
+    "emergency": {
+    "title": "Emergency Contacts",
+    "description": "Manage your emergency contact list",
+
+    "add": "Add Contact",
+    "edit": "Edit Emergency Contact",
+    "create": "Add Emergency Contact",
+    "formDescription": "Enter information for emergency contact",
+
+    "contactType": "Contact Type",
+    "chooseContactType": "Select contact type",
+    "family": "Family",
+    "medical": "Medical",
+
+    "contactName": "Full Name",
+    "enterName": "Enter full name",
+    "contactPhone": "Phone Number",
+    "enterPhone": "Enter phone number",
+    "relationship": "Relationship",
+    "chooseRelationship": "Select relationship",
+
+    "relationships": {
+      "spouse": "Spouse",
+      "child": "Child",
+      "parent": "Parent",
+      "sibling": "Sibling",
+      "friend": "Friend",
+      "other": "Other",
+      "familyDoctor": "Family Doctor",
+      "specialist": "Specialist",
+      "pharmacist": "Pharmacist",
+      "nurse": "Nurse"
+    },
+
+    "emptyFamily": "No family contacts yet",
+    "emptyMedical": "No medical contacts yet",
+
+    "loadError": "Unable to load emergency contacts",
+    "saveError": "Unable to save contact information",
+    "deleteError": "Unable to delete contact",
+
+    "updateSuccess": "Emergency contact updated successfully",
+    "addSuccess": "Emergency contact added successfully",
+    "deleteSuccess": "Emergency contact deleted successfully"
+  },
+  "health": {
+  "title": "Health Record",
+  "description": "Manage your health information",
+  "metricsTab": "Health Metrics",
+  "historyTab": "Medical History",
+  "height": "Height (cm)",
+  "weight": "Weight (kg)",
+  "bmi": "BMI Index",
+  "bloodType": "Blood Type",
+  "chooseBloodType": "Select blood type",
+  "allergies": "Allergies",
+  "loadError": "Unable to load health record",
+  "updateSuccess": "Health record has been updated",
+  "updateError": "Unable to update health record"
+}
 }

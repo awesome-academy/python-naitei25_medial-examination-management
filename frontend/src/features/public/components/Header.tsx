@@ -2,23 +2,25 @@
 
 import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Heart, Menu, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-
-const navigation = [
-  { name: "Trang chủ", href: "/" },
-  { name: "Bác sĩ", href: "/doctors" },
-  { name: "Chuyên khoa", href: "/specialties" },
-  { name: "Về chúng tôi", href: "/about" },
-  { name: "Liên hệ", href: "/contact" },
-]
+import { useTranslation } from "react-i18next"
 
 export function Header() {
+  const { t } = useTranslation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+
+  const navigation = [
+    { name: t("navigation.home"), href: "/" },
+    { name: t("sidebar.doctors"), href: "/doctors" },
+    { name: t("sidebar.departments"), href: "/specialties" },
+    { name: t("navigation.about"), href: "/about" },
+    { name: t("navigation.contact"), href: "/contact" },
+  ]
 
   // Hàm kiểm tra active link
   const isActive = (href: string) => {
@@ -64,13 +66,13 @@ export function Header() {
                   onClick={() => navigate("/auth/patient-login")}
                   className="text-gray-700 hover:text-teal-600"
                 >
-                  Đăng nhập
+                  {t("auth.login")}
                 </Button>
                 <Button
                   onClick={() => navigate("/auth/register")}
                   className="bg-teal-600 hover:bg-teal-700 text-white"
                 >
-                  Đăng ký
+                  {t("auth.register")}
                 </Button>
               </>
             ) : (
@@ -126,7 +128,7 @@ export function Header() {
                       }}
                       className="justify-start text-gray-700 hover:text-teal-600"
                     >
-                      Đăng nhập
+                      {t("auth.login")}
                     </Button>
                     <Button
                       onClick={() => {
@@ -135,7 +137,7 @@ export function Header() {
                       }}
                       className="bg-teal-600 hover:bg-teal-700 text-white"
                     >
-                      Đăng ký
+                      {t("auth.register")}
                     </Button>
                   </div>
                 ) : (

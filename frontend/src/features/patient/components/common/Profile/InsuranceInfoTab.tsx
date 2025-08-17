@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Edit, Save, X, Shield, CreditCard, Building2 } from "lucide-react"
 import { useToast } from "../../../hooks/useToast"
 import { patientService } from "../../../../../shared/services/patientService"
+import { useTranslation } from "react-i18next"
 
 interface SocialInsurance {
   insurance_number: string
@@ -62,6 +63,7 @@ export function InsuranceInfoTab() {
     expiry_date: "",
   })
   const { toast } = useToast()
+  const { t } = useTranslation()
 
   useEffect(() => {
     loadInsuranceInfo()
@@ -74,13 +76,12 @@ export function InsuranceInfoTab() {
 
       const socialData: SocialInsurance = {
         insurance_number: patient.insurance_number,
-        insurance_provider: "Bảo hiểm xã hội Việt Nam",
-        policy_type: "Bảo hiểm y tế cơ bản",
-        expiry_date: "", // This would come from insurance API
-        coverage_amount: "", // This would come from insurance API
+        insurance_provider: t("insurance.defaultProvider"),
+        policy_type: t("insurance.defaultPolicyType"),
+        expiry_date: "",
+        coverage_amount: "",
       }
 
-      // Private insurance would come from a separate API or patient extended data
       const privateData: PrivateInsurance = {
         policy_number: "",
         company_name: "",
@@ -96,8 +97,8 @@ export function InsuranceInfoTab() {
       setOriginalPrivate(privateData)
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Không thể tải thông tin bảo hiểm",
+        title: t("common.error"),
+        description: t("insurance.loadError"),
         variant: "destructive",
       })
     } finally {
@@ -112,20 +113,17 @@ export function InsuranceInfoTab() {
         insurance_number: socialInsurance.insurance_number,
       })
 
-      // Private insurance would be updated via separate API
-      // await updatePrivateInsurance(privateInsurance)
-
       setOriginalSocial(socialInsurance)
       setOriginalPrivate(privateInsurance)
       setIsEditing(false)
       toast({
-        title: "Thành công",
-        description: "Thông tin bảo hiểm đã được cập nhật",
+        title: t("common.success"),
+        description: t("insurance.updateSuccess"),
       })
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Không thể cập nhật thông tin bảo hiểm",
+        title: t("common.error"),
+        description: t("insurance.updateError"),
         variant: "destructive",
       })
     } finally {
@@ -145,26 +143,26 @@ export function InsuranceInfoTab() {
         <div>
           <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
             <Shield className="w-5 h-5 text-green-600" />
-            Thông tin bảo hiểm
+            {t("insurance.title")}
           </CardTitle>
-          <CardDescription>Quản lý thông tin bảo hiểm y tế của bạn</CardDescription>
+          <CardDescription>{t("insurance.description")}</CardDescription>
         </div>
         <div className="flex gap-2">
           {isEditing ? (
             <>
               <Button onClick={handleSave} disabled={loading} size="sm" className="bg-green-600 hover:bg-green-700">
                 <Save className="w-4 h-4 mr-2" />
-                {loading ? "Đang lưu..." : "Lưu"}
+                {loading ? t("common.saving") : t("common.save")}
               </Button>
               <Button onClick={handleCancel} variant="outline" size="sm" disabled={loading}>
                 <X className="w-4 h-4 mr-2" />
-                Hủy
+                {t("common.cancel")}
               </Button>
             </>
           ) : (
             <Button onClick={() => setIsEditing(true)} size="sm" className="bg-blue-600 hover:bg-blue-700">
               <Edit className="w-4 h-4 mr-2" />
-              Chỉnh sửa
+              {t("common.edit")}
             </Button>
           )}
         </div>
@@ -182,72 +180,70 @@ export function InsuranceInfoTab() {
             <TabsList className="grid w-full grid-cols-2 bg-gray-50 mb-6">
               <TabsTrigger value="social" className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
-                Bảo hiểm xã hội
+                {t("insurance.social")}
               </TabsTrigger>
               <TabsTrigger value="private" className="flex items-center gap-2">
                 <Building2 className="w-4 h-4" />
-                Bảo hiểm tư nhân
+                {t("insurance.private")}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="social" className="space-y-6">
-              {/* Social Insurance Card Visual */}
               <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
                 <div className="flex items-center justify-between mb-4">
                   <CreditCard className="w-8 h-8" />
                   <div className="text-right">
-                    <p className="text-sm opacity-90">Thẻ bảo hiểm y tế</p>
-                    <p className="text-xs opacity-75">Việt Nam</p>
+                    <p className="text-sm opacity-90">{t("insurance.cardTitle")}</p>
+                    <p className="text-xs opacity-75">{t("insurance.country")}</p>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <p className="text-lg font-mono tracking-wider">
                     {socialInsurance.insurance_number || "•••• •••• ••••"}
                   </p>
-                  <p className="text-sm opacity-90">{socialInsurance.insurance_provider || "Nhà cung cấp bảo hiểm"}</p>
+                  <p className="text-sm opacity-90">{socialInsurance.insurance_provider || t("insurance.placeholderProvider")}</p>
                 </div>
               </div>
 
-              {/* Social Insurance Information Form */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="social_insurance_number">Số thẻ bảo hiểm</Label>
+                  <Label htmlFor="social_insurance_number">{t("insurance.insuranceNumber")}</Label>
                   <Input
                     id="social_insurance_number"
                     value={socialInsurance.insurance_number}
                     onChange={(e) => setSocialInsurance((prev) => ({ ...prev, insurance_number: e.target.value }))}
                     disabled={!isEditing || loading}
                     className="bg-white font-mono"
-                    placeholder="Nhập số thẻ bảo hiểm"
+                    placeholder={t("insurance.enterInsuranceNumber")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="social_insurance_provider">Nhà cung cấp bảo hiểm</Label>
+                  <Label htmlFor="social_insurance_provider">{t("insurance.provider")}</Label>
                   <Input
                     id="social_insurance_provider"
                     value={socialInsurance.insurance_provider}
                     onChange={(e) => setSocialInsurance((prev) => ({ ...prev, insurance_provider: e.target.value }))}
                     disabled={!isEditing || loading}
                     className="bg-white"
-                    placeholder="Tên công ty bảo hiểm"
+                    placeholder={t("insurance.enterProvider")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="social_policy_type">Loại bảo hiểm</Label>
+                  <Label htmlFor="social_policy_type">{t("insurance.policyType")}</Label>
                   <Input
                     id="social_policy_type"
                     value={socialInsurance.policy_type}
                     onChange={(e) => setSocialInsurance((prev) => ({ ...prev, policy_type: e.target.value }))}
                     disabled={!isEditing || loading}
                     className="bg-white"
-                    placeholder="Loại gói bảo hiểm"
+                    placeholder={t("insurance.enterPolicyType")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="social_expiry_date">Ngày hết hạn</Label>
+                  <Label htmlFor="social_expiry_date">{t("insurance.expiryDate")}</Label>
                   <Input
                     id="social_expiry_date"
                     type="date"
@@ -259,41 +255,39 @@ export function InsuranceInfoTab() {
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="social_coverage_amount">Mức bảo hiểm</Label>
+                  <Label htmlFor="social_coverage_amount">{t("insurance.coverageAmount")}</Label>
                   <Input
                     id="social_coverage_amount"
                     value={socialInsurance.coverage_amount}
                     onChange={(e) => setSocialInsurance((prev) => ({ ...prev, coverage_amount: e.target.value }))}
                     disabled={!isEditing || loading}
                     className="bg-white"
-                    placeholder="Số tiền bảo hiểm tối đa"
+                    placeholder={t("insurance.enterCoverageAmount")}
                   />
                 </div>
               </div>
 
-              {/* Social Insurance Status */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 text-green-800">
                   <Shield className="w-5 h-5" />
                   <span className="font-medium">
-                    Trạng thái bảo hiểm: {socialInsurance.insurance_number ? "Đang hoạt động" : "Chưa cập nhật"}
+                    {t("insurance.socialStatus")}: {socialInsurance.insurance_number ? t("insurance.active") : t("insurance.notUpdated")}
                   </span>
                 </div>
                 {socialInsurance.expiry_date && (
                   <p className="text-sm text-green-600 mt-1">
-                    Thẻ bảo hiểm của bạn còn hiệu lực đến {socialInsurance.expiry_date}
+                    {t("insurance.validUntil", { date: socialInsurance.expiry_date })}
                   </p>
                 )}
               </div>
             </TabsContent>
 
             <TabsContent value="private" className="space-y-6">
-              {/* Private Insurance Card Visual */}
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
                 <div className="flex items-center justify-between mb-4">
                   <Building2 className="w-8 h-8" />
                   <div className="text-right">
-                    <p className="text-sm opacity-90">Bảo hiểm tư nhân</p>
+                    <p className="text-sm opacity-90">{t("insurance.privateTitle")}</p>
                     <p className="text-xs opacity-75">Private Insurance</p>
                   </div>
                 </div>
@@ -301,74 +295,73 @@ export function InsuranceInfoTab() {
                   <p className="text-lg font-mono tracking-wider">
                     {privateInsurance.policy_number || "•••• •••• ••••"}
                   </p>
-                  <p className="text-sm opacity-90">{privateInsurance.company_name || "Công ty bảo hiểm"}</p>
+                  <p className="text-sm opacity-90">{privateInsurance.company_name || t("insurance.placeholderCompany")}</p>
                 </div>
               </div>
 
-              {/* Private Insurance Information Form */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="private_policy_number">Số hợp đồng</Label>
+                  <Label htmlFor="private_policy_number">{t("insurance.policyNumber")}</Label>
                   <Input
                     id="private_policy_number"
                     value={privateInsurance.policy_number}
                     onChange={(e) => setPrivateInsurance((prev) => ({ ...prev, policy_number: e.target.value }))}
                     disabled={!isEditing || loading}
                     className="bg-white font-mono"
-                    placeholder="Nhập số hợp đồng"
+                    placeholder={t("insurance.enterPolicyNumber")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="private_company_name">Công ty bảo hiểm</Label>
+                  <Label htmlFor="private_company_name">{t("insurance.companyName")}</Label>
                   <Input
                     id="private_company_name"
                     value={privateInsurance.company_name}
                     onChange={(e) => setPrivateInsurance((prev) => ({ ...prev, company_name: e.target.value }))}
                     disabled={!isEditing || loading}
                     className="bg-white"
-                    placeholder="Tên công ty bảo hiểm"
+                    placeholder={t("insurance.enterCompanyName")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="private_plan_name">Tên gói bảo hiểm</Label>
+                  <Label htmlFor="private_plan_name">{t("insurance.planName")}</Label>
                   <Input
                     id="private_plan_name"
                     value={privateInsurance.plan_name}
                     onChange={(e) => setPrivateInsurance((prev) => ({ ...prev, plan_name: e.target.value }))}
                     disabled={!isEditing || loading}
                     className="bg-white"
-                    placeholder="Tên gói bảo hiểm"
+                    placeholder={t("insurance.enterPlanName")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="private_premium_amount">Phí bảo hiểm</Label>
+                  <Label htmlFor="private_premium_amount">{t("insurance.premiumAmount")}</Label>
                   <Input
                     id="private_premium_amount"
                     value={privateInsurance.premium_amount}
                     onChange={(e) => setPrivateInsurance((prev) => ({ ...prev, premium_amount: e.target.value }))}
                     disabled={!isEditing || loading}
                     className="bg-white"
-                    placeholder="Phí bảo hiểm hàng năm"
+                    placeholder={t("insurance.enterPremiumAmount")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="private_coverage_limit">Hạn mức bảo hiểm</Label>
+                  <Label htmlFor="private_coverage_limit">{t("insurance.coverageLimit")}</Label>
                   <Input
                     id="private_coverage_limit"
                     value={privateInsurance.coverage_limit}
                     onChange={(e) => setPrivateInsurance((prev) => ({ ...prev, coverage_limit: e.target.value }))}
                     disabled={!isEditing || loading}
                     className="bg-white"
-                    placeholder="Hạn mức bảo hiểm tối đa"
+                    placeholder={t("insurance.enterCoverageLimit")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="private_expiry_date">Ngày hết hạn</Label>
+                  <Label htmlFor="private_expiry_date">{t("insurance.expiryDate")}</Label>
                   <Input
                     id="private_expiry_date"
                     type="date"
@@ -380,17 +373,16 @@ export function InsuranceInfoTab() {
                 </div>
               </div>
 
-              {/* Private Insurance Status */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 text-blue-800">
                   <Building2 className="w-5 h-5" />
                   <span className="font-medium">
-                    Trạng thái bảo hiểm tư nhân: {privateInsurance.policy_number ? "Đang hoạt động" : "Chưa đăng ký"}
+                    {t("insurance.privateStatus")}: {privateInsurance.policy_number ? t("insurance.active") : t("insurance.notRegistered")}
                   </span>
                 </div>
                 {privateInsurance.expiry_date && (
                   <p className="text-sm text-blue-600 mt-1">
-                    Hợp đồng bảo hiểm còn hiệu lực đến {privateInsurance.expiry_date}
+                    {t("insurance.validUntil", { date: privateInsurance.expiry_date })}
                   </p>
                 )}
               </div>

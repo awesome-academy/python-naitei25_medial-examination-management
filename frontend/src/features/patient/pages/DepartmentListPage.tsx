@@ -5,7 +5,6 @@ import DepartmentCard from '../components/common/Doctor/DepartmentCard';
 import SearchBar from '../components/form/SearchBar';
 import { useApi } from '../hooks/useApi';
 import { departmentService } from '../../../shared/services/departmentService';
-import type { DepartmentDetail } from '../types/department';
 import LoadingSpinner from '../../../shared/components/common/LoadingSpinner';
 import ErrorMessage from '../../../shared/components/common/ErrorMessage';
 

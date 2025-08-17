@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Edit, Save, X } from "lucide-react"
 import { useToast } from "../../../hooks/useToast"
 import { patientService } from "../../../../../shared/services/patientService"
+import { useTranslation } from "react-i18next"
 
 interface HealthMetrics {
   id: number
@@ -24,6 +25,7 @@ interface MedicalHistory {
 }
 
 export function HealthRecordTab() {
+  const { t } = useTranslation()
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeSubTab, setActiveSubTab] = useState("metrics")
@@ -63,8 +65,8 @@ export function HealthRecordTab() {
       setOriginalHistory(historyData)
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Không thể tải hồ sơ sức khỏe",
+        title: t("common.error"),
+        description: t("health.loadError"),
         variant: "destructive",
       })
     } finally {
@@ -94,13 +96,13 @@ export function HealthRecordTab() {
       setOriginalHistory(medicalHistory)
       setIsEditing(false)
       toast({
-        title: "Thành công",
-        description: "Hồ sơ sức khỏe đã được cập nhật",
+        title: t("common.success"),
+        description: t("health.updateSuccess"),
       })
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Không thể cập nhật hồ sơ sức khỏe",
+        title: t("common.error"),
+        description: t("health.updateError"),
         variant: "destructive",
       })
     } finally {
@@ -117,77 +119,74 @@ export function HealthRecordTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Hồ sơ sức khỏe</CardTitle>
-        <CardDescription>Quản lý thông tin sức khỏe của bạn</CardDescription>
+        <CardTitle>{t("health.title")}</CardTitle>
+        <CardDescription>{t("health.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
           <TabsList>
-            <TabsTrigger value="metrics">Chỉ số sức khỏe</TabsTrigger>
-            <TabsTrigger value="history">Lịch sử y khoa</TabsTrigger>
+            <TabsTrigger value="metrics">{t("health.metricsTab")}</TabsTrigger>
+            <TabsTrigger value="history">{t("health.historyTab")}</TabsTrigger>
           </TabsList>
           <div className="mt-4">
             {isEditing ? (
               <div className="flex justify-end gap-2">
                 <Button onClick={handleSave} disabled={loading}>
-                  <Save className="mr-2 h-4 w-4" /> Lưu
+                  <Save className="mr-2 h-4 w-4" /> {t("common.save")}
                 </Button>
                 <Button variant="outline" onClick={handleCancel} disabled={loading}>
-                  <X className="mr-2 h-4 w-4" /> Hủy
+                  <X className="mr-2 h-4 w-4" /> {t("common.cancel")}
                 </Button>
               </div>
             ) : (
               <Button onClick={() => setIsEditing(true)} disabled={loading}>
-                <Edit className="mr-2 h-4 w-4" /> Chỉnh sửa
+                <Edit className="mr-2 h-4 w-4" /> {t("common.edit")}
               </Button>
             )}
           </div>
           {activeSubTab === "metrics" && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="height" className="text-right">Chiều cao (cm)</Label>
+                <Label htmlFor="height" className="text-right">
+                  {t("health.height")}
+                </Label>
                 <Input
                   id="height"
                   value={healthMetrics.height}
-                  onChange={(e) =>
-                    setHealthMetrics({ ...healthMetrics, height: e.target.value })
-                  }
+                  onChange={(e) => setHealthMetrics({ ...healthMetrics, height: e.target.value })}
                   disabled={!isEditing || loading}
                   className="col-span-3"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="weight" className="text-right">Cân nặng (kg)</Label>
+                <Label htmlFor="weight" className="text-right">
+                  {t("health.weight")}
+                </Label>
                 <Input
                   id="weight"
                   value={healthMetrics.weight}
-                  onChange={(e) =>
-                    setHealthMetrics({ ...healthMetrics, weight: e.target.value })
-                  }
+                  onChange={(e) => setHealthMetrics({ ...healthMetrics, weight: e.target.value })}
                   disabled={!isEditing || loading}
                   className="col-span-3"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="bmi" className="text-right">Chỉ số BMI</Label>
-                <Input
-                  id="bmi"
-                  value={calculateBMI()}
-                  disabled
-                  className="col-span-3"
-                />
+                <Label htmlFor="bmi" className="text-right">
+                  {t("health.bmi")}
+                </Label>
+                <Input id="bmi" value={calculateBMI()} disabled className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="blood_type" className="text-right">Nhóm máu</Label>
+                <Label htmlFor="blood_type" className="text-right">
+                  {t("health.bloodType")}
+                </Label>
                 <Select
                   value={healthMetrics.blood_type}
-                  onValueChange={(value) =>
-                    setHealthMetrics({ ...healthMetrics, blood_type: value })
-                  }
+                  onValueChange={(value) => setHealthMetrics({ ...healthMetrics, blood_type: value })}
                   disabled={!isEditing || loading}
                 >
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Chọn nhóm máu" />
+                    <SelectValue placeholder={t("health.chooseBloodType")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="A+">A+</SelectItem>
@@ -206,13 +205,13 @@ export function HealthRecordTab() {
           {activeSubTab === "history" && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="allergies" className="text-right">Dị ứng</Label>
+                <Label htmlFor="allergies" className="text-right">
+                  {t("health.allergies")}
+                </Label>
                 <Textarea
                   id="allergies"
                   value={medicalHistory.allergies}
-                  onChange={(e) =>
-                    setMedicalHistory({ ...medicalHistory, allergies: e.target.value })
-                  }
+                  onChange={(e) => setMedicalHistory({ ...medicalHistory, allergies: e.target.value })}
                   disabled={!isEditing || loading}
                   className="col-span-3"
                 />

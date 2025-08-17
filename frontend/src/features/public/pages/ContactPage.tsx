@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { MapPin, Phone, Mail, Clock, Send, MessageCircle, Calendar, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function ContactPage() {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,7 +24,6 @@ export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     console.log("Form submitted:", formData)
-    // Handle form submission
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -33,29 +33,29 @@ export default function ContactPage() {
   const contactInfo = [
     {
       icon: MapPin,
-      title: "Địa chỉ",
-      details: ["123 Đường ABC, Quận 1", "TP. Hồ Chí Minh, Việt Nam"],
+      title: t("contact.info.address.title"),
+      details: t("contact.info.address.details", { returnObjects: true }) as string[],
       color: "text-red-600",
       bgColor: "bg-red-50",
     },
     {
       icon: Phone,
-      title: "Điện thoại",
-      details: ["+84 123 456 789", "Hotline: 1900 1234"],
+      title: t("contact.info.phone.title"),
+      details: t("contact.info.phone.details", { returnObjects: true }) as string[],
       color: "text-green-600",
       bgColor: "bg-green-50",
     },
     {
       icon: Mail,
-      title: "Email",
-      details: ["info@healthcare.vn", "support@healthcare.vn"],
+      title: t("contact.info.email.title"),
+      details: t("contact.info.email.details", { returnObjects: true }) as string[],
       color: "text-blue-600",
       bgColor: "bg-blue-50",
     },
     {
       icon: Clock,
-      title: "Giờ làm việc",
-      details: ["Thứ 2 - Thứ 6: 8:00 - 20:00", "Thứ 7 - CN: 8:00 - 17:00"],
+      title: t("contact.info.workingHours.title"),
+      details: t("contact.info.workingHours.details", { returnObjects: true }) as string[],
       color: "text-purple-600",
       bgColor: "bg-purple-50",
     },
@@ -64,23 +64,25 @@ export default function ContactPage() {
   const services = [
     {
       icon: MessageCircle,
-      title: "Tư vấn trực tuyến",
-      description: "Nhận tư vấn từ bác sĩ qua video call hoặc chat",
-      action: "Bắt đầu tư vấn",
+      title: t("contact.services.items.consultation.title"),
+      description: t("contact.services.items.consultation.desc"),
+      action: t("contact.services.items.consultation.action"),
     },
     {
       icon: Calendar,
-      title: "Đặt lịch khám",
-      description: "Đặt lịch khám với bác sĩ chuyên khoa phù hợp",
-      action: "Đặt lịch ngay",
+      title: t("contact.services.items.appointment.title"),
+      description: t("contact.services.items.appointment.desc"),
+      action: t("contact.services.items.appointment.action"),
     },
     {
       icon: Users,
-      title: "Hỗ trợ khách hàng",
-      description: "Đội ngũ hỗ trợ 24/7 sẵn sàng giải đáp thắc mắc",
-      action: "Liên hệ ngay",
+      title: t("contact.services.items.support.title"),
+      description: t("contact.services.items.support.desc"),
+      action: t("contact.services.items.support.action"),
     },
   ]
+
+  const faqs = t("contact.faq.items", { returnObjects: true }) as { q: string; a: string }[]
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,10 +90,8 @@ export default function ContactPage() {
       <section className="relative overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-teal-700 text-white mb-12">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative container mx-auto px-4 py-20 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Liên hệ với chúng tôi</h1>
-          <p className="text-lg text-teal-100 mb-6">
-            Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi bất cứ lúc nào.
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("contact.header.title")}</h1>
+          <p className="text-lg text-teal-100 mb-6">{t("contact.header.subtitle")}</p>
         </div>
       </section>
 
@@ -126,71 +126,71 @@ export default function ContactPage() {
             <div>
               <Card className="shadow-xl border-0">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-gray-900">Gửi tin nhắn</CardTitle>
-                  <p className="text-gray-600">Điền thông tin bên dưới và chúng tôi sẽ liên hệ lại với bạn sớm nhất</p>
+                  <CardTitle className="text-2xl font-bold text-gray-900">{t("contact.form.title")}</CardTitle>
+                  <p className="text-gray-600">{t("contact.form.desc")}</p>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="name">Họ và tên</Label>
+                        <Label htmlFor="name">{t("contact.form.fields.name")}</Label>
                         <Input
                           id="name"
                           type="text"
                           value={formData.name}
                           onChange={(e) => handleInputChange("name", e.target.value)}
-                          placeholder="Nhập họ và tên của bạn"
+                          placeholder={t("contact.form.placeholders.name")}
                           required
                         />
                       </div>
                       <div>
-                        <Label htmlFor="phone">Số điện thoại</Label>
+                        <Label htmlFor="phone">{t("contact.form.fields.phone")}</Label>
                         <Input
                           id="phone"
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => handleInputChange("phone", e.target.value)}
-                          placeholder="Nhập số điện thoại"
+                          placeholder={t("contact.form.placeholders.phone")}
                           required
                         />
                       </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">{t("contact.form.fields.email")}</Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.email}
                         onChange={(e) => handleInputChange("email", e.target.value)}
-                        placeholder="Nhập địa chỉ email"
+                        placeholder={t("contact.form.placeholders.email")}
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="subject">Chủ đề</Label>
+                      <Label htmlFor="subject">{t("contact.form.fields.subject")}</Label>
                       <Select value={formData.subject} onValueChange={(value) => handleInputChange("subject", value)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Chọn chủ đề" />
+                          <SelectValue placeholder={t("contact.form.placeholders.subject")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="appointment">Đặt lịch khám</SelectItem>
-                          <SelectItem value="consultation">Tư vấn y tế</SelectItem>
-                          <SelectItem value="technical">Hỗ trợ kỹ thuật</SelectItem>
-                          <SelectItem value="complaint">Khiếu nại</SelectItem>
-                          <SelectItem value="other">Khác</SelectItem>
+                          <SelectItem value="appointment">{t("contact.form.subjects.appointment")}</SelectItem>
+                          <SelectItem value="consultation">{t("contact.form.subjects.consultation")}</SelectItem>
+                          <SelectItem value="technical">{t("contact.form.subjects.technical")}</SelectItem>
+                          <SelectItem value="complaint">{t("contact.form.subjects.complaint")}</SelectItem>
+                          <SelectItem value="other">{t("contact.form.subjects.other")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <Label htmlFor="message">Tin nhắn</Label>
+                      <Label htmlFor="message">{t("contact.form.fields.message")}</Label>
                       <Textarea
                         id="message"
                         value={formData.message}
                         onChange={(e) => handleInputChange("message", e.target.value)}
-                        placeholder="Nhập nội dung tin nhắn..."
+                        placeholder={t("contact.form.placeholders.message")}
                         rows={5}
                         required
                       />
@@ -202,7 +202,7 @@ export default function ContactPage() {
                       size="lg"
                     >
                       <Send className="mr-2 h-4 w-4" />
-                      Gửi tin nhắn
+                      {t("contact.form.submit")}
                     </Button>
                   </form>
                 </CardContent>
@@ -214,8 +214,8 @@ export default function ContactPage() {
               {/* Quick Services */}
               <Card className="shadow-xl border-0">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-gray-900">Dịch vụ nhanh</CardTitle>
-                  <p className="text-gray-600">Truy cập nhanh các dịch vụ phổ biến</p>
+                  <CardTitle className="text-2xl font-bold text-gray-900">{t("contact.services.title")}</CardTitle>
+                  <p className="text-gray-600">{t("contact.services.subtitle")}</p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -247,15 +247,15 @@ export default function ContactPage() {
               {/* Map Placeholder */}
               <Card className="shadow-xl border-0">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-gray-900">Vị trí</CardTitle>
-                  <p className="text-gray-600">Tìm chúng tôi tại trung tâm thành phố</p>
+                  <CardTitle className="text-2xl font-bold text-gray-900">{t("contact.map.title")}</CardTitle>
+                  <p className="text-gray-600">{t("contact.map.subtitle")}</p>
                 </CardHeader>
                 <CardContent>
                   <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
                     <div className="text-center">
                       <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500">Bản đồ sẽ được hiển thị tại đây</p>
-                      <p className="text-sm text-gray-400">123 Đường ABC, Quận 1, TP.HCM</p>
+                      <p className="text-gray-500">{t("contact.map.placeholder.desc")}</p>
+                      <p className="text-sm text-gray-400">{t("contact.map.placeholder.address")}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -269,37 +269,16 @@ export default function ContactPage() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Câu hỏi thường gặp</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Một số câu hỏi phổ biến mà khách hàng thường quan tâm</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t("contact.faq.title")}</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">{t("contact.faq.subtitle")}</p>
           </div>
 
           <div className="max-w-3xl mx-auto space-y-6">
-            {[
-              {
-                question: "Làm thế nào để đặt lịch khám?",
-                answer:
-                  "Bạn có thể đặt lịch khám trực tuyến qua website hoặc ứng dụng di động của chúng tôi. Chỉ cần chọn bác sĩ, thời gian phù hợp và xác nhận đặt lịch.",
-              },
-              {
-                question: "Chi phí khám bệnh như thế nào?",
-                answer:
-                  "Chi phí khám bệnh phụ thuộc vào chuyên khoa và bác sĩ. Bạn có thể xem chi tiết phí khám trên trang thông tin của từng bác sĩ.",
-              },
-              {
-                question: "Có thể hủy lịch khám không?",
-                answer:
-                  "Có, bạn có thể hủy lịch khám trước 24 giờ mà không mất phí. Việc hủy muộn hơn có thể phát sinh chi phí.",
-              },
-              {
-                question: "Có hỗ trợ bảo hiểm y tế không?",
-                answer:
-                  "Chúng tôi hỗ trợ thanh toán qua các loại bảo hiểm y tế phổ biến. Vui lòng liên hệ để biết thêm chi tiết.",
-              },
-            ].map((faq, index) => (
+            {faqs.map((faq, index) => (
               <Card key={index} className="border-0 shadow-md">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold text-gray-900 mb-3">{faq.question}</h3>
-                  <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                  <h3 className="font-semibold text-gray-900 mb-3">{faq.q}</h3>
+                  <p className="text-gray-600 leading-relaxed">{faq.a}</p>
                 </CardContent>
               </Card>
             ))}
@@ -310,14 +289,12 @@ export default function ContactPage() {
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-teal-600 to-emerald-700 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Cần hỗ trợ khẩn cấp?</h2>
-          <p className="text-lg text-teal-100 mb-8 max-w-2xl mx-auto">
-            Đội ngũ hỗ trợ 24/7 của chúng tôi luôn sẵn sàng giúp đỡ bạn
-          </p>
+          <h2 className="text-3xl font-bold mb-4">{t("contact.cta.title")}</h2>
+          <p className="text-lg text-teal-100 mb-8 max-w-2xl mx-auto">{t("contact.cta.desc")}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="bg-white text-teal-600 hover:bg-gray-100">
               <Phone className="mr-2 h-4 w-4" />
-              Gọi ngay: 1900 1234
+              {t("contact.cta.call")}
             </Button>
             <Button
               size="lg"
@@ -325,7 +302,7 @@ export default function ContactPage() {
               className="border-white text-white hover:bg-white hover:text-teal-600 bg-transparent"
             >
               <MessageCircle className="mr-2 h-4 w-4" />
-              Chat trực tuyến
+              {t("contact.cta.chat")}
             </Button>
           </div>
         </div>

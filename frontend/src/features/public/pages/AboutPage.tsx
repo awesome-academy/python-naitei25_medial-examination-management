@@ -4,46 +4,32 @@ import { Award, Users, Heart, Shield, Clock, Star, CheckCircle } from "lucide-re
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 
 export default function AboutPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const stats = [
-    { icon: Users, number: "500+", label: "Bác sĩ chuyên khoa", color: "text-teal-600" },
-    { icon: Heart, number: "50,000+", label: "Bệnh nhân tin tưởng", color: "text-red-500" },
-    { icon: Award, number: "25+", label: "Chuyên khoa", color: "text-green-600" },
-    { icon: Star, number: "4.8/5", label: "Đánh giá trung bình", color: "text-yellow-500" },
+    { icon: Users, number: "500+", label: t("about.stats.doctors"), color: "text-teal-600" },
+    { icon: Heart, number: "50,000+", label: t("about.stats.patients"), color: "text-red-500" },
+    { icon: Award, number: "25+", label: t("about.stats.departments"), color: "text-green-600" },
+    { icon: Star, number: "4.8/5", label: t("about.stats.rating"), color: "text-yellow-500" },
   ]
 
   const values = [
-    {
-      icon: Heart,
-      title: "Tận tâm",
-      description: "Chúng tôi luôn đặt sức khỏe và sự hài lòng của bệnh nhân lên hàng đầu",
-    },
-    {
-      icon: Shield,
-      title: "An toàn",
-      description: "Tuân thủ nghiêm ngặt các tiêu chuẩn y tế quốc tế và bảo mật thông tin",
-    },
-    {
-      icon: Award,
-      title: "Chuyên nghiệp",
-      description: "Đội ngũ bác sĩ giàu kinh nghiệm với trình độ chuyên môn cao",
-    },
-    {
-      icon: Clock,
-      title: "Tiện lợi",
-      description: "Dịch vụ 24/7 với hệ thống đặt lịch trực tuyến hiện đại",
-    },
+    { icon: Heart, title: t("about.values.dedication.title"), description: t("about.values.dedication.desc") },
+    { icon: Shield, title: t("about.values.safety.title"), description: t("about.values.safety.desc") },
+    { icon: Award, title: t("about.values.professional.title"), description: t("about.values.professional.desc") },
+    { icon: Clock, title: t("about.values.convenience.title"), description: t("about.values.convenience.desc") },
   ]
 
   const milestones = [
-    { year: "2020", title: "Thành lập", description: "Ra mắt với 50 bác sĩ đầu tiên" },
-    { year: "2021", title: "Mở rộng", description: "Phát triển lên 200+ bác sĩ, 15 chuyên khoa" },
-    { year: "2022", title: "Công nghệ", description: "Ứng dụng AI trong chẩn đoán và tư vấn" },
-    { year: "2023", title: "Quốc tế", description: "Hợp tác với các bệnh viện hàng đầu thế giới" },
-    { year: "2024", title: "Hiện tại", description: "500+ bác sĩ, 50,000+ bệnh nhân tin tưởng" },
+    { year: "2020", title: t("about.timeline.2020.title"), description: t("about.timeline.2020.desc") },
+    { year: "2021", title: t("about.timeline.2021.title"), description: t("about.timeline.2021.desc") },
+    { year: "2022", title: t("about.timeline.2022.title"), description: t("about.timeline.2022.desc") },
+    { year: "2023", title: t("about.timeline.2023.title"), description: t("about.timeline.2023.desc") },
+    { year: "2024", title: t("about.timeline.2024.title"), description: t("about.timeline.2024.desc") },
   ]
 
   return (
@@ -52,10 +38,8 @@ export default function AboutPage() {
       <section className="relative overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-teal-700 text-white mb-12">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative container mx-auto px-4 py-20 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Về HealthCare</h1>
-          <p className="text-lg text-teal-100 mb-6">
-            Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất với đội ngũ bác sĩ chuyên nghiệp và công nghệ y tế hiện đại nhất.
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("about.header.title")}</h1>
+          <p className="text-lg text-teal-100 mb-6">{t("about.header.subtitle")}</p>
         </div>
       </section>
 
@@ -83,33 +67,20 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Sứ mệnh của chúng tôi</h2>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                HealthCare được thành lập với sứ mệnh democratize healthcare - làm cho dịch vụ chăm sóc sức khỏe chất
-                lượng cao trở nên dễ tiếp cận hơn với mọi người.
-              </p>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{t("about.mission.title")}</h2>
+              <p className="text-lg text-gray-600 leading-relaxed">{t("about.mission.desc")}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Tầm nhìn 2030</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">{t("about.vision.title")}</h3>
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-teal-600 mt-1 flex-shrink-0" />
-                    <p className="text-gray-700">Trở thành nền tảng y tế số 1 Việt Nam</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-teal-600 mt-1 flex-shrink-0" />
-                    <p className="text-gray-700">Phục vụ 1 triệu bệnh nhân mỗi năm</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-teal-600 mt-1 flex-shrink-0" />
-                    <p className="text-gray-700">Mở rộng ra toàn khu vực Đông Nam Á</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-teal-600 mt-1 flex-shrink-0" />
-                    <p className="text-gray-700">Tích hợp AI và IoT trong chăm sóc sức khỏe</p>
-                  </div>
+                  {t("about.vision.points", { returnObjects: true }).map((point: string, i: number) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <CheckCircle className="h-6 w-6 text-teal-600 mt-1 flex-shrink-0" />
+                      <p className="text-gray-700">{point}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="bg-white rounded-2xl p-8 shadow-lg">
@@ -117,11 +88,8 @@ export default function AboutPage() {
                   <div className="w-20 h-20 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Heart className="h-10 w-10 text-white" />
                   </div>
-                  <h4 className="text-xl font-bold text-gray-900 mb-4">Cam kết chất lượng</h4>
-                  <p className="text-gray-600">
-                    Chúng tôi không ngừng nâng cao chất lượng dịch vụ và đầu tư vào công nghệ để mang lại trải nghiệm
-                    tốt nhất cho bệnh nhân.
-                  </p>
+                  <h4 className="text-xl font-bold text-gray-900 mb-4">{t("about.commitment.title")}</h4>
+                  <p className="text-gray-600">{t("about.commitment.desc")}</p>
                 </div>
               </div>
             </div>
@@ -133,10 +101,8 @@ export default function AboutPage() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Giá trị cốt lõi</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Những giá trị này định hướng mọi hoạt động của chúng tôi
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{t("about.values.title")}</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t("about.values.subtitle")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -157,15 +123,13 @@ export default function AboutPage() {
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Hành trình phát triển</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Từ những ngày đầu khởi nghiệp đến hiện tại</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{t("about.timeline.title")}</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t("about.timeline.subtitle")}</p>
           </div>
 
           <div className="max-w-4xl mx-auto">
             <div className="relative">
-              {/* Timeline line */}
               <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-teal-200"></div>
-
               {milestones.map((milestone, index) => (
                 <div
                   key={index}
@@ -178,8 +142,6 @@ export default function AboutPage() {
                       <p className="text-gray-600">{milestone.description}</p>
                     </Card>
                   </div>
-
-                  {/* Timeline dot */}
                   <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-teal-600 rounded-full border-4 border-white shadow-lg"></div>
                 </div>
               ))}
@@ -192,18 +154,15 @@ export default function AboutPage() {
       <section className="py-20 bg-gradient-to-r from-teal-600 to-emerald-700 text-white">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Tham gia cùng chúng tôi</h2>
-            <p className="text-lg mb-10 text-teal-100">
-              Hãy trở thành một phần của cộng đồng HealthCare và cùng chúng tôi xây dựng tương lai chăm sóc sức khỏe tốt
-              hơn
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">{t("about.cta.title")}</h2>
+            <p className="text-lg mb-10 text-teal-100">{t("about.cta.desc")}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
                 className="bg-white text-teal-600 hover:bg-gray-100 shadow-lg"
                 onClick={() => navigate("/auth/register")}
               >
-                Đăng ký ngay
+                {t("about.cta.register")}
               </Button>
               <Button
                 size="lg"
@@ -211,7 +170,7 @@ export default function AboutPage() {
                 className="border-white text-white hover:bg-white hover:text-teal-600 bg-transparent"
                 onClick={() => navigate("/contact")}
               >
-                Tìm hiểu thêm
+                {t("about.cta.learnMore")}
               </Button>
             </div>
           </div>

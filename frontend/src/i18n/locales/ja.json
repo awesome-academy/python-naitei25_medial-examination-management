@@ -71,7 +71,12 @@
     "download": "ダウンロード",
     "noPrescriptionId": "処方箋IDがありません。",
     "unit": "単位",
-    "invalidDate": "無効な日付"
+    "invalidDate": "無効な日付",
+    "filters": "フィルター",
+    "searchResults": "件の検索結果",
+    "doctorsInDepartment": "名の医師が所属",
+    "returnToDashboard": "ダッシュボードに戻る",
+    "saving": "保存中..."
   },
   "navigation": {
     "home": "ホーム",
@@ -132,7 +137,8 @@
     "loginFailed": "ログインに失敗しました",
     "logoutSuccess": "ログアウトしました",
     "refreshAuthError": "認証情報を更新できません",
-    "invalidCredentials": "電話番号またはパスワードが正しくありません"
+    "invalidCredentials": "電話番号またはパスワードが正しくありません",
+    "pleaseLogin": "続行するにはログインしてください"
   },
   "forms": {
     "firstName": "名",
@@ -413,7 +419,8 @@
     "date": "日付",
     "shift": "シフト",
     "patients": "患者",
-    "schedule": "スケジュール"
+    "schedule": "スケジュール",
+    "dashboard": "ダッシュボード"
   },
   "table": {
     "no": "番号",
@@ -864,7 +871,36 @@
     "eventCalendar": "イベントカレンダー",
     "viewDetails": "詳細を見る",
     "upcomingAppointments": "今後の予約",
-    "systemInfo": "システム情報"
+    "systemInfo": "システム情報",
+    "defaultPatient": "患者",
+    "subtitle": "お帰りなさい。こちらはあなたの健康状態の概要です。",
+    "stats": {
+      "upcoming": "今後の予約",
+      "total": "総予約数",
+      "completed": "完了した診察"
+    },
+    "appointments": {
+      "recent": "最近の予約",
+      "empty": "まだ予約がありません",
+      "unknownDoctor": "不明な医師",
+      "unknownSpecialization": "不明な専門"
+    },
+    "status": {
+      "upcoming": "予定",
+      "completed": "完了",
+      "cancelled": "キャンセル済み"
+    },
+    "actions": {
+      "viewAll": "すべて表示",
+      "bookNow": "今すぐ予約"
+    },
+    "quickActions": {
+      "title": "クイック操作",
+      "findDoctor": "医師を探す",
+      "findDoctorSubtitle": "適切な医師を検索する",
+      "myAppointments": "私の予約",
+      "myAppointmentsSubtitle": "予約を表示・管理する"
+    }
   },
   "log": {
     "eventDetails": "イベント詳細",
@@ -880,5 +916,540 @@
     "location": "場所",
     "building": "建物",
     "status": "状態"
-  }
+  },
+    "footer": {
+    "companyDescription": "私たちは、専門医チームと最新技術により最高の医療サービスを提供することをお約束します。",
+    "quickLinks": "クイックリンク",
+    "contactInfo": "連絡先情報",
+    "addressLine1": "トゥードゥック市リンチュン区",
+    "addressLine2": "ベトナム ホーチミン市",
+    "phone": "+84 123 456 789",
+    "email": "info@healthcare.vn",
+    "rightsReserved": "全著作権所有。",
+    "privacyPolicy": "プライバシーポリシー",
+    "termsOfUse": "利用規約"
+  },
+    "about": {
+    "header": {
+      "title": "HealthCareについて",
+      "subtitle": "私たちは、専門医と最新の医療技術によって最高のヘルスケアサービスを提供することをお約束します。"
+    },
+    "stats": {
+      "doctors": "専門医",
+      "patients": "信頼される患者数",
+      "departments": "診療科",
+      "rating": "平均評価"
+    },
+    "mission": {
+      "title": "私たちの使命",
+      "desc": "HealthCareは「医療の民主化」を使命として設立され、高品質な医療をすべての人がより身近に受けられるようにしています。"
+    },
+    "vision": {
+      "title": "2030年のビジョン",
+      "points": [
+        "ベトナムNo.1のデジタルヘルスケアプラットフォームになる",
+        "年間100万人の患者にサービスを提供する",
+        "東南アジア全域に拡大する",
+        "AIとIoTを医療に統合する"
+      ]
+    },
+    "commitment": {
+      "title": "品質への取り組み",
+      "desc": "私たちは常にサービスの質を向上させ、テクノロジーに投資し、患者に最高の体験を提供します。"
+    },
+    "values": {
+      "title": "基本的な価値観",
+      "subtitle": "これらの価値観は私たちのすべての活動を導きます",
+      "dedication": {
+        "title": "献身",
+        "desc": "私たちは常に患者の健康と満足を最優先にしています"
+      },
+      "safety": {
+        "title": "安全",
+        "desc": "国際的な医療基準と情報保護を厳格に遵守します"
+      },
+      "professional": {
+        "title": "プロフェッショナリズム",
+        "desc": "豊富な経験と高い専門性を持つ医師チーム"
+      },
+      "convenience": {
+        "title": "利便性",
+        "desc": "最新のオンライン予約システムによる24時間サービス"
+      }
+    },
+    "timeline": {
+      "title": "私たちの歩み",
+      "subtitle": "創業から現在まで",
+      "2020": { "title": "設立", "desc": "最初の50人の医師と共に開始" },
+      "2021": { "title": "拡大", "desc": "200人以上の医師、15の診療科へ成長" },
+      "2022": { "title": "テクノロジー", "desc": "AIを診断と相談に活用" },
+      "2023": { "title": "国際化", "desc": "世界有数の病院と提携" },
+      "2024": { "title": "現在", "desc": "500人以上の医師、5万人以上の患者に信頼される" }
+    },
+    "cta": {
+      "title": "私たちと一緒に",
+      "desc": "HealthCareコミュニティの一員となり、より良い医療の未来を共に築きましょう",
+      "register": "今すぐ登録",
+      "learnMore": "もっと知る"
+    }
+  },
+    "contact": {
+    "header": {
+      "title": "お問い合わせ",
+      "subtitle": "私たちはいつでもあなたの声に耳を傾け、サポートする準備ができています。お気軽にご連絡ください。"
+    },
+    "info": {
+      "address": {
+        "title": "住所",
+        "details": ["ABC通り123, 1区", "ホーチミン市, ベトナム"]
+      },
+      "phone": {
+        "title": "電話",
+        "details": ["+84 123 456 789", "ホットライン: 1900 1234"]
+      },
+      "email": {
+        "title": "メール",
+        "details": ["info@healthcare.vn", "support@healthcare.vn"]
+      },
+      "workingHours": {
+        "title": "営業時間",
+        "details": ["月〜金: 8:00 - 20:00", "土日: 8:00 - 17:00"]
+      }
+    },
+    "form": {
+      "title": "メッセージを送る",
+      "desc": "以下の情報を入力していただければ、できるだけ早くご連絡いたします",
+      "fields": {
+        "name": "氏名",
+        "phone": "電話番号",
+        "email": "メール",
+        "subject": "件名",
+        "message": "メッセージ"
+      },
+      "placeholders": {
+        "name": "氏名を入力してください",
+        "phone": "電話番号を入力してください",
+        "email": "メールアドレスを入力してください",
+        "subject": "件名を選択してください",
+        "message": "メッセージ内容を入力してください..."
+      },
+      "subjects": {
+        "appointment": "診察予約",
+        "consultation": "医療相談",
+        "technical": "技術サポート",
+        "complaint": "苦情",
+        "other": "その他"
+      },
+      "submit": "メッセージを送信"
+    },
+    "services": {
+      "title": "クイックサービス",
+      "subtitle": "人気のサービスに素早くアクセス",
+      "items": {
+        "consultation": {
+          "title": "オンライン相談",
+          "desc": "医師からビデオ通話やチャットでアドバイスを受ける",
+          "action": "相談を開始"
+        },
+        "appointment": {
+          "title": "診察予約",
+          "desc": "適切な専門医と診察を予約する",
+          "action": "今すぐ予約"
+        },
+        "support": {
+          "title": "カスタマーサポート",
+          "desc": "24時間対応のサポートチームがお手伝いします",
+          "action": "今すぐ連絡"
+        }
+      }
+    },
+    "map": {
+      "title": "所在地",
+      "subtitle": "市内中心部で私たちを見つけてください",
+      "placeholder": {
+        "desc": "地図はここに表示されます",
+        "address": "ABC通り123, 1区, ホーチミン市"
+      }
+    },
+    "faq": {
+      "title": "よくある質問",
+      "subtitle": "お客様からよく寄せられる質問",
+      "items": [
+        {
+          "q": "どうやって診察予約をしますか？",
+          "a": "当社のウェブサイトまたはモバイルアプリからオンラインで診察予約が可能です。医師、都合の良い時間を選び、予約を確認してください。"
+        },
+        {
+          "q": "診察費用はいくらですか？",
+          "a": "診察費用は専門科や医師によって異なります。各医師の情報ページで詳細をご確認いただけます。"
+        },
+        {
+          "q": "予約をキャンセルできますか？",
+          "a": "はい、24時間前までにキャンセルすれば無料です。それ以降のキャンセルは費用が発生する場合があります。"
+        },
+        {
+          "q": "健康保険は利用できますか？",
+          "a": "一般的な健康保険での支払いに対応しています。詳細はお問い合わせください。"
+        }
+      ]
+    },
+    "cta": {
+      "title": "緊急サポートが必要ですか？",
+      "desc": "私たちの24時間サポートチームがいつでも対応いたします",
+      "call": "今すぐ電話: 1900 1234",
+      "chat": "ライブチャット"
+    }
+  },
+    "doctors": {
+    "header": {
+      "title": "医師一覧",
+      "subtitle": "一流の医師を検索して予約する"
+    },
+    "search": {
+      "placeholder": "医師を検索...",
+      "button": "検索"
+    },
+    "prefix": "医師",
+    "labels": {
+      "fee": "診察料"
+    },
+    "actions": {
+      "book": "予約する"
+    },
+    "empty": "医師が見つかりません"
+  },
+    "home": {
+    "hero": {
+      "tagline": "最高の医療サービス",
+      "title": "健康は",
+      "highlight": "幸福",
+      "subtitle": "トップ医師と簡単・迅速に予約できます"
+    },
+    "search": {
+      "placeholder": "医師、診療科を検索...",
+      "button": "検索"
+    },
+    "doctorPrefix": "医師",
+    "labels": {
+      "fee": "診察料"
+    },
+    "actions": {
+      "book": "予約する",
+      "viewAllDoctors": "すべての医師を見る"
+    },
+    "emptyDoctors": "医師が見つかりません",
+    "specialties": {
+      "title": "診療科",
+      "subtitle": "高度な専門知識を持つ医師と共に主要な診療科を探索する",
+      "doctorCount": "医師"
+    },
+    "emptySpecialties": "診療科が見つかりません",
+    "featured": {
+      "title": "注目の医師",
+      "subtitle": "経験豊富な医師チームに会いましょう"
+    },
+    "features": {
+      "title": "なぜ私たちを選ぶのか？",
+      "subtitle": "最新技術で最高の医療サービスを提供します",
+      "items": {
+        "safe": {
+          "title": "安全とセキュリティ",
+          "description": "個人情報は高度な暗号化技術で完全に保護されます"
+        },
+        "booking": {
+          "title": "24時間予約可能",
+          "description": "いつでもどこでもオンラインで予約可能"
+        },
+        "support": {
+          "title": "親切なサポート",
+          "description": "サポートチームがいつでもどこでも対応します"
+        }
+      }
+    },
+    "cta": {
+      "title": "健康管理を始めましょう",
+      "subtitle": "今すぐ登録して、現代的で専門的な医療サービスを体験してください",
+      "login": "ログイン",
+      "register": "今すぐ登録",
+      "dashboard": "ダッシュボードへ"
+    }
+  },
+    "specialties": {
+    "header": {
+      "title": "診療科",
+      "subtitle": "診療科を探索して、あなたのニーズに合ったものを選びましょう"
+    },
+    "noDescription": "説明はありません",
+    "actions": {
+      "viewDoctors": "医師を見る"
+    },
+    "empty": "診療科が見つかりません"
+  },
+    "appointment": {
+    "title": "予約をする",
+    "date": "日付",
+    "session": "勤務シフト",
+    "time": "時間",
+    "symptoms": "症状",
+    "note": "備考",
+    "notePlaceholder": "追加のメモを入力してください...",
+    "submit": "送信",
+    "cancel": "キャンセル",
+    "morning": "午前",
+    "afternoon": "午後",
+    "symptomFever": "発熱",
+    "symptomCough": "咳",
+    "symptomHeadache": "頭痛",
+    "symptomOther": "その他",
+    "selectSymptoms": "症状を選択してください",
+    "noAvailableSlots": "利用可能な時間枠がありません。",
+    "noPatientInfo": "患者情報が見つかりません。",
+    "selectTime": "時間を選択してください。",
+    "pastNotAllowed": "過去に予約することはできません。",
+    "noScheduleFound": "該当するスケジュールが見つかりません。",
+    "success": "予約が正常に完了しました！",
+    "errorGeneric": "予約中にエラーが発生しました。",
+    "checkStatus": "予約状況を確認してください。",
+    "scheduleTime": "勤務時間: {{start}} - {{end}}",
+    "viewAppointments": "予約を見る",
+    "confirmation": {
+      "title": "予約確認",
+      "details": "予約詳細",
+      "id": "ID",
+      "doctor": "医師",
+      "date": "日付",
+      "time": "時間",
+      "status": "ステータス",
+      "patient": "患者",
+      "session": "勤務シフト",
+      "price": "金額",
+      "symptoms": "症状",
+      "location": "場所",
+      "room": "部屋 {{room}}",
+      "floor": "{{floor}} 階",
+      "building": "{{building}} 号館",
+      "missingInfo": "確認ページを読み込むために必要な情報が不足しています。",
+      "errorLoad": "確認情報の読み込み中にエラーが発生しました。",
+      "invalidData": "予約データが無効、または医師／患者の情報が不足しています。",
+      "errorConfirm": "確認と支払い中にエラーが発生しました。",
+      "loading": "確認情報を読み込んでいます...",
+      "incompleteInfo": "予約情報を完全に読み込めませんでした。",
+      "processing": "処理中...",
+      "confirmAndPay": "確認して支払う",
+      "workingTime": "勤務時間: {{start}} - {{end}}"
+    },
+    "status": {
+      "pending": "保留中",
+      "confirmed": "確認済み"
+    }
+  },
+  "payment": {
+    "paymentTitle": "支払い情報",
+    "successTitle": "支払い成功",
+    "cancelTitle": "支払いがキャンセルされました",
+    "paymentSuccess": "支払いが成功しました",
+    "paymentCancelled": "支払いがキャンセルされました",
+    "noPaymentLink": "支払いリンクを作成できません",
+    "createPaymentLinkFailed": "支払いリンクの作成に失敗しました",
+    "billNotFound": "請求書が見つかりません",
+    "doctorInfo": "医師情報",
+    "doctorName": "医師名",
+    "specialty": "専門",
+    "consultationFee": "診察料",
+    "appointmentInfo": "予約情報",
+    "appointmentCode": "予約コード",
+    "date": "日付",
+    "time": "時間",
+    "shift": "シフト",
+    "status": "状態",
+    "location": "場所",
+    "symptoms": "症状",
+    "billInfo": "請求情報",
+    "billCode": "請求コード",
+    "amount": "金額",
+    "createdAt": "作成日",
+    "tryAgain": "再度支払う",
+    "payNow": "今すぐ支払う",
+    "cancel": "キャンセル",
+    "successNote": "支払いが成功しました！予約が確認されました。",
+    "cancelNote": "支払いはキャンセルされました。再試行するか戻ってください。",
+    "pendingNote": "支払いを完了して予約を確認してください。",
+    "importantNoteTitle": "重要な注意:",
+    "importantNote": "時間通りに到着し、身分証明書を持参してください。予約を変更する場合は、少なくとも2時間前にご連絡ください。"
+  },
+    "drug": {
+    "title": "医薬品情報検索",
+    "searchPlaceholder": "薬名、有効成分、製造元で検索...",
+    "search": "検索",
+    "searching": "検索中...",
+    "error": "エラーが発生しました",
+    "searchError": "検索中にエラーが発生しました",
+    "listTitle": "薬一覧 ({{count}})",
+    "notFound": "薬が見つかりません",
+    "priceInsurance": "価格と保険",
+    "insuranceCovered": "保険適用 ({{discount}}% 割引)",
+    "notCovered": "保険適用外",
+    "productInfo": "製品情報",
+    "category": "分類",
+    "unit": "単位",
+    "quantity": "数量",
+    "description": "説明",
+    "usage": "使用方法",
+    "sideEffects": "副作用",
+    "warningTitle": "重要な警告",
+    "warning1": "• 医師または薬剤師の指示に従って使用してください",
+    "warning2": "• 使用前に説明書をよく読んでください",
+    "warning3": "• 副作用が出た場合は使用を中止し医師に相談してください",
+    "warning4": "• 直射日光を避け、乾燥した涼しい場所で保管してください",
+    "selectMedicine": "詳細を表示する薬を選択してください",
+    "selectInstruction": "左のリストから薬を選択して詳細を確認してください"
+  },
+    "profile": {
+    "title": "プロフィール",
+    "subtitle": "個人情報と健康情報を管理します",
+    "personalInfo": "個人情報",
+    "personalInfoShort": "個人",
+    "insurance": "保険",
+    "insuranceShort": "保険",
+    "emergencyContact": "緊急連絡先",
+    "emergencyContactShort": "緊急",
+    "healthRecord": "健康記録",
+    "healthRecordShort": "健康"
+  },
+    "personalInfo": {
+    "title": "個人情報",
+    "subtitle": "あなたの個人情報を管理します",
+    "basicInfo": "基本情報",
+    "contactInfo": "連絡先情報",
+    "addressInfo": "住所",
+    "firstName": "名",
+    "lastName": "姓",
+    "birthday": "生年月日",
+    "gender": "性別",
+    "selectGender": "性別を選択",
+    "male": "男性",
+    "female": "女性",
+    "other": "その他",
+    "identityNumber": "身分証番号",
+    "email": "メール",
+    "phone": "電話番号",
+    "address": "住所",
+    "city": "市",
+    "district": "区/郡",
+    "ward": "町/村",
+    "avatar": "アバター",
+    "loadError": "個人情報を読み込めません",
+    "updateSuccess": "個人情報が更新されました",
+    "updateError": "情報を更新できません",
+    "invalidPatient": "患者情報が読み込まれていません。後でもう一度お試しください。",
+    "avatarUpdated": "アバターが更新されました",
+    "avatarUploadError": "アバターをアップロードできません"
+  },
+    "insurance": {
+    "title": "保険情報",
+    "description": "あなたの健康保険情報を管理します",
+    "defaultProvider": "ベトナム社会保険",
+    "defaultPolicyType": "基本医療保険",
+
+    "social": "社会保険",
+    "private": "民間保険",
+
+    "cardTitle": "健康保険証",
+    "country": "ベトナム",
+    "placeholderProvider": "保険会社",
+    "placeholderCompany": "保険会社",
+
+    "insuranceNumber": "保険証番号",
+    "enterInsuranceNumber": "保険証番号を入力してください",
+    "provider": "保険提供者",
+    "enterProvider": "保険会社名を入力してください",
+    "policyType": "保険の種類",
+    "enterPolicyType": "保険種類を入力してください",
+    "expiryDate": "有効期限",
+    "coverageAmount": "保険金額",
+    "enterCoverageAmount": "最大保険金額を入力してください",
+
+    "socialStatus": "社会保険の状態",
+    "privateTitle": "民間保険",
+    "policyNumber": "契約番号",
+    "enterPolicyNumber": "契約番号を入力してください",
+    "companyName": "保険会社",
+    "enterCompanyName": "保険会社名を入力してください",
+    "planName": "プラン名",
+    "enterPlanName": "プラン名を入力してください",
+    "premiumAmount": "保険料",
+    "enterPremiumAmount": "年間保険料を入力してください",
+    "coverageLimit": "保険限度額",
+    "enterCoverageLimit": "最大保険限度額を入力してください",
+
+    "privateStatus": "民間保険の状態",
+    "active": "有効",
+    "notUpdated": "未更新",
+    "notRegistered": "未登録",
+    "validUntil": "保険証は {{date}} まで有効です",
+
+    "loadError": "保険情報を読み込めません",
+    "updateSuccess": "保険情報が更新されました",
+    "updateError": "保険情報を更新できません"
+  },
+    "emergency": {
+    "title": "緊急連絡先",
+    "description": "緊急時の連絡先リストを管理します",
+
+    "add": "連絡先を追加",
+    "edit": "緊急連絡先を編集",
+    "create": "緊急連絡先を追加",
+    "formDescription": "緊急時に連絡する人の情報を入力してください",
+
+    "contactType": "連絡先の種類",
+    "chooseContactType": "連絡先の種類を選択",
+    "family": "家族",
+    "medical": "医療",
+
+    "contactName": "氏名",
+    "enterName": "氏名を入力してください",
+    "contactPhone": "電話番号",
+    "enterPhone": "電話番号を入力してください",
+    "relationship": "関係",
+    "chooseRelationship": "関係を選択してください",
+
+    "relationships": {
+      "spouse": "配偶者",
+      "child": "子供",
+      "parent": "父/母",
+      "sibling": "兄弟姉妹",
+      "friend": "友人",
+      "other": "その他",
+      "familyDoctor": "かかりつけ医",
+      "specialist": "専門医",
+      "pharmacist": "薬剤師",
+      "nurse": "看護師"
+    },
+
+    "emptyFamily": "家族の連絡先はまだありません",
+    "emptyMedical": "医療の連絡先はまだありません",
+
+    "loadError": "緊急連絡先を読み込めません",
+    "saveError": "連絡先情報を保存できません",
+    "deleteError": "連絡先を削除できません",
+
+    "updateSuccess": "緊急連絡先が更新されました",
+    "addSuccess": "緊急連絡先が追加されました",
+    "deleteSuccess": "緊急連絡先が削除されました"
+  },
+  "health": {
+  "title": "健康記録",
+  "description": "健康情報を管理する",
+  "metricsTab": "健康指標",
+  "historyTab": "病歴",
+  "height": "身長 (cm)",
+  "weight": "体重 (kg)",
+  "bmi": "BMI指数",
+  "bloodType": "血液型",
+  "chooseBloodType": "血液型を選択",
+  "allergies": "アレルギー",
+  "loadError": "健康記録を読み込めませんでした",
+  "updateSuccess": "健康記録が更新されました",
+  "updateError": "健康記録を更新できません"
+}
 }
