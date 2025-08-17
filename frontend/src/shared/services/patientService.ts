@@ -155,7 +155,7 @@ export const patientService = {
   ): Promise<EmergencyContact> {
     try {
       const { data } = await api.patch<EmergencyContact>(
-        `/patients/${patientId}/contacts/${contactId}/`, // nhớ dấu "/" ở cuối
+        `/patients/${patientId}/contacts/${contactId}/`,
         contactData
       );
       return data;
