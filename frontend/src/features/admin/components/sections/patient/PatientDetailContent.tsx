@@ -277,13 +277,20 @@ export function MedicalRecordsContent() {
 // AppointmentsContent
 export function AppointmentsContent() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
   const { patientId } = useParams();
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
-  const [deleteModal, setDeleteModal] = useState<Appointment | null>(null);
-  const [editModal, setEditModal] = useState<AppointmentUpdateRequest | null>(
-    null
-  );
+  const [statusChangeAppointment, setStatusChangeAppointment] = 
+    useState<{ appointmentId: number; currentStatus: string } | null>(null);
+  const [selectedNewStatus, setSelectedNewStatus] = useState<string>("");
+  const [isChangingStatus, setIsChangingStatus] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000); // Auto hide after 4 seconds
+  };
 
   const formatHHmm = (timeStr: string) => {
     if (!timeStr) return "N/A";
@@ -294,6 +301,7 @@ export function AppointmentsContent() {
 
   const reloadAppointments = async () => {
     if (!patientId) return;
+    setLoading(true);
     try {
       const data = await appointmentService.getAppointmentsByPatientId(
         Number(patientId),
@@ -318,6 +326,10 @@ export function AppointmentsContent() {
             ? "CANCELLED"
             : appt.status === "D"
             ? "COMPLETED"
+            : appt.status === "N"
+            ? "NO_SHOW"
+            : appt.status === "I"
+            ? "IN_PROGRESS"
             : "PENDING",
         createdAt: appt.createdAt,
         prescriptionId: appt.prescriptionId,
@@ -325,6 +337,8 @@ export function AppointmentsContent() {
       setAppointments(mappedAppointments);
     } catch (error) {
       console.error("Failed to fetch appointments:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -332,24 +346,65 @@ export function AppointmentsContent() {
     reloadAppointments();
   }, [patientId]);
 
-  const handleEdit = async (appointmentId: number) => {
+  const handleStatusChange = async (
+    appointmentId: number,
+    selectedStatus: string
+  ) => {
     try {
-      const data = await appointmentService.getAppointmentById(appointmentId);
-      setEditModal({
-        appointmentId: data.appointmentId,
-        doctorId: data.doctorId,
-        patientId: data.patientInfo?.patientId ?? data.patientId ?? 0,
-        scheduleId: data.schedule?.scheduleId ?? data.scheduleId ?? 0,
-        symptoms: data.symptoms || "",
-        // The 'number' field is missing in AppointmentUpdateRequest, assuming it's not needed for update payload
-        // If it is, you'll need to add it to AppointmentUpdateRequest type
-        appointmentStatus: data.appointmentStatus,
-        slotStart: data.slotStart,
-        slotEnd: data.slotEnd,
-      });
+      setLoading(true);
+      await appointmentService.updateAppointmentStatus(appointmentId, selectedStatus);
+
+      // Reload appointments to reflect the change
+      await reloadAppointments();
+
+      // Show success message
+      const statusLabels: Record<string, string> = {
+        PENDING: "Chờ xác nhận",
+        CONFIRMED: "Đã xác nhận", 
+        COMPLETED: "Đã khám",
+        CANCELLED: "Đã hủy",
+      };
+      
+      // Success notification
+      showToast(`Thành công! Đã chuyển trạng thái cuộc hẹn thành: ${statusLabels[selectedStatus] || selectedStatus}`, 'success');
+      setStatusChangeAppointment(null);
+      setSelectedNewStatus("");
     } catch (error) {
-      alert("Không thể tải thông tin cuộc hẹn!");
+      console.error("Error changing appointment status:", error);
+      showToast("❌ Lỗi! Không thể thay đổi trạng thái cuộc hẹn!", 'error');
+      setLoading(false);
     }
+  };
+
+  const openStatusChangeModal = (appointmentId: number, currentStatus: string) => {
+    setStatusChangeAppointment({ appointmentId, currentStatus });
+    setSelectedNewStatus(currentStatus);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!statusChangeAppointment || !selectedNewStatus) return;
+    
+    if (selectedNewStatus === statusChangeAppointment.currentStatus) {
+      alert("Trạng thái mới giống với trạng thái hiện tại!");
+      return;
+    }
+
+    const confirmed = confirm(`Bạn có chắc chắn muốn chuyển trạng thái cuộc hẹn thành "${getStatusLabel(selectedNewStatus)}"?`);
+    if (confirmed) {
+      setIsChangingStatus(true);
+      await handleStatusChange(statusChangeAppointment.appointmentId, selectedNewStatus);
+      setIsChangingStatus(false);
+    }
+  };
+
+  const getStatusLabel = (status: string): string => {
+    const statusLabels: Record<string, string> = {
+      PENDING: "Chờ xác nhận",
+      CONFIRMED: "Đã xác nhận", 
+      COMPLETED: "Đã khám",
+      CANCELLED: "Đã hủy",
+    };
+    return statusLabels[status] || status;
   };
 
   return (
@@ -392,7 +447,16 @@ export function AppointmentsContent() {
         </TableHeader>
 
         <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-          {appointments.length > 0 ? (
+          {loading ? (
+            <TableRow>
+              <TableCell className="text-center text-gray-500 py-8" colSpan={5}>
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-base-600 mr-2"></div>
+                  Đang tải...
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : appointments.length > 0 ? (
             appointments.map((appt) => (
               <TableRow key={appt.appointmentId}>
                 <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
@@ -413,6 +477,10 @@ export function AppointmentsContent() {
                         ? "cancelled"
                         : appt.appointmentStatus === "CONFIRMED"
                         ? "confirmed"
+                        : appt.appointmentStatus === "NO_SHOW"
+                        ? "error"
+                        : appt.appointmentStatus === "IN_PROGRESS"
+                        ? "warning"
                         : "light"
                     }
                   >
@@ -451,21 +519,14 @@ export function AppointmentsContent() {
                       </svg>
                     </button>
                     <button
-                      onClick={() => handleEdit(appt.appointmentId)}
-                      className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => setDeleteModal(appt)}
-                      className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+                      onClick={() =>
+                        openStatusChangeModal(
+                          appt.appointmentId,
+                          appt.appointmentStatus
+                        )
+                      }
+                      className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                      title="Chọn trạng thái"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -475,7 +536,7 @@ export function AppointmentsContent() {
                       >
                         <path
                           fillRule="evenodd"
-                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
                           clipRule="evenodd"
                         />
                       </svg>
@@ -486,10 +547,8 @@ export function AppointmentsContent() {
             ))
           ) : (
             <TableRow>
-              <TableCell className="text-center text-gray-500">
-                <span className="block col-span-5">
-                  Không có lịch khám nào.
-                </span>
+              <TableCell className="text-center text-gray-500 py-8" colSpan={5}>
+                Không có lịch khám nào.
               </TableCell>
             </TableRow>
           )}
@@ -502,50 +561,95 @@ export function AppointmentsContent() {
           onClose={() => setSelectedAppointment(null)}
         />
       )}
-      {editModal && (
-        <AppointmentEditModalComponent
-          appointment={{
-            ...editModal,
-          }}
-          isOpen={true}
-          onClose={() => setEditModal(null)}
-          onSubmit={async (updatedData) => {
-            try {
-              await appointmentService.updateAppointment(
-                editModal.appointmentId,
-                {
-                  doctorId: updatedData.doctorId,
-                  patientId: updatedData.patientId,
-                  scheduleId: updatedData.scheduleId,
-                  symptoms: updatedData.symptoms,
-                  // number: updatedData.number, // Removed as it's not in AppointmentUpdateRequest
-                  appointmentStatus: updatedData.appointmentStatus,
-                  slotStart: updatedData.slotStart,
-                  slotEnd: updatedData.slotEnd,
-                }
-              );
-              setEditModal(null);
-              reloadAppointments();
-            } catch (error) {
-              throw error;
-            }
-          }}
-        />
-      )}
-      {deleteModal && (
-        <DeleteAppointmentModal
-          isOpen={true}
-          onClose={() => setDeleteModal(null)}
-          appointmentId={deleteModal.appointmentId}
-          onDelete={async () => {
-            await appointmentService.deleteAppointment(
-              deleteModal.appointmentId
-            );
-            setDeleteModal(null);
-            reloadAppointments();
-          }}
-        />
-      )}
+      
+      {/* Status Change Dropdown */}
+      {statusChangeAppointment && (
+      <div
+        className="fixed inset-0 bg-gray-200/60 backdrop-blur-md flex items-center justify-center z-50"
+        onClick={() => setStatusChangeAppointment(null)} // click ngoài để đóng
+      >
+        <div
+          className="relative bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6 transform transition-all duration-300"
+          onClick={(e) => e.stopPropagation()} // chặn click trong modal
+        >
+          <h3 className="text-lg font-semibold mb-4">
+            Chọn trạng thái mới
+          </h3>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Trạng thái hiện tại:{" "}
+              <span className="font-semibold text-blue-600">
+                {getStatusLabel(statusChangeAppointment.currentStatus)}
+              </span>
+            </label>
+            <select
+              value={selectedNewStatus}
+              onChange={(e) => setSelectedNewStatus(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">-- Chọn trạng thái mới --</option>
+              <option value="PENDING">Chờ xác nhận</option>
+              <option value="CONFIRMED">Đã xác nhận</option>
+              <option value="COMPLETED">Đã khám</option>
+              <option value="CANCELLED">Đã hủy</option>
+            </select>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => setStatusChangeAppointment(null)}
+              disabled={isChangingStatus}
+              className="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={confirmStatusChange}
+              disabled={
+                isChangingStatus ||
+                !selectedNewStatus ||
+                selectedNewStatus === statusChangeAppointment.currentStatus
+              }
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {isChangingStatus ? "Đang xử lý..." : "Xác nhận"}
+            </button>
+          </div>
+
+          {/* Loading overlay */}
+          {isChangingStatus && (
+            <div className="absolute inset-0 bg-white bg-opacity-80 backdrop-blur-sm flex items-center justify-center rounded-xl">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-gray-600 font-medium">Đang đổi trạng thái...</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* Toast Notification */}
+    {toast && (
+      <div className="fixed top-4 right-4 z-[60] animate-in slide-in-from-right duration-300">
+        <div className={`px-6 py-4 rounded-lg shadow-lg max-w-md ${
+          toast.type === 'success' 
+            ? 'bg-green-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className="font-medium">{toast.message}</span>
+            <button
+              onClick={() => setToast(null)}
+              className="ml-4 text-white hover:text-gray-200 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 }

@@ -167,6 +167,37 @@ export const appointmentService = {
     }
   },
 
+  // Update appointment status only
+  async updateAppointmentStatus(
+    appointmentId: number,
+    status: string
+  ): Promise<any> {
+    try {
+      const response = await api.patch(
+        `/appointments/${appointmentId}/status/`,
+        { appointment_status: status }
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error(`Error updating appointment status ${appointmentId}:`, error);
+
+      if (error.response) {
+        console.error("Backend response error:", {
+          status: error.response.status,
+          data: error.response.data,
+        });
+
+        const backendMessage =
+          error.response.data?.message || error.response.data?.detail;
+        if (backendMessage) {
+          throw new Error(`Lỗi từ server: ${backendMessage}`);
+        }
+      }
+
+      throw new Error("Không thể cập nhật trạng thái lịch khám");
+    }
+  },
+
   // Update appointment
   async updateAppointment(
     appointmentId: number,

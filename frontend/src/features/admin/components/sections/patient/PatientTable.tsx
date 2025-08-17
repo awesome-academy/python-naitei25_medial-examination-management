@@ -1,6 +1,5 @@
 "use client";
 
-import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import SearchInput from "../../common/SearchInput";
@@ -16,8 +15,6 @@ import { DeleteConfirmationModal } from "../../ui/modal/DeleteConfirmationModal"
 import { patientService } from "../../../services/patientService";
 import type { Patient } from "../../../types/patient";
 import { format } from "date-fns";
-import { X } from "lucide-react";
-import type { PatientUpdateDto } from "../../../types/patient";
 
 export default function PatientTable() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -26,10 +23,7 @@ export default function PatientTable() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editPatient, setEditPatient] = useState<Patient | null>(null);
-  const [editData, setEditData] = useState<Partial<Patient>>({});
-  const [editLoading, setEditLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const navigate = useNavigate();
 
   const fetchPatients = async () => {
@@ -65,6 +59,9 @@ export default function PatientTable() {
       setPatients((prev) =>
         prev.filter((patient) => patient.patientId !== patientToDelete)
       );
+      // Hiển thị thông báo thành công
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
     } catch (err) {
       console.error("Error deleting patient:", err);
     } finally {
@@ -79,20 +76,13 @@ export default function PatientTable() {
       if (!searchTerm.trim()) {
         await fetchPatients();
       } else {
-        const params: {
-          identityNumber?: string;
-          insuranceNumber?: string;
-          fullName?: string;
-        } = {};
-        if (/^\d{9,12}$/.test(searchTerm.trim())) {
-          params.identityNumber = searchTerm.trim();
-        } else if (/^[A-Za-z0-9]{8,20}$/.test(searchTerm.trim())) {
-          params.insuranceNumber = searchTerm.trim();
-        } else {
-          params.fullName = searchTerm.trim();
-        }
-        const result = await patientService.searchPatient(params);
-        setPatients(result ? [result] : []);
+        const allPatients = await patientService.getAllPatients();
+        const filtered = allPatients.filter(patient => 
+          patient.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          patient.identityNumber.includes(searchTerm) ||
+          (patient.insuranceNumber && patient.insuranceNumber.includes(searchTerm))
+        );
+        setPatients(filtered);
       }
     } catch (err) {
       setPatients([]);
@@ -102,55 +92,6 @@ export default function PatientTable() {
     }
   };
 
-  const handleEditClick = (patient: Patient) => {
-    setEditPatient(patient);
-    setEditData({
-      patientId: patient.patientId,
-      fullName: patient.fullName,
-      identityNumber: patient.identityNumber,
-      insuranceNumber: patient.insuranceNumber,
-      birthday: patient.birthday,
-      phone: patient.phone,
-      email: patient.email,
-      gender: patient.gender,
-      address: patient.address,
-      allergies: patient.allergies,
-      height: patient.height,
-      weight: patient.weight,
-      bloodType: patient.bloodType,
-    });
-    setShowEditModal(true);
-  };
-
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editPatient || !editData.patientId) return;
-    setEditLoading(true);
-    try {
-      const updatePayload: Partial<PatientUpdateDto> = {
-        fullName: editData.fullName,
-        identityNumber: editData.identityNumber,
-        insuranceNumber: editData.insuranceNumber,
-        birthday: editData.birthday,
-        phone: editData.phone,
-        email: editData.email,
-        gender: editData.gender,
-        address: editData.address,
-        allergies: editData.allergies,
-        height: editData.height,
-        weight: editData.weight,
-        bloodType: editData.bloodType,
-      };
-
-      await patientService.updatePatient(editData.patientId, updatePayload);
-      setShowEditModal(false);
-      await fetchPatients();
-    } catch (err) {
-      console.error("Error updating patient:", err);
-    } finally {
-      setEditLoading(false);
-    }
-  };
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] px-3">
@@ -311,20 +252,6 @@ export default function PatientTable() {
                           Xem
                         </button>
                         <button
-                          onClick={() => handleEditClick(patient)}
-                          className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 text-slate-500"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                          </svg>
-                          Sửa
-                        </button>
-                        <button
                           onClick={() => handleDelete(patient.patientId)}
                           className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
                         >
@@ -349,104 +276,22 @@ export default function PatientTable() {
               </TableBody>
             </Table>
           </div>
-          {/* Modal sửa bệnh nhân */}
-          {showEditModal && editPatient && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-              <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg text-center relative">
-                <div className="flex flex-row justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold text-base-600">
-                    Sửa thông tin bệnh nhân
-                  </h2>
-                  <button
-                    onClick={() => setShowEditModal(false)}
-                    className="p-2 text-gray-400 hover:bg-slate-500/20 bg-slate-500/10 rounded-full"
-                    aria-label="Đóng"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-
-                <form
-                  onSubmit={handleEditSubmit}
-                  className="space-y-4 text-left"
-                >
-                  <div>
-                    <label className="block font-medium mb-1">Họ tên</label>
-                    <input
-                      type="text"
-                      value={editData.fullName || ""}
-                      onChange={(e) =>
-                        setEditData((d) => ({ ...d, fullName: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border rounded"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">CCCD</label>
-                    <input
-                      type="text"
-                      value={editData.identityNumber || ""}
-                      onChange={(e) =>
-                        setEditData((d) => ({
-                          ...d,
-                          identityNumber: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border rounded"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">BHYT</label>
-                    <input
-                      type="text"
-                      value={editData.insuranceNumber || ""}
-                      onChange={(e) =>
-                        setEditData((d) => ({
-                          ...d,
-                          insuranceNumber: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">Ngày sinh</label>
-                    <input
-                      type="date"
-                      value={
-                        editData.birthday
-                          ? new Date(editData.birthday)
-                              .toISOString()
-                              .slice(0, 10)
-                          : ""
-                      }
-                      onChange={(e) =>
-                        setEditData((d) => ({ ...d, birthday: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border rounded"
-                      required
-                    />
-                  </div>
-                  <div className="flex gap-3 justify-end pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowEditModal(false)}
-                      className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    >
-                      Hủy
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={editLoading}
-                      className="px-4 py-2 rounded-lg bg-base-600 text-white hover:bg-base-700 disabled:opacity-60"
-                    >
-                      {editLoading ? "Đang lưu..." : "Lưu"}
-                    </button>
-                  </div>
-                </form>
-              </div>
+          {/* Thông báo thành công */}
+          {showSuccessMessage && (
+            <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Đã xóa bệnh nhân thành công!
             </div>
           )}
           <DeleteConfirmationModal
