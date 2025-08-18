@@ -55,7 +55,8 @@ const AppSidebar: React.FC = () => {
       icon: <GridIcon />,
       name: t("sidebar.overview"),
       path: `${basePath}/dashboard`,
-      roles: ["A", "D", "P"],
+      roles: ["D", "P"],
+      // roles: ["A", "D", "P"],
     },
     {
       icon: <PatientIcon />,
@@ -143,7 +144,8 @@ const AppSidebar: React.FC = () => {
       icon: <UserCircleIcon />,
       name: t("sidebar.account"),
       path: `${basePath}/profile`,
-      roles: ["A", "D", "P"],
+      roles: ["D", "P"],
+      // roles: ["A", "D", "P"],
     },
   ];
 

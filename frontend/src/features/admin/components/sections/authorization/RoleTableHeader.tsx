@@ -1,27 +1,30 @@
-import React from 'react';
 import { TableCell, TableHeader, TableRow } from "../../ui/table";
 
-export default function RoleTableHeader() {
+interface RoleTableHeaderProps {
+    t: (key: string) => string;
+}
+
+export default function RoleTableHeader({ t }: RoleTableHeaderProps) {
     return (
         <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
             <TableRow>
                 <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    Tên vai trò
+                    {t("authorization.roleName")}
                 </TableCell>
                 <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    Mô tả
+                    {t("authorization.roleDescription")}
                 </TableCell>
                 <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    Số người dùng
+                    {t("authorization.userCount")}
                 </TableCell>
                 <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    Số quyền
+                    {t("authorization.permissionCount")}
                 </TableCell>
                 <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    Cập nhật cuối
+                    {t("authorization.lastUpdated")}
                 </TableCell>
                 <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    Thao tác
+                    {t("authorization.actions")}
                 </TableCell>
             </TableRow>
         </TableHeader>

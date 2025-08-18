@@ -3,9 +3,10 @@ import React from 'react';
 interface ErrorDisplayProps {
     error: string;
     onRetry?: () => void;
+    t: (key: string) => string;
 }
 
-export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
+export default function ErrorDisplay({ error, onRetry, t }: ErrorDisplayProps) {
     return (
         <div className="flex flex-col items-center gap-4 text-center">
             <div className="rounded-full bg-red-100 p-3">
@@ -31,7 +32,7 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
                         onClick={onRetry}
                         className="mt-2 text-sm underline hover:no-underline"
                     >
-                        Thử lại
+                        {t('retry')}
                     </button>
                 )}
             </div>

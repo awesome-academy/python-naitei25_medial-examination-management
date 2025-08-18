@@ -1,5 +1,6 @@
 // RolePermissionTable.tsx - FILE GỐC CỦA BẠN SAU KHI REFACTOR
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import LoadingSpinner from "../../components/sections/authorization/LoadingSpinner";
 import ErrorDisplay from "../../components/sections/authorization/ErrorDisplay";
 import RoleManagementHeader from "../../components/sections/authorization/RoleManagementHeader";
@@ -11,6 +12,7 @@ import { permissionsData, roleService } from "../../services/authorizationServic
 import { PAGE_SIZE } from "../../../../shared/constants/constants";
 
 export default function RolePermissionTable() {
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [roles, setRoles] = useState<Role[]>([]);
@@ -54,7 +56,7 @@ export default function RolePermissionTable() {
         setTotalItems(res.total);
         setTotalPages(res.totalPages);
       } catch (err: any) {
-        setError(err.message || "Không thể tải dữ liệu vai trò");
+        setError(err.message || t("authorization.cannotLoadRoles"));
       } finally {
         setIsLoading(false);
       }
@@ -107,20 +109,21 @@ export default function RolePermissionTable() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="Đang tải dữ liệu vai trò..." />;
+    return <LoadingSpinner message={t("authorization.loadingRoles")} t={t} />;
   }
 
   if (error) {
-    return <ErrorDisplay error={error} onRetry={() => window.location.reload()} />;
+    return <ErrorDisplay error={error} onRetry={() => window.location.reload()} t={t} />;
   }
 
   return (
     <div className="space-y-6">
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-        <RoleManagementHeader totalItems={totalItems} />
+        <RoleManagementHeader totalItems={totalItems} t={t} />
         <RoleSearchFilter 
           searchTerm={searchTerm} 
-          onSearchChange={handleSearchChange} 
+          onSearchChange={handleSearchChange}
+          t={t}
         />
         <RoleTable
           roles={roles}
@@ -129,6 +132,7 @@ export default function RolePermissionTable() {
           totalItems={totalItems}
           onPageChange={setCurrentPage}
           onViewPermissions={handleViewPermissions}
+          t={t}
         />
       </div>
 
@@ -138,11 +142,18 @@ export default function RolePermissionTable() {
           permissionsData={permissionsData}
           isEditing={isEditingPermissions}
           editingPermissions={editingPermissions}
-          onClose={handleCloseModal}
-          onStartEditing={handleStartEditingPermissions}
+          onClose={() => setSelectedRole(null)}
+          onStartEditing={() => {
+            setIsEditingPermissions(true);
+            setEditingPermissions([...selectedRole.permissions]);
+          }}
           onTogglePermission={handleTogglePermission}
           onSave={handleSavePermissions}
-          onCancel={handleCancelEditingPermissions}
+          onCancel={() => {
+            setIsEditingPermissions(false);
+            setEditingPermissions([]);
+          }}
+          t={t}
         />
       )}
     </div>

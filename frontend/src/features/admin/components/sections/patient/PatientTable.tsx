@@ -16,10 +16,12 @@ import { patientService } from "../../../services/patientService";
 import type { Patient } from "../../../types/patient";
 import { format } from "date-fns";
 import { Pagination } from "../../ui/Pagination";
+import { useTranslation } from "react-i18next";
 
 const PAGE_SIZE = 10;
 
 export default function PatientTable() {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
@@ -168,17 +170,17 @@ export default function PatientTable() {
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] px-3">
       <div className="flex justify-start items-center px-5 pt-5">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-          Danh sách bệnh nhân
+          {t("patientTable.title")}
         </h2>
         <span className="ml-5 text-sm bg-base-600/20 text-base-600 py-1 px-4 rounded-full font-bold">
-          {totalItems} bệnh nhân
+          {t("patientTable.totalPatients", { count: totalItems })}
         </span>
       </div>
       {loading && (
         <div className="text-center py-10">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-base-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
-            Đang tải danh sách bệnh nhân...
+            {t("patientTable.loading")}
           </p>
         </div>
       )}
@@ -190,11 +192,11 @@ export default function PatientTable() {
             <div className="flex flex-wrap gap-4 items-end">
               <div className="flex-1 min-w-[300px]">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tìm kiếm
+                  {t("patientTable.search")}
                 </label>
                 <SearchInput
                   inputRef={inputRef}
-                  placeholder="Nhập từ khóa tìm kiếm..."
+                  placeholder={t("patientTable.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => {
@@ -205,19 +207,19 @@ export default function PatientTable() {
               
               <div className="min-w-[150px]">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tìm trong
+                  {t("patientTable.searchIn")}
                 </label>
                 <select
                   value={searchField}
                   onChange={(e) => setSearchField(e.target.value as typeof searchField)}
                   className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="all">Tất cả trường</option>
-                  <option value="name">Họ tên</option>
-                  <option value="phone">Số điện thoại</option>
-                  <option value="email">Email</option>
-                  <option value="identity">CCCD</option>
-                  <option value="insurance">BHYT</option>
+                  <option value="all">{t("patientTable.allFields")}</option>
+                  <option value="name">{t("patientTable.name")}</option>
+                  <option value="phone">{t("patientTable.phone")}</option>
+                  <option value="email">{t("patientTable.email")}</option>
+                  <option value="identity">{t("patientTable.identity")}</option>
+                  <option value="insurance">{t("patientTable.insurance")}</option>
                 </select>
               </div>
               
@@ -225,7 +227,7 @@ export default function PatientTable() {
                 className="h-11 px-6 rounded-lg bg-base-700 text-white text-sm font-medium shadow-theme-xs hover:bg-base-600 focus:outline-hidden focus:ring-3 focus:ring-base-600/50"
                 onClick={handleSearch}
               >
-                Tìm kiếm
+                {t("common.search")}
               </button>
             </div>
             
@@ -234,34 +236,34 @@ export default function PatientTable() {
               {/* Gender Filter */}
               <div className="min-w-[120px]">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Giới tính
+                  {t("patientTable.gender")}
                 </label>
                 <select
                   value={genderFilter}
                   onChange={(e) => setGenderFilter(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Tất cả</option>
-                  <option value="MALE">Nam</option>
-                  <option value="FEMALE">Nữ</option>
-                  <option value="OTHER">Khác</option>
+                  <option value="">{t("common.all")}</option>
+                  <option value="MALE">{t("gender.male")}</option>
+                  <option value="FEMALE">{t("gender.female")}</option>
+                  <option value="OTHER">{t("gender.other")}</option>
                 </select>
               </div>
               
               {/* Sort By */}
               <div className="min-w-[140px]">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sắp xếp theo
+                  {t("patientTable.sortBy")}
                 </label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="name">Họ tên</option>
-                  <option value="birthday">Ngày sinh</option>
-                  <option value="createdAt">Ngày tạo</option>
-                  <option value="gender">Giới tính</option>
+                  <option value="name">{t("patientTable.name")}</option>
+                  <option value="birthday">{t("patientTable.birthday")}</option>
+                  <option value="createdAt">{t("patientTable.createdAt")}</option>
+                  <option value="gender">{t("patientTable.gender")}</option>
                 </select>
               </div>
               
@@ -275,7 +277,7 @@ export default function PatientTable() {
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                 >
-                  ↑ Tăng dần
+                  {t("patientTable.asc")}
                 </button>
                 <button
                   onClick={() => setSortOrder("desc")}
@@ -285,7 +287,7 @@ export default function PatientTable() {
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                 >
-                  ↓ Giảm dần
+                  {t("patientTable.desc")}
                 </button>
               </div>
               
@@ -300,22 +302,22 @@ export default function PatientTable() {
                 }}
                 className="px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               >
-                Xóa bộ lọc
+                {t("patientTable.clearFilters")}
               </button>
             </div>
             
             {/* Results Summary */}
             {(searchTerm || genderFilter) && (
               <div className="text-sm text-gray-600">
-                Hiển thị {filteredPatients.length} / {patients.length} bệnh nhân
+                {t("patientTable.showing", { count: filteredPatients.length, total: patients.length })}
                 {searchTerm && (
                   <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                    Tìm kiếm: "{searchTerm}"
+                    {t("patientTable.searchTag", { term: searchTerm })}
                   </span>
                 )}
                 {genderFilter && (
                   <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                    Giới tính: {genderFilter === "MALE" ? "Nam" : genderFilter === "FEMALE" ? "Nữ" : "Khác"}
+                    {t("patientTable.genderTag", { gender: genderFilter })}
                   </span>
                 )}
               </div>
@@ -329,50 +331,50 @@ export default function PatientTable() {
                     isHeader
                     className="px-6 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
                   >
-                    Họ tên
+                    {t("patientTable.name")}
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
                   >
-                    Căn cước công dân
+                    {t("patientTable.identity")}
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
                   >
-                    Bảo hiểm y tế
+                    {t("patientTable.insurance")}
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
                   >
-                    Số điện thoại
+                    {t("patientTable.phone")}
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
                   >
-                    Email
+                    {t("patientTable.email")}
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
                   >
-                    Giới tính
+                    {t("patientTable.gender")}
                   </TableCell>
 
                   <TableCell
                     isHeader
                     className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
                   >
-                    Ngày sinh
+                    {t("patientTable.birthday")}
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-4 py-3 font-medium text-slate-500 text-start text-theme-sm dark:text-slate-400"
                   >
-                    Thao tác
+                    {t("patientTable.actions")}
                   </TableCell>
                 </TableRow>
               </TableHeader>
@@ -381,7 +383,7 @@ export default function PatientTable() {
                 {paginatedPatients.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-10 text-gray-500">
-                      Không tìm thấy bệnh nhân phù hợp.
+                      {t("patientTable.noResults")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -402,7 +404,7 @@ export default function PatientTable() {
                       {patient.phone}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {patient.email || "Chưa có"}
+                      {patient.email || t("common.notAvailable")}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       <Badge
@@ -416,10 +418,10 @@ export default function PatientTable() {
                         }
                       >
                         {patient.gender === "MALE"
-                          ? "Nam"
+                          ? t("gender.male")
                           : patient.gender === "FEMALE"
-                          ? "Nữ"
-                          : "Khác"}
+                          ? t("gender.female")
+                          : t("gender.other")}
                       </Badge>
                     </TableCell>
 
@@ -445,7 +447,7 @@ export default function PatientTable() {
                               clipRule="evenodd"
                             />
                           </svg>
-                          Xem
+                          {t("common.view")}
                         </button>
                         <button
                           onClick={() => handleDelete(patient.patientId)}
@@ -463,7 +465,7 @@ export default function PatientTable() {
                               clipRule="evenodd"
                             />
                           </svg>
-                          Xóa
+                          {t("common.delete")}
                         </button>
                       </div>
                     </TableCell>
@@ -500,15 +502,15 @@ export default function PatientTable() {
                   clipRule="evenodd"
                 />
               </svg>
-              Đã xóa bệnh nhân thành công!
+              {t("patientTable.deleteSuccess")}
             </div>
           )}
           <DeleteConfirmationModal
             isOpen={isModalOpen}
             onClose={() => setModalOpen(false)}
             onConfirm={handleConfirmDelete}
-            title="Xác nhận xóa"
-            message="Bạn có chắc chắn muốn xóa bệnh nhân này? Thao tác này sẽ không thể hoàn tác."
+            title={t("patientTable.confirmDeleteTitle")}
+            message={t("patientTable.confirmDeleteMessage")}
           />
         </>
       )}

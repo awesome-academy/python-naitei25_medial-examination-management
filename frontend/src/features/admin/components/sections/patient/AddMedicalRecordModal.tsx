@@ -45,7 +45,7 @@ export default function AddMedicalRecordModal({
   const [medicines, setMedicines] = useState<Medicine[]>([])
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([])
   const [loadingAppointments, setLoadingAppointments] = useState(false)
-
+  const { t } = useTranslation();
   // State for frequency inputs (times and unit)
   const [frequencyInputs, setFrequencyInputs] = useState<{ [key: number]: { times: string; unit: string } }>({})
 
@@ -91,27 +91,27 @@ export default function AddMedicalRecordModal({
     const newErrors: Record<string, string> = {}
 
     if (!form.appointment_id || form.appointment_id === 0) {
-      newErrors.appointment_id = "Vui lòng chọn cuộc hẹn"
+      newErrors.appointment_id = t("medicalRecord.error.selectAppointment")
     }
 
     if (!form.diagnosis.trim()) {
-      newErrors.diagnosis = "Chẩn đoán là bắt buộc"
+      newErrors.diagnosis = t("medicalRecord.error.diagnosisRequired")
     }
 
     if (form.systolic_blood_pressure < 80 || form.systolic_blood_pressure > 200) {
-      newErrors.systolic_blood_pressure = "Huyết áp tâm thu phải từ 80-200 mmHg"
+      newErrors.systolic_blood_pressure = t("medicalRecord.error.systolicRange")
     }
 
     if (form.diastolic_blood_pressure < 40 || form.diastolic_blood_pressure > 120) {
-      newErrors.diastolic_blood_pressure = "Huyết áp tâm trương phải từ 40-120 mmHg"
+      newErrors.diastolic_blood_pressure = t("medicalRecord.error.diastolicRange")
     }
 
     if (form.heart_rate < 40 || form.heart_rate > 200) {
-      newErrors.heart_rate = "Nhịp tim phải từ 40-200 bpm"
+      newErrors.heart_rate = t("medicalRecord.error.heartRateRange")
     }
 
     if (form.blood_sugar < 50 || form.blood_sugar > 500) {
-      newErrors.blood_sugar = "Đường huyết phải từ 50-500 mg/dL"
+      newErrors.blood_sugar = t("medicalRecord.error.bloodSugarRange")
     }
 
     setErrors(newErrors)
@@ -299,14 +299,14 @@ export default function AddMedicalRecordModal({
     >
       <div className="flex flex-col h-full">
         <div className="flex-shrink-0 px-2 pb-4">
-          <h5 className="mb-4 font-semibold text-gray-800 text-xl lg:text-2xl">Thêm bệnh án mới</h5>
+          <h5 className="mb-4 font-semibold text-gray-800 text-xl lg:text-2xl">{t("medicalRecord.addNew")}</h5>
         </div>
 
         <div className="flex-1 px-2">
           <form id="medical-record-form" onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Chọn cuộc hẹn <span className="text-red-500">*</span>
+                {t("medicalRecord.selectAppointment")} <span className="text-red-500">*</span>
               </label>
               <select
                 name="appointment_id"
@@ -316,9 +316,9 @@ export default function AddMedicalRecordModal({
                 required
                 disabled={loadingAppointments}
               >
-                <option value={0}>{loadingAppointments ? "Đang tải..." : "Chọn cuộc hẹn"}</option>
+                <option value={0}>{loadingAppointments ? t("common.loading") : t("medicalRecord.selectAppointment")}</option>
                 {appointments.map((appointment, index) => (
-  <option key={appointment.id || index} value={appointment.id}>
+                  <option key={appointment.id || index} value={appointment.id}>
                     {`${appointment.schedule?.workDate || "N/A"} - ${appointment.slot_start} đến ${appointment.slot_end} - ${appointment.doctorInfo?.fullName || "N/A"}`}
                   </option>
                 ))}
@@ -328,37 +328,37 @@ export default function AddMedicalRecordModal({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Chẩn đoán <span className="text-red-500">*</span>
+                {t("medicalRecord.diagnosis")} <span className="text-red-500">*</span>
               </label>
               <input
                 name="diagnosis"
                 value={form.diagnosis}
                 onChange={handleChange}
                 type="text"
-                placeholder="Nhập chẩn đoán"
+                placeholder={t("medicalRecord.diagnosisPlaceholder")}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-0"
-                title="Nhập chẩn đoán của bệnh nhân"
+                title={t("medicalRecord.diagnosisPlaceholder")}
                 required
               />
               {errors.diagnosis && <p className="mt-1 text-sm text-red-600">{errors.diagnosis}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Lý do khám</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("medicalRecord.reason")}</label>
               <textarea
                 name="note"
                 value={form.note}
                 onChange={handleChange}
-                placeholder="Nhập lý do khám và ghi chú"
+                placeholder={t("medicalRecord.reasonPlaceholder")}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-0 min-h-[80px] resize-none"
-                title="Nhập lý do khám và ghi chú thêm"
+                title={t("medicalRecord.reasonPlaceholder")}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Huyết áp tâm thu <span className="text-red-500">*</span>
+                  {t("medicalRecord.systolic")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -378,7 +378,7 @@ export default function AddMedicalRecordModal({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Huyết áp tâm trương <span className="text-red-500">*</span>
+                  {t("medicalRecord.diastolic")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -401,7 +401,7 @@ export default function AddMedicalRecordModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nhịp tim <span className="text-red-500">*</span>
+                  {t("medicalRecord.heartRate")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -419,7 +419,7 @@ export default function AddMedicalRecordModal({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Đường huyết <span className="text-red-500">*</span>
+                  {t("medicalRecord.bloodSugar")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -445,12 +445,12 @@ export default function AddMedicalRecordModal({
                 onChange={handleChange}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label className="ml-2 block text-sm text-gray-900">Cần tái khám</label>
+              <label className="ml-2 block text-sm text-gray-900">{t("medicalRecord.needFollowUp")}</label>
             </div>
 
             {form.is_follow_up && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ngày tái khám</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("medicalRecord.followUpDate")}</label>
                 <input
                   type="date"
                   value={form.follow_up_date || ""}
@@ -462,13 +462,13 @@ export default function AddMedicalRecordModal({
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-gray-700">Chi tiết đơn thuốc</label>
+                <label className="block text-sm font-medium text-gray-700">{t("medicalRecord.prescriptionDetails")}</label>
                 <button
                   type="button"
                   onClick={addPrescriptionDetail}
                   className="px-3 py-2 text-sm font-medium text-white bg-rose-800 rounded-lg hover:bg-rose-900"
                 >
-                  + Thêm thuốc
+                  + {t("medicalRecord.addMedicine")}
                 </button>
               </div>
               {form.prescription_details.map((detail, index) => {
@@ -477,14 +477,14 @@ export default function AddMedicalRecordModal({
                   <div key={index} className="p-4 mb-4 bg-gray-50 rounded-lg border">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Thuốc</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t("medicalRecord.medicine")}</label>
                         <select
                           value={detail.medicine_id}
                           onChange={(e) => updatePrescriptionDetail(index, "medicine_id", Number(e.target.value))}
                           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-0"
                           title="Chọn thuốc từ danh sách"
                         >
-                          <option value={0}>Chọn thuốc</option>
+                          <option value={0}>{t("medicalRecord.selectMedicine")}</option>
                           {medicines && Array.isArray(medicines) && medicines.length > 0 ? (
                             medicines.map((med) => {
                               console.log("Rendering medicine option:", med)
@@ -497,21 +497,21 @@ export default function AddMedicalRecordModal({
                           ) : (
                             <option value={0} disabled>
                               {medicines === null || medicines === undefined
-                                ? "Đang tải danh sách thuốc..."
-                                : "Không có thuốc nào"}
+                                ? t("medicalRecord.loadingMedicines")
+                                : t("medicalRecord.noMedicines")}
                             </option>
                           )}
                         </select>
                         {(!medicines || medicines.length === 0) && (
                           <p className="mt-1 text-sm text-amber-600">
                             {medicines === null || medicines === undefined
-                              ? "Đang tải danh sách thuốc..."
-                              : "Không có thuốc nào trong hệ thống"}
+                              ? t("medicalRecord.loadingMedicines")
+                              : t("medicalRecord.noMedicinesInSystem")}
                           </p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Liều lượng</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t("medicalRecord.dosage")}</label>
                         <input
                           type="text"
                           value={detail.dosage}
@@ -523,7 +523,7 @@ export default function AddMedicalRecordModal({
                     </div>
                     <div className="grid grid-cols-4 gap-4 mt-2">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Số lần</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t("medicalRecord.frequencyTimes")}</label>
                         <input
                           type="number"
                           value={getFrequencyTimes(index)}
@@ -535,21 +535,21 @@ export default function AddMedicalRecordModal({
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Đơn vị thời gian</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t("medicalRecord.frequencyUnit")}</label>
                         <select
                           value={getFrequencyUnit(index)}
                           onChange={(e) => updateFrequencyUnit(index, e.target.value)}
                           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-0"
                           title="Chọn đơn vị thời gian"
                         >
-                          <option value="ngày">ngày</option>
-                          <option value="tuần">tuần</option>
-                          <option value="tháng">tháng</option>
-                          <option value="giờ">giờ</option>
+                          <option value="ngày">{t("medicalRecord.units.day")}</option>
+                          <option value="tuần">{t("medicalRecord.units.week")}</option>
+                          <option value="tháng">{t("medicalRecord.units.month")}</option>
+                          <option value="giờ">{t("medicalRecord.units.hour")}</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Thời gian dùng</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t("medicalRecord.duration")}</label>
                         <input
                           type="text"
                           value={detail.duration}
@@ -560,7 +560,7 @@ export default function AddMedicalRecordModal({
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Số lượng <span className="text-red-500">*</span>
+                          {t("medicalRecord.quantity")} <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="number"
@@ -583,7 +583,7 @@ export default function AddMedicalRecordModal({
                       </div>
                     </div>
                     <div className="mt-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("medicalRecord.notes")}</label>
                       <textarea
                         value={detail.prescription_notes}
                         onChange={(e) => updatePrescriptionDetail(index, "prescription_notes", e.target.value)}
@@ -597,14 +597,14 @@ export default function AddMedicalRecordModal({
                         onClick={() => removePrescriptionDetail(index)}
                         className="px-3 py-2 text-sm font-medium text-red-600 bg-red-100 rounded-lg hover:bg-red-200"
                       >
-                        Xóa thuốc
+                        {t("medicalRecord.removeMedicine")}
                       </button>
                       <button
                         type="button"
                         onClick={addPrescriptionDetail}
                         className="px-3 py-2 text-sm font-medium text-blue-500 bg-blue-500/20 rounded-lg hover:bg-blue-800/20"
                       >
-                        Thêm thuốc
+                        {t("medicalRecord.addMedicine")}
                       </button>
                     </div>
                   </div>
@@ -622,7 +622,7 @@ export default function AddMedicalRecordModal({
               onClick={handleClose}
               disabled={loading}
             >
-              Hủy
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
@@ -630,7 +630,7 @@ export default function AddMedicalRecordModal({
               className="px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
-              {loading ? "Đang lưu..." : "Lưu bệnh án"}
+              {loading ? t("common.saving") : t("medicalRecord.save")}
             </button>
           </div>
         </div>

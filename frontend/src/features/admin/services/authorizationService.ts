@@ -1,4 +1,5 @@
 import { api } from "../../../shared/services/api";
+import { doctorService } from "./doctorService";
 
 // Error response interface for type safety
 interface ApiErrorResponse {
@@ -24,6 +25,12 @@ export interface BackendUser {
   phone: string;
   role: "A" | "P" | "D"; // Backend uses single letters - only 3 roles
   created_at: string; // Backend uses snake_case
+  updated_at: string;
+  password: string;
+  is_active: boolean;
+  is_verified: boolean;
+  is_deleted: boolean;
+  deleted_at: string | null;
 }
 
 // Extended User interface for frontend display (we'll map backend roles to extended roles)
@@ -43,6 +50,7 @@ export interface User {
   department: string;
   status: string;
   lastLogin: string;
+  isVerified: boolean;
 }
 
 // Helper function to map backend role to frontend role
@@ -93,6 +101,9 @@ export interface UpdateUserData {
   email?: string | null; // Can be null
   password?: string;
   role?: "ADMIN" | "DOCTOR" | "PATIENT";
+  department?: string;
+  is_active?: boolean;
+  is_verified?: boolean;
 }
 
 export interface CreateRoleData {
@@ -174,6 +185,7 @@ const mockUsers: User[] = [
     department: "Quản trị hệ thống",
     status: "Hoạt động",
     lastLogin: "30/04/2025 14:30",
+    isVerified: true,
   },
   {
     id: "U002",
@@ -190,6 +202,7 @@ const mockUsers: User[] = [
     department: "Khoa Tim mạch",
     status: "Hoạt động",
     lastLogin: "30/04/2025 09:15",
+    isVerified: true,
   },
   {
     id: "U003",
@@ -206,6 +219,7 @@ const mockUsers: User[] = [
     department: "Khoa Nội",
     status: "Hoạt động",
     lastLogin: "29/04/2025 16:45",
+    isVerified: false,
   },
   {
     id: "U004",
@@ -222,6 +236,7 @@ const mockUsers: User[] = [
     department: "Tiếp nhận",
     status: "Tạm khóa",
     lastLogin: "28/04/2025 11:20",
+    isVerified: false,
   },
   {
     id: "U005",
@@ -238,6 +253,7 @@ const mockUsers: User[] = [
     department: "Khoa Dược",
     status: "Hoạt động",
     lastLogin: "30/04/2025 13:10",
+    isVerified: true,
   },
   {
     id: "U006",
@@ -254,6 +270,7 @@ const mockUsers: User[] = [
     department: "Tài chính",
     status: "Hoạt động",
     lastLogin: "30/04/2025 08:30",
+    isVerified: true,
   },
 ];
 
@@ -355,6 +372,8 @@ const filterUsers = (
     role?: string;
     department?: string;
     status?: string;
+    is_active?: string;
+    is_verified?: string;
   }
 ): User[] => {
   return users.filter((user) => {
@@ -392,6 +411,23 @@ const filterUsers = (
       return false;
     }
 
+    // Filter by active status
+    if (filters.is_active) {
+      const isActive = user.status === "Hoạt động";
+      const filterValue = filters.is_active === "true";
+      if (isActive !== filterValue) {
+        return false;
+      }
+    }
+
+    // Filter by verified status
+    if (filters.is_verified) {
+      const filterValue = filters.is_verified === "true";
+      if (user.isVerified !== filterValue) {
+        return false;
+      }
+    }
+
     return true;
   });
 };
@@ -408,6 +444,8 @@ export const userService = {
     role?: string;
     department?: string;
     status?: string;
+    is_active?: string;
+    is_verified?: string;
   }): Promise<{
     users: User[];
     total: number;
@@ -467,15 +505,53 @@ export const userService = {
           let department =
             role === "ADMIN"
               ? "Quản trị hệ thống"
-              : role === "DOCTOR"
-              ? "Chưa phân khoa"
               : role === "PATIENT"
               ? "Bệnh nhân"
               : "Chưa phân công";
 
-          // Note: Removed calls to /doctors/users/ and /patients/users/ endpoints
-          // as they don't exist in the backend
-          // TODO: Implement these endpoints in backend if detailed user info is needed
+          // Fetch actual department data for doctors
+          if (role === "DOCTOR") {
+            try {
+              let doctorData;
+              
+              // Try to fetch by user ID first, fallback to email if ID is missing
+              if (backendUser.id && backendUser.id !== 0) {
+                console.log(`🔍 [DEBUG] Fetching doctor data for user ID: ${backendUser.id}`);
+                doctorData = await doctorService.getDoctorByUserId(backendUser.id);
+              } else if (backendUser.email) {
+                console.log(`🔍 [DEBUG] User ID missing, fetching doctor data by email: ${backendUser.email}`);
+                doctorData = await doctorService.getDoctorByEmail(backendUser.email);
+              } else {
+                throw new Error("No user ID or email available to fetch doctor data");
+              }
+              
+              console.log(`✅ [DEBUG] Doctor data received:`, doctorData);
+              console.log(`🏥 [DEBUG] Department data:`, doctorData.department);
+              console.log(`📋 [DEBUG] Department name:`, doctorData.departmentName);
+              
+              if (doctorData.departmentName) {
+                department = doctorData.departmentName;
+                console.log(`✅ [DEBUG] Set department to: ${department}`);
+              } else {
+                department = "Chưa phân khoa";
+                console.log(`⚠️ [DEBUG] No department name found, set to: ${department}`);
+              }
+              if (doctorData.fullName) {
+                displayName = doctorData.fullName;
+                console.log(`✅ [DEBUG] Set display name to: ${displayName}`);
+              }
+              if (doctorData.avatar) {
+                userAvatar = doctorData.avatar;
+                console.log(`✅ [DEBUG] Set avatar to: ${userAvatar}`);
+              }
+            } catch (doctorError) {
+              console.warn(
+                `⚠️ [DEBUG] Could not fetch doctor data:`,
+                doctorError
+              );
+              department = "Chưa phân khoa";
+            }
+          }
 
           const transformedUser = {
             id: backendUser.id?.toString() || "unknown",
@@ -490,8 +566,9 @@ export const userService = {
               email: userEmail,
             },
             department: department,
-            status: "Hoạt động", // Default status
-            lastLogin: "Chưa có dữ liệu",
+            status: backendUser.is_active ? "Hoạt động" : "Tạm khóa",
+            lastLogin: backendUser.deleted_at || "Chưa có dữ liệu",
+            isVerified: backendUser.is_verified,
           };
 
           // Debug: Log the transformed user
@@ -550,15 +627,30 @@ export const userService = {
       let department =
         role === "ADMIN"
           ? "Quản trị hệ thống"
-          : role === "DOCTOR"
-          ? "Chưa phân khoa"
           : role === "PATIENT"
           ? "Bệnh nhân"
           : "Chưa phân công";
 
-      // Note: Removed calls to /doctors/users/ and /patients/users/ endpoints
-      // as they don't exist in the backend
-      // TODO: Implement these endpoints in backend if detailed user info is needed
+      // Fetch actual department data for doctors
+      if (role === "DOCTOR") {
+        try {
+          const doctorData = await doctorService.getDoctorByUserId(backendUser.id);
+          if (doctorData.departmentName) {
+            department = doctorData.departmentName;
+          } else {
+            department = "Chưa phân khoa";
+          }
+          if (doctorData.fullName) {
+            displayName = doctorData.fullName;
+          }
+          if (doctorData.avatar) {
+            userAvatar = doctorData.avatar;
+          }
+        } catch (doctorError) {
+          console.warn(`⚠️ [DEBUG] Could not fetch doctor data for user ${backendUser.id}:`, doctorError);
+          department = "Chưa phân khoa";
+        }
+      }
 
       return {
         id: backendUser.id?.toString() || id,
@@ -575,6 +667,7 @@ export const userService = {
         department: department,
         status: "Hoạt động",
         lastLogin: "Chưa có dữ liệu",
+        isVerified: backendUser.is_verified,
       };
     } catch (error) {
       console.error("Failed to get user by ID from backend:", error);
@@ -623,6 +716,7 @@ export const userService = {
             : "Chưa phân công",
         status: "Hoạt động",
         lastLogin: "Chưa đăng nhập",
+        isVerified: backendUser.is_verified,
       };
     } catch (error: unknown) {
       console.error("❌ [DEBUG] Failed to create user in backend:", error);
@@ -656,10 +750,14 @@ export const userService = {
         email?: string | null;
         password?: string;
         role?: BackendUser["role"];
+        is_active?: boolean;
+        is_verified?: boolean;
       } = {
         phone: userData.phone,
         email: userData.email,
         password: userData.password,
+        is_active: userData.is_active,
+        is_verified: userData.is_verified,
       };
 
       if (userData.role) {
@@ -667,11 +765,16 @@ export const userService = {
       }
 
       console.log("🌐 [DEBUG] Sending update to backend:", backendUserData);
+      console.log("🔍 [DEBUG] Update URL:", `/users/${id}/edit_user/`);
+      console.log("🔍 [DEBUG] Original userData:", userData);
+      
       const response = await api.put(
         `/users/${id}/edit_user/`,
         backendUserData
       );
       console.log("✅ [DEBUG] User updated successfully:", response.data);
+      console.log("🔍 [DEBUG] Response status:", response.status);
+      console.log("🔍 [DEBUG] Response headers:", response.headers);
 
       const backendUser: BackendUser = response.data;
       const role = mapBackendRoleToFrontend(backendUser.role);
@@ -729,6 +832,7 @@ export const userService = {
         department: department,
         status: "Hoạt động", // Default status
         lastLogin: "Chưa có dữ liệu",
+        isVerified: true, // Default for updated users
       };
     } catch (error: unknown) {
       console.error("❌ [DEBUG] Failed to update user in backend:", error);

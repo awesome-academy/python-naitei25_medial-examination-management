@@ -1,4 +1,41 @@
 {
+  "authorization": {
+    "title": "認可管理",
+    "description": "システム内のユーザー、役割、権限を管理",
+    "pageTitle": "認可 | Wecare総合病院",
+    "pageDescription": "This is Authorization Dashboard",
+    "totalUsers": "総ユーザー数",
+    "todayLogins": "今日のログイン",
+    "comparedToLastMonth": "先月と比較",
+    "comparedToYesterday": "昨日と比較",
+    "userManagement": "ユーザー管理",
+    "rolesPermissions": "役割と権限",
+    "loadingRoles": "役割データを読み込み中...",
+    "cannotLoadRoles": "役割データを読み込めません",
+    "roleManagement": "役割管理",
+    "totalRoles": "役割",
+    "searchRoles": "役割を検索...",
+    "roleName": "役割名",
+    "userCount": "ユーザー数",
+    "permissions": "権限",
+    "actions": "操作",
+    "viewPermissions": "権限を表示",
+    "editPermissions": "権限を編集",
+    "savePermissions": "権限を保存",
+    "cancelEdit": "編集をキャンセル",
+    "permissionsFor": "役割の権限",
+    "noRolesFound": "役割が見つかりません",
+    "roleDescription": "説明",
+    "permissionCount": "権限数",
+    "lastUpdated": "最終更新",
+    "people": "人",
+    "assignPermissions": "権限割り当て",
+    "permissionsOfRole": "役割の権限",
+    "close": "閉じる",
+    "saveChanges": "変更を保存",
+    "loading": "データを読み込み中...",
+    "retry": "再試行"
+  },
   "common": {
     "welcome": "ようこそ",
     "hello": "こんにちは",
@@ -77,7 +114,51 @@
     "searchResults": "件の検索結果",
     "doctorsInDepartment": "名の医師が所属",
     "returnToDashboard": "ダッシュボードに戻る",
-    "saving": "保存中..."
+    "saving": "保存中...",
+    "search": "検索",
+    "view": "表示",
+    "all": "すべて",
+    "notAvailable": "未入力",
+    "retry": "再試行",
+    "addNew": "+ 新規追加",
+    "close": "閉じる",
+    "saveChanges": "変更を保存",
+    "gender": {
+      "male": "男性",
+      "female": "女性",
+      "other": "その他"
+    },
+    "actions": "操作",
+    "ascending": "↑ 昇順",
+    "descending": "↓ 降順",
+    "notFound": "見つかりません",
+    "staffCount": "スタッフ数",
+    "overview": "概要",
+    "headDoctor": "主任医師",
+    "people": "人々",
+    "location": "場所",
+    "founded": "設立",
+    "year": "年",
+    "activityStats": "活動統計",
+    "totalPatients": "総患者数",
+    "todayPatients": "本日の患者数",
+    "occupancyRate": "稼働率",
+    "serviceCount": "サービス数",
+    "description": "説明",
+    "featuredStaff": "注目スタッフ",
+    "staffList": "スタッフ一覧",
+    "doctor": "医師",
+    "position": "役職",
+    "status": "ステータス",
+    "unavailable": "利用不可",
+    "viewSchedule": "スケジュールを見る",
+    "details": "詳細",
+    "medicalServices": "医療サービス",
+    "serviceId": "サービスID",
+    "serviceName": "サービス名",
+    "insurance": "保険",
+    "insuranceCovered": "保険適用",
+    "noStaffInfo": "スタッフ情報はありません"
   },
   "navigation": {
     "home": "ホーム",
@@ -314,7 +395,12 @@
     "profile": "プロフィール",
     "appointments": "予約一覧",
     "upcomingAppointments": "今後の予約",
-    "pastAppointments": "過去の予約"
+    "pastAppointments": "過去の予約",
+    "medicalRecords": "診療記録",
+    "invoices": "請求書",
+    "patientInfo": "患者情報",
+    "healthInfo": "健康情報",
+    "contactInfo": "緊急連絡先情報"
   },
   "tabs": {
     "testResults": "検査結果",
@@ -655,7 +741,7 @@
     "noServices": "サービスが見つかりません。",
     "viewPrescription": "処方箋を見る",
     "title": "診療記録の詳細",
-    "diagnosis": "診断",
+    "diagnosis": "診断: ",
     "bloodPressure": "血圧",
     "heartRate": "心拍数",
     "bloodSugar": "血糖値",
@@ -670,7 +756,64 @@
     "quantity": "数量",
     "notes": "備考",
     "subtitle": "詳細な医療記録情報",
-    "medicalInfo": "医療情報"
+    "medicalInfo": "医療情報",
+    "addNew": "新しい診療記録を追加",
+    "selectAppointment": "予約を選択",
+    "diagnosisPlaceholder": "診断を入力してください",
+    "reason": "受診理由",
+    "reasonPlaceholder": "受診理由とメモを入力してください",
+    "systolic": "収縮期血圧",
+    "diastolic": "拡張期血圧",
+    "needFollowUp": "再診が必要",
+    "medicine": "薬",
+    "frequencyTimes": "回数",
+    "frequencyUnit": "時間単位",
+    "addMedicine": "薬を追加",
+    "removeMedicine": "薬を削除",
+    "noMedicines": "薬がありません",
+    "loadingMedicines": "薬を読み込み中...",
+    "noMedicinesInSystem": "システムに薬がありません",
+    "save": "診療記録を保存",
+    "error": {
+      "selectAppointment": "予約を選択してください",
+      "diagnosisRequired": "診断は必須です",
+      "systolicRange": "収縮期血圧は80-200 mmHgでなければなりません",
+      "diastolicRange": "拡張期血圧は40-120 mmHgでなければなりません",
+      "heartRateRange": "心拍数は40-200 bpmでなければなりません",
+      "bloodSugarRange": "血糖値は50-500 mg/dLでなければなりません"
+    },
+    "units": { "day": "日", "week": "週", "month": "月", "hour": "時間" },
+    "selectMedicine": "薬を選択",
+    "edit": "診療記録を編集",
+    "update": "診療記録を更新",
+    "medicineNumber": "薬 {{number}}",
+    "notesPlaceholder": "薬の使用に関する追加メモ",
+    "noMedicinesInPrescription": "処方に薬がありません。「薬を追加」をクリックしてください。",
+    "titles": "診療記録",
+    "notice": "注意: ",
+    "noNote": "メモなし",
+    "noDiagnosis": "診断なし",
+    "vitalSigns": {
+      "label": "バイタルサイン: ",
+      "bp": "血圧: {{sys}}/{{dia}} mmHg",
+      "hr": "心拍数: {{hr}} bpm",
+      "bs": "血糖値: {{bs}} mg/dL"
+    },
+    "noVitalSigns": "バイタルサイン情報なし",
+    "prescription": "処方: ",
+    "noPrescription": "処方なし",
+    "noPrescriptionInfo": "処方情報なし",
+    "unknownMedicine": "不明な薬",
+    "quantityLabel": "数量: {{quantity}}",
+    "table": {
+      "medicineName": "薬名",
+      "price": "価格 (VND)",
+      "dosage": "用量",
+      "instructions": "指示",
+      "quantity": "数量",
+      "totalPrice": "合計 (VND)"
+    },
+    "delete": "診療記録を削除"
   },
   "upcomingAppointments": {
     "title": "今後の予約",
@@ -1284,7 +1427,20 @@
     "status": {
       "pending": "保留中",
       "confirmed": "確認済み"
-    }
+    },
+    "detail": "予約",
+    "doctor": "医師",
+    "specialization": "専門",
+    "stat": "状態",
+    "number": "番号",
+    "timeRange": "時間枠",
+    "statusPending": "確認待ち",
+    "statusCompleted": "診察済み",
+    "statusCancelled": "キャンセル済み",
+    "statusConfirmed": "確認済み",
+    "statusUnknown": "不明",
+    "confirmDeleteTitle": "削除の確認",
+    "confirmDeleteMessage": "予約 #{{id}} を削除してもよろしいですか？"
   },
   "payment": {
     "paymentTitle": "支払い情報",
@@ -1566,5 +1722,346 @@
     "bhyt": "-健康保険",
     "vnd": "VND",
     "gd": "取引"
+  },
+  "patientTable": {
+    "title": "患者リスト",
+    "totalPatients": "{{count}} 人の患者",
+    "loading": "患者リストを読み込み中...",
+    "search": "検索",
+    "searchPlaceholder": "検索キーワードを入力...",
+    "searchIn": "検索対象",
+    "allFields": "すべての項目",
+    "name": "氏名",
+    "phone": "電話番号",
+    "email": "メール",
+    "identity": "身分証番号",
+    "insurance": "健康保険",
+    "gender": "性別",
+    "birthday": "生年月日",
+    "createdAt": "作成日",
+    "sortBy": "並び替え",
+    "asc": "↑ 昇順",
+    "desc": "↓ 降順",
+    "clearFilters": "フィルターをクリア",
+    "showing": "{{total}} 人中 {{count}} 人を表示",
+    "searchTag": "検索: \"{{term}}\"",
+    "genderTag": "性別: {{gender}}",
+    "actions": "操作",
+    "noResults": "該当する患者が見つかりません。",
+    "deleteSuccess": "患者を正常に削除しました！",
+    "confirmDeleteTitle": "削除の確認",
+    "confirmDeleteMessage": "この患者を削除してもよろしいですか？ この操作は元に戻せません。"
+  },
+  "gender": {
+    "male": "男性",
+    "female": "女性",
+    "other": "その他"
+  },
+  "patientDetail": {
+    "invoices": {
+      "title": "請求書",
+      "searchPlaceholder": "請求番号またはサービス名で検索...",
+      "empty": "請求書はありません",
+      "emptyFiltered": "該当する請求書はありません。",
+      "alert": {
+        "notRequired": "この請求書はオンライン決済の必要がありません。"
+      },
+      "error": {
+        "load": "請求書の読み込みに失敗しました",
+        "payFailed": "決済を実行できません"
+      },
+      "actions": {
+        "payBooking": "予約金を支払う",
+        "payService": "サービス料金を支払う"
+      },
+      "status": {
+        "all": "すべてのステータス",
+        "paid": "支払済み",
+        "unpaid": "未払い",
+        "bookingPaid": "予約金支払い済み",
+        "cancelled": "キャンセル済み"
+      },
+      "sort": {
+        "date": "日付で並べ替え",
+        "amount": "金額で並べ替え",
+        "status": "ステータスで並べ替え"
+      },
+      "resultsCount": "{{shown}} / {{total}} 件の請求書を表示",
+      "table": {
+        "headers": {
+          "id": "請求書ID",
+          "date": "作成日",
+          "status": "ステータス",
+          "amount": "金額",
+          "actions": "操作"
+        },
+        "amountWithCurrency": "{{amount}} 円"
+      }
+    },
+    "payments": {
+      "headers": {
+        "transactionId": "取引ID",
+        "transactionTime": "支払い時刻",
+        "status": "ステータス",
+        "amount": "金額",
+        "method": "方法",
+        "actions": "操作"
+      }
+    },
+    "medicalRecords": {
+      "sort": {
+        "date": "日付で並べ替え",
+        "diagnosis": "診断で並べ替え",
+        "toAsc": "昇順に切り替え",
+        "toDesc": "降順に切り替え"
+      },
+      "resultsCount": "{{shown}} / {{total}} 件を表示",
+      "loading": "診療記録を読み込み中...",
+      "empty": "診療記録はありません。",
+      "emptyFiltered": "該当する記録はありません。",
+      "title": "診療記録",
+      "add": "診療記録を追加",
+      "searchPlaceholder": "診断、メモ、または薬で検索...",
+      "error": {
+        "invalidPatientId": "無効な患者IDです。",
+        "loadLog": "診療記録の読み込みエラー:",
+        "load": "診療記録を読み込めません。後でもう一度お試しください。",
+        "addLog": "診療記録の追加エラー:",
+        "add": "診療記録の追加に失敗しました。情報を確認してください。",
+        "updateLog": "診療記録の更新エラー:",
+        "update": "診療記録の更新に失敗しました。情報を確認してください。",
+        "notFound": "編集する診療記録が見つかりません。",
+        "delete": "診療記録の削除に失敗しました。もう一度お試しください。"
+      },
+      "success": {
+        "update": "診療記録が正常に更新されました！",
+        "delete": "診療記録が正常に削除されました！"
+      },
+      "deleteConfirm": {
+        "title": "診療記録の削除確認",
+        "message": "この診療記録を削除してもよろしいですか？この操作は元に戻せません。",
+        "confirm": "削除",
+        "cancel": "キャンセル"
+      }
+    },
+    "contacts": {
+      "title": "緊急連絡先情報",
+      "searchPlaceholder": "氏名または電話番号で検索...",
+      "table": {
+        "name": "連絡先氏名",
+        "phone": "電話番号",
+        "relationship": "関係",
+        "actions": "操作"
+      },
+      "filters": {
+        "allRelationships": "すべての関係"
+      },
+      "sortBy": {
+        "name": "名前で並び替え",
+        "phone": "電話番号で並び替え",
+        "relationship": "関係で並び替え"
+      },
+      "relationship": {
+        "family": "家族",
+        "friend": "友人",
+        "others": "その他"
+      },
+      "deleteConfirm": {
+        "title": "削除の確認",
+        "message": "連絡先「{{name}}」を削除してよろしいですか？この操作は元に戻せません。"
+      },
+      "error": {
+        "load": "連絡先を読み込めませんでした！",
+        "save": "連絡先の保存に失敗しました！",
+        "delete": "連絡先の削除に失敗しました！",
+        "invalid": "正しい連絡先情報を入力してください。",
+        "saveLog": "連絡先保存エラー:",
+        "saveFailed": "連絡先の保存に失敗しました！",
+        "deleteFailed": "連絡先の削除に失敗しました！"
+      },
+      "empty": "連絡先がありません",
+      "emptyFiltered": "該当する連絡先はありません。",
+      "detailTitle": "連絡先の詳細",
+      "editTitle": "連絡先を編集",
+      "selectRelationship": "関係を選択",
+      "emptyFilter": "フィルターに一致する連絡先が見つかりません"
+    },
+    "appointments": {
+      "title": "予約",
+      "searchPlaceholder": "医師名、予約ID、または症状で検索...",
+      "status": {
+        "all": "すべてのステータス",
+        "pending": "確認待ち",
+        "confirmed": "確認済み",
+        "completed": "診察済み",
+        "cancelled": "キャンセル済み",
+        "noShow": "未来院",
+        "inProgress": "診察中",
+        "unknown": "不明"
+      },
+      "sort": {
+        "date": "日付で並べ替え",
+        "doctor": "医師で並べ替え",
+        "status": "ステータスで並べ替え"
+      },
+      "resultsCount": "{{shown}} / {{total}} 件の予約を表示",
+      "table": {
+        "headers": {
+          "id": "予約ID",
+          "doctor": "医師",
+          "status": "ステータス",
+          "time": "時間",
+          "actions": "操作"
+        }
+      },
+      "empty": "予約はありません。",
+      "emptyFiltered": "該当する予約はありません。",
+      "changeStatus": {
+        "title": "新しいステータスを選択",
+        "current": "現在のステータス",
+        "placeholder": "-- 新しいステータスを選択 --",
+        "confirm": "確認",
+        "processing": "処理中...",
+        "loading": "ステータスを変更中..."
+      }
+    },
+    "info": {
+      "title": "患者情報",
+      "editTitle": "患者情報を編集",
+      "fields": {
+        "fullName": "氏名",
+        "patientId": "患者ID",
+        "birthday": "生年月日",
+        "gender": "性別",
+        "phone": "電話番号",
+        "email": "メール",
+        "address": "住所",
+        "insuranceNumber": "健康保険番号",
+        "identityNumber": "身分証番号",
+        "createdAt": "アカウント作成日"
+      },
+      "form": {
+        "fullName": "氏名",
+        "gender": "性別",
+        "birthday": "生年月日",
+        "phone": "電話番号",
+        "email": "メール",
+        "address": "住所",
+        "identityNumber": "身分証番号",
+        "insuranceNumber": "健康保険番号",
+        "avatar": "アバターURL",
+        "correctURL": "有効な画像URLを入力してください。",
+        "paper": " 書類情報",
+        "placeholders": {
+          "fullName": "氏名を入力",
+          "phone": "電話番号を入力",
+          "email": "メールアドレスを入力",
+          "address": "住所を入力",
+          "identityNumber": "身分証番号を入力",
+          "insuranceNumber": "健康保険番号を入力",
+          "avatar": "アバターURLを入力 (https://...)"
+        }
+      },
+      "avatar": {
+        "previewTitle": "アバタープレビュー",
+        "previewDescription": "システムでのアバターの表示方法",
+        "remove": "アバターを削除",
+        "empty": "アバターなし",
+        "hint": "上にURLを入力してプレビュー"
+      }
+    },
+    "healthInfo": {
+      "title": "健康情報",
+      "allergies": "アレルギー",
+      "allergiesPlaceholder": "アレルギーを入力（一行に一つ）",
+      "metrics": "健康指標",
+      "height": "身長",
+      "heightWithUnit": "身長 (cm)",
+      "heightPlaceholder": "身長を入力",
+      "weight": "体重",
+      "weightWithUnit": "体重 (kg)",
+      "weightPlaceholder": "体重を入力",
+      "bloodType": "血液型",
+      "selectBloodType": "血液型を選択",
+      "editTitle": "健康情報を編集",
+      "error": {
+        "updateFailed": "健康情報の更新に失敗しました！"
+      }
+    },
+    "page": {
+      "metaTitle": "患者詳細 | 総合病院Wecare",
+      "metaDescription": "患者詳細",
+      "patient": "患者",
+      "loading": "患者情報を読み込み中...",
+      "error": {
+        "notFoundId": "患者IDが見つかりません。",
+        "loadFailed": "患者情報を読み込めませんでした。"
+      }
+    }
+  },
+  "patientAdd": {
+    "title": "患者を追加",
+    "success": {
+      "title": "患者が正常に追加されました！",
+      "redirect": "患者一覧にリダイレクト中..."
+    },
+    "form": {
+      "firstName": "姓",
+      "lastName": "名",
+      "email": "メール",
+      "password": "パスワード",
+      "phone": "電話番号",
+      "identityNumber": "身分証番号",
+      "insuranceNumber": "健康保険番号",
+      "birthday": "生年月日",
+      "gender": "性別",
+      "address": "住所",
+      "allergies": "アレルギー",
+      "height": "身長 (cm)",
+      "weight": "体重 (kg)",
+      "bloodType": "血液型",
+      "placeholders": {
+        "firstName": "例: Nguyen",
+        "lastName": "例: Van A",
+        "email": "例: email@example.com",
+        "password": "パスワードを入力",
+        "phone": "例: 0917165628",
+        "identityNumber": "例: 0123456789",
+        "insuranceNumber": "例: ytaucsonns",
+        "birthday": "DD/MM/YYYY",
+        "address": "住所を入力",
+        "allergies": "アレルギーを入力 (任意)"
+      }
+    },
+    "emergency": {
+      "title": "緊急連絡先",
+      "add": "連絡先を追加",
+      "empty": "緊急連絡先がありません。「連絡先を追加」をクリックしてください。",
+      "contact": "緊急連絡先 #{{index}}",
+      "fields": {
+        "name": "氏名",
+        "phone": "電話番号",
+        "relationship": "関係"
+      },
+      "relationship": {
+        "family": "家族",
+        "friend": "友人",
+        "others": "その他"
+      }
+    }
+  },
+  "addDepartment": {
+    "pageTitle": "部門の追加",
+    "pageDescription": "以下の詳細で新しい部門を作成します。",
+    "heading": "部門情報",
+    "departmentName": "部門名",
+    "departmentNamePlaceholder": "部門名を入力してください",
+    "descriptionLabel": "説明",
+    "descriptionPlaceholder": "部門の説明を入力してください",
+    "locationLabel": "所在地",
+    "locationPlaceholder": "所在地を入力してください",
+    "headLabel": "部門長",
+    "headPlaceholder": "部門長の名前を入力してください",
+    "createButton": "部門を作成"
   }
 }

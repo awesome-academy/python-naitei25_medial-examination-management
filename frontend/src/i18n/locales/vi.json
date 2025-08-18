@@ -1,4 +1,41 @@
 {
+  "authorization": {
+    "title": "Quản lý phân quyền",
+    "description": "Quản lý người dùng, vai trò và quyền hạn trong hệ thống",
+    "pageTitle": "Phân quyền | Bệnh viện Đa khoa Wecare",
+    "pageDescription": "This is Authorization Dashboard",
+    "totalUsers": "Tổng người dùng",
+    "todayLogins": "Đăng nhập hôm nay",
+    "comparedToLastMonth": "so với tháng trước",
+    "comparedToYesterday": "so với hôm qua",
+    "userManagement": "Quản lý người dùng",
+    "rolesPermissions": "Vai trò & Quyền hạn",
+    "loadingRoles": "Đang tải dữ liệu vai trò...",
+    "cannotLoadRoles": "Không thể tải dữ liệu vai trò",
+    "roleManagement": "Quản lý vai trò",
+    "totalRoles": "vai trò",
+    "searchRoles": "Tìm kiếm vai trò...",
+    "roleName": "Tên vai trò",
+    "userCount": "Số người dùng",
+    "permissions": "Quyền hạn",
+    "actions": "Thao tác",
+    "viewPermissions": "Xem quyền",
+    "editPermissions": "Chỉnh sửa quyền",
+    "savePermissions": "Lưu quyền",
+    "cancelEdit": "Hủy chỉnh sửa",
+    "permissionsFor": "Quyền hạn cho vai trò",
+    "noRolesFound": "Không tìm thấy vai trò nào",
+    "roleDescription": "Mô tả",
+    "permissionCount": "Số quyền",
+    "lastUpdated": "Cập nhật cuối",
+    "people": "người",
+    "assignPermissions": "Phân quyền",
+    "permissionsOfRole": "Quyền của vai trò",
+    "close": "Đóng",
+    "saveChanges": "Lưu thay đổi",
+    "loading": "Đang tải dữ liệu...",
+    "retry": "Thử lại"
+  },
   "common": {
     "welcome": "Chào mừng",
     "hello": "Xin chào",
@@ -77,7 +114,51 @@
     "searchResults": "kết quả tìm kiếm",
     "doctorsInDepartment": "bác sĩ trong khoa",
     "returnToDashboard": "Về trang chủ",
-    "saving": "Đang lưu..."
+    "saving": "Đang lưu...",
+    "search": "Tìm kiếm",
+    "view": "Xem",
+    "all": "Tất cả",
+    "notAvailable": "Chưa có",
+    "retry": "Thử lại",
+    "addNew": "+ Thêm mới",
+    "close": "Đóng",
+    "saveChanges": "Lưu thay đổi",
+    "gender": {
+      "male": "Nam",
+      "female": "Nữ",
+      "other": "Khác"
+    },
+    "actions": "Thao tác",
+    "ascending": "↑ Tăng dần",
+    "descending": "↓ Giảm dần",
+    "notFound": "Không tìm thấy",
+    "staffCount": "Số lượng nhân viên",
+    "overview": "Tổng quan",
+    "headDoctor": "Bác sĩ trưởng",
+    "people": "Người",
+    "location": "Địa điểm",
+    "founded": "Thành lập",
+    "year": "Năm",
+    "activityStats": "Thống kê hoạt động",
+    "totalPatients": "Tổng số bệnh nhân",
+    "todayPatients": "Bệnh nhân hôm nay",
+    "occupancyRate": "Tỷ lệ lấp đầy",
+    "serviceCount": "Số lượng dịch vụ",
+    "description": "Mô tả",
+    "featuredStaff": "Nhân viên nổi bật",
+    "staffList": "Danh sách nhân viên",
+    "doctor": "Bác sĩ",
+    "position": "Vị trí",
+    "status": "Trạng thái",
+    "unavailable": "Không khả dụng",
+    "viewSchedule": "Xem lịch",
+    "details": "Chi tiết",
+    "medicalServices": "Dịch vụ y tế",
+    "serviceId": "Mã dịch vụ",
+    "serviceName": "Tên dịch vụ",
+    "insurance": "Bảo hiểm",
+    "insuranceCovered": "Bảo hiểm chi trả",
+    "noStaffInfo": "Không có thông tin nhân viên"
   },
   "navigation": {
     "home": "Trang chủ",
@@ -311,7 +392,12 @@
     "profile": "Hồ sơ",
     "appointments": "Lịch khám",
     "upcomingAppointments": "Lịch khám sắp tới",
-    "pastAppointments": "Lịch khám đã qua"
+    "pastAppointments": "Lịch khám đã qua",
+    "medicalRecords": "Bệnh án",
+    "invoices": "Hóa đơn",
+    "patientInfo": "Thông tin bệnh nhân",
+    "healthInfo": "Thông tin sức khỏe",
+    "contactInfo": "Thông tin liên lạc khẩn cấp"
   },
   "tabs": {
     "testResults": "Kết quả xét nghiệm",
@@ -697,7 +783,7 @@
     "noServices": "Không tìm thấy dịch vụ.",
     "viewPrescription": "Xem đơn thuốc",
     "title": "Chi tiết Hồ sơ Khám bệnh",
-    "diagnosis": "Chẩn đoán",
+    "diagnosis": "Chẩn đoán: ",
     "bloodPressure": "Huyết áp",
     "heartRate": "Nhịp tim",
     "bloodSugar": "Đường huyết",
@@ -712,7 +798,64 @@
     "quantity": "Số lượng",
     "notes": "Ghi chú",
     "subtitle": "Thông tin chi tiết hồ sơ bệnh án",
-    "medicalInfo": "Thông tin khám bệnh"
+    "medicalInfo": "Thông tin khám bệnh",
+    "addNew": "Thêm bệnh án mới",
+    "selectAppointment": "Chọn cuộc hẹn",
+    "diagnosisPlaceholder": "Nhập chẩn đoán",
+    "reason": "Lý do khám",
+    "reasonPlaceholder": "Nhập lý do khám và ghi chú",
+    "systolic": "Huyết áp tâm thu",
+    "diastolic": "Huyết áp tâm trương",
+    "needFollowUp": "Cần tái khám",
+    "medicine": "Thuốc",
+    "frequencyTimes": "Số lần",
+    "frequencyUnit": "Đơn vị thời gian",
+    "addMedicine": "Thêm thuốc",
+    "removeMedicine": "Xóa thuốc",
+    "noMedicines": "Không có thuốc nào",
+    "loadingMedicines": "Đang tải danh sách thuốc...",
+    "noMedicinesInSystem": "Không có thuốc nào trong hệ thống",
+    "save": "Lưu bệnh án",
+    "error": {
+      "selectAppointment": "Vui lòng chọn cuộc hẹn",
+      "diagnosisRequired": "Chẩn đoán là bắt buộc",
+      "systolicRange": "Huyết áp tâm thu phải từ 80-200 mmHg",
+      "diastolicRange": "Huyết áp tâm trương phải từ 40-120 mmHg",
+      "heartRateRange": "Nhịp tim phải từ 40-200 bpm",
+      "bloodSugarRange": "Đường huyết phải từ 50-500 mg/dL"
+    },
+    "units": { "day": "ngày", "week": "tuần", "month": "tháng", "hour": "giờ" },
+    "selectMedicine": "Chọn thuốc",
+    "edit": "Chỉnh sửa bệnh án",
+    "update": "Cập nhật bệnh án",
+    "medicineNumber": "Thuốc {{number}}",
+    "notesPlaceholder": "Ghi chú thêm về cách dùng thuốc",
+    "noMedicinesInPrescription": "Chưa có thuốc nào trong đơn. Nhấn \"Thêm thuốc\" để thêm.",
+    "titles": "Bệnh án",
+    "notice": "Lưu ý: ",
+    "noNote": "Không có ghi chú",
+    "noDiagnosis": "Chưa có chẩn đoán",
+    "vitalSigns": {
+      "label": "Sinh hiệu: ",
+      "bp": "Huyết áp: {{sys}}/{{dia}} mmHg",
+      "hr": "Nhịp tim: {{hr}} bpm",
+      "bs": "Đường huyết: {{bs}} mg/dL"
+    },
+    "noVitalSigns": "Chưa có thông tin sinh hiệu",
+    "prescription": "Đơn thuốc: ",
+    "noPrescription": "Chưa có đơn thuốc",
+    "noPrescriptionInfo": "Chưa có thông tin đơn thuốc",
+    "unknownMedicine": "Thuốc không xác định",
+    "quantityLabel": "SL: {{quantity}}",
+    "table": {
+      "medicineName": "Tên thuốc",
+      "price": "Giá (₫)",
+      "dosage": "Liều dùng",
+      "instructions": "Hướng dẫn",
+      "quantity": "Số lượng",
+      "totalPrice": "Thành tiền (₫)"
+    },
+    "delete": "Xóa bệnh án"
   },
   "upcomingAppointments": {
     "title": "Lịch Khám Sắp Tới",
@@ -1291,7 +1434,20 @@
     "status": {
       "pending": "Đang chờ",
       "confirmed": "Đã xác nhận"
-    }
+    },
+    "detail": "Lịch khám",
+    "doctor": "Bác sĩ",
+    "specialization": "Chuyên khoa",
+    "stat": "Tình trạng",
+    "number": "Số thứ tự",
+    "timeRange": "Khung giờ",
+    "statusPending": "Chờ xác nhận",
+    "statusCompleted": "Đã khám",
+    "statusCancelled": "Đã hủy",
+    "statusConfirmed": "Đã xác nhận",
+    "statusUnknown": "Chưa xác định",
+    "confirmDeleteTitle": "Xác nhận xóa",
+    "confirmDeleteMessage": "Bạn có chắc muốn xóa lịch khám #{{id}} không?"
   },
   "payment": {
     "paymentTitle": "Thông tin thanh toán",
@@ -1571,7 +1727,348 @@
     "payOnline": "Thanh toán online",
     "payCash": "Thanh toán tiền mặt",
     "bhyt": "-BHYT",
-    "vnd": "VNĐ", 
+    "vnd": "VNĐ",
     "gd": "GD"
+  },
+  "patientTable": {
+    "title": "Danh sách bệnh nhân",
+    "totalPatients": "{{count}} bệnh nhân",
+    "loading": "Đang tải danh sách bệnh nhân...",
+    "search": "Tìm kiếm",
+    "searchPlaceholder": "Nhập từ khóa tìm kiếm...",
+    "searchIn": "Tìm trong",
+    "allFields": "Tất cả trường",
+    "name": "Họ tên",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "identity": "Căn cước công dân",
+    "insurance": "Bảo hiểm y tế",
+    "gender": "Giới tính",
+    "birthday": "Ngày sinh",
+    "createdAt": "Ngày tạo",
+    "sortBy": "Sắp xếp theo",
+    "asc": "↑ Tăng dần",
+    "desc": "↓ Giảm dần",
+    "clearFilters": "Xóa bộ lọc",
+    "showing": "Hiển thị {{count}} / {{total}} bệnh nhân",
+    "searchTag": "Tìm kiếm: \"{{term}}\"",
+    "genderTag": "Giới tính: ",
+    "actions": "Thao tác",
+    "noResults": "Không tìm thấy bệnh nhân phù hợp.",
+    "deleteSuccess": "Đã xóa bệnh nhân thành công!",
+    "confirmDeleteTitle": "Xác nhận xóa",
+    "confirmDeleteMessage": "Bạn có chắc chắn muốn xóa bệnh nhân này? Thao tác này sẽ không thể hoàn tác."
+  },
+  "gender": {
+    "male": "Nam",
+    "female": "Nữ",
+    "other": "Khác"
+  },
+  "patientDetail": {
+    "invoices": {
+      "title": "Hóa đơn",
+      "searchPlaceholder": "Tìm kiếm theo mã hóa đơn hoặc tên dịch vụ...",
+      "empty": "Không có hóa đơn nào",
+      "emptyFiltered": "Không tìm thấy hóa đơn phù hợp.",
+      "alert": {
+        "notRequired": "Hóa đơn này không cần thanh toán online"
+      },
+      "error": {
+        "load": "Không thể tải danh sách hóa đơn",
+        "payFailed": "Không thể thực hiện thanh toán"
+      },
+      "actions": {
+        "payBooking": "Thanh toán tiền đặt lịch",
+        "payService": "Thanh toán tiền dịch vụ"
+      },
+      "status": {
+        "all": "Tất cả trạng thái",
+        "paid": "Đã thanh toán",
+        "unpaid": "Chưa thanh toán",
+        "bookingPaid": "Đã thanh toán tiền đặt lịch",
+        "cancelled": "Đã hủy"
+      },
+      "sort": {
+        "date": "Sắp xếp theo ngày",
+        "amount": "Sắp xếp theo số tiền",
+        "status": "Sắp xếp theo trạng thái"
+      },
+      "resultsCount": "Hiển thị {{shown}} / {{total}} hóa đơn",
+      "table": {
+        "headers": {
+          "id": "Mã hóa đơn",
+          "date": "Ngày tạo",
+          "status": "Tình trạng",
+          "amount": "Trị giá",
+          "actions": "Hành động"
+        },
+        "amountWithCurrency": "{{amount}} VNĐ"
+      }
+    },
+    "payments": {
+      "headers": {
+        "transactionId": "Mã giao dịch",
+        "transactionTime": "Thời gian thanh toán",
+        "status": "Tình trạng",
+        "amount": "Số tiền",
+        "method": "Phương thức",
+        "actions": "Hành động"
+      }
+    },
+    "medicalRecords": {
+      "sort": {
+        "date": "Sắp xếp theo ngày",
+        "diagnosis": "Sắp xếp theo chẩn đoán",
+        "toAsc": "Đổi thành tăng dần",
+        "toDesc": "Đổi thành giảm dần"
+      },
+      "resultsCount": "Hiển thị {{shown}} / {{total}} bệnh án",
+      "loading": "Đang tải bệnh án...",
+      "empty": "Không có bệnh án nào.",
+      "emptyFiltered": "Không tìm thấy bệnh án phù hợp.",
+      "title": "Bệnh án",
+      "add": "Thêm bệnh án",
+      "searchPlaceholder": "Tìm kiếm theo chẩn đoán, ghi chú, hoặc thuốc...",
+      "error": {
+        "invalidPatientId": "ID bệnh nhân không hợp lệ.",
+        "loadLog": "Lỗi khi tải bệnh án:",
+        "load": "Không thể tải bệnh án. Vui lòng thử lại sau.",
+        "addLog": "Lỗi khi thêm bệnh án:",
+        "add": "Thêm bệnh án thất bại! Vui lòng kiểm tra lại thông tin.",
+        "updateLog": "Lỗi khi cập nhật bệnh án:",
+        "update": "Cập nhật bệnh án thất bại! Vui lòng kiểm tra lại thông tin.",
+        "notFound": "Không tìm thấy bệnh án để chỉnh sửa.",
+        "delete": "Xóa bệnh án thất bại! Vui lòng thử lại."
+      },
+      "success": {
+        "update": "Cập nhật bệnh án thành công!",
+        "delete": "Xóa bệnh án thành công!"
+      },
+      "deleteConfirm": {
+        "title": "Xác nhận xóa bệnh án",
+        "message": "Bạn có chắc chắn muốn xóa bệnh án này không? Hành động này không thể hoàn tác.",
+        "confirm": "Xóa",
+        "cancel": "Hủy"
+      }
+    },
+    "contacts": {
+      "title": "Thông tin liên lạc khẩn cấp",
+      "searchPlaceholder": "Tìm kiếm theo tên hoặc số điện thoại...",
+      "filters": {
+        "allRelationships": "Tất cả mối quan hệ"
+      },
+      "table": {
+        "name": "Tên người liên lạc",
+        "phone": "Số điện thoại",
+        "relationship": "Mối quan hệ",
+        "actions": "Thao tác"
+      },
+      "relationship": {
+        "family": "Gia đình",
+        "friend": "Bạn bè",
+        "others": "Khác"
+      },
+      "deleteConfirm": {
+        "title": "Xác nhận xóa liên hệ",
+        "message": "Bạn có chắc chắn muốn xóa liên hệ {{name}} không? Thao tác này sẽ không thể hoàn tác."
+      },
+      "error": {
+        "load": "Không thể tải danh sách liên hệ!",
+        "save": "Lưu liên hệ thất bại!",
+        "delete": "Xóa liên hệ thất bại!",
+        "invalid": "Vui lòng nhập đầy đủ và đúng thông tin liên hệ!",
+        "saveLog": "Lỗi lưu liên hệ:",
+        "saveFailed": "Lưu liên hệ thất bại!",
+        "deleteFailed": "Xóa liên hệ thất bại!"
+      },
+      "sortBy": {
+        "name": "Sắp xếp theo tên",
+        "phone": "Sắp xếp theo SĐT",
+        "relationship": "Sắp xếp theo quan hệ"
+      },
+      "empty": "Không có liên hệ nào",
+      "emptyFiltered": "Không tìm thấy liên hệ phù hợp.",
+      "detailTitle": "Chi tiết liên hệ",
+      "editTitle": "Chỉnh sửa liên hệ",
+      "selectRelationship": "Chọn mối quan hệ",
+      "emptyFilter": "Không tìm thấy liên hệ phù hợp với bộ lọc"
+    },
+    "appointments": {
+      "title": "Lịch khám",
+      "searchPlaceholder": "Tìm kiếm theo tên bác sĩ, mã lịch khám, hoặc triệu chứng...",
+      "status": {
+        "all": "Tất cả trạng thái",
+        "pending": "Chờ xác nhận",
+        "confirmed": "Đã xác nhận",
+        "completed": "Đã khám",
+        "cancelled": "Đã hủy",
+        "noShow": "Không đến",
+        "inProgress": "Đang khám",
+        "unknown": "Chưa xác định"
+      },
+      "sort": {
+        "date": "Sắp xếp theo ngày",
+        "doctor": "Sắp xếp theo bác sĩ",
+        "status": "Sắp xếp theo trạng thái"
+      },
+      "resultsCount": "Hiển thị {{shown}} / {{total}} lịch khám",
+      "table": {
+        "headers": {
+          "id": "Mã đặt lịch",
+          "doctor": "Tên bác sĩ",
+          "status": "Tình trạng",
+          "time": "Thời gian khám",
+          "actions": "Hành động"
+        }
+      },
+      "empty": "Không có lịch khám nào.",
+      "emptyFiltered": "Không tìm thấy lịch khám phù hợp.",
+      "changeStatus": {
+        "title": "Chọn trạng thái mới",
+        "current": "Trạng thái hiện tại",
+        "placeholder": "-- Chọn trạng thái mới --",
+        "confirm": "Xác nhận",
+        "processing": "Đang xử lý...",
+        "loading": "Đang đổi trạng thái..."
+      }
+    },
+    "info": {
+      "title": "Thông tin bệnh nhân",
+      "editTitle": "Chỉnh sửa thông tin bệnh nhân",
+      "fields": {
+        "fullName": "Họ và tên",
+        "patientId": "Mã bệnh nhân",
+        "birthday": "Ngày sinh",
+        "gender": "Giới tính",
+        "phone": "Điện thoại",
+        "email": "Email",
+        "address": "Địa chỉ",
+        "insuranceNumber": "Bảo hiểm y tế",
+        "identityNumber": "Căn cước công dân",
+        "createdAt": "Ngày tạo tài khoản"
+      },
+      "form": {
+        "fullName": "Họ và tên",
+        "gender": "Giới tính",
+        "birthday": "Ngày sinh",
+        "phone": "Điện thoại",
+        "email": "Email",
+        "address": "Địa chỉ",
+        "identityNumber": "Căn cước công dân",
+        "insuranceNumber": "Bảo hiểm y tế",
+        "avatar": "URL ảnh đại diện",
+        "correctURL": "Nhập URL hình ảnh hợp lệ.",
+        "paper": "Thông tin giấy tờ",
+        "placeholders": {
+          "fullName": "Nhập họ và tên",
+          "phone": "Nhập số điện thoại",
+          "email": "Nhập địa chỉ email",
+          "address": "Nhập địa chỉ",
+          "identityNumber": "Nhập số căn cước công dân",
+          "insuranceNumber": "Nhập số bảo hiểm y tế",
+          "avatar": "Nhập đường dẫn ảnh đại diện (https://...)"
+        }
+      },
+      "avatar": {
+        "previewTitle": "Preview ảnh đại diện",
+        "previewDescription": "Đây là cách ảnh của bạn sẽ hiển thị trong hệ thống",
+        "remove": "Xóa ảnh",
+        "empty": "Chưa có ảnh đại diện",
+        "hint": "Nhập URL ảnh bên trên để xem preview"
+      }
+    },
+    "healthInfo": {
+      "title": "Thông tin sức khỏe",
+      "allergies": "Dị ứng",
+      "allergiesPlaceholder": "Nhập dị ứng (mỗi dòng 1 dị ứng)",
+      "metrics": "Các chỉ số sức khỏe",
+      "height": "Chiều cao",
+      "heightWithUnit": "Chiều cao (cm)",
+      "heightPlaceholder": "Nhập chiều cao",
+      "weight": "Cân nặng",
+      "weightWithUnit": "Cân nặng (kg)",
+      "weightPlaceholder": "Nhập cân nặng",
+      "bloodType": "Nhóm máu",
+      "selectBloodType": "Chọn nhóm máu",
+      "editTitle": "Chỉnh sửa thông tin sức khỏe",
+      "error": {
+        "updateFailed": "Cập nhật thông tin sức khỏe thất bại!"
+      }
+    },
+    "page": {
+      "metaTitle": "Chi tiết bệnh nhân | Bệnh viện đa khoa Wecare",
+      "metaDescription": "Chi tiết bệnh nhân",
+      "patient": "Bệnh nhân",
+      "loading": "Đang tải thông tin bệnh nhân...",
+      "error": {
+        "notFoundId": "Không tìm thấy ID bệnh nhân.",
+        "loadFailed": "Không thể tải thông tin bệnh nhân."
+      }
+    }
+  },
+  "patientAdd": {
+    "title": "Thêm bệnh nhân",
+    "success": {
+      "title": "Thêm bệnh nhân thành công!",
+      "redirect": "Đang chuyển hướng về trang danh sách bệnh nhân..."
+    },
+    "form": {
+      "firstName": "Họ",
+      "lastName": "Tên",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "phone": "Số điện thoại",
+      "identityNumber": "CCCD/CMND",
+      "insuranceNumber": "BHYT",
+      "birthday": "Ngày sinh",
+      "gender": "Giới tính",
+      "address": "Địa chỉ",
+      "allergies": "Dị ứng",
+      "height": "Chiều cao (cm)",
+      "weight": "Cân nặng (kg)",
+      "bloodType": "Nhóm máu",
+      "placeholders": {
+        "firstName": "VD: Nguyễn",
+        "lastName": "VD: Văn A",
+        "email": "VD: email@example.com",
+        "password": "Nhập mật khẩu",
+        "phone": "VD: 0917165628",
+        "identityNumber": "VD: 0123456789",
+        "insuranceNumber": "VD: ytaucsonns",
+        "birthday": "DD/MM/YYYY",
+        "address": "Nhập địa chỉ",
+        "allergies": "Nhập dị ứng (nếu có)"
+      }
+    },
+    "emergency": {
+      "title": "Thông tin liên lạc khẩn cấp",
+      "add": "Thêm liên hệ",
+      "empty": "Chưa có thông tin liên lạc khẩn cấp. Nhấn \"Thêm liên hệ\" để thêm.",
+      "contact": "Liên hệ khẩn cấp #{{index}}",
+      "fields": {
+        "name": "Tên người liên hệ",
+        "phone": "Số điện thoại",
+        "relationship": "Mối quan hệ"
+      },
+      "relationship": {
+        "family": "Gia đình",
+        "friend": "Bạn bè",
+        "others": "Khác"
+      }
+    }
+  },
+  "addDepartment": {
+    "pageTitle": "Thêm phòng ban",
+    "pageDescription": "Tạo một phòng ban mới với các chi tiết bên dưới.",
+    "heading": "Thông tin phòng ban",
+    "departmentName": "Tên phòng ban",
+    "departmentNamePlaceholder": "Nhập tên phòng ban",
+    "descriptionLabel": "Mô tả",
+    "descriptionPlaceholder": "Nhập mô tả phòng ban",
+    "locationLabel": "Địa điểm",
+    "locationPlaceholder": "Nhập địa điểm",
+    "headLabel": "Trưởng phòng",
+    "headPlaceholder": "Nhập tên trưởng phòng",
+    "createButton": "Tạo phòng ban"
   }
 }

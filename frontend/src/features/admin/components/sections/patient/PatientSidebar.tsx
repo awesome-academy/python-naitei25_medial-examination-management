@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { patientService } from "../../../services/patientService";
 import { Patient } from "../../../types/patient";
+import { useTranslation } from "react-i18next";
 
 const MedicalRecordIcon = () => (
   <svg
@@ -134,7 +135,7 @@ export default function PatientSidebar({
           Number(patientId)
         );
         console.log("Patient data:", patientData);
-        setPatient(patientData); // ✅ không phải response.data
+        setPatient(patientData); 
       } catch (error) {
         console.error("Failed to fetch patient data:", error);
       }
@@ -142,17 +143,19 @@ export default function PatientSidebar({
     fetchPatient();
   }, [patientId]);
 
+  const { t } = useTranslation();
+
   // Menu items configuration
   const menuItems = [
-    { id: "medical-records", name: "Bệnh án", icon: <MedicalRecordIcon /> },
-    { id: "appointments", name: "Lịch khám", icon: <CalendarIcon /> },
-    { id: "invoices", name: "Hóa đơn", icon: <PaymentIcon /> },
+    { id: "medical-records", name: t("sidebar.medicalRecords"), icon: <MedicalRecordIcon /> },
+    { id: "appointments", name: t("sidebar.appointments"), icon: <CalendarIcon /> },
+    { id: "invoices", name: t("sidebar.invoices"), icon: <PaymentIcon /> },
     // { id: "payments", name: "Thanh toán", icon: <PaymentIcon /> },
-    { id: "patient-info", name: "Thông tin bệnh nhân", icon: <UserIcon /> },
-    { id: "health-info", name: "Thông tin sức khỏe", icon: <HealthIcon /> },
+    { id: "patient-info", name: t("sidebar.patientInfo"), icon: <UserIcon /> },
+    { id: "health-info", name: t("sidebar.healthInfo"), icon: <HealthIcon /> },
     {
       id: "contact-info",
-      name: "Thông tin liên lạc khẩn cấp",
+      name: t("sidebar.contactInfo"),
       icon: <ListIcon />,
     },
   ];
@@ -175,12 +178,12 @@ export default function PatientSidebar({
 
         {/* Name */}
         <h3 className="mt-4 text-lg font-bold text-gray-800">
-          {patient ? patient.fullName : "Đang tải..."}
+          {patient ? patient.fullName : t("common.loading")}
         </h3>
 
         {/* Patient Code */}
         <p className="text-gray-500 text-sm my-1">
-          BN{patient ? patient.patientId?.toString().padStart(4, "0") : ""}
+          {t("navigation.patients")} {patient ? patient.patientId?.toString().padStart(4, "0") : ""}
         </p>
       </div>
 

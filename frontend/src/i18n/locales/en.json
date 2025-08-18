@@ -1,4 +1,41 @@
 {
+  "authorization": {
+    "title": "Authorization Management",
+    "description": "Manage users, roles and permissions in the system",
+    "pageTitle": "Authorization | Wecare General Hospital",
+    "pageDescription": "This is Authorization Dashboard",
+    "totalUsers": "Total Users",
+    "todayLogins": "Today's Logins",
+    "comparedToLastMonth": "compared to last month",
+    "comparedToYesterday": "compared to yesterday",
+    "userManagement": "User Management",
+    "rolesPermissions": "Roles & Permissions",
+    "loadingRoles": "Loading roles data...",
+    "cannotLoadRoles": "Cannot load roles data",
+    "roleManagement": "Role Management",
+    "totalRoles": "roles",
+    "searchRoles": "Search roles...",
+    "roleName": "Role Name",
+    "userCount": "User Count",
+    "permissions": "Permissions",
+    "actions": "Actions",
+    "viewPermissions": "View Permissions",
+    "editPermissions": "Edit Permissions",
+    "savePermissions": "Save Permissions",
+    "cancelEdit": "Cancel Edit",
+    "permissionsFor": "Permissions for role",
+    "noRolesFound": "No roles found",
+    "roleDescription": "Description",
+    "permissionCount": "Permission Count",
+    "lastUpdated": "Last Updated",
+    "people": "people",
+    "assignPermissions": "Assign Permissions",
+    "permissionsOfRole": "Permissions of role",
+    "close": "Close",
+    "saveChanges": "Save Changes",
+    "loading": "Loading data...",
+    "retry": "Try Again"
+  },
   "common": {
     "welcome": "Welcome",
     "hello": "Hello",
@@ -60,6 +97,7 @@
     "prescriptionId": "Prescription ID",
     "medicineList": "Medicine List",
     "dosage": "Dosage",
+    "notFound": "Not found",
     "addressTooLong": "Address cannot exceed 200 characters!",
     "fullNameRequired": "Please enter your full name!",
     "fullNameMinLength": "Full name must be at least 2 characters!",
@@ -84,7 +122,50 @@
     "searchResults": "search results",
     "doctorsInDepartment": "doctors in department",
     "returnToDashboard": "Return to Dashboard",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "search": "Search",
+    "view": "View",
+    "all": "All",
+    "notAvailable": "N/A",
+    "retry": "Retry",
+    "addNew": "+ Add new",
+    "close": "Close",
+    "saveChanges": "Save Changes",
+    "gender": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "actions": "Actions",
+    "ascending": "↑ Ascending",
+    "descending": "↓ Descending",
+    "staffCount": "Staff Count",
+    "overview": "Overview",
+    "headDoctor": "Head Doctor",
+    "people": "People",
+    "location": "Location",
+    "founded": "Founded",
+    "year": "Year",
+    "activityStats": "Activity Statistics",
+    "totalPatients": "Total Patients",
+    "todayPatients": "Today's Patients",
+    "occupancyRate": "Occupancy Rate",
+    "serviceCount": "Number of Services",
+    "description": "Description",
+    "featuredStaff": "Featured Staff",
+    "staffList": "Staff List",
+    "doctor": "Doctor",
+    "position": "Position",
+    "status": "Status",
+    "unavailable": "Unavailable",
+    "viewSchedule": "View Schedule",
+    "details": "Details",
+    "medicalServices": "Medical Services",
+    "serviceId": "Service ID",
+    "serviceName": "Service Name",
+    "insurance": "Insurance",
+    "insuranceCovered": "Insurance Covered",
+    "noStaffInfo": "No staff information available"
   },
   "navigation": {
     "home": "Home",
@@ -324,7 +405,12 @@
     "managePersonalInfo": "Manage personal information",
     "appointments": "Appointments",
     "upcomingAppointments": "Upcoming Appointments",
-    "pastAppointments": "Past Appointments"
+    "pastAppointments": "Past Appointments",
+    "medicalRecords": "Medical Records",
+    "invoices": "Invoices",
+    "patientInfo": "Patient Information",
+    "healthInfo": "Health Information",
+    "contactInfo": "Emergency Contact Information"
   },
   "tabs": {
     "testResults": "Test Results",
@@ -554,7 +640,7 @@
     "prescriptionId": "Prescription ID",
     "createdAt": "Created At",
     "detailsCount": "Number of medicines",
-    "diagnosis": "Diagnosis",
+    "diagnosis": "Diagnosis ",
     "viewDetails": "View Details",
     "downloadPdf": "Download PDF",
     "notFound": "Prescription not found"
@@ -562,7 +648,7 @@
   "prescriptionDetail": {
     "prescriptionTitle": "Prescription #{{id}}",
     "prescriptionSubtitle": "Detailed prescription information and usage instructions",
-    "diagnosis": "Diagnosis",
+    "diagnosis": "Diagnosis: ",
     "noDiagnosis": "No specific diagnosis",
     "prescriptionDate": "Prescription Date",
     "overview": "Overview",
@@ -608,7 +694,7 @@
     "doctorNotes": "Doctor's Notes",
     "prescription": "Prescription",
     "prescriptionDate": "Prescription Date",
-    "diagnosis": "Diagnosis",
+    "diagnosis": "Diagnosis: ",
     "followUpAppointment": "Follow-up Appointment",
     "status": "Status",
     "patientName": "Patient Name",
@@ -660,7 +746,7 @@
     "noServices": "No services found.",
     "viewPrescription": "View Prescription",
     "title": "Medical Record Details",
-    "diagnosis": "Diagnosis",
+    "diagnosis": "Diagnosis: ",
     "bloodPressure": "Blood Pressure",
     "heartRate": "Heart Rate",
     "bloodSugar": "Blood Sugar",
@@ -673,9 +759,66 @@
     "frequency": "Frequency",
     "duration": "Duration",
     "quantity": "Quantity",
-    "notes": "Notes",
+    "notes": "Notes: ",
     "subtitle": "Detailed medical record information",
-    "medicalInfo": "Medical Information"
+    "medicalInfo": "Medical Information",
+    "addNew": "Add new medical record",
+    "selectAppointment": "Select appointment",
+    "diagnosisPlaceholder": "Enter diagnosis",
+    "reason": "Reason for visit",
+    "reasonPlaceholder": "Enter reason for visit and notes",
+    "systolic": "Systolic blood pressure",
+    "diastolic": "Diastolic blood pressure",
+    "needFollowUp": "Need follow-up",
+    "medicine": "Medicine",
+    "frequencyTimes": "Frequency",
+    "frequencyUnit": "Time unit",
+    "addMedicine": "Add medicine",
+    "removeMedicine": "Remove medicine",
+    "noMedicines": "No medicines",
+    "loadingMedicines": "Loading medicines...",
+    "noMedicinesInSystem": "No medicines in system",
+    "save": "Save medical record",
+    "error": {
+      "selectAppointment": "Please select an appointment",
+      "diagnosisRequired": "Diagnosis is required",
+      "systolicRange": "Systolic blood pressure must be 80-200 mmHg",
+      "diastolicRange": "Diastolic blood pressure must be 40-120 mmHg",
+      "heartRateRange": "Heart rate must be 40-200 bpm",
+      "bloodSugarRange": "Blood sugar must be 50-500 mg/dL"
+    },
+    "units": { "day": "day", "week": "week", "month": "month", "hour": "hour" },
+    "selectMedicine": "Select medicine",
+    "edit": "Edit medical record",
+    "update": "Update medical record",
+    "medicineNumber": "Medicine {{number}}",
+    "notesPlaceholder": "Additional notes about medicine usage",
+    "noMedicinesInPrescription": "No medicines in this prescription. Click \"Add medicine\" to add",
+    "titles": "Medical record",
+    "notice": "Note: ",
+    "noNote": "No note",
+    "noDiagnosis": "No diagnosis",
+    "vitalSigns": {
+      "label": "Vital signs: ",
+      "bp": "Blood pressure: {{sys}}/{{dia}} mmHg",
+      "hr": "Heart rate: {{hr}} bpm",
+      "bs": "Blood sugar: {{bs}} mg/dL"
+    },
+    "noVitalSigns": "No vital signs available",
+    "prescription": "Prescription: ",
+    "noPrescription": "No prescription",
+    "noPrescriptionInfo": "No prescription information",
+    "unknownMedicine": "Unknown medicine",
+    "quantityLabel": "Quantity: {{quantity}}",
+    "table": {
+      "medicineName": "Medicine name",
+      "price": "Price (VND)",
+      "dosage": "Dosage",
+      "instructions": "Instructions",
+      "quantity": "Quantity",
+      "totalPrice": "Total price (VND)"
+    },
+    "delete": "Delete medical record"
   },
   "upcomingAppointments": {
     "title": "Upcoming Appointments",
@@ -837,9 +980,9 @@
     "itemsPerPage": "Show:",
     "prescriptionNumber": "Prescription #{{id}}",
     "createdOn": "Created on:",
-    "diagnosisLabel": "Diagnosis:",
+    "diagnosisLabel": "Diagnosis ",
     "noDiagnosis": "No diagnosis",
-    "medicinesLabel": "Medicines:",
+    "medicinesLabel": "Medicines: ",
     "moreTypes": "+{{count}} more types",
     "viewDetails": "View Details",
     "downloadPdf": "Download PDF",
@@ -1301,7 +1444,20 @@
     "status": {
       "pending": "Pending",
       "confirmed": "Confirmed"
-    }
+    },
+    "detail": "Appointment",
+    "doctor": "Doctor",
+    "specialization": "Specialization",
+    "stat": "Status",
+    "number": "Number",
+    "timeRange": "Time range",
+    "statusPending": "Pending confirmation",
+    "statusCompleted": "Completed",
+    "statusCancelled": "Cancelled",
+    "statusConfirmed": "Confirmed",
+    "statusUnknown": "Unknown",
+    "confirmDeleteTitle": "Confirm delete",
+    "confirmDeleteMessage": "Are you sure you want to delete appointment #{{id}}?"
   },
   "payment": {
     "paymentTitle": "Payment Information",
@@ -1568,7 +1724,348 @@
     "payOnline": "Pay online",
     "payCash": "Pay cash",
     "bhyt": "Health Insurance Discount",
-    "vnd": "VND", 
+    "vnd": "VND",
     "gd": "Transaction"
+  },
+  "patientTable": {
+    "title": "Patient List",
+    "totalPatients": "{{count}} patients",
+    "loading": "Loading patient list...",
+    "search": "Search",
+    "searchPlaceholder": "Enter search keyword...",
+    "searchIn": "Search in",
+    "allFields": "All fields",
+    "name": "Full name",
+    "phone": "Phone number",
+    "email": "Email",
+    "identity": "National ID",
+    "insurance": "Health insurance",
+    "gender": "Gender",
+    "birthday": "Birthday",
+    "createdAt": "Created at",
+    "sortBy": "Sort by",
+    "asc": "↑ Ascending",
+    "desc": "↓ Descending",
+    "clearFilters": "Clear filters",
+    "showing": "Showing {{count}} / {{total}} patients",
+    "searchTag": "Search: \"{{term}}\"",
+    "genderTag": "Gender: {{gender}}",
+    "actions": "Actions",
+    "noResults": "No matching patients found.",
+    "deleteSuccess": "Patient deleted successfully!",
+    "confirmDeleteTitle": "Confirm deletion",
+    "confirmDeleteMessage": "Are you sure you want to delete this patient? This action cannot be undone."
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "patientDetail": {
+    "invoices": {
+      "title": "Invoices",
+      "searchPlaceholder": "Search by invoice ID or service name...",
+      "empty": "No invoices",
+      "emptyFiltered": "No matching invoices.",
+      "alert": {
+        "notRequired": "This invoice does not require online payment."
+      },
+      "error": {
+        "load": "Failed to load invoices",
+        "payFailed": "Unable to process payment"
+      },
+      "actions": {
+        "payBooking": "Pay booking fee",
+        "payService": "Pay service fee"
+      },
+      "status": {
+        "all": "All statuses",
+        "paid": "Paid",
+        "unpaid": "Unpaid",
+        "bookingPaid": "Booking fee paid",
+        "cancelled": "Cancelled"
+      },
+      "sort": {
+        "date": "Sort by date",
+        "amount": "Sort by amount",
+        "status": "Sort by status"
+      },
+      "resultsCount": "Showing {{shown}} / {{total}} invoices",
+      "table": {
+        "headers": {
+          "id": "Invoice ID",
+          "date": "Created date",
+          "status": "Status",
+          "amount": "Amount",
+          "actions": "Actions"
+        },
+        "amountWithCurrency": "{{amount}} VND"
+      }
+    },
+    "payments": {
+      "headers": {
+        "transactionId": "Transaction ID",
+        "transactionTime": "Payment time",
+        "status": "Status",
+        "amount": "Amount",
+        "method": "Method",
+        "actions": "Actions"
+      }
+    },
+    "medicalRecords": {
+      "sort": {
+        "date": "Sort by date",
+        "diagnosis": "Sort by diagnosis",
+        "toAsc": "Switch to ascending",
+        "toDesc": "Switch to descending"
+      },
+      "resultsCount": "Showing {{shown}} / {{total}} records",
+      "loading": "Loading medical records...",
+      "empty": "No medical records.",
+      "emptyFiltered": "No matching records.",
+      "title": "Medical Records",
+      "add": "Add Medical Record",
+      "searchPlaceholder": "Search by diagnosis, notes, or medicine...",
+      "error": {
+        "invalidPatientId": "Invalid patient ID.",
+        "loadLog": "Error loading medical records:",
+        "load": "Unable to load medical records. Please try again later.",
+        "addLog": "Error adding medical record:",
+        "add": "Failed to add medical record! Please check the information.",
+        "updateLog": "Error updating medical record:",
+        "update": "Failed to update medical record! Please check the information.",
+        "notFound": "Medical record not found for editing.",
+        "delete": "Failed to delete medical record! Please try again."
+      },
+      "success": {
+        "update": "Medical record updated successfully!",
+        "delete": "Medical record deleted successfully!"
+      },
+      "deleteConfirm": {
+        "title": "Confirm delete medical record",
+        "message": "Are you sure you want to delete this medical record? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      }
+    },
+    "contacts": {
+      "title": "Emergency Contact Information",
+      "searchPlaceholder": "Search by name or phone number...",
+      "table": {
+        "name": "Contact name",
+        "phone": "Phone number",
+        "relationship": "Relationship",
+        "actions": "Actions"
+      },
+      "relationship": {
+        "family": "Family",
+        "friend": "Friend",
+        "others": "Others"
+      },
+      "deleteConfirm": {
+        "title": "Confirm delete",
+        "message": "Are you sure you want to delete contact {{name}}? This action cannot be undone."
+      },
+      "error": {
+        "load": "Unable to load contacts!",
+        "save": "Failed to save contact!",
+        "delete": "Failed to delete contact!",
+        "invalid": "Please enter valid contact information.",
+        "saveLog": "Error saving contact:",
+        "saveFailed": "Failed to save contact!",
+        "deleteFailed": "Failed to delete contact!"
+      },
+      "empty": "No contacts",
+      "emptyFiltered": "No matching contacts.",
+      "filters": {
+        "allRelationships": "All relationships"
+      },
+      "sortBy": {
+        "name": "Sort by name",
+        "phone": "Sort by phone",
+        "relationship": "Sort by relationship"
+      },
+      "detailTitle": "Contact Details",
+      "editTitle": "Edit Contact",
+      "selectRelationship": "Select relationship",
+      "emptyFilter": "No contacts found matching the filter"
+    },
+    "appointments": {
+      "title": "Appointments",
+      "searchPlaceholder": "Search by doctor name, appointment ID, or symptoms...",
+      "status": {
+        "all": "All statuses",
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "noShow": "No show",
+        "inProgress": "In progress",
+        "unknown": "Unknown"
+      },
+      "sort": {
+        "date": "Sort by date",
+        "doctor": "Sort by doctor",
+        "status": "Sort by status"
+      },
+      "resultsCount": "Showing {{shown}} / {{total}} appointments",
+      "table": {
+        "headers": {
+          "id": "Appointment ID",
+          "doctor": "Doctor",
+          "status": "Status",
+          "time": "Time",
+          "actions": "Actions"
+        }
+      },
+      "empty": "No appointments.",
+      "emptyFiltered": "No matching appointments.",
+      "changeStatus": {
+        "title": "Select new status",
+        "current": "Current status",
+        "placeholder": "-- Select new status --",
+        "confirm": "Confirm",
+        "processing": "Processing...",
+        "loading": "Changing status..."
+      }
+    },
+    "info": {
+      "title": "Patient Information",
+      "editTitle": "Edit Patient Information",
+      "fields": {
+        "fullName": "Full Name",
+        "patientId": "Patient ID",
+        "birthday": "Birthday",
+        "gender": "Gender",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "insuranceNumber": "Health Insurance",
+        "identityNumber": "Identity Number",
+        "createdAt": "Account Created At"
+      },
+      "form": {
+        "fullName": "Full Name",
+        "gender": "Gender",
+        "birthday": "Birthday",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "identityNumber": "Identity Number",
+        "insuranceNumber": "Health Insurance",
+        "avatar": "Avatar URL",
+        "correctURL": "Please enter a valid image URL.",
+        "paper": "Document information",
+        "placeholders": {
+          "fullName": "Enter full name",
+          "phone": "Enter phone number",
+          "email": "Enter email address",
+          "address": "Enter address",
+          "identityNumber": "Enter identity number",
+          "insuranceNumber": "Enter health insurance number",
+          "avatar": "Enter avatar URL (https://...)"
+        }
+      },
+      "avatar": {
+        "previewTitle": "Avatar Preview",
+        "previewDescription": "This is how your avatar will appear in the system",
+        "remove": "Remove avatar",
+        "empty": "No avatar",
+        "hint": "Enter avatar URL above to preview"
+      }
+    },
+    "healthInfo": {
+      "title": "Health Information",
+      "allergies": "Allergies",
+      "allergiesPlaceholder": "Enter allergies (one per line)",
+      "metrics": "Health Metrics",
+      "height": "Height",
+      "heightWithUnit": "Height (cm)",
+      "heightPlaceholder": "Enter height",
+      "weight": "Weight",
+      "weightWithUnit": "Weight (kg)",
+      "weightPlaceholder": "Enter weight",
+      "bloodType": "Blood Type",
+      "selectBloodType": "Select blood type",
+      "editTitle": "Edit Health Information",
+      "error": {
+        "updateFailed": "Failed to update health information!"
+      }
+    },
+    "page": {
+      "metaTitle": "Patient Details | Wecare General Hospital",
+      "metaDescription": "Patient Details",
+      "patient": "Patient",
+      "loading": "Loading patient information...",
+      "error": {
+        "notFoundId": "Patient ID not found.",
+        "loadFailed": "Failed to load patient information."
+      }
+    }
+  },
+  "patientAdd": {
+    "title": "Add Patient",
+    "success": {
+      "title": "Patient added successfully!",
+      "redirect": "Redirecting to patient list..."
+    },
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "password": "Password",
+      "phone": "Phone Number",
+      "identityNumber": "Identity Number",
+      "insuranceNumber": "Health Insurance",
+      "birthday": "Birthday",
+      "gender": "Gender",
+      "address": "Address",
+      "allergies": "Allergies",
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "bloodType": "Blood Type",
+      "placeholders": {
+        "firstName": "e.g. Nguyen",
+        "lastName": "e.g. Van A",
+        "email": "e.g. email@example.com",
+        "password": "Enter password",
+        "phone": "e.g. 0917165628",
+        "identityNumber": "e.g. 0123456789",
+        "insuranceNumber": "e.g. ytaucsonns",
+        "birthday": "DD/MM/YYYY",
+        "address": "Enter address",
+        "allergies": "Enter allergies (if any)"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Contacts",
+      "add": "Add Contact",
+      "empty": "No emergency contact. Click \"Add Contact\" to add.",
+      "contact": "Emergency Contact #{{index}}",
+      "fields": {
+        "name": "Contact Name",
+        "phone": "Phone Number",
+        "relationship": "Relationship"
+      },
+      "relationship": {
+        "family": "Family",
+        "friend": "Friend",
+        "others": "Others"
+      }
+    }
+  },
+  "addDepartment": {
+    "pageTitle": "Add Department",
+    "pageDescription": "Create a new department with details below.",
+    "heading": "Department Information",
+    "departmentName": "Department Name",
+    "departmentNamePlaceholder": "Enter department name",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Enter department description",
+    "locationLabel": "Location",
+    "locationPlaceholder": "Enter location",
+    "headLabel": "Head of Department",
+    "headPlaceholder": "Enter head doctor's name",
+    "createButton": "Create Department"
   }
 }

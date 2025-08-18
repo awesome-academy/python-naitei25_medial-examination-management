@@ -48,8 +48,8 @@ const AdminApp: React.FC = () => {
             </RequireAdmin>
           }
         >
-          <Route index element={<Home />} />
-          <Route path="dashboard" element={<Home />} />
+          <Route index element={<Patient />} />
+          {/* <Route path="dashboard" element={<Home />} /> */}
 
           {/* Medical Examinations Pages */}
           <Route path="calendar" element={<MedicalCalendar />} />
@@ -85,7 +85,7 @@ const AdminApp: React.FC = () => {
           <Route path="authorization" element={<Authorization />} />
 
           {/* Others Page */}
-          <Route path="profile" element={<Profile />} />
+          {/* <Route path="profile" element={<Profile />} /> */}
         </Route>
 
         {/* Fallback Route */}

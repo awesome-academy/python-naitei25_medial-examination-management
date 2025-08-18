@@ -2,6 +2,7 @@ import PageMeta from "../../components/common/PageMeta.tsx";
 import UserRoleTable from "./UserRoleTable.tsx";
 import RolePermissionTable from "./RolePermissionTable.tsx";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Users,
   Shield,
@@ -15,6 +16,7 @@ import {
 } from "../../services/authorizationService";
 
 export default function Authorization() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"users" | "roles">("users");
   const [statistics, setStatistics] = useState<UserStatistics | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -38,18 +40,18 @@ export default function Authorization() {
   return (
     <>
       <PageMeta
-        title="Phân quyền | Bệnh viện Đa khoa Wecare"
-        description="This is Authorization Dashboard"
+        title={t("authorization.pageTitle")}
+        description={t("authorization.pageDescription")}
       />
       <div className="">
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white/90">
-                Quản lý phân quyền
+                {t("authorization.title")}
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Quản lý người dùng, vai trò và quyền hạn trong hệ thống
+                {t("authorization.description")}
               </p>
             </div>
           </div>
@@ -60,7 +62,7 @@ export default function Authorization() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Tổng người dùng
+                  {t("authorization.totalUsers")}
                 </p>
                 {statsLoading ? (
                   <div className="flex items-center gap-2">
@@ -95,7 +97,7 @@ export default function Authorization() {
                               statistics.userGrowthPercent
                             }%`
                           : "0%"}{" "}
-                        so với tháng trước
+                        {t("authorization.comparedToLastMonth")}
                       </p>
                     </div>
                   </>
@@ -111,7 +113,7 @@ export default function Authorization() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Đăng nhập hôm nay
+                  {t("authorization.todayLogins")}
                 </p>
                 {statsLoading ? (
                   <div className="flex items-center gap-2">
@@ -146,7 +148,7 @@ export default function Authorization() {
                               statistics.loginGrowthPercent
                             }%`
                           : "0%"}{" "}
-                        so với hôm qua
+                        {t("authorization.comparedToYesterday")}
                       </p>
                     </div>
                   </>
@@ -174,7 +176,7 @@ export default function Authorization() {
                 }`}
               >
                 <Users size={18} />
-                Quản lý người dùng
+                {t("authorization.userManagement")}
               </button>
               <button
                 onClick={() => setActiveTab("roles")}
@@ -185,7 +187,7 @@ export default function Authorization() {
                 }`}
               >
                 <Shield size={18} />
-                Vai trò & Quyền hạn
+                {t("authorization.rolesPermissions")}
               </button>
             </nav>
           </div>

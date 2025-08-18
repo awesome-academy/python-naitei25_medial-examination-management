@@ -389,9 +389,15 @@ class UserService:
 
     def map_to_user_response(self, user):
         return {
-            'userId': user.id,
+            'id': user.id,
+            'created_at': user.created_at,
+            'updated_at': user.updated_at,
             'email': user.email,
+            'password': user.password,
             'phone': user.phone,
             'role': user.role,
-            'created_at': user.created_at
+            'is_active': user.is_active,
+            'is_verified': user.is_verified,
+            'is_deleted': user.is_deleted,
+            'deleted_at': user.deleted_at
         }

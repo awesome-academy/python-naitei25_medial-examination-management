@@ -77,11 +77,17 @@ export const doctorService = {
   // Get doctor by userId (user's primary key ID)
   async getDoctorByUserId(userId: number): Promise<Doctor> {
     try {
+      console.log(`🌐 [DEBUG] Calling API: /doctors/user/${userId}/`);
       const response = await api.get<any>(`/doctors/user/${userId}/`);
+      console.log(`📥 [DEBUG] Raw API response for user ${userId}:`, response.data);
       const item = response.data;
       if (!item) {
+        console.log(`❌ [DEBUG] No doctor data found for user ${userId}`);
         throw new Error(i18n.t("services.doctor.doctorNotFound"));
       }
+      console.log(`🔍 [DEBUG] Doctor item data:`, item);
+      console.log(`🏥 [DEBUG] Department in raw data:`, item.department);
+      console.log(`📋 [DEBUG] Department name in raw data:`, item.department?.department_name);
       return {
         doctorId: item.id,
         userId: item.user?.id,
@@ -110,12 +116,59 @@ export const doctorService = {
     }
   },
 
+  // Get doctor by email (fallback when user ID is not available)
+  async getDoctorByEmail(email: string): Promise<Doctor> {
+    try {
+      console.log(`🌐 [DEBUG] Calling API: /doctors/ to find doctor by email: ${email}`);
+      const response = await api.get<any[]>("/doctors/");
+      console.log(`📥 [DEBUG] Raw API response for all doctors:`, response.data);
+      
+      // Find the doctor with matching email
+      const item = response.data.find(doctor => doctor.user?.email === email);
+      
+      if (!item) {
+        console.log(`❌ [DEBUG] No doctor data found for email ${email}`);
+        throw new Error("Doctor not found for email: " + email);
+      }
+      
+      console.log(`🔍 [DEBUG] Doctor item data for ${email}:`, item);
+      console.log(`🏥 [DEBUG] Department in raw data:`, item.department);
+      console.log(`📋 [DEBUG] Department name in raw data:`, item.department?.department_name);
+      
+      return {
+        doctorId: item.id,
+        userId: item.user?.id,
+        identityNumber: item.identity_number,
+        fullName: `${item.first_name || ""} ${item.last_name || ""}`.trim(),
+        birthday: item.birthday,
+        gender: item.gender === "M" ? "MALE" : "FEMALE",
+        address: item.address,
+        academicDegree: item.academic_degree,
+        specialization: item.specialization,
+        avatar: item.avatar,
+        type: item.type === "EXAMINATION" ? "EXAMINATION" : "SERVICE",
+        department: {
+          id: item.department?.id,
+          department_name: item.department?.department_name,
+          description: item.department?.description,
+          created_at: item.department?.created_at,
+        },
+        departmentId: item.department?.id,
+        departmentName: item.department?.department_name,
+        createdAt: item.created_at,
+      };
+    } catch (error: any) {
+      console.error(`Error fetching doctor by email ${email}:`, error);
+      throw new Error("Doctor not found for email: " + email);
+    }
+  },
+
   // Create doctor
   async createDoctor(doctorData: any): Promise<Doctor> {
     try {
       // Data is already in the correct API format from AddDoctor component
       const response = await api.post<any>("/doctors/", doctorData);
-      
+
       // Transform response back to frontend format
       const item = response.data;
       return {
@@ -163,7 +216,8 @@ export const doctorService = {
         requestBody.gender = doctorData.gender === "MALE" ? "M" : "F";
       }
       if (doctorData.type !== undefined) {
-        requestBody.type = doctorData.type === "EXAMINATION" ? "EXAMINATION" : "SERVICE";
+        requestBody.type =
+          doctorData.type === "EXAMINATION" ? "EXAMINATION" : "SERVICE";
       }
 
       const response = await api.put<Doctor>(
@@ -243,7 +297,15 @@ export const doctorService = {
     try {
       const queryParams = new URLSearchParams();
 
-      if (params.gender) queryParams.append("gender", params.gender === "MALE" ? "M" : (params.gender === "FEMALE" ? "F" : params.gender));
+      if (params.gender)
+        queryParams.append(
+          "gender",
+          params.gender === "MALE"
+            ? "M"
+            : params.gender === "FEMALE"
+            ? "F"
+            : params.gender
+        );
       if (params.academicDegree)
         queryParams.append("academicDegree", params.academicDegree);
       if (params.specialization)
