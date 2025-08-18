@@ -4,6 +4,7 @@ import InfoField from "../../form/InfoField";
 import { Appointment } from "../../../types/appointment";
 import { format } from "date-fns";
 import { appointmentService } from "../../../services/appointmentService";
+import { useTranslation } from "react-i18next";
 
 interface AppointmentModalProps extends Appointment {
   isOpen: boolean;

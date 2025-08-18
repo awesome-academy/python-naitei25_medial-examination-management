@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import { paymentService } from "../../../services/paymentService";
 import Badge from '../../ui/badge/Badge';
+import { useTranslation } from "react-i18next";
 
 interface Transaction {
   transactionId: number;
@@ -20,6 +21,7 @@ interface BillModalProps extends Bill {
 }
 
 export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModalProps) {
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -82,7 +84,7 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl shadow-lg">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">
-            Chi tiết hóa đơn #{String(bill.billId || 0).padStart(4, "0")}
+            {t("bill.detail")} #{String(bill.billId || 0).padStart(4, "0")}
           </h2>
           <button
             onClick={onClose}
@@ -104,30 +106,28 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
           </button>
         </div>
 
-        {/* ✅ Phần dịch vụ đã sử dụng từ appointmentId */}
         <div className="mb-6">
-          <h3 className="font-medium mb-3">Dịch vụ đã sử dụng</h3>
+          <h3 className="font-medium mb-3">{t("bill.usedServices")}</h3>
           {services.length > 0 ? (
             <div className="space-y-2">
               {services.map((svc, idx) => (
                 <div key={idx} className="flex justify-between items-center py-1">
                   <span className="font-medium">{svc.service?.serviceName}</span>
-                  <span>{(svc.service?.price || 0).toLocaleString("vi-VN")} VNĐ</span>
+                  <span>{(svc.service?.price || 0).toLocaleString("vi-VN")} {t("bill.vnd")}</span>
                 </div>
               ))}
               <div className="flex justify-between font-semibold border-t pt-2">
-                <span>Tổng tiền dịch vụ</span>
-                <span>{totalServiceCost.toLocaleString("vi-VN")} VNĐ</span>
+                <span>{t("bill.totalServiceCost")}</span>
+                <span>{totalServiceCost.toLocaleString("vi-VN")} {t("bill.vnd")}</span>
               </div>
             </div>
           ) : (
-            <p className="text-gray-500">Không có dịch vụ</p>
+            <p className="text-gray-500">{t("bill.noServices")}</p>
           )}
         </div>
 
-        {/* ✅ Giữ nguyên phần chi tiết bill cũ */}
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="font-medium mb-3">Chi tiết</h3>
+          <h3 className="font-medium mb-3">{t("bill.details")}</h3>
           <div className="space-y-2">
             {bill.billDetails?.map((detail: BillDetail) => (
               <div
@@ -137,53 +137,52 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
                 <div className="flex-1">
                   <span className="font-medium">{detail.itemName}</span>
                   <div className="text-sm text-gray-500">
-                    {detail.quantity} x {detail.unitPrice?.toLocaleString('vi-VN')} VNĐ
+                    {detail.quantity} x {detail.unitPrice?.toLocaleString('vi-VN')} {t("bill.vnd")}
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="font-medium">
-                    {detail.totalPrice?.toLocaleString('vi-VN')} VNĐ
+                    {detail.totalPrice?.toLocaleString('vi-VN')} {t("bill.vnd")}
                   </span>
                   {detail.insuranceDiscount > 0 && (
                     <div className="text-sm text-green-600">
-                      -BHYT: {detail.insuranceDiscount?.toLocaleString('vi-VN')} VNĐ
+                      {t("bill.bhyt")}: {detail.insuranceDiscount?.toLocaleString('vi-VN')} {t("bill.vnd")}
                     </div>
                   )}
                 </div>
               </div>
             ))}
             <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-              <span className="font-medium">Tổng tiền dịch vụ</span>
+              <span className="font-medium">{t("bill.totalBookingCost")}</span>
               <span className="font-medium">
-                {bill.totalCost?.toLocaleString('vi-VN')} VNĐ
+                {bill.totalCost?.toLocaleString('vi-VN')} {t("bill.vnd")}
               </span>
             </div>
             {bill.insuranceDiscount > 0 && (
               <div className="flex justify-between items-center text-green-600">
-                <span>Bảo hiểm y tế chi trả</span>
-                <span>-{bill.insuranceDiscount?.toLocaleString('vi-VN')} VNĐ</span>
+                <span>{t("bill.insuranceCovered")}</span>
+                <span>-{bill.insuranceDiscount?.toLocaleString('vi-VN')} {t("bill.vnd")}</span>
               </div>
             )}
             <div className="flex justify-between items-center pt-2 border-t border-gray-200 font-semibold">
-              <span>Số tiền phải thanh toán</span>
+              <span>{t("bill.amountToPay")}</span>
               <span className="text-green-600">
-                {bill.amount?.toLocaleString('vi-VN')} VNĐ
+                {bill.amount?.toLocaleString('vi-VN')} {t("bill.vnd")}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Giữ nguyên phần thanh toán & lịch sử giao dịch cũ */}
         {bill.status === 'PAID' ? (
           <div className="mt-6">
-            <h3 className="font-medium mb-3">Lịch sử giao dịch</h3>
+            <h3 className="font-medium mb-3">{t("bill.transactionHistory")}</h3>
             {loading ? (
-              <div className="text-center py-4">Đang tải...</div>
+              <div className="text-center py-4">{t("common.loading")}</div>
             ) : error ? (
-              <div className="text-center text-red-500 py-4">{error}</div>
+              <div className="text-center text-red-500 py-4">{error || t("bill.errorLoadingTransactions")}</div>
             ) : transactions.length === 0 ? (
               <div className="text-center text-gray-500 py-4">
-                Không có giao dịch nào
+                {t("bill.noTransactions")}
               </div>
             ) : (
               <div className="border rounded-lg overflow-hidden">
@@ -191,19 +190,19 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Mã giao dịch
+                        {t("bill.transactionId")}
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Thời gian
+                        {t("bill.transactionDate")}
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Phương thức
+                        {t("bill.paymentMethod")}
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Số tiền
+                        {t("bill.amount")}
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Trạng thái
+                        {t("bill.status")}
                       </th>
                     </tr>
                   </thead>
@@ -211,18 +210,18 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
                     {transactions.map((transaction) => (
                       <tr key={transaction.transactionId}>
                         <td className="px-4 py-3 text-sm text-gray-900">
-                          GD{transaction.transactionId.toString().padStart(4, "0")}
+                          {t("bill.gd")}{transaction.transactionId.toString().padStart(4, "0")}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
                           {format(new Date(transaction.transactionDate), "dd-MM-yyyy HH:mm")}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
                           {transaction.paymentMethod === "ONLINE_BANKING"
-                            ? "Chuyển khoản"
-                            : "Tiền mặt"}
+                            ? t("bill.onlineBanking")
+                            : t("bill.cash")}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
-                          {transaction.amount?.toLocaleString("vi-VN") || '0'} VNĐ
+                          {transaction.amount?.toLocaleString("vi-VN") || '0'} {t("bill.vnd")}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <Badge
@@ -236,10 +235,10 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
                             }
                           >
                             {transaction.status === "SUCCESS"
-                              ? "Thành công"
+                              ? t("bill.success")
                               : transaction.status === "PENDING"
-                                ? "Đang xử lý"
-                                : "Thất bại"}
+                                ? t("bill.pending")
+                                : t("bill.failed")}
                           </Badge>
                         </td>
                       </tr>
@@ -256,14 +255,14 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
               disabled={paymentLoading}
               className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              {paymentLoading ? 'Đang xử lý...' : 'Thanh toán online'}
+              {paymentLoading ? t("common.processing") : t("bill.payOnline")}
             </button>
             <button
               onClick={() => handlePayment('cash')}
               disabled={paymentLoading}
               className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50"
             >
-              {paymentLoading ? 'Đang xử lý...' : 'Thanh toán tiền mặt'}
+              {paymentLoading ? t("common.processing") : t("bill.payCash")}
             </button>
           </div>
         ) : null}

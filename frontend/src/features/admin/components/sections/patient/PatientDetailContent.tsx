@@ -43,7 +43,7 @@ import { AppointmentModal } from "./AppointmentModal";
 import { getServiceOrdersByAppointmentId } from "../../../services/serviceOrderService";
 import { servicesService } from "../../../services/servicesService";
 import { Pagination } from "../../ui/Pagination";
-// import { createServicePayment} from "../../../services/paymentService";
+import { useTranslation } from "react-i18next";
 
 export function MedicalRecordsContent() {
   const { patientId } = useParams();
@@ -52,7 +52,7 @@ export function MedicalRecordsContent() {
     []
   );
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // Thêm trạng thái lỗi
+  const [error, setError] = useState<string | null>(null); 
   const [selectedPrescription, setSelectedPrescription] =
     useState<PrescriptionResponse | null>(null);
 
@@ -74,11 +74,11 @@ export function MedicalRecordsContent() {
   const [deletingPrescriptionId, setDeletingPrescriptionId] = useState<
     number | null
   >(null);
-  
+
   // Pagination state for medical records
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // 5 medical records per page
-  
+
   // Filter, sort, and search state for medical records
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "diagnosis">("date");
@@ -92,7 +92,7 @@ export function MedicalRecordsContent() {
       return;
     }
     setLoading(true);
-    setError(null); // Reset lỗi
+    setError(null); 
     try {
       console.log(
         "=== DEBUG: Fetching medical records for patient ===",
@@ -123,7 +123,7 @@ export function MedicalRecordsContent() {
     } catch (err) {
       console.error("Lỗi khi tải bệnh án:", err);
       setError("Không thể tải bệnh án. Vui lòng thử lại sau.");
-      setPrescriptions([]); // Đặt lại danh sách rỗng khi có lỗi
+      setPrescriptions([]); 
     } finally {
       setLoading(false);
     }
@@ -155,7 +155,7 @@ export function MedicalRecordsContent() {
 
   const handleEditMedicalRecord = (prescriptionId: number) => {
     const prescriptionToEdit = prescriptions.find(
-      (p) => p.prescriptionId === prescriptionId
+      (p) => p.id === prescriptionId
     );
     if (prescriptionToEdit) {
       setSelectedPrescription(prescriptionToEdit);
@@ -171,8 +171,8 @@ export function MedicalRecordsContent() {
   ) => {
     try {
       await pharmacyService.updatePrescription(prescriptionId, data);
-      await fetchMedicalRecords(); // Tải lại dữ liệu sau khi cập nhật
-      closeEditModal(); // Đóng modal
+      await fetchMedicalRecords(); 
+      closeEditModal(); 
     } catch (err) {
       console.error("Lỗi khi cập nhật bệnh án:", err);
       alert("Cập nhật bệnh án thất bại! Vui lòng kiểm tra lại thông tin.");
@@ -189,7 +189,7 @@ export function MedicalRecordsContent() {
 
     try {
       await pharmacyService.deletePrescription(deletingPrescriptionId);
-      await fetchMedicalRecords(); // Tải lại dữ liệu sau khi xóa
+      await fetchMedicalRecords(); 
       closeDeleteConfirmModal();
       alert("Xóa bệnh án thành công!");
     } catch (err) {
@@ -227,7 +227,7 @@ export function MedicalRecordsContent() {
     });
 
     setFilteredPrescriptions(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1); 
   };
 
   // Apply filters when dependencies change
@@ -241,7 +241,7 @@ export function MedicalRecordsContent() {
         <h2 className="text-xl font-semibold">Bệnh án</h2>
         <button
           className="flex items-center justify-center bg-base-700 py-2.5 px-5 rounded-lg text-white text-sm hover:bg-base-700/70"
-          onClick={openAddModal} // Sử dụng openAddModal từ useModal
+          onClick={openAddModal} 
         >
           Thêm bệnh án
           <span className="ml-2 text-lg">+</span>
@@ -316,7 +316,7 @@ export function MedicalRecordsContent() {
 
             return paginatedPrescriptions.map((pres) => (
               <MedicalRecord
-                key={pres.prescriptionId}
+                key={pres.id}
                 prescription={pres}
                 onEdit={handleEditMedicalRecord}
                 onDelete={handleDeleteMedicalRecord}
@@ -339,21 +339,19 @@ export function MedicalRecordsContent() {
 
       <AddMedicalRecordModal
         isOpen={isAddModalOpen}
-        onClose={closeAddModal} // Sử dụng closeModal từ useModal
+        onClose={closeAddModal} 
         onSubmit={handleAddMedicalRecord}
         patientId={Number(patientId)}
-        // Nếu có appointmentId từ context, bạn có thể truyền vào đây
-        // appointmentId={someAppointmentId}
       />
       <EditMedicalRecordModal
-        isOpen={isEditModalOpen} // Sử dụng isEditModalOpen từ useModal
-        onClose={closeEditModal} // Sử dụng closeModal từ useModal
+        isOpen={isEditModalOpen} 
+        onClose={closeEditModal} 
         onSubmit={handleUpdateMedicalRecord}
-        prescription={selectedPrescription} // Sử dụng selectedPrescription
+        prescription={selectedPrescription}
       />
       <DeleteConfirmationModal
-        isOpen={isDeleteConfirmModalOpen} // Sử dụng isDeleteConfirmModalOpen từ useModal
-        onClose={closeDeleteConfirmModal} // Sử dụng closeModal từ useModal
+        isOpen={isDeleteConfirmModalOpen} 
+        onClose={closeDeleteConfirmModal} 
         onConfirm={handleConfirmDeleteMedicalRecord}
         title="Xác nhận xóa bệnh án"
         message="Bạn có chắc chắn muốn xóa bệnh án này không? Hành động này không thể hoàn tác."
@@ -371,16 +369,16 @@ export function AppointmentsContent() {
   const { patientId } = useParams();
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
-  const [statusChangeAppointment, setStatusChangeAppointment] = 
+  const [statusChangeAppointment, setStatusChangeAppointment] =
     useState<{ appointmentId: number; currentStatus: string } | null>(null);
   const [selectedNewStatus, setSelectedNewStatus] = useState<string>("");
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  
+
   // Pagination state for appointments
   const [appointmentCurrentPage, setAppointmentCurrentPage] = useState(1);
   const appointmentItemsPerPage = 10; // 10 appointments per page
-  
+
   // Filter, sort, and search state for appointments
   const [appointmentSearchTerm, setAppointmentSearchTerm] = useState("");
   const [appointmentSortBy, setAppointmentSortBy] = useState<"date" | "doctor" | "status">("date");
@@ -390,7 +388,7 @@ export function AppointmentsContent() {
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4000); // Auto hide after 4 seconds
+    setTimeout(() => setToast(null), 4000); 
   };
 
   const formatHHmm = (timeStr: string) => {
@@ -422,16 +420,16 @@ export function AppointmentsContent() {
           appt.status === "P"
             ? "PENDING"
             : appt.status === "C"
-            ? "CONFIRMED"
-            : appt.status === "X"
-            ? "CANCELLED"
-            : appt.status === "D"
-            ? "COMPLETED"
-            : appt.status === "N"
-            ? "NO_SHOW"
-            : appt.status === "I"
-            ? "IN_PROGRESS"
-            : "PENDING",
+              ? "CONFIRMED"
+              : appt.status === "X"
+                ? "CANCELLED"
+                : appt.status === "D"
+                  ? "COMPLETED"
+                  : appt.status === "N"
+                    ? "NO_SHOW"
+                    : appt.status === "I"
+                      ? "IN_PROGRESS"
+                      : "PENDING",
         createdAt: appt.createdAt,
         prescriptionId: appt.prescriptionId,
       }));
@@ -443,29 +441,29 @@ export function AppointmentsContent() {
       setLoading(false);
     }
   };
-  
+
   // Filter, sort, and search logic for appointments
   const applyAppointmentFiltersAndSort = () => {
     let filtered = [...appointments];
-    
+
     // Apply search filter
     if (appointmentSearchTerm.trim()) {
-      filtered = filtered.filter(appointment => 
+      filtered = filtered.filter(appointment =>
         appointment.doctorInfo?.fullName?.toLowerCase().includes(appointmentSearchTerm.toLowerCase()) ||
         appointment.appointmentId.toString().includes(appointmentSearchTerm) ||
         appointment.symptoms?.toLowerCase().includes(appointmentSearchTerm.toLowerCase())
       );
     }
-    
+
     // Apply status filter
     if (statusFilter) {
       filtered = filtered.filter(appointment => appointment.appointmentStatus === statusFilter);
     }
-    
+
     // Apply sorting
     filtered.sort((a, b) => {
       let compareValue = 0;
-      
+
       if (appointmentSortBy === "date") {
         compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       } else if (appointmentSortBy === "doctor") {
@@ -473,14 +471,14 @@ export function AppointmentsContent() {
       } else if (appointmentSortBy === "status") {
         compareValue = a.appointmentStatus.localeCompare(b.appointmentStatus);
       }
-      
+
       return appointmentSortOrder === "asc" ? compareValue : -compareValue;
     });
-    
+
     setFilteredAppointments(filtered);
     setAppointmentCurrentPage(1); // Reset to first page when filters change
   };
-  
+
   // Apply filters when dependencies change
   useEffect(() => {
     applyAppointmentFiltersAndSort();
@@ -504,11 +502,11 @@ export function AppointmentsContent() {
       // Show success message
       const statusLabels: Record<string, string> = {
         PENDING: "Chờ xác nhận",
-        CONFIRMED: "Đã xác nhận", 
+        CONFIRMED: "Đã xác nhận",
         COMPLETED: "Đã khám",
         CANCELLED: "Đã hủy",
       };
-      
+
       // Success notification
       showToast(`Thành công! Đã chuyển trạng thái cuộc hẹn thành: ${statusLabels[selectedStatus] || selectedStatus}`, 'success');
       setStatusChangeAppointment(null);
@@ -527,7 +525,7 @@ export function AppointmentsContent() {
 
   const confirmStatusChange = async () => {
     if (!statusChangeAppointment || !selectedNewStatus) return;
-    
+
     if (selectedNewStatus === statusChangeAppointment.currentStatus) {
       alert("Trạng thái mới giống với trạng thái hiện tại!");
       return;
@@ -544,7 +542,7 @@ export function AppointmentsContent() {
   const getStatusLabel = (status: string): string => {
     const statusLabels: Record<string, string> = {
       PENDING: "Chờ xác nhận",
-      CONFIRMED: "Đã xác nhận", 
+      CONFIRMED: "Đã xác nhận",
       COMPLETED: "Đã khám",
       CANCELLED: "Đã hủy",
     };
@@ -554,7 +552,7 @@ export function AppointmentsContent() {
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4 ml-1">Lịch khám</h2>
-      
+
       {/* Search, Filter, and Sort Controls */}
       <div className="mb-4 space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
@@ -568,7 +566,7 @@ export function AppointmentsContent() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           {/* Status Filter */}
           <div className="w-full sm:w-48">
             <select
@@ -585,7 +583,7 @@ export function AppointmentsContent() {
               <option value="IN_PROGRESS">Đang khám</option>
             </select>
           </div>
-          
+
           {/* Sort Controls */}
           <div className="flex gap-2">
             <select
@@ -597,7 +595,7 @@ export function AppointmentsContent() {
               <option value="doctor">Sắp xếp theo bác sĩ</option>
               <option value="status">Sắp xếp theo trạng thái</option>
             </select>
-            
+
             <button
               onClick={() => setAppointmentSortOrder(appointmentSortOrder === "asc" ? "desc" : "asc")}
               className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -607,7 +605,7 @@ export function AppointmentsContent() {
             </button>
           </div>
         </div>
-        
+
         {/* Results count */}
         <div className="text-sm text-gray-600">
           Hiển thị {filteredAppointments.length} / {appointments.length} lịch khám
@@ -664,96 +662,96 @@ export function AppointmentsContent() {
               const startIndex = (appointmentCurrentPage - 1) * appointmentItemsPerPage;
               const endIndex = startIndex + appointmentItemsPerPage;
               const paginatedAppointments = filteredAppointments.slice(startIndex, endIndex);
-              
+
               return paginatedAppointments.map((appt) => (
-              <TableRow key={appt.appointmentId}>
-                <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
-                  CH{appt.appointmentId.toString().padStart(4, "0")}
-                </TableCell>
-                <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
-                  {appt.doctorInfo?.fullName}
-                </TableCell>
-                <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
-                  <Badge
-                    size="sm"
-                    color={
-                      appt.appointmentStatus === "PENDING"
-                        ? "pending"
-                        : appt.appointmentStatus === "COMPLETED"
-                        ? "completed"
-                        : appt.appointmentStatus === "CANCELLED"
-                        ? "cancelled"
-                        : appt.appointmentStatus === "CONFIRMED"
-                        ? "confirmed"
-                        : appt.appointmentStatus === "NO_SHOW"
-                        ? "error"
-                        : appt.appointmentStatus === "IN_PROGRESS"
-                        ? "warning"
-                        : "light"
-                    }
-                  >
-                    {appt.appointmentStatus === "PENDING"
-                      ? "Chờ xác nhận"
-                      : appt.appointmentStatus === "COMPLETED"
-                      ? "Đã khám"
-                      : appt.appointmentStatus === "CANCELLED"
-                      ? "Đã hủy"
-                      : appt.appointmentStatus === "CONFIRMED"
-                      ? "Đã xác nhận"
-                      : "Chưa xác định"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
-                  {formatHHmm(appt.slotStart)} - {formatHHmm(appt.slotEnd)}
-                </TableCell>
-                <TableCell className="px-4 py-3 flex items-center text-gray-500 text-theme-md dark:text-gray-400">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedAppointment(appt)}
-                      className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() =>
-                        openStatusChangeModal(
-                          appt.appointmentId,
-                          appt.appointmentStatus
-                        )
+                <TableRow key={appt.appointmentId}>
+                  <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
+                    CH{appt.appointmentId.toString().padStart(4, "0")}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
+                    {appt.doctorInfo?.fullName}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
+                    <Badge
+                      size="sm"
+                      color={
+                        appt.appointmentStatus === "PENDING"
+                          ? "pending"
+                          : appt.appointmentStatus === "COMPLETED"
+                            ? "completed"
+                            : appt.appointmentStatus === "CANCELLED"
+                              ? "cancelled"
+                              : appt.appointmentStatus === "CONFIRMED"
+                                ? "confirmed"
+                                : appt.appointmentStatus === "NO_SHOW"
+                                  ? "error"
+                                  : appt.appointmentStatus === "IN_PROGRESS"
+                                    ? "warning"
+                                    : "light"
                       }
-                      className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
-                      title="Chọn trạng thái"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
+                      {appt.appointmentStatus === "PENDING"
+                        ? "Chờ xác nhận"
+                        : appt.appointmentStatus === "COMPLETED"
+                          ? "Đã khám"
+                          : appt.appointmentStatus === "CANCELLED"
+                            ? "Đã hủy"
+                            : appt.appointmentStatus === "CONFIRMED"
+                              ? "Đã xác nhận"
+                              : "Chưa xác định"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
+                    {formatHHmm(appt.slotStart)} - {formatHHmm(appt.slotEnd)}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 flex items-center text-gray-500 text-theme-md dark:text-gray-400">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setSelectedAppointment(appt)}
+                        className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ));
-          })()
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                          <path
+                            fillRule="evenodd"
+                            d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() =>
+                          openStatusChangeModal(
+                            appt.appointmentId,
+                            appt.appointmentStatus
+                          )
+                        }
+                        className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                        title="Chọn trạng thái"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ));
+            })()
           ) : (
             <TableRow>
               <TableCell className="text-center text-gray-500 py-8" colSpan={5}>
@@ -763,7 +761,7 @@ export function AppointmentsContent() {
           )}
         </TableBody>
       </Table>
-      
+
       {/* Pagination for Appointments */}
       {filteredAppointments.length > 0 && (
         <Pagination
@@ -774,7 +772,7 @@ export function AppointmentsContent() {
           totalItems={filteredAppointments.length}
         />
       )}
-      
+
       {selectedAppointment && (
         <AppointmentModal
           {...selectedAppointment}
@@ -782,95 +780,94 @@ export function AppointmentsContent() {
           onClose={() => setSelectedAppointment(null)}
         />
       )}
-      
+
       {/* Status Change Dropdown */}
       {statusChangeAppointment && (
-      <div
-        className="fixed inset-0 bg-gray-200/60 backdrop-blur-md flex items-center justify-center z-50"
-        onClick={() => setStatusChangeAppointment(null)} // click ngoài để đóng
-      >
         <div
-          className="relative bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6 transform transition-all duration-300"
-          onClick={(e) => e.stopPropagation()} // chặn click trong modal
+          className="fixed inset-0 bg-gray-200/60 backdrop-blur-md flex items-center justify-center z-50"
+          onClick={() => setStatusChangeAppointment(null)} // click ngoài để đóng
         >
-          <h3 className="text-lg font-semibold mb-4">
-            Chọn trạng thái mới
-          </h3>
+          <div
+            className="relative bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6 transform transition-all duration-300"
+            onClick={(e) => e.stopPropagation()} // chặn click trong modal
+          >
+            <h3 className="text-lg font-semibold mb-4">
+              Chọn trạng thái mới
+            </h3>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Trạng thái hiện tại:{" "}
-              <span className="font-semibold text-blue-600">
-                {getStatusLabel(statusChangeAppointment.currentStatus)}
-              </span>
-            </label>
-            <select
-              value={selectedNewStatus}
-              onChange={(e) => setSelectedNewStatus(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">-- Chọn trạng thái mới --</option>
-              <option value="PENDING">Chờ xác nhận</option>
-              <option value="CONFIRMED">Đã xác nhận</option>
-              <option value="COMPLETED">Đã khám</option>
-              <option value="CANCELLED">Đã hủy</option>
-            </select>
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => setStatusChangeAppointment(null)}
-              disabled={isChangingStatus}
-              className="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Hủy
-            </button>
-            <button
-              onClick={confirmStatusChange}
-              disabled={
-                isChangingStatus ||
-                !selectedNewStatus ||
-                selectedNewStatus === statusChangeAppointment.currentStatus
-              }
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              {isChangingStatus ? "Đang xử lý..." : "Xác nhận"}
-            </button>
-          </div>
-
-          {/* Loading overlay */}
-          {isChangingStatus && (
-            <div className="absolute inset-0 bg-white bg-opacity-80 backdrop-blur-sm flex items-center justify-center rounded-xl">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-gray-600 font-medium">Đang đổi trạng thái...</p>
-              </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Trạng thái hiện tại:{" "}
+                <span className="font-semibold text-blue-600">
+                  {getStatusLabel(statusChangeAppointment.currentStatus)}
+                </span>
+              </label>
+              <select
+                value={selectedNewStatus}
+                onChange={(e) => setSelectedNewStatus(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">-- Chọn trạng thái mới --</option>
+                <option value="PENDING">Chờ xác nhận</option>
+                <option value="CONFIRMED">Đã xác nhận</option>
+                <option value="COMPLETED">Đã khám</option>
+                <option value="CANCELLED">Đã hủy</option>
+              </select>
             </div>
-          )}
-        </div>
-      </div>
-    )}
 
-    {/* Toast Notification */}
-    {toast && (
-      <div className="fixed top-4 right-4 z-[60] animate-in slide-in-from-right duration-300">
-        <div className={`px-6 py-4 rounded-lg shadow-lg max-w-md ${
-          toast.type === 'success' 
-            ? 'bg-green-500 text-white' 
-            : 'bg-red-500 text-white'
-        }`}>
-          <div className="flex items-center justify-between">
-            <span className="font-medium">{toast.message}</span>
-            <button
-              onClick={() => setToast(null)}
-              className="ml-4 text-white hover:text-gray-200 transition-colors"
-            >
-              ✕
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setStatusChangeAppointment(null)}
+                disabled={isChangingStatus}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmStatusChange}
+                disabled={
+                  isChangingStatus ||
+                  !selectedNewStatus ||
+                  selectedNewStatus === statusChangeAppointment.currentStatus
+                }
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {isChangingStatus ? "Đang xử lý..." : "Xác nhận"}
+              </button>
+            </div>
+
+            {/* Loading overlay */}
+            {isChangingStatus && (
+              <div className="absolute inset-0 bg-white bg-opacity-80 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                  <p className="text-gray-600 font-medium">Đang đổi trạng thái...</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
-    )}
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-[60] animate-in slide-in-from-right duration-300">
+          <div className={`px-6 py-4 rounded-lg shadow-lg max-w-md ${toast.type === 'success'
+              ? 'bg-green-500 text-white'
+              : 'bg-red-500 text-white'
+            }`}>
+            <div className="flex items-center justify-between">
+              <span className="font-medium">{toast.message}</span>
+              <button
+                onClick={() => setToast(null)}
+                className="ml-4 text-white hover:text-gray-200 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -885,11 +882,11 @@ export function InvoicesContent() {
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Pagination state for invoices
   const [invoiceCurrentPage, setInvoiceCurrentPage] = useState(1);
   const invoiceItemsPerPage = 8; // 8 invoices per page
-  
+
   // Filter, sort, and search state for invoices
   const [invoiceSearchTerm, setInvoiceSearchTerm] = useState("");
   const [invoiceSortBy, setInvoiceSortBy] = useState<"date" | "amount" | "status">("date");
@@ -921,7 +918,7 @@ export function InvoicesContent() {
         }
 
         return {
-          billId: b.id,
+          billId: b.bill_id || b.id,
           appointment: appointmentObj,
           patientId: b.patient,
           totalCost: Number(b.total_cost),
@@ -958,31 +955,30 @@ export function InvoicesContent() {
 
             // 3️⃣ Lấy thêm thông tin chi tiết dịch vụ
             const serviceOrdersWithInfo = await Promise.all(
-  serviceOrders.map(async (order: any) => {
-    try {
-      const serviceInfo = await servicesService.getServiceById(order.service_id);
-      return {
-        ...order,
-        service: {
-          serviceId: serviceInfo.id,
-          serviceName: serviceInfo.service_name,
-          price: Number(serviceInfo.price),
-        },
-      };
-    } catch (err) {
-      console.error(`Lỗi lấy dịch vụ id=${order.service_id}`, err);
-      return {
-        ...order,
-        service: {
-          serviceId: order.service_id,
-          serviceName: "Không xác định",
-          price: 0,
-        },
-      };
-    }
-  })
-);
-
+              serviceOrders.map(async (order: any) => {
+                try {
+                  const serviceInfo = await servicesService.getServiceById(order.service_id);
+                  return {
+                    ...order,
+                    service: {
+                      serviceId: serviceInfo.id,
+                      serviceName: serviceInfo.service_name,
+                      price: Number(serviceInfo.price),
+                    },
+                  };
+                } catch (err) {
+                  console.error(`Lỗi lấy dịch vụ id=${order.service_id}`, err);
+                  return {
+                    ...order,
+                    service: {
+                      serviceId: order.service_id,
+                      serviceName: "Không xác định",
+                      price: 0,
+                    },
+                  };
+                }
+              })
+            );
             return { billId: bill.billId, services: serviceOrdersWithInfo };
           } else {
             return { billId: bill.billId, services: [] };
@@ -1007,33 +1003,33 @@ export function InvoicesContent() {
       setLoading(false);
     }
   };
-  
+
   // Filter, sort, and search logic for invoices
   const applyInvoiceFiltersAndSort = () => {
     let filtered = [...bills];
-    
+
     // Apply search filter
     if (invoiceSearchTerm.trim()) {
       filtered = filtered.filter(bill => {
         const services = billServices[bill.billId || 0] || [];
         return (
           bill.billId?.toString().includes(invoiceSearchTerm) ||
-          services.some(service => 
+          services.some(service =>
             service.serviceName?.toLowerCase().includes(invoiceSearchTerm.toLowerCase())
           )
         );
       });
     }
-    
+
     // Apply status filter
     if (invoiceStatusFilter) {
       filtered = filtered.filter(bill => bill.status === invoiceStatusFilter);
     }
-    
+
     // Apply sorting
     filtered.sort((a, b) => {
       let compareValue = 0;
-      
+
       if (invoiceSortBy === "date") {
         compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       } else if (invoiceSortBy === "amount") {
@@ -1041,14 +1037,14 @@ export function InvoicesContent() {
       } else if (invoiceSortBy === "status") {
         compareValue = a.status.localeCompare(b.status);
       }
-      
+
       return invoiceSortOrder === "asc" ? compareValue : -compareValue;
     });
-    
+
     setFilteredBills(filtered);
     setInvoiceCurrentPage(1); // Reset to first page when filters change
   };
-  
+
   // Apply filters when dependencies change
   useEffect(() => {
     applyInvoiceFiltersAndSort();
@@ -1110,14 +1106,14 @@ export function InvoicesContent() {
   };
 
   const calculateTotalFromServices = (bill: Bill) => {
-  const services = billServices[bill.billId || 0] || [];
-  return services.reduce((sum, svc) => sum + (Number(svc.price) || 0), 0);
-};
+    const services = billServices[bill.billId || 0] || [];
+    return services.reduce((sum, svc) => sum + (Number(svc.price) || 0), 0);
+  };
 
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4 ml-1">Hóa đơn</h2>
-      
+
       {/* Search, Filter, and Sort Controls */}
       <div className="mb-4 space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
@@ -1131,7 +1127,7 @@ export function InvoicesContent() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           {/* Status Filter */}
           <div className="w-full sm:w-48">
             <select
@@ -1145,7 +1141,7 @@ export function InvoicesContent() {
               <option value="BOOKING_PAID">Đã thanh toán tiền đặt lịch</option>
             </select>
           </div>
-          
+
           {/* Sort Controls */}
           <div className="flex gap-2">
             <select
@@ -1157,7 +1153,7 @@ export function InvoicesContent() {
               <option value="amount">Sắp xếp theo số tiền</option>
               <option value="status">Sắp xếp theo trạng thái</option>
             </select>
-            
+
             <button
               onClick={() => setInvoiceSortOrder(invoiceSortOrder === "asc" ? "desc" : "asc")}
               className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1167,7 +1163,7 @@ export function InvoicesContent() {
             </button>
           </div>
         </div>
-        
+
         {/* Results count */}
         <div className="text-sm text-gray-600">
           Hiển thị {filteredBills.filter(bill => (billServices[bill.billId || 0] || []).length > 0).length} / {bills.filter(bill => (billServices[bill.billId || 0] || []).length > 0).length} hóa đơn
@@ -1248,7 +1244,7 @@ export function InvoicesContent() {
                     const services = billServices[bill.billId || 0] || [];
                     return services.length > 0; // ✅ chỉ giữ bill có dịch vụ
                   });
-                  
+
                   if (billsWithServices.length === 0) {
                     return (
                       <TableRow>
@@ -1261,11 +1257,11 @@ export function InvoicesContent() {
                       </TableRow>
                     );
                   }
-                  
+
                   const startIndex = (invoiceCurrentPage - 1) * invoiceItemsPerPage;
                   const endIndex = startIndex + invoiceItemsPerPage;
                   const paginatedBills = billsWithServices.slice(startIndex, endIndex);
-                  
+
                   return paginatedBills.map((bill) => {
                     const services = billServices[bill.billId || 0] || [];
                     const totalFromServices = calculateTotalFromServices(bill);
@@ -1278,16 +1274,16 @@ export function InvoicesContent() {
                         <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
                           {services.length > 0
                             ? format(
-                                new Date(
-                                  services[0].order_time ||
-                                    services[0].created_at ||
-                                    bill.createdAt
-                                ),
-                                "dd-MM-yyyy"
-                              )
+                              new Date(
+                                services[0].order_time ||
+                                services[0].created_at ||
+                                bill.createdAt
+                              ),
+                              "dd-MM-yyyy"
+                            )
                             : bill.createdAt
-                            ? format(new Date(bill.createdAt), "dd-MM-yyyy")
-                            : "N/A"}
+                              ? format(new Date(bill.createdAt), "dd-MM-yyyy")
+                              : "N/A"}
                         </TableCell>
                         {/* <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
                         {services.length > 0 ? (
@@ -1315,24 +1311,24 @@ export function InvoicesContent() {
                               bill.status === "PAID"
                                 ? "success"
                                 : bill.status === "UNPAID"
-                                ? "error"
-                                : bill.status === "BOOKING_PAID"
-                                ? "warning"
-                                : "cancel"
+                                  ? "error"
+                                  : bill.status === "BOOKING_PAID"
+                                    ? "warning"
+                                    : "cancel"
                             }
                           >
                             {bill.status === "PAID"
                               ? "Đã thanh toán"
                               : bill.status === "UNPAID"
-                              ? "Chưa thanh toán"
-                              : bill.status === "BOOKING_PAID"
-                              ? "Đã thanh toán tiền đặt lịch"
-                              : "Đã hủy"}
+                                ? "Chưa thanh toán"
+                                : bill.status === "BOOKING_PAID"
+                                  ? "Đã thanh toán tiền đặt lịch"
+                                  : "Đã hủy"}
                           </Badge>
                         </TableCell>
                         <TableCell className="px-4 py-3 text-gray-700 text-start text-xs text-green-700 font-semibold">
-  {calculateTotalFromServices(bill).toLocaleString("vi-VN")} VNĐ
-</TableCell>
+                          {calculateTotalFromServices(bill).toLocaleString("vi-VN")} VNĐ
+                        </TableCell>
 
 
                         <TableCell className="px-4 py-3 text-gray-500 text-theme-md dark:text-gray-400">
@@ -1388,7 +1384,7 @@ export function InvoicesContent() {
           </Table>
         </div>
       </div>
-      
+
       {/* Pagination for Invoices */}
       {(() => {
         const billsWithServices = filteredBills.filter((bill) => {
@@ -1405,14 +1401,13 @@ export function InvoicesContent() {
           />
         );
       })()}
-      
+
       {selectedBill && (
         <BillModal
-          bill={selectedBill}
+          {...selectedBill}   // spread thẳng các field của Bill
           services={billServices[selectedBill.billId || 0] || []}
           isOpen={true}
           onClose={() => setSelectedBill(null)}
-          onPayment={handlePayment}
         />
       )}
     </div>
@@ -1544,8 +1539,8 @@ export function PaymentsContent() {
                         transaction.status === "Thành công"
                           ? "success"
                           : transaction.status === "Đang chờ"
-                          ? "warning"
-                          : "error"
+                            ? "warning"
+                            : "error"
                       }
                     >
                       {transaction.status}
@@ -1724,8 +1719,8 @@ export function PatientInfoContent({ patient }: { patient: Patient }) {
               {patient?.gender === "MALE"
                 ? "Nam"
                 : patient?.gender === "FEMALE"
-                ? "Nữ"
-                : "Khác"}
+                  ? "Nữ"
+                  : "Khác"}
             </p>
           </div>
           <div>
@@ -2585,7 +2580,7 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
   });
   const [loading, setLoading] = useState(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
-  
+
   // Pagination state for emergency contacts
   const [contactCurrentPage, setContactCurrentPage] = useState(1);
   const contactItemsPerPage = 6; // 6 contacts per page
@@ -2610,7 +2605,7 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
   // Apply filters and sort for emergency contacts
   const applyContactFiltersAndSort = () => {
     let filtered = [...contacts];
-    
+
     // Search filter
     if (contactSearchTerm.trim()) {
       filtered = filtered.filter(contact =>
@@ -2618,12 +2613,12 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
         contact.contactPhone?.toLowerCase().includes(contactSearchTerm.toLowerCase())
       );
     }
-    
+
     // Relationship filter
     if (relationshipFilter) {
       filtered = filtered.filter(contact => contact.relationship === relationshipFilter);
     }
-    
+
     // Sort
     filtered.sort((a, b) => {
       let compareValue = 0;
@@ -2636,7 +2631,7 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
       }
       return contactSortOrder === "asc" ? compareValue : -compareValue;
     });
-    
+
     setFilteredContacts(filtered);
     setContactCurrentPage(1); // Reset to first page when filters change
   };
@@ -2830,21 +2825,19 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
         <div className="flex gap-2">
           <button
             onClick={() => setContactSortOrder("asc")}
-            className={`px-3 py-2 text-sm rounded-md transition-colors ${
-              contactSortOrder === "asc"
+            className={`px-3 py-2 text-sm rounded-md transition-colors ${contactSortOrder === "asc"
                 ? "bg-blue-500 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
+              }`}
           >
             ↑ Tăng dần
           </button>
           <button
             onClick={() => setContactSortOrder("desc")}
-            className={`px-3 py-2 text-sm rounded-md transition-colors ${
-              contactSortOrder === "desc"
+            className={`px-3 py-2 text-sm rounded-md transition-colors ${contactSortOrder === "desc"
                 ? "bg-blue-500 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
+              }`}
           >
             ↓ Giảm dần
           </button>
@@ -2896,82 +2889,82 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
                   const startIndex = (contactCurrentPage - 1) * contactItemsPerPage;
                   const endIndex = startIndex + contactItemsPerPage;
                   const paginatedContacts = filteredContacts.slice(startIndex, endIndex);
-                  
+
                   return paginatedContacts.map((contact) => (
-                  <TableRow key={contact.contactId}>
-                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
-                      {contact.contactName}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
-                      {contact.contactPhone}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
-                      {contact.relationship === "FAMILY"
-                        ? "Gia đình"
-                        : contact.relationship === "FRIEND"
-                        ? "Bạn bè"
-                        : contact.relationship === "OTHERS"
-                        ? "Khác"
-                        : "Chưa xác định"}
-                    </TableCell>
-                    <TableCell className="px-3 py-3 text-theme-sm">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleView(contact)}
-                          className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                    <TableRow key={contact.contactId}>
+                      <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
+                        {contact.contactName}
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
+                        {contact.contactPhone}
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
+                        {contact.relationship === "FAMILY"
+                          ? "Gia đình"
+                          : contact.relationship === "FRIEND"
+                            ? "Bạn bè"
+                            : contact.relationship === "OTHERS"
+                              ? "Khác"
+                              : "Chưa xác định"}
+                      </TableCell>
+                      <TableCell className="px-3 py-3 text-theme-sm">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleView(contact)}
+                            className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
                           >
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path
-                              fillRule="evenodd"
-                              d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          Xem
-                        </button>
-                        <button
-                          onClick={() => handleEdit(contact)}
-                          className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-md hover:bg-yellow-200 transition-colors"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 text-yellow-500"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path
+                                fillRule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Xem
+                          </button>
+                          <button
+                            onClick={() => handleEdit(contact)}
+                            className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-md hover:bg-yellow-200 transition-colors"
                           >
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                          </svg>
-                          Sửa
-                        </button>
-                        <button
-                          onClick={() => setDeleteContact(contact)}
-                          className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 text-yellow-500"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                            Sửa
+                          </button>
+                          <button
+                            onClick={() => setDeleteContact(contact)}
+                            className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
                           >
-                            <path
-                              fillRule="evenodd"
-                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          Xóa
-                        </button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ));
-              })()}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Xóa
+                          </button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ));
+                })()}
               </TableBody>
             ) : (
               <TableBody>
@@ -2980,7 +2973,7 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
                     colSpan={4}
                     className="pl-4 py-2 text-gray-500 text-theme-sm dark:text-gray-400 text-center"
                   >
-                    {contactSearchTerm || relationshipFilter 
+                    {contactSearchTerm || relationshipFilter
                       ? "Không tìm thấy liên hệ phù hợp với bộ lọc"
                       : "Không có liên hệ khẩn cấp"}
                   </TableCell>
@@ -2990,7 +2983,7 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
           </Table>
         </div>
       </div>
-      
+
       {/* Pagination for Emergency Contacts */}
       {filteredContacts.length > 0 && (
         <Pagination
@@ -3020,10 +3013,10 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
                 {selectedContact.relationship === "FAMILY"
                   ? "Gia đình"
                   : selectedContact.relationship === "FRIEND"
-                  ? "Bạn bè"
-                  : selectedContact.relationship === "OTHERS"
-                  ? "Khác"
-                  : "Chưa xác định"}
+                    ? "Bạn bè"
+                    : selectedContact.relationship === "OTHERS"
+                      ? "Khác"
+                      : "Chưa xác định"}
               </div>
             </div>
             <div className="flex justify-end mt-6">

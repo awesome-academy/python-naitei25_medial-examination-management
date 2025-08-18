@@ -8,6 +8,7 @@ import type { CreatePrescriptionRequest, PrescriptionDetailRequest, Medicine } f
 import { pharmacyService } from "../../../services/pharmacyService"
 import { appointmentService } from "../../../services/appointmentService"
 import type { AppointmentResponse } from "../../../types/appointment"
+import { useTranslation } from "react-i18next"
 
 
 interface AddMedicalRecordModalProps {
