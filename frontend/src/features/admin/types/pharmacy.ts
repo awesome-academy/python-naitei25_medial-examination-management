@@ -141,7 +141,7 @@ export interface UpdatePrescriptionRequest {
     duration: string;
     quantity: number;
     prescription_notes?: string;
-    status?: "active" | "cancel"; // 👈 thêm field này
+    status?: "active" | "cancel"; 
   }[];
 }
 

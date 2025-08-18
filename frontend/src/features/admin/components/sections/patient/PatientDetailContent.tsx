@@ -46,34 +46,32 @@ import { Pagination } from "../../ui/Pagination";
 import { useTranslation } from "react-i18next";
 
 export function MedicalRecordsContent() {
-  const { patientId } = useParams();
-  const navigate = useNavigate();
+  const { patientId } = useParams()
+  const navigate = useNavigate()
   const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>(
     []
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); 
+  )
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedPrescription, setSelectedPrescription] =
-    useState<PrescriptionResponse | null>(null);
+    useState<PrescriptionResponse | null>(null)
 
   const {
     isOpen: isAddModalOpen,
     openModal: openAddModal,
     closeModal: closeAddModal,
-  } = useModal();
+  } = useModal()
   const {
     isOpen: isEditModalOpen,
     openModal: openEditModal,
     closeModal: closeEditModal,
-  } = useModal();
+  } = useModal()
   const {
     isOpen: isDeleteConfirmModalOpen,
     openModal: openDeleteConfirmModal,
     closeModal: closeDeleteConfirmModal,
-  } = useModal();
-  const [deletingPrescriptionId, setDeletingPrescriptionId] = useState<
-    number | null
-  >(null);
+  } = useModal()
+  const [deletingPrescriptionId, setDeletingPrescriptionId] = useState<number | null>(null)
 
   // Pagination state for medical records
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,32 +92,23 @@ export function MedicalRecordsContent() {
     setLoading(true);
     setError(null); 
     try {
-      console.log(
-        "=== DEBUG: Fetching medical records for patient ===",
-        patientId
-      );
-      const data = await pharmacyService.getPrescriptionHistoryByPatientId(
-        Number(patientId)
-      );
-      console.log("=== DEBUG: Received data from service ===", data);
+      const data = await pharmacyService.getPrescriptionHistoryByPatientId(Number(patientId))
 
-      // Đảm bảo dữ liệu được ánh xạ đúng cách, đặc biệt là quantity
-      const mappedData = data.map((prescription: any) => ({
-        ...prescription,
-        prescriptionDetails:
-          prescription.prescriptionDetails?.map((detail: any) => ({
-            ...detail,
-            prescriptionId:
-              detail.prescriptionId ?? prescription.prescriptionId,
-            quantity:
-              detail.quantity !== undefined && detail.quantity !== null
-                ? Number(detail.quantity)
-                : 1,
-          })) ?? [],
-      }));
+      // Gắn quantity + lọc bỏ prescription/status cancel + lọc bỏ detail/status cancel
+      const mappedData = data
+        .map((prescription: any) => ({
+          ...prescription,
+          prescription_details:
+            prescription.prescription_details
+              ?.map((detail: any) => ({
+                ...detail,
+                quantity: detail.quantity !== undefined && detail.quantity !== null ? Number(detail.quantity) : 1,
+              }))
+              .filter((d: any) => d.status !== "cancel") ?? [],
+        }))
+        .filter((p: any) => p.status !== "cancel") 
 
-      console.log("=== DEBUG: Final mapped data for state ===", mappedData);
-      setPrescriptions(mappedData);
+      setPrescriptions(mappedData)
     } catch (err) {
       console.error("Lỗi khi tải bệnh án:", err);
       setError("Không thể tải bệnh án. Vui lòng thử lại sau.");
@@ -154,9 +143,7 @@ export function MedicalRecordsContent() {
   };
 
   const handleEditMedicalRecord = (prescriptionId: number) => {
-    const prescriptionToEdit = prescriptions.find(
-      (p) => p.id === prescriptionId
-    );
+    const prescriptionToEdit = prescriptions.find((p) => p.id === prescriptionId)
     if (prescriptionToEdit) {
       setSelectedPrescription(prescriptionToEdit);
       openEditModal();
@@ -170,9 +157,26 @@ export function MedicalRecordsContent() {
     data: UpdatePrescriptionRequest
   ) => {
     try {
-      await pharmacyService.updatePrescription(prescriptionId, data);
-      await fetchMedicalRecords(); 
-      closeEditModal(); 
+      const finalData: UpdatePrescriptionRequest = {
+        ...data,
+        prescription_details: data.prescription_details?.map((detail: any) => ({
+          id: detail.id ?? detail.detailId,
+          medicine_id: detail.medicine?.medicineId ?? detail.medicine_id,
+          dosage: detail.dosage,
+          frequency: detail.frequency,
+          duration: detail.duration,
+          quantity: Number(detail.quantity),
+          prescription_notes: detail.prescription_notes ?? "",
+          status: detail.status ?? "active", 
+        })),
+      }
+
+      console.log("=== DEBUG UPDATE PAYLOAD ===", finalData)
+
+      await pharmacyService.updatePrescription(prescriptionId, finalData)
+      await fetchMedicalRecords()
+      closeEditModal()
+      alert("Cập nhật bệnh án thành công!")
     } catch (err) {
       console.error("Lỗi khi cập nhật bệnh án:", err);
       alert("Cập nhật bệnh án thất bại! Vui lòng kiểm tra lại thông tin.");
@@ -188,10 +192,16 @@ export function MedicalRecordsContent() {
     if (!deletingPrescriptionId) return;
 
     try {
-      await pharmacyService.deletePrescription(deletingPrescriptionId);
-      await fetchMedicalRecords(); 
-      closeDeleteConfirmModal();
-      alert("Xóa bệnh án thành công!");
+      setPrescriptions((prev) =>
+        prev
+          .map((p) =>
+            p.id === deletingPrescriptionId ? { ...p, status: "cancel" } : p
+          )
+          .filter((p) => p.status !== "cancel") 
+      )
+
+      closeDeleteConfirmModal()
+      alert("Xóa bệnh án thành công!")
     } catch (err) {
       console.error("Lỗi khi xóa bệnh án:", err);
       alert("Xóa bệnh án thất bại! Vui lòng thử lại.");
