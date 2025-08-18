@@ -210,6 +210,53 @@ class AppointmentViewSet(viewsets.ModelViewSet):
           logger.exception("Error updating appointment:")
           return Response({"message": _("Đã xảy ra lỗi khi cập nhật cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+  def partial_update(self, request, *args, **kwargs):
+      kwargs['partial'] = True
+      return self.update(request, *args, **kwargs)
+
+  @action(detail=True, methods=['patch'], url_path='status')
+  def update_status(self, request, pk=None):
+      """Update only the appointment status"""
+      try:
+          appointment = self.get_object()
+          appointment_status = request.data.get('appointment_status')
+          
+          if not appointment_status:
+              return Response(
+                  {"message": _("Trường appointment_status là bắt buộc.")}, 
+                  status=status.HTTP_400_BAD_REQUEST
+              )
+          
+          # Validate status value
+          valid_statuses = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'IN_PROGRESS']
+          if appointment_status not in valid_statuses:
+              return Response(
+                  {"message": _("Trạng thái không hợp lệ. Các giá trị hợp lệ: ") + ", ".join(valid_statuses)}, 
+                  status=status.HTTP_400_BAD_REQUEST
+              )
+          
+          # Map frontend status to backend enum
+          status_mapping = {
+              'PENDING': AppointmentStatus.PENDING.value,
+              'CONFIRMED': AppointmentStatus.CONFIRMED.value, 
+              'COMPLETED': AppointmentStatus.COMPLETED.value,
+              'CANCELLED': AppointmentStatus.CANCELLED.value,
+              'NO_SHOW': AppointmentStatus.NO_SHOW.value,
+              'IN_PROGRESS': AppointmentStatus.IN_PROGRESS.value
+          }
+          
+          appointment.status = status_mapping[appointment_status]
+          appointment.save()
+          
+          return Response(AppointmentSerializer(appointment).data)
+          
+      except Exception as e:
+          logger.exception("Error updating appointment status:")
+          return Response(
+              {"message": _("Đã xảy ra lỗi khi cập nhật trạng thái cuộc hẹn.")}, 
+              status=status.HTTP_500_INTERNAL_SERVER_ERROR
+          )
+
   @action(detail=False, methods=['get'], url_path='upcoming')
   def upcoming_appointments(self, request):
       patient_id = request.user.patient.id

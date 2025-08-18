@@ -1,5 +1,4 @@
 "use client";
-
 import MedicalRecord from "./MedicalRecord";
 import AddMedicalRecordModal from "./AddMedicalRecordModal";
 import EditMedicalRecordModal from "./EditMedicalRecordModal";
@@ -43,6 +42,7 @@ import type { CreatePrescriptionRequest } from "../../../types/pharmacy";
 import { AppointmentModal } from "./AppointmentModal";
 import { getServiceOrdersByAppointmentId } from "../../../services/serviceOrderService";
 import { servicesService } from "../../../services/servicesService";
+import { Pagination } from "../../ui/Pagination";
 // import { createServicePayment} from "../../../services/paymentService";
 
 export function MedicalRecordsContent() {
@@ -74,6 +74,16 @@ export function MedicalRecordsContent() {
   const [deletingPrescriptionId, setDeletingPrescriptionId] = useState<
     number | null
   >(null);
+  
+  // Pagination state for medical records
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // 5 medical records per page
+  
+  // Filter, sort, and search state for medical records
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<"date" | "diagnosis">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filteredPrescriptions, setFilteredPrescriptions] = useState<PrescriptionResponse[]>([]);
 
   const fetchMedicalRecords = async () => {
     if (!patientId) {
@@ -188,6 +198,43 @@ export function MedicalRecordsContent() {
     }
   };
 
+  // Filter, sort, and search logic for medical records
+  const applyFiltersAndSort = () => {
+    let filtered = [...prescriptions];
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter((prescription) =>
+        prescription.diagnosis?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        prescription.note?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        prescription.prescriptionDetails?.some((detail) =>
+          detail.medicine.medicineName.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+
+      if (sortBy === "date") {
+        compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sortBy === "diagnosis") {
+        compareValue = (a.diagnosis || "").localeCompare(b.diagnosis || "");
+      }
+
+      return sortOrder === "asc" ? compareValue : -compareValue;
+    });
+
+    setFilteredPrescriptions(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Apply filters when dependencies change
+  useEffect(() => {
+    applyFiltersAndSort();
+  }, [prescriptions, searchTerm, sortBy, sortOrder]);
+
   return (
     <div className="font-outfit bg-white py-6 px-4 rounded-lg border border-gray-200">
       <div className="flex justify-between mb-4 ml-1">
@@ -200,11 +247,52 @@ export function MedicalRecordsContent() {
           <span className="ml-2 text-lg">+</span>
         </button>
       </div>
+
+      {/* Search, Filter, and Sort Controls */}
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Search Input */}
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo chẩn đoán, ghi chú, hoặc thuốc..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Sort Controls */}
+          <div className="flex gap-2">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "date" | "diagnosis")}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="date">Sắp xếp theo ngày</option>
+              <option value="diagnosis">Sắp xếp theo chẩn đoán</option>
+            </select>
+
+            <button
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title={sortOrder === "asc" ? "Đổi thành giảm dần" : "Đổi thành tăng dần"}
+            >
+              {sortOrder === "asc" ? "↑" : "↓"}
+            </button>
+          </div>
+        </div>
+
+        {/* Results count */}
+        <div className="text-sm text-gray-600">
+          Hiển thị {filteredPrescriptions.length} / {prescriptions.length} bệnh án
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4">
         {loading ? (
           <div className="text-center py-8 text-gray-500 flex items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Đang tải bệnh
-            án...
+            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Đang tải bệnh án...
           </div>
         ) : error ? (
           <div className="text-center py-8 text-red-600">
@@ -216,21 +304,39 @@ export function MedicalRecordsContent() {
               Thử lại
             </button>
           </div>
-        ) : prescriptions.length === 0 ? (
+        ) : filteredPrescriptions.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            Không có bệnh án nào.
+            {searchTerm.trim() ? "Không tìm thấy bệnh án phù hợp." : "Không có bệnh án nào."}
           </div>
         ) : (
-          prescriptions.map((pres) => (
-            <MedicalRecord
-              key={pres.prescriptionId}
-              prescription={pres}
-              onEdit={handleEditMedicalRecord}
-              onDelete={handleDeleteMedicalRecord}
-            />
-          ))
+          (() => {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedPrescriptions = filteredPrescriptions.slice(startIndex, endIndex);
+
+            return paginatedPrescriptions.map((pres) => (
+              <MedicalRecord
+                key={pres.prescriptionId}
+                prescription={pres}
+                onEdit={handleEditMedicalRecord}
+                onDelete={handleDeleteMedicalRecord}
+              />
+            ));
+          })()
         )}
       </div>
+
+      {/* Pagination for Medical Records */}
+      {filteredPrescriptions.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredPrescriptions.length / itemsPerPage)}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredPrescriptions.length}
+        />
+      )}
+
       <AddMedicalRecordModal
         isOpen={isAddModalOpen}
         onClose={closeAddModal} // Sử dụng closeModal từ useModal
@@ -261,13 +367,31 @@ export function MedicalRecordsContent() {
 // AppointmentsContent
 export function AppointmentsContent() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
   const { patientId } = useParams();
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
-  const [deleteModal, setDeleteModal] = useState<Appointment | null>(null);
-  const [editModal, setEditModal] = useState<AppointmentUpdateRequest | null>(
-    null
-  );
+  const [statusChangeAppointment, setStatusChangeAppointment] = 
+    useState<{ appointmentId: number; currentStatus: string } | null>(null);
+  const [selectedNewStatus, setSelectedNewStatus] = useState<string>("");
+  const [isChangingStatus, setIsChangingStatus] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  
+  // Pagination state for appointments
+  const [appointmentCurrentPage, setAppointmentCurrentPage] = useState(1);
+  const appointmentItemsPerPage = 10; // 10 appointments per page
+  
+  // Filter, sort, and search state for appointments
+  const [appointmentSearchTerm, setAppointmentSearchTerm] = useState("");
+  const [appointmentSortBy, setAppointmentSortBy] = useState<"date" | "doctor" | "status">("date");
+  const [appointmentSortOrder, setAppointmentSortOrder] = useState<"asc" | "desc">("desc");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [filteredAppointments, setFilteredAppointments] = useState<Appointment[]>([]);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000); // Auto hide after 4 seconds
+  };
 
   const formatHHmm = (timeStr: string) => {
     if (!timeStr) return "N/A";
@@ -278,6 +402,7 @@ export function AppointmentsContent() {
 
   const reloadAppointments = async () => {
     if (!patientId) return;
+    setLoading(true);
     try {
       const data = await appointmentService.getAppointmentsByPatientId(
         Number(patientId),
@@ -302,43 +427,192 @@ export function AppointmentsContent() {
             ? "CANCELLED"
             : appt.status === "D"
             ? "COMPLETED"
+            : appt.status === "N"
+            ? "NO_SHOW"
+            : appt.status === "I"
+            ? "IN_PROGRESS"
             : "PENDING",
         createdAt: appt.createdAt,
         prescriptionId: appt.prescriptionId,
       }));
       setAppointments(mappedAppointments);
+      setFilteredAppointments(mappedAppointments);
     } catch (error) {
       console.error("Failed to fetch appointments:", error);
+    } finally {
+      setLoading(false);
     }
   };
+  
+  // Filter, sort, and search logic for appointments
+  const applyAppointmentFiltersAndSort = () => {
+    let filtered = [...appointments];
+    
+    // Apply search filter
+    if (appointmentSearchTerm.trim()) {
+      filtered = filtered.filter(appointment => 
+        appointment.doctorInfo?.fullName?.toLowerCase().includes(appointmentSearchTerm.toLowerCase()) ||
+        appointment.appointmentId.toString().includes(appointmentSearchTerm) ||
+        appointment.symptoms?.toLowerCase().includes(appointmentSearchTerm.toLowerCase())
+      );
+    }
+    
+    // Apply status filter
+    if (statusFilter) {
+      filtered = filtered.filter(appointment => appointment.appointmentStatus === statusFilter);
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+      
+      if (appointmentSortBy === "date") {
+        compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (appointmentSortBy === "doctor") {
+        compareValue = (a.doctorInfo?.fullName || "").localeCompare(b.doctorInfo?.fullName || "");
+      } else if (appointmentSortBy === "status") {
+        compareValue = a.appointmentStatus.localeCompare(b.appointmentStatus);
+      }
+      
+      return appointmentSortOrder === "asc" ? compareValue : -compareValue;
+    });
+    
+    setFilteredAppointments(filtered);
+    setAppointmentCurrentPage(1); // Reset to first page when filters change
+  };
+  
+  // Apply filters when dependencies change
+  useEffect(() => {
+    applyAppointmentFiltersAndSort();
+  }, [appointments, appointmentSearchTerm, appointmentSortBy, appointmentSortOrder, statusFilter]);
 
   useEffect(() => {
     reloadAppointments();
   }, [patientId]);
 
-  const handleEdit = async (appointmentId: number) => {
+  const handleStatusChange = async (
+    appointmentId: number,
+    selectedStatus: string
+  ) => {
     try {
-      const data = await appointmentService.getAppointmentById(appointmentId);
-      setEditModal({
-        appointmentId: data.appointmentId,
-        doctorId: data.doctorId,
-        patientId: data.patientInfo?.patientId ?? data.patientId ?? 0,
-        scheduleId: data.schedule?.scheduleId ?? data.scheduleId ?? 0,
-        symptoms: data.symptoms || "",
-        // The 'number' field is missing in AppointmentUpdateRequest, assuming it's not needed for update payload
-        // If it is, you'll need to add it to AppointmentUpdateRequest type
-        appointmentStatus: data.appointmentStatus,
-        slotStart: data.slotStart,
-        slotEnd: data.slotEnd,
-      });
+      setLoading(true);
+      await appointmentService.updateAppointmentStatus(appointmentId, selectedStatus);
+
+      // Reload appointments to reflect the change
+      await reloadAppointments();
+
+      // Show success message
+      const statusLabels: Record<string, string> = {
+        PENDING: "Chờ xác nhận",
+        CONFIRMED: "Đã xác nhận", 
+        COMPLETED: "Đã khám",
+        CANCELLED: "Đã hủy",
+      };
+      
+      // Success notification
+      showToast(`Thành công! Đã chuyển trạng thái cuộc hẹn thành: ${statusLabels[selectedStatus] || selectedStatus}`, 'success');
+      setStatusChangeAppointment(null);
+      setSelectedNewStatus("");
     } catch (error) {
-      alert("Không thể tải thông tin cuộc hẹn!");
+      console.error("Error changing appointment status:", error);
+      showToast("❌ Lỗi! Không thể thay đổi trạng thái cuộc hẹn!", 'error');
+      setLoading(false);
     }
+  };
+
+  const openStatusChangeModal = (appointmentId: number, currentStatus: string) => {
+    setStatusChangeAppointment({ appointmentId, currentStatus });
+    setSelectedNewStatus(currentStatus);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!statusChangeAppointment || !selectedNewStatus) return;
+    
+    if (selectedNewStatus === statusChangeAppointment.currentStatus) {
+      alert("Trạng thái mới giống với trạng thái hiện tại!");
+      return;
+    }
+
+    const confirmed = confirm(`Bạn có chắc chắn muốn chuyển trạng thái cuộc hẹn thành "${getStatusLabel(selectedNewStatus)}"?`);
+    if (confirmed) {
+      setIsChangingStatus(true);
+      await handleStatusChange(statusChangeAppointment.appointmentId, selectedNewStatus);
+      setIsChangingStatus(false);
+    }
+  };
+
+  const getStatusLabel = (status: string): string => {
+    const statusLabels: Record<string, string> = {
+      PENDING: "Chờ xác nhận",
+      CONFIRMED: "Đã xác nhận", 
+      COMPLETED: "Đã khám",
+      CANCELLED: "Đã hủy",
+    };
+    return statusLabels[status] || status;
   };
 
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4 ml-1">Lịch khám</h2>
+      
+      {/* Search, Filter, and Sort Controls */}
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Search Input */}
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo tên bác sĩ, mã lịch khám, hoặc triệu chứng..."
+              value={appointmentSearchTerm}
+              onChange={(e) => setAppointmentSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          
+          {/* Status Filter */}
+          <div className="w-full sm:w-48">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="PENDING">Chờ xác nhận</option>
+              <option value="CONFIRMED">Đã xác nhận</option>
+              <option value="COMPLETED">Đã khám</option>
+              <option value="CANCELLED">Đã hủy</option>
+              <option value="NO_SHOW">Không đến</option>
+              <option value="IN_PROGRESS">Đang khám</option>
+            </select>
+          </div>
+          
+          {/* Sort Controls */}
+          <div className="flex gap-2">
+            <select
+              value={appointmentSortBy}
+              onChange={(e) => setAppointmentSortBy(e.target.value as "date" | "doctor" | "status")}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="date">Sắp xếp theo ngày</option>
+              <option value="doctor">Sắp xếp theo bác sĩ</option>
+              <option value="status">Sắp xếp theo trạng thái</option>
+            </select>
+            
+            <button
+              onClick={() => setAppointmentSortOrder(appointmentSortOrder === "asc" ? "desc" : "asc")}
+              className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title={appointmentSortOrder === "asc" ? "Đổi thành giảm dần" : "Đổi thành tăng dần"}
+            >
+              {appointmentSortOrder === "asc" ? "↑" : "↓"}
+            </button>
+          </div>
+        </div>
+        
+        {/* Results count */}
+        <div className="text-sm text-gray-600">
+          Hiển thị {filteredAppointments.length} / {appointments.length} lịch khám
+        </div>
+      </div>
       <Table>
         <TableHeader className="border-b border-gray-100 bg-slate-600/10 dark:border-white/[0.05]">
           <TableRow>
@@ -376,8 +650,22 @@ export function AppointmentsContent() {
         </TableHeader>
 
         <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-          {appointments.length > 0 ? (
-            appointments.map((appt) => (
+          {loading ? (
+            <TableRow>
+              <TableCell className="text-center text-gray-500 py-8" colSpan={5}>
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-base-600 mr-2"></div>
+                  Đang tải...
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : filteredAppointments.length > 0 ? (
+            (() => {
+              const startIndex = (appointmentCurrentPage - 1) * appointmentItemsPerPage;
+              const endIndex = startIndex + appointmentItemsPerPage;
+              const paginatedAppointments = filteredAppointments.slice(startIndex, endIndex);
+              
+              return paginatedAppointments.map((appt) => (
               <TableRow key={appt.appointmentId}>
                 <TableCell className="px-4 py-3 text-gray-700 text-theme-sm dark:text-gray-400">
                   CH{appt.appointmentId.toString().padStart(4, "0")}
@@ -397,6 +685,10 @@ export function AppointmentsContent() {
                         ? "cancelled"
                         : appt.appointmentStatus === "CONFIRMED"
                         ? "confirmed"
+                        : appt.appointmentStatus === "NO_SHOW"
+                        ? "error"
+                        : appt.appointmentStatus === "IN_PROGRESS"
+                        ? "warning"
                         : "light"
                     }
                   >
@@ -435,21 +727,14 @@ export function AppointmentsContent() {
                       </svg>
                     </button>
                     <button
-                      onClick={() => handleEdit(appt.appointmentId)}
-                      className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => setDeleteModal(appt)}
-                      className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+                      onClick={() =>
+                        openStatusChangeModal(
+                          appt.appointmentId,
+                          appt.appointmentStatus
+                        )
+                      }
+                      className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                      title="Chọn trạng thái"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -459,7 +744,7 @@ export function AppointmentsContent() {
                       >
                         <path
                           fillRule="evenodd"
-                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
                           clipRule="evenodd"
                         />
                       </svg>
@@ -467,18 +752,29 @@ export function AppointmentsContent() {
                   </div>
                 </TableCell>
               </TableRow>
-            ))
+            ));
+          })()
           ) : (
             <TableRow>
-              <TableCell className="text-center text-gray-500">
-                <span className="block col-span-5">
-                  Không có lịch khám nào.
-                </span>
+              <TableCell className="text-center text-gray-500 py-8" colSpan={5}>
+                {appointmentSearchTerm.trim() || statusFilter ? "Không tìm thấy lịch khám phù hợp." : "Không có lịch khám nào."}
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
+      
+      {/* Pagination for Appointments */}
+      {filteredAppointments.length > 0 && (
+        <Pagination
+          currentPage={appointmentCurrentPage}
+          totalPages={Math.ceil(filteredAppointments.length / appointmentItemsPerPage)}
+          onPageChange={setAppointmentCurrentPage}
+          itemsPerPage={appointmentItemsPerPage}
+          totalItems={filteredAppointments.length}
+        />
+      )}
+      
       {selectedAppointment && (
         <AppointmentModal
           {...selectedAppointment}
@@ -486,50 +782,95 @@ export function AppointmentsContent() {
           onClose={() => setSelectedAppointment(null)}
         />
       )}
-      {editModal && (
-        <AppointmentEditModalComponent
-          appointment={{
-            ...editModal,
-          }}
-          isOpen={true}
-          onClose={() => setEditModal(null)}
-          onSubmit={async (updatedData) => {
-            try {
-              await appointmentService.updateAppointment(
-                editModal.appointmentId,
-                {
-                  doctorId: updatedData.doctorId,
-                  patientId: updatedData.patientId,
-                  scheduleId: updatedData.scheduleId,
-                  symptoms: updatedData.symptoms,
-                  // number: updatedData.number, // Removed as it's not in AppointmentUpdateRequest
-                  appointmentStatus: updatedData.appointmentStatus,
-                  slotStart: updatedData.slotStart,
-                  slotEnd: updatedData.slotEnd,
-                }
-              );
-              setEditModal(null);
-              reloadAppointments();
-            } catch (error) {
-              throw error;
-            }
-          }}
-        />
-      )}
-      {deleteModal && (
-        <DeleteAppointmentModal
-          isOpen={true}
-          onClose={() => setDeleteModal(null)}
-          appointmentId={deleteModal.appointmentId}
-          onDelete={async () => {
-            await appointmentService.deleteAppointment(
-              deleteModal.appointmentId
-            );
-            setDeleteModal(null);
-            reloadAppointments();
-          }}
-        />
-      )}
+      
+      {/* Status Change Dropdown */}
+      {statusChangeAppointment && (
+      <div
+        className="fixed inset-0 bg-gray-200/60 backdrop-blur-md flex items-center justify-center z-50"
+        onClick={() => setStatusChangeAppointment(null)} // click ngoài để đóng
+      >
+        <div
+          className="relative bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6 transform transition-all duration-300"
+          onClick={(e) => e.stopPropagation()} // chặn click trong modal
+        >
+          <h3 className="text-lg font-semibold mb-4">
+            Chọn trạng thái mới
+          </h3>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Trạng thái hiện tại:{" "}
+              <span className="font-semibold text-blue-600">
+                {getStatusLabel(statusChangeAppointment.currentStatus)}
+              </span>
+            </label>
+            <select
+              value={selectedNewStatus}
+              onChange={(e) => setSelectedNewStatus(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">-- Chọn trạng thái mới --</option>
+              <option value="PENDING">Chờ xác nhận</option>
+              <option value="CONFIRMED">Đã xác nhận</option>
+              <option value="COMPLETED">Đã khám</option>
+              <option value="CANCELLED">Đã hủy</option>
+            </select>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => setStatusChangeAppointment(null)}
+              disabled={isChangingStatus}
+              className="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={confirmStatusChange}
+              disabled={
+                isChangingStatus ||
+                !selectedNewStatus ||
+                selectedNewStatus === statusChangeAppointment.currentStatus
+              }
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {isChangingStatus ? "Đang xử lý..." : "Xác nhận"}
+            </button>
+          </div>
+
+          {/* Loading overlay */}
+          {isChangingStatus && (
+            <div className="absolute inset-0 bg-white bg-opacity-80 backdrop-blur-sm flex items-center justify-center rounded-xl">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-gray-600 font-medium">Đang đổi trạng thái...</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* Toast Notification */}
+    {toast && (
+      <div className="fixed top-4 right-4 z-[60] animate-in slide-in-from-right duration-300">
+        <div className={`px-6 py-4 rounded-lg shadow-lg max-w-md ${
+          toast.type === 'success' 
+            ? 'bg-green-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className="font-medium">{toast.message}</span>
+            <button
+              onClick={() => setToast(null)}
+              className="ml-4 text-white hover:text-gray-200 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 }
@@ -544,6 +885,17 @@ export function InvoicesContent() {
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Pagination state for invoices
+  const [invoiceCurrentPage, setInvoiceCurrentPage] = useState(1);
+  const invoiceItemsPerPage = 8; // 8 invoices per page
+  
+  // Filter, sort, and search state for invoices
+  const [invoiceSearchTerm, setInvoiceSearchTerm] = useState("");
+  const [invoiceSortBy, setInvoiceSortBy] = useState<"date" | "amount" | "status">("date");
+  const [invoiceSortOrder, setInvoiceSortOrder] = useState<"asc" | "desc">("desc");
+  const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<string>("");
+  const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
 
   const reloadBills = async () => {
     try {
@@ -647,6 +999,7 @@ export function InvoicesContent() {
 
       setBillServices(servicesMap);
       setBills(billsData);
+      setFilteredBills(billsData);
     } catch (err) {
       console.error("Error loading bills:", err);
       setError("Không thể tải danh sách hóa đơn");
@@ -654,6 +1007,52 @@ export function InvoicesContent() {
       setLoading(false);
     }
   };
+  
+  // Filter, sort, and search logic for invoices
+  const applyInvoiceFiltersAndSort = () => {
+    let filtered = [...bills];
+    
+    // Apply search filter
+    if (invoiceSearchTerm.trim()) {
+      filtered = filtered.filter(bill => {
+        const services = billServices[bill.billId || 0] || [];
+        return (
+          bill.billId?.toString().includes(invoiceSearchTerm) ||
+          services.some(service => 
+            service.serviceName?.toLowerCase().includes(invoiceSearchTerm.toLowerCase())
+          )
+        );
+      });
+    }
+    
+    // Apply status filter
+    if (invoiceStatusFilter) {
+      filtered = filtered.filter(bill => bill.status === invoiceStatusFilter);
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+      
+      if (invoiceSortBy === "date") {
+        compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (invoiceSortBy === "amount") {
+        compareValue = (a.service_fee || 0) - (b.service_fee || 0);
+      } else if (invoiceSortBy === "status") {
+        compareValue = a.status.localeCompare(b.status);
+      }
+      
+      return invoiceSortOrder === "asc" ? compareValue : -compareValue;
+    });
+    
+    setFilteredBills(filtered);
+    setInvoiceCurrentPage(1); // Reset to first page when filters change
+  };
+  
+  // Apply filters when dependencies change
+  useEffect(() => {
+    applyInvoiceFiltersAndSort();
+  }, [bills, invoiceSearchTerm, invoiceSortBy, invoiceSortOrder, invoiceStatusFilter, billServices]);
 
   useEffect(() => {
     if (patientId) {
@@ -718,6 +1117,62 @@ export function InvoicesContent() {
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4 ml-1">Hóa đơn</h2>
+      
+      {/* Search, Filter, and Sort Controls */}
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Search Input */}
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo mã hóa đơn hoặc tên dịch vụ..."
+              value={invoiceSearchTerm}
+              onChange={(e) => setInvoiceSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          
+          {/* Status Filter */}
+          <div className="w-full sm:w-48">
+            <select
+              value={invoiceStatusFilter}
+              onChange={(e) => setInvoiceStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="PAID">Đã thanh toán</option>
+              <option value="UNPAID">Chưa thanh toán</option>
+              <option value="BOOKING_PAID">Đã thanh toán tiền đặt lịch</option>
+            </select>
+          </div>
+          
+          {/* Sort Controls */}
+          <div className="flex gap-2">
+            <select
+              value={invoiceSortBy}
+              onChange={(e) => setInvoiceSortBy(e.target.value as "date" | "amount" | "status")}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="date">Sắp xếp theo ngày</option>
+              <option value="amount">Sắp xếp theo số tiền</option>
+              <option value="status">Sắp xếp theo trạng thái</option>
+            </select>
+            
+            <button
+              onClick={() => setInvoiceSortOrder(invoiceSortOrder === "asc" ? "desc" : "asc")}
+              className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title={invoiceSortOrder === "asc" ? "Đổi thành giảm dần" : "Đổi thành tăng dần"}
+            >
+              {invoiceSortOrder === "asc" ? "↑" : "↓"}
+            </button>
+          </div>
+        </div>
+        
+        {/* Results count */}
+        <div className="text-sm text-gray-600">
+          Hiển thị {filteredBills.filter(bill => (billServices[bill.billId || 0] || []).length > 0).length} / {bills.filter(bill => (billServices[bill.billId || 0] || []).length > 0).length} hóa đơn
+        </div>
+      </div>
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto">
           <Table>
@@ -788,12 +1243,30 @@ export function InvoicesContent() {
                   </TableCell>
                 </TableRow>
               ) : (
-                bills
-                  .filter((bill) => {
+                (() => {
+                  const billsWithServices = filteredBills.filter((bill) => {
                     const services = billServices[bill.billId || 0] || [];
                     return services.length > 0; // ✅ chỉ giữ bill có dịch vụ
-                  })
-                  .map((bill) => {
+                  });
+                  
+                  if (billsWithServices.length === 0) {
+                    return (
+                      <TableRow>
+                        <TableCell
+                          className="text-center text-gray-500 py-4"
+                          colSpan={6}
+                        >
+                          {invoiceSearchTerm.trim() || invoiceStatusFilter ? "Không tìm thấy hóa đơn phù hợp." : "Không có hóa đơn nào"}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+                  
+                  const startIndex = (invoiceCurrentPage - 1) * invoiceItemsPerPage;
+                  const endIndex = startIndex + invoiceItemsPerPage;
+                  const paginatedBills = billsWithServices.slice(startIndex, endIndex);
+                  
+                  return paginatedBills.map((bill) => {
                     const services = billServices[bill.billId || 0] || [];
                     const totalFromServices = calculateTotalFromServices(bill);
 
@@ -908,22 +1381,38 @@ export function InvoicesContent() {
                         </TableCell>
                       </TableRow>
                     );
-                  })
+                  });
+                })()
               )}
             </TableBody>
           </Table>
         </div>
       </div>
-
+      
+      {/* Pagination for Invoices */}
+      {(() => {
+        const billsWithServices = filteredBills.filter((bill) => {
+          const services = billServices[bill.billId || 0] || [];
+          return services.length > 0;
+        });
+        return billsWithServices.length > 0 && (
+          <Pagination
+            currentPage={invoiceCurrentPage}
+            totalPages={Math.ceil(billsWithServices.length / invoiceItemsPerPage)}
+            onPageChange={setInvoiceCurrentPage}
+            itemsPerPage={invoiceItemsPerPage}
+            totalItems={billsWithServices.length}
+          />
+        );
+      })()}
+      
       {selectedBill && (
         <BillModal
-          {...selectedBill}
+          bill={selectedBill}
           services={billServices[selectedBill.billId || 0] || []}
           isOpen={true}
-          onClose={() => {
-            setSelectedBill(null);
-            reloadBills();
-          }}
+          onClose={() => setSelectedBill(null)}
+          onPayment={handlePayment}
         />
       )}
     </div>
@@ -2096,6 +2585,17 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
   });
   const [loading, setLoading] = useState(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
+  
+  // Pagination state for emergency contacts
+  const [contactCurrentPage, setContactCurrentPage] = useState(1);
+  const contactItemsPerPage = 6; // 6 contacts per page
+
+  // Filter, sort, and search state for emergency contacts
+  const [contactSearchTerm, setContactSearchTerm] = useState("");
+  const [contactSortBy, setContactSortBy] = useState<"name" | "phone" | "relationship">("name");
+  const [contactSortOrder, setContactSortOrder] = useState<"asc" | "desc">("asc");
+  const [relationshipFilter, setRelationshipFilter] = useState<string>("");
+  const [filteredContacts, setFilteredContacts] = useState<EmergencyContact[]>([]);
 
   const reloadContacts = async () => {
     if (!patientId) return;
@@ -2106,6 +2606,45 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
       setErrorModal("Không thể tải danh sách liên hệ!");
     }
   };
+
+  // Apply filters and sort for emergency contacts
+  const applyContactFiltersAndSort = () => {
+    let filtered = [...contacts];
+    
+    // Search filter
+    if (contactSearchTerm.trim()) {
+      filtered = filtered.filter(contact =>
+        contact.contactName?.toLowerCase().includes(contactSearchTerm.toLowerCase()) ||
+        contact.contactPhone?.toLowerCase().includes(contactSearchTerm.toLowerCase())
+      );
+    }
+    
+    // Relationship filter
+    if (relationshipFilter) {
+      filtered = filtered.filter(contact => contact.relationship === relationshipFilter);
+    }
+    
+    // Sort
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+      if (contactSortBy === "name") {
+        compareValue = (a.contactName || "").localeCompare(b.contactName || "");
+      } else if (contactSortBy === "phone") {
+        compareValue = (a.contactPhone || "").localeCompare(b.contactPhone || "");
+      } else if (contactSortBy === "relationship") {
+        compareValue = a.relationship.localeCompare(b.relationship);
+      }
+      return contactSortOrder === "asc" ? compareValue : -compareValue;
+    });
+    
+    setFilteredContacts(filtered);
+    setContactCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Apply filters whenever contacts or filter criteria change
+  useEffect(() => {
+    applyContactFiltersAndSort();
+  }, [contacts, contactSearchTerm, contactSortBy, contactSortOrder, relationshipFilter]);
 
   useEffect(() => {
     // Use emergency contacts from patient data first, then fallback to API call if needed
@@ -2247,6 +2786,78 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
         </button>
       </h2>
 
+      {/* Search, Filter, and Sort Controls for Emergency Contacts */}
+      <div className="mb-4 flex flex-wrap gap-4 items-center bg-gray-50 p-3 rounded-lg">
+        {/* Search */}
+        <div className="flex-1 min-w-[200px]">
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên hoặc số điện thoại..."
+            value={contactSearchTerm}
+            onChange={(e) => setContactSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Relationship Filter */}
+        <div className="min-w-[150px]">
+          <select
+            value={relationshipFilter}
+            onChange={(e) => setRelationshipFilter(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Tất cả mối quan hệ</option>
+            <option value="FAMILY">Gia đình</option>
+            <option value="FRIEND">Bạn bè</option>
+            <option value="OTHERS">Khác</option>
+          </select>
+        </div>
+
+        {/* Sort By */}
+        <div className="min-w-[120px]">
+          <select
+            value={contactSortBy}
+            onChange={(e) => setContactSortBy(e.target.value as "name" | "phone" | "relationship")}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="name">Sắp xếp theo tên</option>
+            <option value="phone">Sắp xếp theo SĐT</option>
+            <option value="relationship">Sắp xếp theo quan hệ</option>
+          </select>
+        </div>
+
+        {/* Sort Order */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setContactSortOrder("asc")}
+            className={`px-3 py-2 text-sm rounded-md transition-colors ${
+              contactSortOrder === "asc"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            ↑ Tăng dần
+          </button>
+          <button
+            onClick={() => setContactSortOrder("desc")}
+            className={`px-3 py-2 text-sm rounded-md transition-colors ${
+              contactSortOrder === "desc"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            ↓ Giảm dần
+          </button>
+        </div>
+      </div>
+
+      {/* Results count */}
+      {filteredContacts.length !== contacts.length && (
+        <div className="mb-2 text-sm text-gray-600">
+          Hiển thị {filteredContacts.length} / {contacts.length} liên hệ
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto">
           <Table>
@@ -2279,9 +2890,14 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
               </TableRow>
             </TableHeader>
 
-            {contacts && contacts.length > 0 ? (
+            {filteredContacts && filteredContacts.length > 0 ? (
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                {contacts.map((contact) => (
+                {(() => {
+                  const startIndex = (contactCurrentPage - 1) * contactItemsPerPage;
+                  const endIndex = startIndex + contactItemsPerPage;
+                  const paginatedContacts = filteredContacts.slice(startIndex, endIndex);
+                  
+                  return paginatedContacts.map((contact) => (
                   <TableRow key={contact.contactId}>
                     <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm dark:text-gray-400">
                       {contact.contactName}
@@ -2354,7 +2970,8 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                ));
+              })()}
               </TableBody>
             ) : (
               <TableBody>
@@ -2363,7 +2980,9 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
                     colSpan={4}
                     className="pl-4 py-2 text-gray-500 text-theme-sm dark:text-gray-400 text-center"
                   >
-                    Không có liên hệ khẩn cấp
+                    {contactSearchTerm || relationshipFilter 
+                      ? "Không tìm thấy liên hệ phù hợp với bộ lọc"
+                      : "Không có liên hệ khẩn cấp"}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -2371,6 +2990,17 @@ export function ContactInfoContent({ patient }: { patient: Patient }) {
           </Table>
         </div>
       </div>
+      
+      {/* Pagination for Emergency Contacts */}
+      {filteredContacts.length > 0 && (
+        <Pagination
+          currentPage={contactCurrentPage}
+          totalPages={Math.ceil(filteredContacts.length / contactItemsPerPage)}
+          onPageChange={setContactCurrentPage}
+          itemsPerPage={contactItemsPerPage}
+          totalItems={filteredContacts.length}
+        />
+      )}
 
       {selectedContact && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">

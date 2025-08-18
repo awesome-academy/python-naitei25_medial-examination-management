@@ -1,6 +1,5 @@
 "use client";
 
-import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import SearchInput from "../../common/SearchInput";
@@ -16,20 +15,26 @@ import { DeleteConfirmationModal } from "../../ui/modal/DeleteConfirmationModal"
 import { patientService } from "../../../services/patientService";
 import type { Patient } from "../../../types/patient";
 import { format } from "date-fns";
-import { X } from "lucide-react";
-import type { PatientUpdateDto } from "../../../types/patient";
+import { Pagination } from "../../ui/Pagination";
+
+const PAGE_SIZE = 10;
 
 export default function PatientTable() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setModalOpen] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editPatient, setEditPatient] = useState<Patient | null>(null);
-  const [editData, setEditData] = useState<Partial<Patient>>({});
-  const [editLoading, setEditLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Enhanced filter and sort state
+  const [genderFilter, setGenderFilter] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"name" | "birthday" | "createdAt" | "gender">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [searchField, setSearchField] = useState<"all" | "name" | "phone" | "email" | "identity" | "insurance">("all");
   const navigate = useNavigate();
 
   const fetchPatients = async () => {
@@ -37,9 +42,11 @@ export default function PatientTable() {
     try {
       const data = await patientService.getAllPatients();
       setPatients(data);
+      setFilteredPatients(data);
     } catch (err) {
       console.error("API error:", err);
       setPatients([]);
+      setFilteredPatients([]);
     } finally {
       setLoading(false);
     }
@@ -62,9 +69,12 @@ export default function PatientTable() {
     if (patientToDelete === null) return;
     try {
       await patientService.deletePatient(patientToDelete);
-      setPatients((prev) =>
-        prev.filter((patient) => patient.patientId !== patientToDelete)
-      );
+      const updatedPatients = patients.filter((patient) => patient.patientId !== patientToDelete);
+      setPatients(updatedPatients);
+      // Filters will be applied automatically via useEffect
+      // Hiển thị thông báo thành công
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
     } catch (err) {
       console.error("Error deleting patient:", err);
     } finally {
@@ -73,84 +83,86 @@ export default function PatientTable() {
     }
   };
 
+  // Apply comprehensive filters and sorting
+  const applyFiltersAndSort = () => {
+    let filtered = [...patients];
+    
+    // Search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(patient => {
+        switch (searchField) {
+          case "name":
+            return patient.fullName.toLowerCase().includes(searchLower);
+          case "phone":
+            return patient.phone?.toLowerCase().includes(searchLower);
+          case "email":
+            return patient.email?.toLowerCase().includes(searchLower);
+          case "identity":
+            return patient.identityNumber.includes(searchTerm);
+          case "insurance":
+            return patient.insuranceNumber?.includes(searchTerm);
+          default: // "all"
+            return (
+              patient.fullName.toLowerCase().includes(searchLower) ||
+              patient.identityNumber.includes(searchTerm) ||
+              (patient.insuranceNumber && patient.insuranceNumber.includes(searchTerm)) ||
+              (patient.phone && patient.phone.toLowerCase().includes(searchLower)) ||
+              (patient.email && patient.email.toLowerCase().includes(searchLower))
+            );
+        }
+      });
+    }
+    
+    // Gender filter
+    if (genderFilter) {
+      filtered = filtered.filter(patient => patient.gender === genderFilter);
+    }
+    
+    // Sort
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+      if (sortBy === "name") {
+        compareValue = a.fullName.localeCompare(b.fullName);
+      } else if (sortBy === "birthday") {
+        compareValue = new Date(a.birthday).getTime() - new Date(b.birthday).getTime();
+      } else if (sortBy === "createdAt") {
+        compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sortBy === "gender") {
+        compareValue = a.gender.localeCompare(b.gender);
+      }
+      return sortOrder === "asc" ? compareValue : -compareValue;
+    });
+    
+    setFilteredPatients(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Apply filters whenever any filter criteria changes
+  useEffect(() => {
+    applyFiltersAndSort();
+  }, [patients, searchTerm, searchField, genderFilter, sortBy, sortOrder]);
+
   const handleSearch = async () => {
     setLoading(true);
     try {
-      if (!searchTerm.trim()) {
-        await fetchPatients();
-      } else {
-        const params: {
-          identityNumber?: string;
-          insuranceNumber?: string;
-          fullName?: string;
-        } = {};
-        if (/^\d{9,12}$/.test(searchTerm.trim())) {
-          params.identityNumber = searchTerm.trim();
-        } else if (/^[A-Za-z0-9]{8,20}$/.test(searchTerm.trim())) {
-          params.insuranceNumber = searchTerm.trim();
-        } else {
-          params.fullName = searchTerm.trim();
-        }
-        const result = await patientService.searchPatient(params);
-        setPatients(result ? [result] : []);
-      }
+      applyFiltersAndSort();
     } catch (err) {
-      setPatients([]);
+      setFilteredPatients([]);
       console.error("Error during search:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditClick = (patient: Patient) => {
-    setEditPatient(patient);
-    setEditData({
-      patientId: patient.patientId,
-      fullName: patient.fullName,
-      identityNumber: patient.identityNumber,
-      insuranceNumber: patient.insuranceNumber,
-      birthday: patient.birthday,
-      phone: patient.phone,
-      email: patient.email,
-      gender: patient.gender,
-      address: patient.address,
-      allergies: patient.allergies,
-      height: patient.height,
-      weight: patient.weight,
-      bloodType: patient.bloodType,
-    });
-    setShowEditModal(true);
-  };
+  // Calculate pagination values
+  const totalItems = filteredPatients.length;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  const paginatedPatients = filteredPatients.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editPatient || !editData.patientId) return;
-    setEditLoading(true);
-    try {
-      const updatePayload: Partial<PatientUpdateDto> = {
-        fullName: editData.fullName,
-        identityNumber: editData.identityNumber,
-        insuranceNumber: editData.insuranceNumber,
-        birthday: editData.birthday,
-        phone: editData.phone,
-        email: editData.email,
-        gender: editData.gender,
-        address: editData.address,
-        allergies: editData.allergies,
-        height: editData.height,
-        weight: editData.weight,
-        bloodType: editData.bloodType,
-      };
-
-      await patientService.updatePatient(editData.patientId, updatePayload);
-      setShowEditModal(false);
-      await fetchPatients();
-    } catch (err) {
-      console.error("Error updating patient:", err);
-    } finally {
-      setEditLoading(false);
-    }
-  };
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] px-3">
@@ -159,7 +171,7 @@ export default function PatientTable() {
           Danh sách bệnh nhân
         </h2>
         <span className="ml-5 text-sm bg-base-600/20 text-base-600 py-1 px-4 rounded-full font-bold">
-          {patients.length} bệnh nhân
+          {totalItems} bệnh nhân
         </span>
       </div>
       {loading && (
@@ -172,24 +184,142 @@ export default function PatientTable() {
       )}
       {!loading && (
         <>
-          <div className="flex items-center p-4 gap-2">
-            <div className="flex-1">
-              <SearchInput
-                inputRef={inputRef}
-                placeholder="Tìm kiếm theo CCCD, BHYT hoặc Họ tên"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
-                }}
-              />
+          {/* Enhanced Search and Filter Controls */}
+          <div className="p-4 space-y-4">
+            {/* Search Controls */}
+            <div className="flex flex-wrap gap-4 items-end">
+              <div className="flex-1 min-w-[300px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tìm kiếm
+                </label>
+                <SearchInput
+                  inputRef={inputRef}
+                  placeholder="Nhập từ khóa tìm kiếm..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSearch();
+                  }}
+                />
+              </div>
+              
+              <div className="min-w-[150px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tìm trong
+                </label>
+                <select
+                  value={searchField}
+                  onChange={(e) => setSearchField(e.target.value as typeof searchField)}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Tất cả trường</option>
+                  <option value="name">Họ tên</option>
+                  <option value="phone">Số điện thoại</option>
+                  <option value="email">Email</option>
+                  <option value="identity">CCCD</option>
+                  <option value="insurance">BHYT</option>
+                </select>
+              </div>
+              
+              <button
+                className="h-11 px-6 rounded-lg bg-base-700 text-white text-sm font-medium shadow-theme-xs hover:bg-base-600 focus:outline-hidden focus:ring-3 focus:ring-base-600/50"
+                onClick={handleSearch}
+              >
+                Tìm kiếm
+              </button>
             </div>
-            <button
-              className="h-11 w-20 rounded-lg bg-base-700 text-white text-sm font-medium shadow-theme-xs hover:bg-base-600 focus:outline-hidden focus:ring-3 focus:ring-base-600/50"
-              onClick={handleSearch}
-            >
-              Lọc
-            </button>
+            
+            {/* Filter and Sort Controls */}
+            <div className="flex flex-wrap gap-4 items-center bg-gray-50 p-3 rounded-lg">
+              {/* Gender Filter */}
+              <div className="min-w-[120px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Giới tính
+                </label>
+                <select
+                  value={genderFilter}
+                  onChange={(e) => setGenderFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="MALE">Nam</option>
+                  <option value="FEMALE">Nữ</option>
+                  <option value="OTHER">Khác</option>
+                </select>
+              </div>
+              
+              {/* Sort By */}
+              <div className="min-w-[140px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sắp xếp theo
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="name">Họ tên</option>
+                  <option value="birthday">Ngày sinh</option>
+                  <option value="createdAt">Ngày tạo</option>
+                  <option value="gender">Giới tính</option>
+                </select>
+              </div>
+              
+              {/* Sort Order */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSortOrder("asc")}
+                  className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                    sortOrder === "asc"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  ↑ Tăng dần
+                </button>
+                <button
+                  onClick={() => setSortOrder("desc")}
+                  className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                    sortOrder === "desc"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  ↓ Giảm dần
+                </button>
+              </div>
+              
+              {/* Clear Filters */}
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSearchField("all");
+                  setGenderFilter("");
+                  setSortBy("name");
+                  setSortOrder("asc");
+                }}
+                className="px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Xóa bộ lọc
+              </button>
+            </div>
+            
+            {/* Results Summary */}
+            {(searchTerm || genderFilter) && (
+              <div className="text-sm text-gray-600">
+                Hiển thị {filteredPatients.length} / {patients.length} bệnh nhân
+                {searchTerm && (
+                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                    Tìm kiếm: "{searchTerm}"
+                  </span>
+                )}
+                {genderFilter && (
+                  <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                    Giới tính: {genderFilter === "MALE" ? "Nam" : genderFilter === "FEMALE" ? "Nữ" : "Khác"}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <div className="max-w-full overflow-x-auto">
             <Table>
@@ -248,7 +378,14 @@ export default function PatientTable() {
               </TableHeader>
 
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                {patients.map((patient) => (
+                {paginatedPatients.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-10 text-gray-500">
+                      Không tìm thấy bệnh nhân phù hợp.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedPatients.map((patient) => (
                   <TableRow key={patient.patientId}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
@@ -311,20 +448,6 @@ export default function PatientTable() {
                           Xem
                         </button>
                         <button
-                          onClick={() => handleEditClick(patient)}
-                          className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 text-slate-500"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                          </svg>
-                          Sửa
-                        </button>
-                        <button
                           onClick={() => handleDelete(patient.patientId)}
                           className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
                         >
@@ -345,108 +468,39 @@ export default function PatientTable() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
-          {/* Modal sửa bệnh nhân */}
-          {showEditModal && editPatient && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-              <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg text-center relative">
-                <div className="flex flex-row justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold text-base-600">
-                    Sửa thông tin bệnh nhân
-                  </h2>
-                  <button
-                    onClick={() => setShowEditModal(false)}
-                    className="p-2 text-gray-400 hover:bg-slate-500/20 bg-slate-500/10 rounded-full"
-                    aria-label="Đóng"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-
-                <form
-                  onSubmit={handleEditSubmit}
-                  className="space-y-4 text-left"
-                >
-                  <div>
-                    <label className="block font-medium mb-1">Họ tên</label>
-                    <input
-                      type="text"
-                      value={editData.fullName || ""}
-                      onChange={(e) =>
-                        setEditData((d) => ({ ...d, fullName: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border rounded"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">CCCD</label>
-                    <input
-                      type="text"
-                      value={editData.identityNumber || ""}
-                      onChange={(e) =>
-                        setEditData((d) => ({
-                          ...d,
-                          identityNumber: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border rounded"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">BHYT</label>
-                    <input
-                      type="text"
-                      value={editData.insuranceNumber || ""}
-                      onChange={(e) =>
-                        setEditData((d) => ({
-                          ...d,
-                          insuranceNumber: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">Ngày sinh</label>
-                    <input
-                      type="date"
-                      value={
-                        editData.birthday
-                          ? new Date(editData.birthday)
-                              .toISOString()
-                              .slice(0, 10)
-                          : ""
-                      }
-                      onChange={(e) =>
-                        setEditData((d) => ({ ...d, birthday: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border rounded"
-                      required
-                    />
-                  </div>
-                  <div className="flex gap-3 justify-end pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowEditModal(false)}
-                      className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    >
-                      Hủy
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={editLoading}
-                      className="px-4 py-2 rounded-lg bg-base-600 text-white hover:bg-base-700 disabled:opacity-60"
-                    >
-                      {editLoading ? "Đang lưu..." : "Lưu"}
-                    </button>
-                  </div>
-                </form>
-              </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-4 py-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={PAGE_SIZE}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+          {/* Thông báo thành công */}
+          {showSuccessMessage && (
+            <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Đã xóa bệnh nhân thành công!
             </div>
           )}
           <DeleteConfirmationModal

@@ -22,6 +22,7 @@ import { ScrollToTop } from "../../shared/components/common/ScrollToTop"
 import { PatientProvider } from "./context/PatientContext"
 import MedicalRecordDetailPage from "./pages/MedicalRecordDetailPage"
 import DrugLookupPage from "./pages/DrugLookupPage"
+import AIChatDiagnosisPage from "./pages/AIChatDiagnosisPage"
 
 export const PatientApp: React.FC = () => {
   const { t } = useTranslation()
@@ -55,20 +56,7 @@ export const PatientApp: React.FC = () => {
 
           <Route path="profile" element={<ProfilePage />} />
           <Route path="drug-lookup" element={<DrugLookupPage />} />
-          <Route
-            path="ai-diagnosis"
-            element={
-              <div className="p-6">
-                <h1 className="text-2xl font-bold mb-4">{t("sidebar.aiDiagnosis")}</h1>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <span className="inline-block bg-blue-500 text-white text-xs px-2 py-1 rounded mb-2">
-                    {t("sidebar.new")}
-                  </span>
-                  <p>AI Diagnosis Page - Coming Soon</p>
-                </div>
-              </div>
-            }
-          />
+          <Route path="ai-diagnosis" element={<AIChatDiagnosisPage />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -12,6 +12,8 @@ import Doctor from "./pages/Doctors/Doctor";
 import Medicines from "./pages/Medicines/Medicines";
 import Services from "./pages/HealthServices/Service";
 import Department from "./pages/Departments/Department";
+import DepartmentDetail from "./pages/Departments/DepartmentDetail";
+import AddDepartment from "./pages/Departments/AddDepartment";
 import InpatientRoom from "./pages/Inpatient/InpatientRoom";
 import MedicalCalendar from "./pages/MedicalExamination/MedicalCalendar";
 import Authorization from "./pages/Authorization/Authorization";
@@ -76,6 +78,8 @@ const AdminApp: React.FC = () => {
 
           {/* Department Page */}
           <Route path="departments" element={<Department />} />
+          <Route path="departments/add" element={<AddDepartment />} />
+          <Route path="departments/:id" element={<DepartmentDetail />} />
 
           {/* Authorization Page */}
           <Route path="authorization" element={<Authorization />} />
