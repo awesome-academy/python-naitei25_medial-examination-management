@@ -111,7 +111,8 @@
         "serviceId": "Service ID",
         "serviceName": "Service Name",
         "insurance": "Insurance",
-        "insuranceCovered": "Insurance Covered"
+        "insuranceCovered": "Insurance Covered",
+        "noStaffInfo": "No staff information available"
     },
     "navigation": {
         "home": "Home",
@@ -1525,5 +1526,19 @@
         "loadError": "Unable to load health record",
         "updateSuccess": "Health record has been updated",
         "updateError": "Unable to update health record"
+    },
+    "addDepartment": {
+        "pageTitle": "Add Department",
+        "pageDescription": "Create a new department with details below.",
+        "heading": "Department Information",
+        "departmentName": "Department Name",
+        "departmentNamePlaceholder": "Enter department name",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter department description",
+        "locationLabel": "Location",
+        "locationPlaceholder": "Enter location",
+        "headLabel": "Head of Department",
+        "headPlaceholder": "Enter head doctor's name",
+        "createButton": "Create Department"
     }
 }

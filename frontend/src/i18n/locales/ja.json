@@ -104,7 +104,8 @@
         "serviceId": "サービスID",
         "serviceName": "サービス名",
         "insurance": "保険",
-        "insuranceCovered": "保険適用"
+        "insuranceCovered": "保険適用",
+        "noStaffInfo": "スタッフ情報はありません"
     },
     "navigation": {
         "home": "ホーム",
@@ -1520,5 +1521,19 @@
         "loadError": "健康記録を読み込めませんでした",
         "updateSuccess": "健康記録が更新されました",
         "updateError": "健康記録を更新できません"
+    },
+    "addDepartment": {
+        "pageTitle": "部門の追加",
+        "pageDescription": "以下の詳細で新しい部門を作成します。",
+        "heading": "部門情報",
+        "departmentName": "部門名",
+        "departmentNamePlaceholder": "部門名を入力してください",
+        "descriptionLabel": "説明",
+        "descriptionPlaceholder": "部門の説明を入力してください",
+        "locationLabel": "所在地",
+        "locationPlaceholder": "所在地を入力してください",
+        "headLabel": "部門長",
+        "headPlaceholder": "部門長の名前を入力してください",
+        "createButton": "部門を作成"
     }
 }

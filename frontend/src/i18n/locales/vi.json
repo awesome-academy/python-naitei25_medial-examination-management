@@ -104,7 +104,8 @@
         "serviceId": "Mã dịch vụ",
         "serviceName": "Tên dịch vụ",
         "insurance": "Bảo hiểm",
-        "insuranceCovered": "Bảo hiểm chi trả"
+        "insuranceCovered": "Bảo hiểm chi trả",
+        "noStaffInfo": "Không có thông tin nhân viên"
     },
     "navigation": {
         "home": "Trang chủ",
@@ -1518,5 +1519,19 @@
         "loadError": "Không thể tải hồ sơ sức khỏe",
         "updateSuccess": "Hồ sơ sức khỏe đã được cập nhật",
         "updateError": "Không thể cập nhật hồ sơ sức khỏe"
+    },
+    "addDepartment": {
+        "pageTitle": "Thêm phòng ban",
+        "pageDescription": "Tạo một phòng ban mới với các chi tiết bên dưới.",
+        "heading": "Thông tin phòng ban",
+        "departmentName": "Tên phòng ban",
+        "departmentNamePlaceholder": "Nhập tên phòng ban",
+        "descriptionLabel": "Mô tả",
+        "descriptionPlaceholder": "Nhập mô tả phòng ban",
+        "locationLabel": "Địa điểm",
+        "locationPlaceholder": "Nhập địa điểm",
+        "headLabel": "Trưởng phòng",
+        "headPlaceholder": "Nhập tên trưởng phòng",
+        "createButton": "Tạo phòng ban"
     }
 }
