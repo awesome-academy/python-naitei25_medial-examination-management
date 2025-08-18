@@ -19,7 +19,7 @@
     "avatar": "Avatar",
     "avatarFormat": "Format: JPG, PNG, GIF",
     "avatarMaxSize": "Maximum size: 3MB",
-    "selected": "Selected",
+    "selected": "Selected:",
     "removeAvatar": "Remove avatar",
     "chooseImage": "Choose image",
     "upload": "Upload",
@@ -410,7 +410,18 @@
     "resetPasswordFailed": "Password reset failed",
     "resendOtpFailed": "Resend OTP failed",
     "fetchWorkSchedules": "Failed to fetch work schedules",
-    "noPatientInfo": "No patient information"
+    "noPatientInfo": "No patient information",
+    "loadDoctors": "Error loading doctors: {{error}}",
+    "loadPatients": "Error loading patients: {{error}}",
+    "loadInitialData": "Error loading initial data: {{error}}",
+    "loadDoctorsByDepartment": "Error fetching doctors by department",
+    "invalidApiResponse": "Invalid API response format",
+    "loadAppointments": "Error loading appointments",
+    "missingAppointmentId": "Missing appointment ID, skipped",
+    "missingWorkDate": "Missing work date for appointment #{{id}}, skipped",
+    "invalidWorkDate": "Invalid work date for appointment #{{id}}",
+    "unknownPatient": "Unknown patient",
+    "unknown": "Unknown error"
   },
   "api": {
     "loading": "Loading...",
@@ -740,7 +751,7 @@
     "sortBy": "Sort By",
     "appointmentDate": "Appointment Date",
     "doctorName": "Doctor Name",
-    "status": "Status",
+    "status": "Status: ",
     "rating": "Rating",
     "price": "Price",
     "sortOrder": "Order",
@@ -874,6 +885,7 @@
     "recentAppointments": "Recent Appointments",
     "viewAll": "View All",
     "eventCalendar": "Event Calendar",
+    "appointmentCalendar": "Appointment Calendar",
     "viewDetails": "View Details",
     "upcomingAppointments": "Upcoming Appointments",
     "systemInfo": "System Information",
@@ -1048,31 +1060,19 @@
     "info": {
       "address": {
         "title": "Address",
-        "details": [
-          "123 ABC Street, District 1",
-          "Ho Chi Minh City, Vietnam"
-        ]
+        "details": ["123 ABC Street, District 1", "Ho Chi Minh City, Vietnam"]
       },
       "phone": {
         "title": "Phone",
-        "details": [
-          "+84 123 456 789",
-          "Hotline: 1900 1234"
-        ]
+        "details": ["+84 123 456 789", "Hotline: 1900 1234"]
       },
       "email": {
         "title": "Email",
-        "details": [
-          "info@healthcare.vn",
-          "support@healthcare.vn"
-        ]
+        "details": ["info@healthcare.vn", "support@healthcare.vn"]
       },
       "workingHours": {
         "title": "Working Hours",
-        "details": [
-          "Mon - Fri: 8:00 - 20:00",
-          "Sat - Sun: 8:00 - 17:00"
-        ]
+        "details": ["Mon - Fri: 8:00 - 20:00", "Sat - Sun: 8:00 - 17:00"]
       }
     },
     "form": {
@@ -1497,5 +1497,49 @@
     "loadError": "Unable to load health record",
     "updateSuccess": "Health record has been updated",
     "updateError": "Unable to update health record"
+  },
+  "ui": {
+    "patientInfo": "Patient Information",
+    "department": "Department",
+    "selectDepartment": "Select Department",
+    "loadingDepartments": "Loading departments...",
+    "selectDoctor": "Select Doctor",
+    "loadingDoctors": "Loading doctors...",
+    "chooseDepartmentFirst": "Please select a department first",
+    "noDoctors": "No doctors available",
+    "selectPatient": "Select Patient",
+    "loadingPatients": "Loading patients...",
+    "loadingworkSchedule": "Loading work schedule...",
+    "loadingSlots": "Loading slot...",
+    "noPatients": "No patients available",
+    "patientDetails": "Patient Details",
+    "fullName": "Full name:",
+    "age": "Age:",
+    "notUpdated": "Not updated",
+    "appointmentDate": "Appointment Date",
+    "selectSchedule": "Select Schedule",
+    "noWorkShifts": "No work shifts available",
+    "full": "Full",
+    "bookable": "Bookable",
+    "selectSlot": "Select Time Slot",
+    "noAvailableSlotsForShift": "No available slots for this shift",
+    "symptoms": "Symptoms",
+    "symptomsPlaceholder": "Enter the patient's symptoms...",
+    "close": "Close",
+    "save": "Save",
+    "addAppointment": "Add Appointment",
+    "creating": "Creating...",
+    "noAppointmentsToday": "No appointments for this day",
+    "doctorLabel": "Doctor:",
+    "timeLabel": "Time:",
+    "statusLabel": "Appointment Status", 
+    "appointments": "appointments", 
+    "patientId": "Patient ID: ", 
+    "healthInsurance": "Health Insurance Number:", 
+    "cancelApm": "Cancel Appointment", 
+    "gender": "Gender:", 
+    "createApm": "Create Appointment",
+    "apmList": "Appointment List", 
+    "totalAppointments": "Total Appointment:"
   }
 }

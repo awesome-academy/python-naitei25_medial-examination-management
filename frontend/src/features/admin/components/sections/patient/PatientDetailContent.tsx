@@ -606,26 +606,30 @@ export function InvoicesContent() {
 
             // 3️⃣ Lấy thêm thông tin chi tiết dịch vụ
             const serviceOrdersWithInfo = await Promise.all(
-              serviceOrders.map(async (order: any) => {
-                try {
-                  const serviceInfo = await servicesService.getServiceById(
-                    order.service_id
-                  );
-                  return {
-                    ...order,
-                    serviceName: serviceInfo.service_name, // lấy đúng field từ backend
-                    price: Number(serviceInfo.price),
-                  };
-                } catch (err) {
-                  console.error(`Lỗi lấy dịch vụ id=${order.service_id}`, err);
-                  return {
-                    ...order,
-                    serviceName: "Không xác định",
-                    price: 0,
-                  };
-                }
-              })
-            );
+  serviceOrders.map(async (order: any) => {
+    try {
+      const serviceInfo = await servicesService.getServiceById(order.service_id);
+      return {
+        ...order,
+        service: {
+          serviceId: serviceInfo.id,
+          serviceName: serviceInfo.service_name,
+          price: Number(serviceInfo.price),
+        },
+      };
+    } catch (err) {
+      console.error(`Lỗi lấy dịch vụ id=${order.service_id}`, err);
+      return {
+        ...order,
+        service: {
+          serviceId: order.service_id,
+          serviceName: "Không xác định",
+          price: 0,
+        },
+      };
+    }
+  })
+);
 
             return { billId: bill.billId, services: serviceOrdersWithInfo };
           } else {
@@ -707,8 +711,9 @@ export function InvoicesContent() {
   };
 
   const calculateTotalFromServices = (bill: Bill) => {
-    return bill.service_fee || 0;
-  };
+  const services = billServices[bill.billId || 0] || [];
+  return services.reduce((sum, svc) => sum + (Number(svc.price) || 0), 0);
+};
 
   return (
     <div className="bg-white py-6 px-4 rounded-lg border border-gray-200">
@@ -853,8 +858,9 @@ export function InvoicesContent() {
                           </Badge>
                         </TableCell>
                         <TableCell className="px-4 py-3 text-gray-700 text-start text-xs text-green-700 font-semibold">
-                          {(bill.service_fee || 0).toLocaleString("vi-VN")} VNĐ
-                        </TableCell>
+  {calculateTotalFromServices(bill).toLocaleString("vi-VN")} VNĐ
+</TableCell>
+
 
                         <TableCell className="px-4 py-3 text-gray-500 text-theme-md dark:text-gray-400">
                           <div className="flex gap-2">

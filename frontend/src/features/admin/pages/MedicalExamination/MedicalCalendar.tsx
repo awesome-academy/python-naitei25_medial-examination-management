@@ -223,7 +223,7 @@ const MedicalCalendar: React.FC = () => {
             }));
             setAllDoctors(transformedDoctors);
           } catch (error) {
-            console.error("Lỗi khi tải bác sĩ:", error);
+            console.error(t("errors.loadDoctors"), error);
             setAllDoctors([]);
             setToastInfo({
               open: true,
@@ -244,7 +244,7 @@ const MedicalCalendar: React.FC = () => {
             const patientsData = await patientService.getAllPatients();
             setPatients(patientsData);
           } catch (error) {
-            console.error("Lỗi khi tải bệnh nhân:", error);
+            console.error(t("errors.loadPatients"), error);
             setPatients([]);
             setToastInfo({
               open: true,
@@ -262,7 +262,7 @@ const MedicalCalendar: React.FC = () => {
 
         setInitialDataLoaded(true);
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu ban đầu:", error);
+        console.error(t("errors.loadInitialData"), error);
         setToastInfo({
           open: true,
           message: `Lỗi khi tải dữ liệu ban đầu: ${
@@ -324,7 +324,7 @@ const MedicalCalendar: React.FC = () => {
 
         setDoctorsByDepartment(transformedDoctors);
       } catch (error) {
-        console.error("Lỗi khi lấy bác sĩ theo khoa:", error);
+        console.error(t("errors.loadDoctorsByDepartment"), error);
         setDoctorsByDepartment([]);
         setToastInfo({
           open: true,
@@ -356,7 +356,7 @@ const MedicalCalendar: React.FC = () => {
       const response = await appointmentService.getAllAppointments(0, 200);
 
       if (!response || !response.content || !Array.isArray(response.content)) {
-        console.error("Định dạng phản hồi API không hợp lệ:", response);
+        console.error(t("errors.invalidApiResponse"), response);
         setEvents([]);
         setToastInfo({
           open: true,
@@ -585,7 +585,7 @@ const MedicalCalendar: React.FC = () => {
 
       setEvents(apiEvents);
     } catch (error) {
-      console.error("Lỗi khi lấy các cuộc hẹn:", error);
+      console.error(t("errors.loadAppointments"), error);
       setEvents([]);
       setToastInfo({
         open: true,
@@ -619,7 +619,7 @@ const MedicalCalendar: React.FC = () => {
     setIsLoadingSchedules(true);
     try {
       const doctorIdNumber = parseInt(doctorId, 10);
-      console.log("🔍 MedicalCalendar - Loading schedules for:", { doctorId, date });
+      console.log("MedicalCalendar - Loading schedules for:", { doctorId, date });
       const response = await appointmentService.getSchedulesByDoctorAndDate(
         doctorIdNumber,
         date
@@ -1210,7 +1210,7 @@ const MedicalCalendar: React.FC = () => {
         borderColor = "border-blue-500";
         pillColor = "bg-blue-500 text-white";
         break;
-      case "no-show": // Đảm bảo trường hợp này được xử lý
+      case "no-show": 
         bgColor = "bg-red-50";
         textColor = "text-red-800";
         borderColor = "border-red-500";
@@ -1355,7 +1355,7 @@ const MedicalCalendar: React.FC = () => {
         {/* Thanh công cụ lịch */}
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800">
-            Lịch khám bệnh
+            {t("dashboard.appointmentCalendar")}
           </h2>
           <div className="flex space-x-2">
             <button
@@ -1385,7 +1385,7 @@ const MedicalCalendar: React.FC = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Đang tải...
+                  {t("common.loading")}
                 </>
               ) : (
                 <>
@@ -1403,7 +1403,7 @@ const MedicalCalendar: React.FC = () => {
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
-                  Làm mới dữ liệu
+                  {t("buttons.refresh")}
                 </>
               )}
             </button>
@@ -1514,7 +1514,7 @@ const MedicalCalendar: React.FC = () => {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {appointmentCount} cuộc hẹn
+                        {appointmentCount} {t("ui.appointments")}
                       </div>
                     )}
                   </div>
@@ -1523,7 +1523,7 @@ const MedicalCalendar: React.FC = () => {
             }}
             customButtons={{
               addEventButton: {
-                text: "Thêm cuộc hẹn",
+                text: t("ui.addAppointment"),
                 click: openModal,
               },
             }}
@@ -1545,7 +1545,7 @@ const MedicalCalendar: React.FC = () => {
               {selectedEvent?.extendedProps?.appointmentId && (
                 <div className="flex items-center">
                   <span className="text-sm text-gray-600 mr-2">
-                    Trạng thái:
+                    {t("pastAppointments.status")}
                   </span>
                   <select
                     value={
@@ -1560,20 +1560,20 @@ const MedicalCalendar: React.FC = () => {
                       );
                     }}
                     className="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                    aria-label="Trạng thái cuộc hẹn"
+                    aria-label={t("ui.statusLabel")}
                   >
-                    <option value={AppointmentStatus.PENDING}>Chờ xử lý</option>
+                    <option value={AppointmentStatus.PENDING}>{t("stats.pending")}</option>
                     <option value={AppointmentStatus.CONFIRMED}>
-                      Đã xác nhận
+                      {t("stats.confirmed")}
                     </option>
                     <option value={AppointmentStatus.IN_PROGRESS}>
-                      Đang khám
+                      {t("upcomingAppointments.inProgress")}
                     </option>
                     <option value={AppointmentStatus.COMPLETED}>
-                      Hoàn thành
+                      {t("dashboard.status.completed")}
                     </option>
-                    <option value={AppointmentStatus.CANCELLED}>Đã hủy</option>
-                    <option value={AppointmentStatus.NO_SHOW}>Không đến</option>
+                    <option value={AppointmentStatus.CANCELLED}>{t("stats.cancelled")}</option>
+                    <option value={AppointmentStatus.NO_SHOW}>{t("upcomingAppointments.statusNoShow")}</option>
                   </select>
                 </div>
               )}
@@ -1583,24 +1583,24 @@ const MedicalCalendar: React.FC = () => {
             {selectedEvent && selectedEvent.extendedProps.patientName && (
               <div className="bg-blue-50 p-4 rounded-lg mb-4">
                 <h6 className="font-semibold text-blue-800 mb-2">
-                  Thông tin bệnh nhân
+                  {t("ui.patientInfo")}
                 </h6>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-sm text-gray-600">Họ tên:</p>
+                    <p className="text-sm text-gray-600">{t("ui.fullName")}</p>
                     <p className="font-medium">
                       {selectedEvent.extendedProps.patientName}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Mã bệnh nhân:</p>
+                    <p className="text-sm text-gray-600">{t("ui.patientId")}</p>
                     <p className="font-medium">
                       {selectedEvent.extendedProps.patientId || "N/A"}
                     </p>
                   </div>
                   {selectedEvent.extendedProps.patientAge !== undefined && (
                     <div>
-                      <p className="text-sm text-gray-600">Tuổi:</p>
+                      <p className="text-sm text-gray-600">{t("ui.age")}</p>
                       <p className="font-medium">
                         {selectedEvent.extendedProps.patientAge}
                       </p>
@@ -1609,7 +1609,7 @@ const MedicalCalendar: React.FC = () => {
                   {/* REMOVED: Số điện thoại bệnh nhân */}
                   {selectedEvent.extendedProps.insuranceId && (
                     <div>
-                      <p className="text-sm text-gray-600">Số bảo hiểm:</p>
+                      <p className="text-sm text-gray-600">{t("ui.healthInsurance")}</p>
                       <p className="font-medium">
                         {selectedEvent.extendedProps.insuranceId}
                       </p>
@@ -1617,7 +1617,7 @@ const MedicalCalendar: React.FC = () => {
                   )}
                   {selectedEvent.extendedProps.symptoms && (
                     <div className="col-span-2">
-                      <p className="text-sm text-gray-600">Triệu chứng:</p>
+                      <p className="text-sm text-gray-600">{t("ui.symptoms")}</p>
                       <p className="font-medium">
                         {selectedEvent.extendedProps.symptoms}
                       </p>
@@ -1625,7 +1625,7 @@ const MedicalCalendar: React.FC = () => {
                   )}
                   {selectedEvent.extendedProps.doctorName && (
                     <div className="col-span-2">
-                      <p className="text-sm text-gray-600">Bác sĩ:</p>
+                      <p className="text-sm text-gray-600">{t("ui.doctorLabel")}</p>
                       <p className="font-medium">
                         {selectedEvent.extendedProps.doctorName}
                       </p>
@@ -1633,7 +1633,7 @@ const MedicalCalendar: React.FC = () => {
                   )}
                   {selectedEvent.extendedProps.department && (
                     <div className="col-span-2">
-                      <p className="text-sm text-gray-600">Khoa:</p>
+                      <p className="text-sm text-gray-600">{t("ui.department")}:</p>
                       <p className="font-medium">
                         {selectedEvent.extendedProps.department}
                       </p>
@@ -1641,7 +1641,7 @@ const MedicalCalendar: React.FC = () => {
                   )}
                   {selectedEvent.extendedProps.eventTime && (
                     <div className="col-span-2">
-                      <p className="text-sm text-gray-600">Thời gian:</p>
+                      <p className="text-sm text-gray-600">{t("ui.timeLabel")}</p>
                       <p className="font-medium">
                         {formatTimeToVietnamese(
                           selectedEvent.extendedProps.eventTime
@@ -1672,7 +1672,7 @@ const MedicalCalendar: React.FC = () => {
                       className="px-6 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={isLoading}
                     >
-                      Hủy cuộc hẹn
+                      {t("ui.cancelApm")}
                     </button>
                   )}
                 <button
@@ -1680,7 +1680,7 @@ const MedicalCalendar: React.FC = () => {
                   onClick={handleCloseModal}
                   className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50"
                 >
-                  Đóng
+                  {t("ui.close")}
                 </button>
               </div>
             )}
@@ -1697,14 +1697,14 @@ const MedicalCalendar: React.FC = () => {
                 {/* Chọn lịch */}
                 <div className="bg-gray-50 p-4 rounded-lg space-y-4">
                   <h6 className="font-medium text-gray-700 mb-3">
-                    Chọn lịch khám
+                    {t("ui.selectSchedule")}
                   </h6>
 
                   <div className="grid grid-cols-3 gap-4">
                     {/* Chọn khoa */}
                     <div>
                       <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                        Khoa <span className="text-red-500">*</span>
+                        {t("ui.department")} <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={departmentId}
@@ -1714,8 +1714,8 @@ const MedicalCalendar: React.FC = () => {
                       >
                         <option value="">
                           {isLoadingDepartments
-                            ? "Đang tải khoa..."
-                            : "Chọn khoa"}
+                            ? t("ui.loadingDepartments") 
+                            : t("ui.selectDepartment")}
                         </option>
                         {departmentList.map((dept) => (
                           <option key={dept.id} value={String(dept.id)}>
@@ -1730,7 +1730,7 @@ const MedicalCalendar: React.FC = () => {
                       )}
                       {selectedDepartment && (
                         <p className="text-sm text-gray-600 mt-2">
-                          Đã chọn:{" "}
+                          {t("common.selected")}{" "}
                           <span className="font-medium text-gray-800">
                             {selectedDepartment.department_name}
                           </span>
@@ -1741,7 +1741,7 @@ const MedicalCalendar: React.FC = () => {
                     {/* Chọn bác sĩ - Sử dụng doctorsByDepartment với trạng thái loading */}
                     <div>
                       <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                        Bác sĩ <span className="text-red-500">*</span>
+                        {t("ui.selectDoctor")} <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={doctorId}
@@ -1751,12 +1751,12 @@ const MedicalCalendar: React.FC = () => {
                       >
                         <option value="">
                           {isLoadingDoctors
-                            ? "Đang tải bác sĩ..."
+                            ? t("ui.loadingDoctors")
                             : !departmentId
-                            ? "Chọn khoa trước"
+                            ? t("ui.chooseDepartmentFirst")
                             : doctorsByDepartment.length === 0
-                            ? "Không có bác sĩ nào"
-                            : "Chọn bác sĩ"}
+                            ? t("ui.noDoctors")
+                            : t("ui.selectDoctor")}
                         </option>
                         {doctorsByDepartment.map((doctor) => (
                           <option
@@ -1774,7 +1774,7 @@ const MedicalCalendar: React.FC = () => {
                       )}
                       {selectedDoctor && (
                         <p className="text-sm text-gray-600 mt-2">
-                          Đã chọn:{" "}
+                          {t("common.selected")}{" "}
                           <span className="font-medium text-gray-800">
                             {selectedDoctor.fullName}
                           </span>
@@ -1785,7 +1785,7 @@ const MedicalCalendar: React.FC = () => {
                     {/* Chọn ngày */}
                     <div>
                       <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                        Ngày khám <span className="text-red-500">*</span>
+                        {t("ui.appointmentDate")} <span className="text-red-500">*</span>
                       </label>
                       <DatePicker
                         id="appointment-date"
@@ -1806,7 +1806,7 @@ const MedicalCalendar: React.FC = () => {
                   {(isLoadingSchedules || schedules.length > 0) && (
                     <div>
                       <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                        Ca làm việc <span className="text-red-500">*</span>
+                        {t("appointment.session")} <span className="text-red-500">*</span>
                       </label>
 
                       {isLoadingSchedules ? (
@@ -1830,12 +1830,12 @@ const MedicalCalendar: React.FC = () => {
                             />
                           </svg>
                           <span className="ml-2 text-gray-600">
-                            Đang tải lịch làm việc...
+                            {t("ui.loadingworkSchedule")}
                           </span>
                         </div>
                       ) : schedules.length === 0 ? (
                         <div className="text-center py-8 text-gray-500">
-                          <p>Không có ca làm việc nào</p>
+                          <p>{t("ui.noWorkShifts")}</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 gap-4">
@@ -1854,7 +1854,7 @@ const MedicalCalendar: React.FC = () => {
                                 ? "bg-red-100 text-red-800"
                                 : "bg-green-100 text-green-800"
                             }`;
-                            const pillText = isFull ? "Đã đầy" : "Có thể đặt";
+                            const pillText = isFull ? t("ui.full") : t("ui.bookable");
 
                             return (
                               <div
@@ -1888,7 +1888,7 @@ const MedicalCalendar: React.FC = () => {
                     (isLoadingSchedules || availableSlots.length > 0) && (
                       <div>
                         <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                          Chọn giờ khám <span className="text-red-500">*</span>
+                          {t("ui.selectSlot")} <span className="text-red-500">*</span>
                         </label>
                         {isLoadingSchedules ? (
                           <div className="flex items-center justify-center py-4">
@@ -1911,12 +1911,12 @@ const MedicalCalendar: React.FC = () => {
                               />
                             </svg>
                             <span className="ml-2 text-gray-600">
-                              Đang tải slot...
+                              {t("ui.loadingSlots")}
                             </span>
                           </div>
                         ) : availableSlots.length === 0 ? (
                           <div className="text-center py-4 text-gray-500">
-                            <p>Không có slot trống nào cho ca này</p>
+                            <p>{t("ui.noAvailableSlotsForShift")}</p>
                           </div>
                         ) : (
                           <select
@@ -1929,7 +1929,7 @@ const MedicalCalendar: React.FC = () => {
                                 .length === 0
                             }
                           >
-                            <option value="">Chọn giờ khám</option>
+                            <option value="">{t("ui.selectSlot")}</option>
                             {availableSlots.map((slot, index) => (
                               <option
                                 key={index}
@@ -1955,12 +1955,12 @@ const MedicalCalendar: React.FC = () => {
                 {/* Chọn bệnh nhân */}
                 <div className="bg-gray-50 p-4 rounded-lg space-y-4">
                   <h6 className="font-medium text-gray-700 mb-3">
-                    Thông tin bệnh nhân
+                    {t("ui.patientInfo")}
                   </h6>
 
                   <div>
                     <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                      Chọn bệnh nhân <span className="text-red-500">*</span>
+                      {t("ui.selectPatient")} <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={selectedPatient?.patientId || ""}
@@ -1971,10 +1971,10 @@ const MedicalCalendar: React.FC = () => {
                     >
                       <option value="">
                         {isLoadingPatients
-                          ? "Đang tải bệnh nhân..."
+                          ? t("ui.loadingPatients")
                           : patients.length === 0
-                          ? "Không có bệnh nhân nào"
-                          : "Chọn bệnh nhân"}
+                          ? t("ui.noPatients")
+                          : t("ui.selectPatient")}
                       </option>
                       {patients.map((patient) => (
                         <option
@@ -1996,38 +1996,38 @@ const MedicalCalendar: React.FC = () => {
                   {selectedPatient && (
                     <div className="mt-4 p-4 bg-white rounded-lg border">
                       <h4 className="text-sm font-medium text-gray-900 mb-2">
-                        Chi tiết bệnh nhân
+                        {t("ui.patientDetails")}
                       </h4>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="font-medium text-gray-600">
-                            Họ tên:
+                            {t("ui.fullName")}
                           </span>{" "}
                           <span className="text-gray-800">
-                            {selectedPatient.fullName || "Chưa cập nhật"}
+                            {selectedPatient.fullName || t("ui.notUpdated")}
                           </span>
                         </div>
                         <div>
                           <span className="font-medium text-gray-600">
-                            Tuổi:
+                            {t("ui.age")}
                           </span>{" "}
                           <span className="text-gray-800">
-                            {selectedPatient.age || "Chưa cập nhật"}
+                            {selectedPatient.age || t("ui.notUpdated")}
                           </span>
                         </div>
                         <div>
                           <span className="font-medium text-gray-600">
-                            Giới tính:
+                            {t("ui.gender")}
                           </span>{" "}
                           <span className="text-gray-800">
                             {getGenderText(selectedPatient.gender) ||
-                              "Chưa cập nhật"}
+                              t("ui.notUpdated")}
                           </span>
                         </div>
                         {selectedPatient.insuranceNumber && (
                           <div className="col-span-2">
                             <span className="font-medium text-gray-600">
-                              Số bảo hiểm:
+                              {t("ui.healthInsurance")}
                             </span>{" "}
                             <span className="text-gray-800">
                               {selectedPatient.insuranceNumber}
@@ -2041,12 +2041,12 @@ const MedicalCalendar: React.FC = () => {
                   {/* Triệu chứng */}
                   <div>
                     <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                      Triệu chứng <span className="text-red-500">*</span>
+                        {t("ui.symptoms")} <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       value={symptoms}
                       onChange={(e) => setSymptoms(e.target.value)}
-                      placeholder="Nhập triệu chứng của bệnh nhân..."
+                      placeholder={t("ui.symptomsPlaceholder")}
                       rows={3}
                       className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm resize-none"
                       required
@@ -2066,7 +2066,7 @@ const MedicalCalendar: React.FC = () => {
                     onClick={handleCloseModal}
                     className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50"
                   >
-                    Hủy
+                    {t("common.cancel")}
                   </button>
                   <button
                     type="submit"
@@ -2098,10 +2098,10 @@ const MedicalCalendar: React.FC = () => {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           />
                         </svg>
-                        Đang tạo...
+                        {t("ui.creating")}
                       </span>
                     ) : (
-                      "Tạo cuộc hẹn"
+                      t("ui.createApm")
                     )}
                   </button>
                 </div>
@@ -2119,19 +2119,19 @@ const MedicalCalendar: React.FC = () => {
           <div className="flex flex-col px-4">
             <div>
               <h5 className="mb-2 font-semibold text-gray-800 text-xl lg:text-2xl">
-                Danh sách cuộc hẹn {selectedDate}
+                {t("ui.apmList")} {selectedDate}
               </h5>
               <p className="text-sm text-gray-600 mb-4">
-                Tổng số cuộc hẹn:{" "}
+                {t("ui.totalAppointments")}{" "}
                 <span className="font-semibold text-blue-600">
-                  {dayEvents.length} cuộc hẹn
+                  {dayEvents.length} {t("ui.appointments")}
                 </span>
               </p>
             </div>
             <div className="mt-4 overflow-y-auto max-h-[60vh] custom-scrollbar pr-2">
               {dayEvents.length === 0 ? (
                 <p className="text-center text-gray-500 text-sm py-8">
-                  Không có cuộc hẹn nào trong ngày này
+                  {t("ui.noAppointmentsToday")}
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -2167,14 +2167,14 @@ const MedicalCalendar: React.FC = () => {
                             }`}
                           >
                             {event.extendedProps.calendar === "success"
-                              ? "Đã hoàn thành"
+                              ? t("stats.completed")
                               : event.extendedProps.calendar === "cancel"
-                              ? "Đã hủy"
+                              ? t("status.cancelled")
                               : event.extendedProps.calendar === "no-show"
-                              ? "Không đến"
+                              ? t("pastAppointments.noShow")
                               : event.extendedProps.calendar === "upcoming"
-                              ? "Đã xác nhận"
-                              : "Chờ xử lý"}
+                              ? t("status.confirmed")
+                              : t("status.pending")}
                           </span>
                         </div>
                         <div className="text-sm font-medium text-blue-600">
@@ -2182,7 +2182,7 @@ const MedicalCalendar: React.FC = () => {
                             ? formatTimeToVietnamese(
                                 event.extendedProps.eventTime
                               )
-                            : "Chưa xác định"}
+                            : t("prescriptionDetail.notSpecified")}
                         </div>
                       </div>
                       <div className="mt-3">
@@ -2191,15 +2191,15 @@ const MedicalCalendar: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
                           <div>
-                            <span className="font-medium">Mã BN:</span>{" "}
+                            <span className="font-medium">{t("ui.patientId")}</span>{" "}
                             {event.extendedProps.patientId || "N/A"}
                           </div>
                           <div>
-                            <span className="font-medium">Bác sĩ:</span>{" "}
+                            <span className="font-medium">{t("ui.doctorLabel")}</span>{" "}
                             {event.extendedProps.doctorName || "N/A"}
                           </div>
                           <div>
-                            <span className="font-medium">Khoa:</span>{" "}
+                            <span className="font-medium">{t("ui.department")}:</span>{" "}
                             {event.extendedProps.department || "N/A"}
                           </div>
                         </div>

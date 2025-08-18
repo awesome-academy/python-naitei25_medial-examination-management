@@ -26,22 +26,35 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadTransactions = async () => {
-      try {
-        setLoading(true);
-        const data = await paymentService.getTransactionsByBillId(bill.billId);
-        setTransactions(data);
-      } catch (error: any) {
-        setError(error.message || "Không thể tải danh sách giao dịch");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (isOpen && bill.status === "PAID") {
-      loadTransactions();
+  const loadTransactions = async () => {
+    try {
+      setLoading(true);
+      const raw = await paymentService.getTransactionsByBillId(bill.billId);
+      const mapped: Transaction[] = raw.map((t: any) => ({
+        transactionId: t.id,
+        amount: Number(t.amount),
+        paymentMethod: t.payment_method === "C" ? "CASH" : "ONLINE_BANKING",
+        status:
+          t.status === "S"
+            ? "SUCCESS"
+            : t.status === "P"
+            ? "PENDING"
+            : "FAILED",
+        transactionDate: t.transaction_date,
+      }));
+      setTransactions(mapped);
+    } catch (error: any) {
+      setError(error.message || "Không thể tải danh sách giao dịch");
+    } finally {
+      setLoading(false);
     }
-  }, [isOpen, bill.billId, bill.status]);
+  };
+
+  if (isOpen) {
+    loadTransactions();
+  }
+}, [isOpen, bill.billId]);
+
 
   const handlePayment = async (method: 'online' | 'cash') => {
     try {
@@ -69,7 +82,7 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl shadow-lg">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">
-            Chi tiết hóa đơn #{bill.billId.toString().padStart(4, '0')}
+            Chi tiết hóa đơn #{String(bill.billId || 0).padStart(4, "0")}
           </h2>
           <button
             onClick={onClose}
@@ -218,15 +231,15 @@ export function BillModal({ isOpen, onClose, services = [], ...bill }: BillModal
                               transaction.status === "SUCCESS"
                                 ? "success"
                                 : transaction.status === "PENDING"
-                                ? "warning"
-                                : "error"
+                                  ? "warning"
+                                  : "error"
                             }
                           >
                             {transaction.status === "SUCCESS"
                               ? "Thành công"
                               : transaction.status === "PENDING"
-                              ? "Đang xử lý"
-                              : "Thất bại"}
+                                ? "Đang xử lý"
+                                : "Thất bại"}
                           </Badge>
                         </td>
                       </tr>

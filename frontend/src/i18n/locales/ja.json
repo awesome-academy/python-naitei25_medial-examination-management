@@ -19,7 +19,7 @@
     "avatar": "アバター",
     "avatarFormat": "形式: JPG, PNG, GIF",
     "avatarMaxSize": "最大サイズ: 3MB",
-    "selected": "選択済み",
+    "selected": "選択済み:",
     "removeAvatar": "アバターを削除",
     "chooseImage": "画像を選択",
     "upload": "アップロード",
@@ -399,7 +399,18 @@
     "forgotPasswordFailed": "OTPリクエストに失敗しました",
     "resetPasswordFailed": "パスワードリセットに失敗しました",
     "resendOtpFailed": "OTP再送信に失敗しました",
-    "noPatientInfo": "患者情報がありません"
+    "noPatientInfo": "患者情報がありません",
+    "loadDoctors": "医師の読み込みエラー: {{error}}",
+    "loadPatients": "患者の読み込みエラー: {{error}}",
+    "loadInitialData": "初期データの読み込みエラー: {{error}}",
+    "loadDoctorsByDepartment": "部門ごとの医師取得エラー",
+    "invalidApiResponse": "無効なAPIレスポンス形式",
+    "loadAppointments": "予約リストの読み込みエラー",
+    "missingAppointmentId": "予約IDが不足しているためスキップしました",
+    "missingWorkDate": "予約 #{{id}} の勤務日が不足しているためスキップしました",
+    "invalidWorkDate": "予約 #{{id}} の勤務日が無効です",
+    "unknownPatient": "不明な患者",
+    "unknown": "不明なエラー"
   },
   "api": {
     "loading": "読み込み中...",
@@ -735,7 +746,7 @@
     "sortBy": "並べ替え",
     "appointmentDate": "予約日",
     "doctorName": "医師名",
-    "status": "ステータス",
+    "status": "ステータス:",
     "rating": "評価",
     "price": "価格",
     "sortOrder": "順序",
@@ -869,6 +880,7 @@
     "recentAppointments": "最近の予約",
     "viewAll": "すべて表示",
     "eventCalendar": "イベントカレンダー",
+    "appointmentCalendar": "予約のカレンダー",
     "viewDetails": "詳細を見る",
     "upcomingAppointments": "今後の予約",
     "systemInfo": "システム情報",
@@ -921,7 +933,7 @@
     "building": "建物",
     "status": "状態"
   },
-    "serviceOrder": {
+  "serviceOrder": {
     "table": {
       "indication": "適応症",
       "room": "部屋",
@@ -944,7 +956,7 @@
       "save": "保存"
     }
   },
-    "footer": {
+  "footer": {
     "companyDescription": "私たちは、専門医チームと最新技術により最高の医療サービスを提供することをお約束します。",
     "quickLinks": "クイックリンク",
     "contactInfo": "連絡先情報",
@@ -956,7 +968,7 @@
     "privacyPolicy": "プライバシーポリシー",
     "termsOfUse": "利用規約"
   },
-    "about": {
+  "about": {
     "header": {
       "title": "HealthCareについて",
       "subtitle": "私たちは、専門医と最新の医療技術によって最高のヘルスケアサービスを提供することをお約束します。"
@@ -1011,7 +1023,10 @@
       "2021": { "title": "拡大", "desc": "200人以上の医師、15の診療科へ成長" },
       "2022": { "title": "テクノロジー", "desc": "AIを診断と相談に活用" },
       "2023": { "title": "国際化", "desc": "世界有数の病院と提携" },
-      "2024": { "title": "現在", "desc": "500人以上の医師、5万人以上の患者に信頼される" }
+      "2024": {
+        "title": "現在",
+        "desc": "500人以上の医師、5万人以上の患者に信頼される"
+      }
     },
     "cta": {
       "title": "私たちと一緒に",
@@ -1020,7 +1035,7 @@
       "learnMore": "もっと知る"
     }
   },
-    "contact": {
+  "contact": {
     "header": {
       "title": "お問い合わせ",
       "subtitle": "私たちはいつでもあなたの声に耳を傾け、サポートする準備ができています。お気軽にご連絡ください。"
@@ -1127,7 +1142,7 @@
       "chat": "ライブチャット"
     }
   },
-    "doctors": {
+  "doctors": {
     "header": {
       "title": "医師一覧",
       "subtitle": "一流の医師を検索して予約する"
@@ -1145,7 +1160,7 @@
     },
     "empty": "医師が見つかりません"
   },
-    "home": {
+  "home": {
     "hero": {
       "tagline": "最高の医療サービス",
       "title": "健康は",
@@ -1201,7 +1216,7 @@
       "dashboard": "ダッシュボードへ"
     }
   },
-    "specialties": {
+  "specialties": {
     "header": {
       "title": "診療科",
       "subtitle": "診療科を探索して、あなたのニーズに合ったものを選びましょう"
@@ -1212,7 +1227,7 @@
     },
     "empty": "診療科が見つかりません"
   },
-    "appointment": {
+  "appointment": {
     "title": "予約をする",
     "date": "日付",
     "session": "勤務シフト",
@@ -1304,7 +1319,7 @@
     "importantNoteTitle": "重要な注意:",
     "importantNote": "時間通りに到着し、身分証明書を持参してください。予約を変更する場合は、少なくとも2時間前にご連絡ください。"
   },
-    "drug": {
+  "drug": {
     "title": "医薬品情報検索",
     "searchPlaceholder": "薬名、有効成分、製造元で検索...",
     "search": "検索",
@@ -1331,7 +1346,7 @@
     "selectMedicine": "詳細を表示する薬を選択してください",
     "selectInstruction": "左のリストから薬を選択して詳細を確認してください"
   },
-    "profile": {
+  "profile": {
     "title": "プロフィール",
     "subtitle": "個人情報と健康情報を管理します",
     "personalInfo": "個人情報",
@@ -1343,7 +1358,7 @@
     "healthRecord": "健康記録",
     "healthRecordShort": "健康"
   },
-    "personalInfo": {
+  "personalInfo": {
     "title": "個人情報",
     "subtitle": "あなたの個人情報を管理します",
     "basicInfo": "基本情報",
@@ -1372,7 +1387,7 @@
     "avatarUpdated": "アバターが更新されました",
     "avatarUploadError": "アバターをアップロードできません"
   },
-    "insurance": {
+  "insurance": {
     "title": "保険情報",
     "description": "あなたの健康保険情報を管理します",
     "defaultProvider": "ベトナム社会保険",
@@ -1419,7 +1434,7 @@
     "updateSuccess": "保険情報が更新されました",
     "updateError": "保険情報を更新できません"
   },
-    "emergency": {
+  "emergency": {
     "title": "緊急連絡先",
     "description": "緊急時の連絡先リストを管理します",
 
@@ -1465,18 +1480,62 @@
     "deleteSuccess": "緊急連絡先が削除されました"
   },
   "health": {
-  "title": "健康記録",
-  "description": "健康情報を管理する",
-  "metricsTab": "健康指標",
-  "historyTab": "病歴",
-  "height": "身長 (cm)",
-  "weight": "体重 (kg)",
-  "bmi": "BMI指数",
-  "bloodType": "血液型",
-  "chooseBloodType": "血液型を選択",
-  "allergies": "アレルギー",
-  "loadError": "健康記録を読み込めませんでした",
-  "updateSuccess": "健康記録が更新されました",
-  "updateError": "健康記録を更新できません"
-}
+    "title": "健康記録",
+    "description": "健康情報を管理する",
+    "metricsTab": "健康指標",
+    "historyTab": "病歴",
+    "height": "身長 (cm)",
+    "weight": "体重 (kg)",
+    "bmi": "BMI指数",
+    "bloodType": "血液型",
+    "chooseBloodType": "血液型を選択",
+    "allergies": "アレルギー",
+    "loadError": "健康記録を読み込めませんでした",
+    "updateSuccess": "健康記録が更新されました",
+    "updateError": "健康記録を更新できません"
+  },
+  "ui": {
+    "patientInfo": "患者情報",
+    "department": "診療科",
+    "selectDepartment": "診療科を選択",
+    "loadingDepartments": "診療科を読み込み中...",
+    "selectDoctor": "医師を選択",
+    "loadingDoctors": "医師を読み込み中...",
+    "chooseDepartmentFirst": "先に診療科を選択してください",
+    "noDoctors": "利用可能な医師がいません",
+    "selectPatient": "患者を選択",
+    "loadingPatients": "患者を読み込み中...",
+    "loadingworkSchedule": "スケジュールを読み込み中...",
+    "loadingSlots": "時間を読み込み中...",
+    "noPatients": "利用可能な患者がいません",
+    "patientDetails": "患者詳細",
+    "fullName": "氏名:",
+    "age": "年齢:",
+    "notUpdated": "未更新",
+    "appointmentDate": "受診日",
+    "selectSchedule": "シフトを選択",
+    "noWorkShifts": "利用可能なシフトがありません",
+    "full": "満席",
+    "bookable": "予約可",
+    "selectSlot": "時間を選択",
+    "noAvailableSlotsForShift": "このシフトには空き枠がありません",
+    "symptoms": "症状",
+    "symptomsPlaceholder": "患者の症状を入力してください...",
+    "close": "閉じる",
+    "save": "保存",
+    "addAppointment": "予約を追加",
+    "creating": "作成中...",
+    "noAppointmentsToday": "この日には予約がありません",
+    "doctorLabel": "医師:",
+    "timeLabel": "時間:",
+    "statusLabel": "予約ステータス", 
+    "appointments": "予約", 
+    "patientId": "患者ID: ", 
+    "healthInsurance": "健康保険:", 
+    "cancelApm": "予約キャンセル", 
+    "gender": "性別:", 
+    "createApm": "予約作成", 
+    "apmList": "予約リスト", 
+    "totalAppointments": "総予約数:"
+  }
 }

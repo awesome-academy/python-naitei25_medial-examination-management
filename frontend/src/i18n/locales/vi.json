@@ -19,7 +19,7 @@
     "avatar": "Ảnh đại diện",
     "avatarFormat": "Định dạng: JPG, PNG, GIF",
     "avatarMaxSize": "Kích thước tối đa: 3MB",
-    "selected": "Đã chọn",
+    "selected": "Đã chọn:",
     "removeAvatar": "Xóa ảnh đại diện",
     "chooseImage": "Chọn hình ảnh",
     "upload": "Tải lên",
@@ -397,7 +397,18 @@
     "resetPasswordFailed": "Đặt lại mật khẩu thất bại",
     "resendOtpFailed": "Gửi lại OTP thất bại",
     "fetchWorkSchedules": "Lấy lịch làm việc thất bại",
-    "noPatientInfo": "Không có thông tin bệnh nhân"
+    "noPatientInfo": "Không có thông tin bệnh nhân",
+    "loadDoctors": "Lỗi khi tải bác sĩ: {{error}}",
+    "loadPatients": "Lỗi khi tải bệnh nhân: {{error}}",
+    "loadInitialData": "Lỗi khi tải dữ liệu ban đầu: {{error}}",
+    "loadDoctorsByDepartment": "Lỗi khi lấy bác sĩ theo khoa",
+    "invalidApiResponse": "Định dạng phản hồi API không hợp lệ",
+    "loadAppointments": "Lỗi khi tải danh sách cuộc hẹn",
+    "missingAppointmentId": "Thiếu mã cuộc hẹn, bỏ qua",
+    "missingWorkDate": "Thiếu ngày làm việc cho cuộc hẹn #{{id}}, bỏ qua",
+    "invalidWorkDate": "Ngày làm việc không hợp lệ cho cuộc hẹn #{{id}}",
+    "unknownPatient": "Bệnh nhân không xác định",
+    "unknown": "Lỗi không xác định"
   },
   "api": {
     "loading": "Đang tải...",
@@ -777,7 +788,7 @@
     "sortBy": "Sắp xếp theo",
     "appointmentDate": "Ngày khám",
     "doctorName": "Tên bác sĩ",
-    "status": "Trạng thái",
+    "status": "Trạng thái: ",
     "rating": "Đánh giá",
     "price": "Giá khám",
     "sortOrder": "Thứ tự",
@@ -867,6 +878,7 @@
     "recentAppointments": "Cuộc hẹn gần đây",
     "viewAll": "Xem tất cả",
     "eventCalendar": "Lịch sự kiện",
+    "appointmentCalendar": "Lịch khám bệnh",
     "viewDetails": "Xem chi tiết",
     "upcomingAppointments": "Cuộc hẹn sắp tới",
     "systemInfo": "Thông tin hệ thống",
@@ -919,7 +931,7 @@
     "building": "Tòa nhà",
     "status": "Trạng thái"
   },
-    "serviceOrder": {
+  "serviceOrder": {
     "table": {
       "indication": "Chỉ định",
       "room": "Phòng",
@@ -942,7 +954,7 @@
       "save": "Lưu"
     }
   },
-    "footer": {
+  "footer": {
     "companyDescription": "Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất với đội ngũ bác sĩ chuyên nghiệp và công nghệ hiện đại.",
     "quickLinks": "Liên kết nhanh",
     "contactInfo": "Thông tin liên hệ",
@@ -954,7 +966,7 @@
     "privacyPolicy": "Chính sách bảo mật",
     "termsOfUse": "Điều khoản sử dụng"
   },
-    "about": {
+  "about": {
     "header": {
       "title": "Về HealthCare",
       "subtitle": "Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất với đội ngũ bác sĩ chuyên nghiệp và công nghệ y tế hiện đại nhất."
@@ -1006,10 +1018,22 @@
       "title": "Hành trình phát triển",
       "subtitle": "Từ những ngày đầu khởi nghiệp đến hiện tại",
       "2020": { "title": "Thành lập", "desc": "Ra mắt với 50 bác sĩ đầu tiên" },
-      "2021": { "title": "Mở rộng", "desc": "Phát triển lên 200+ bác sĩ, 15 chuyên khoa" },
-      "2022": { "title": "Công nghệ", "desc": "Ứng dụng AI trong chẩn đoán và tư vấn" },
-      "2023": { "title": "Quốc tế", "desc": "Hợp tác với các bệnh viện hàng đầu thế giới" },
-      "2024": { "title": "Hiện tại", "desc": "500+ bác sĩ, 50,000+ bệnh nhân tin tưởng" }
+      "2021": {
+        "title": "Mở rộng",
+        "desc": "Phát triển lên 200+ bác sĩ, 15 chuyên khoa"
+      },
+      "2022": {
+        "title": "Công nghệ",
+        "desc": "Ứng dụng AI trong chẩn đoán và tư vấn"
+      },
+      "2023": {
+        "title": "Quốc tế",
+        "desc": "Hợp tác với các bệnh viện hàng đầu thế giới"
+      },
+      "2024": {
+        "title": "Hiện tại",
+        "desc": "500+ bác sĩ, 50,000+ bệnh nhân tin tưởng"
+      }
     },
     "cta": {
       "title": "Tham gia cùng chúng tôi",
@@ -1018,7 +1042,7 @@
       "learnMore": "Tìm hiểu thêm"
     }
   },
-    "contact": {
+  "contact": {
     "header": {
       "title": "Liên hệ với chúng tôi",
       "subtitle": "Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi bất cứ lúc nào."
@@ -1125,7 +1149,7 @@
       "chat": "Chat trực tuyến"
     }
   },
-    "doctors": {
+  "doctors": {
     "header": {
       "title": "Danh sách bác sĩ",
       "subtitle": "Tìm kiếm và đặt lịch hẹn với các bác sĩ hàng đầu"
@@ -1143,7 +1167,7 @@
     },
     "empty": "Không tìm thấy bác sĩ"
   },
-    "home": {
+  "home": {
     "hero": {
       "tagline": "Chăm sóc sức khỏe hàng đầu",
       "title": "Sức khỏe là",
@@ -1199,7 +1223,7 @@
       "dashboard": "Đi tới Dashboard"
     }
   },
-    "specialties": {
+  "specialties": {
     "header": {
       "title": "Chuyên khoa",
       "subtitle": "Khám phá các chuyên khoa và lựa chọn phù hợp với nhu cầu của bạn"
@@ -1210,7 +1234,7 @@
     },
     "empty": "Không tìm thấy chuyên khoa"
   },
-    "appointment": {
+  "appointment": {
     "title": "Đặt lịch hẹn",
     "date": "Ngày",
     "session": "Ca làm việc",
@@ -1252,7 +1276,7 @@
       "location": "Địa điểm",
       "room": "Phòng {{room}}",
       "floor": "Tầng {{floor}}",
-      "building":"Tòa nhà {{building}}",
+      "building": "Tòa nhà {{building}}",
       "missingInfo": "Thông tin cần thiết bị thiếu để tải trang xác nhận.",
       "errorLoad": "Đã xảy ra lỗi khi tải thông tin xác nhận.",
       "invalidData": "Dữ liệu cuộc hẹn không hợp lệ hoặc thiếu thông tin.",
@@ -1329,7 +1353,7 @@
     "selectMedicine": "Chọn một loại thuốc để xem chi tiết",
     "selectInstruction": "Chọn thuốc từ danh sách bên trái để xem thông tin chi tiết"
   },
-    "profile": {
+  "profile": {
     "title": "Hồ sơ cá nhân",
     "subtitle": "Quản lý thông tin cá nhân và sức khỏe của bạn",
     "personalInfo": "Thông tin cá nhân",
@@ -1341,7 +1365,7 @@
     "healthRecord": "Hồ sơ sức khỏe",
     "healthRecordShort": "Sức khỏe"
   },
-    "personalInfo": {
+  "personalInfo": {
     "title": "Thông tin cá nhân",
     "subtitle": "Quản lý thông tin cá nhân của bạn",
     "basicInfo": "Thông tin cơ bản",
@@ -1370,7 +1394,7 @@
     "avatarUpdated": "Ảnh đại diện đã được cập nhật",
     "avatarUploadError": "Không thể tải ảnh lên"
   },
-    "insurance": {
+  "insurance": {
     "title": "Thông tin bảo hiểm",
     "description": "Quản lý thông tin bảo hiểm y tế của bạn",
     "defaultProvider": "Bảo hiểm xã hội Việt Nam",
@@ -1417,7 +1441,7 @@
     "updateSuccess": "Thông tin bảo hiểm đã được cập nhật",
     "updateError": "Không thể cập nhật thông tin bảo hiểm"
   },
-    "emergency": {
+  "emergency": {
     "title": "Liên hệ khẩn cấp",
     "description": "Quản lý danh sách người liên hệ khi có tình huống khẩn cấp",
 
@@ -1463,18 +1487,62 @@
     "deleteSuccess": "Liên hệ khẩn cấp đã được xóa"
   },
   "health": {
-  "title": "Hồ sơ sức khỏe",
-  "description": "Quản lý thông tin sức khỏe của bạn",
-  "metricsTab": "Chỉ số sức khỏe",
-  "historyTab": "Lịch sử y khoa",
-  "height": "Chiều cao (cm)",
-  "weight": "Cân nặng (kg)",
-  "bmi": "Chỉ số BMI",
-  "bloodType": "Nhóm máu",
-  "chooseBloodType": "Chọn nhóm máu",
-  "allergies": "Dị ứng",
-  "loadError": "Không thể tải hồ sơ sức khỏe",
-  "updateSuccess": "Hồ sơ sức khỏe đã được cập nhật",
-  "updateError": "Không thể cập nhật hồ sơ sức khỏe"
-}
+    "title": "Hồ sơ sức khỏe",
+    "description": "Quản lý thông tin sức khỏe của bạn",
+    "metricsTab": "Chỉ số sức khỏe",
+    "historyTab": "Lịch sử y khoa",
+    "height": "Chiều cao (cm)",
+    "weight": "Cân nặng (kg)",
+    "bmi": "Chỉ số BMI",
+    "bloodType": "Nhóm máu",
+    "chooseBloodType": "Chọn nhóm máu",
+    "allergies": "Dị ứng",
+    "loadError": "Không thể tải hồ sơ sức khỏe",
+    "updateSuccess": "Hồ sơ sức khỏe đã được cập nhật",
+    "updateError": "Không thể cập nhật hồ sơ sức khỏe"
+  },
+  "ui": {
+    "patientInfo": "Thông tin bệnh nhân",
+    "department": "Khoa",
+    "selectDepartment": "Chọn khoa",
+    "loadingDepartments": "Đang tải khoa...",
+    "selectDoctor": "Chọn bác sĩ",
+    "loadingDoctors": "Đang tải bác sĩ...",
+    "chooseDepartmentFirst": "Chọn khoa trước",
+    "noDoctors": "Không có bác sĩ nào",
+    "selectPatient": "Chọn bệnh nhân",
+    "loadingPatients": "Đang tải bệnh nhân...",
+    "loadingworkSchedule": "Đang tải lịch làm việc...",
+    "loadingSlots": "Đang tải slot...",
+    "noPatients": "Không có bệnh nhân nào",
+    "patientDetails": "Chi tiết bệnh nhân",
+    "fullName": "Họ tên:",
+    "age": "Tuổi:",
+    "notUpdated": "Chưa cập nhật",
+    "appointmentDate": "Ngày khám",
+    "selectSchedule": "Chọn lịch khám",
+    "noWorkShifts": "Không có ca làm việc nào",
+    "full": "Đã đầy",
+    "bookable": "Có thể đặt",
+    "selectSlot": "Chọn giờ khám",
+    "noAvailableSlotsForShift": "Không có slot trống nào cho ca này",
+    "symptoms": "Triệu chứng",
+    "symptomsPlaceholder": "Nhập triệu chứng của bệnh nhân...",
+    "close": "Đóng",
+    "save": "Lưu",
+    "addAppointment": "Thêm cuộc hẹn",
+    "creating": "Đang tạo...",
+    "noAppointmentsToday": "Không có cuộc hẹn nào trong ngày này",
+    "doctorLabel": "Bác sĩ:",
+    "timeLabel": "Thời gian:",
+    "statusLabel": "Trạng thái cuộc hẹn", 
+    "appointments": "cuộc hẹn", 
+    "patientId": "Mã bệnh nhân:", 
+    "healthInsurance": "Số bảo hiểm y tế:", 
+    "cancelApm": "Hủy cuộc hẹn", 
+    "gender": "Giới tính:", 
+    "createApm": "Tạo cuộc hẹn",
+    "apmList": "Danh sách cuộc hẹn", 
+    "totalAppointments": "Tổng số cuộc hẹn:"
+  }
 }

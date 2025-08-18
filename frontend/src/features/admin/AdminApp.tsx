@@ -75,7 +75,7 @@ const AdminApp: React.FC = () => {
           {/* Medical Examination Pages */}
 
           {/* Department Page */}
-          {/* <Route path="departments" element={<Department />} /> */}
+          <Route path="departments" element={<Department />} />
 
           {/* Authorization Page */}
           <Route path="authorization" element={<Authorization />} />
