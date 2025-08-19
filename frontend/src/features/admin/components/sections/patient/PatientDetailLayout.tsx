@@ -10,7 +10,7 @@ import {
   HealthInfoContent,
   ContactInfoContent,
 } from "./PatientDetailContent"
-import type { Patient } from "../../../types/patient" // Import Patient type
+import type { Patient } from "../../../types/patient"
 
 interface PatientDetailLayoutProps {
   patient: Patient // Add patient prop

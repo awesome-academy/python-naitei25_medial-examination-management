@@ -1,9 +1,9 @@
-import logging 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
+from django.db.models.functions import TruncDate
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from common.constants import PAGE_NO_DEFAULT, PAGE_SIZE_DEFAULT
@@ -147,7 +147,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
       queryset_data = AppointmentService.get_appointments_by_patient_id_optimized(
           patient_id,
           page_no=PAGE_NO_DEFAULT,
-          page_size=1000,
+          page_size=100,
           appointment_type='upcoming',
           appointment_status=[AppointmentStatus.PENDING.value, AppointmentStatus.CONFIRMED.value, AppointmentStatus.IN_PROGRESS.value]
       )['results']
@@ -210,43 +210,122 @@ class AppointmentViewSet(viewsets.ModelViewSet):
           logger.exception("Error updating appointment:")
           return Response({"message": _("Đã xảy ra lỗi khi cập nhật cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @action(detail=True, methods=['post'], url_path='cancel')
-    def cancel_appointment(self, request, pk=None):
-        try:
-            appointment = AppointmentService.cancel_appointment(pk)
-            serializer = AppointmentSerializer(appointment) 
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except ValueError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.exception("Error cancelling appointment:")
-            return Response({"message": _("Đã xảy ra lỗi khi hủy cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  def partial_update(self, request, *args, **kwargs):
+      kwargs['partial'] = True
+      return self.update(request, *args, **kwargs)
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        try:
-            appointment = AppointmentService.create_appointment(serializer.validated_data)
-            return Response(AppointmentSerializer(appointment).data, status=status.HTTP_201_CREATED)
-        except ValueError as e: 
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e: 
-            logger.exception("Error creating appointment:")
-            return Response({"message": _("Đã xảy ra lỗi khi tạo cuộc hẹn. Chi tiết: ") + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  @action(detail=True, methods=['patch'], url_path='status')
+  def update_status(self, request, pk=None):
+      """Update only the appointment status"""
+      try:
+          appointment = self.get_object()
+          appointment_status = request.data.get('appointment_status')
+          
+          if not appointment_status:
+              return Response(
+                  {"message": _("Trường appointment_status là bắt buộc.")}, 
+                  status=status.HTTP_400_BAD_REQUEST
+              )
+          
+          # Validate status value
+          valid_statuses = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'IN_PROGRESS']
+          if appointment_status not in valid_statuses:
+              return Response(
+                  {"message": _("Trạng thái không hợp lệ. Các giá trị hợp lệ: ") + ", ".join(valid_statuses)}, 
+                  status=status.HTTP_400_BAD_REQUEST
+              )
+          
+          # Map frontend status to backend enum
+          status_mapping = {
+              'PENDING': AppointmentStatus.PENDING.value,
+              'CONFIRMED': AppointmentStatus.CONFIRMED.value, 
+              'COMPLETED': AppointmentStatus.COMPLETED.value,
+              'CANCELLED': AppointmentStatus.CANCELLED.value,
+              'NO_SHOW': AppointmentStatus.NO_SHOW.value,
+              'IN_PROGRESS': AppointmentStatus.IN_PROGRESS.value
+          }
+          
+          appointment.status = status_mapping[appointment_status]
+          appointment.save()
+          
+          return Response(AppointmentSerializer(appointment).data)
+          
+      except Exception as e:
+          logger.exception("Error updating appointment status:")
+          return Response(
+              {"message": _("Đã xảy ra lỗi khi cập nhật trạng thái cuộc hẹn.")}, 
+              status=status.HTTP_500_INTERNAL_SERVER_ERROR
+          )
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        try:
-            updated_appointment = AppointmentService.update_appointment(instance.id, serializer.validated_data)
-            return Response(AppointmentSerializer(updated_appointment).data)
-        except ValueError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.exception("Error updating appointment:")
-            return Response({"message": _("Đã xảy ra lỗi khi cập nhật cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  @action(detail=False, methods=['get'], url_path='upcoming')
+  def upcoming_appointments(self, request):
+      patient_id = request.user.patient.id
+
+      queryset_data = AppointmentService.get_appointments_by_patient_id_optimized(
+          patient_id,
+          page_no=PAGE_NO_DEFAULT,
+          page_size=100,
+          appointment_type='upcoming',
+          appointment_status=[AppointmentStatus.PENDING.value, AppointmentStatus.CONFIRMED.value, AppointmentStatus.IN_PROGRESS.value]
+      )['results']
+
+      serializer = AppointmentPatientViewSerializer(queryset_data, many=True)
+      return Response({"results": serializer.data})
+
+  @action(detail=False, methods=['post'], url_path='schedule/available-slots')
+  def available_slots(self, request):
+      serializer = self.get_serializer(data=request.data)
+      serializer.is_valid(raise_exception=True)
+      schedule_id = serializer.validated_data.get('schedule_id')
+      if schedule_id is None:
+          return Response({"message": _("Thiếu schedule_id trong yêu cầu.")}, status=status.HTTP_400_BAD_REQUEST)
+
+      result = AppointmentService.get_available_time_slots(schedule_id)
+      return Response(result)
+
+  @action(detail=False, methods=['get'], url_path='schedule/(?P<schedule_id>[^/.]+)')
+  def get_by_schedule(self, request, schedule_id):
+      result = AppointmentService.get_appointments_by_schedule_ordered(schedule_id)
+      serializer = AppointmentSerializer(result, many=True)
+      return Response(serializer.data)
+
+  @action(detail=True, methods=['post'], url_path='cancel')
+  def cancel_appointment(self, request, pk=None):
+      try:
+          appointment = AppointmentService.cancel_appointment(pk)
+          serializer = AppointmentSerializer(appointment) 
+          return Response(serializer.data, status=status.HTTP_200_OK)
+      except ValueError as e: 
+          return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+      except Exception as e: 
+          logger.exception("Error cancelling appointment:")
+          return Response({"message": _("Đã xảy ra lỗi khi hủy cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+  def create(self, request, *args, **kwargs):
+      serializer = self.get_serializer(data=request.data)
+      serializer.is_valid(raise_exception=True)
+      try:
+          appointment = AppointmentService.create_appointment(serializer.validated_data)
+          return Response(AppointmentSerializer(appointment).data, status=status.HTTP_201_CREATED)
+      except ValueError as e: 
+          return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+      except Exception as e: 
+          logger.exception("Error creating appointment:")
+          return Response({"message": _("Đã xảy ra lỗi khi tạo cuộc hẹn. Chi tiết: ") + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+  def update(self, request, *args, **kwargs):
+      partial = kwargs.pop('partial', False)
+      instance = self.get_object()
+      serializer = self.get_serializer(instance, data=request.data, partial=partial)
+      serializer.is_valid(raise_exception=True)
+      try:
+          updated_appointment = AppointmentService.update_appointment(instance.id, serializer.validated_data)
+          return Response(AppointmentSerializer(updated_appointment).data)
+      except ValueError as e:
+          return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+      except Exception as e:
+          logger.exception("Error updating appointment:")
+          return Response({"message": _("Đã xảy ra lỗi khi cập nhật cuộc hẹn.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class AppointmentNoteViewSet(viewsets.ModelViewSet):
@@ -259,7 +338,7 @@ class AppointmentNoteViewSet(viewsets.ModelViewSet):
       serializer = self.get_serializer(notes, many=True)
       return Response(serializer.data)
 
-  @action(detail=False, methods=['post'], url_path='appointment/(?P<appointment_id>[^/.]+)/notes')
+  @action(detail=False, methods=['post'], url_path='appointment/(?P<appointment_id>[^/.]+)/notes/create')
   def create_note(self, request, appointment_id=None):
       data = request.data.copy()
       data['appointment'] = appointment_id
@@ -307,7 +386,8 @@ class ServiceOrderViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_path='rooms/(?P<room_id>[^/.]+)/orders')
     def by_room(self, request, room_id=None):
         status_param = request.query_params.get('status')
-        order_date_str = request.query_params.get('orderDate')
+        # Accept both 'orderDate' and 'order_time__date'
+        order_date_str = request.query_params.get('orderDate') or request.query_params.get('order_time__date')
 
         order_date = None
         if order_date_str:
@@ -315,11 +395,13 @@ class ServiceOrderViewSet(viewsets.ViewSet):
             if not order_date:
                 return Response({"error": _("Ngày không hợp lệ. Định dạng đúng: YYYY-MM-DD")}, status=400)
 
-        orders = ServiceOrderService.get_orders_by_room_and_status_and_date(
-            room_id=room_id,
-            status=status_param,
-            order_date=order_date
-        )
+        # Queryset filtering
+        orders = ServiceOrder.objects.filter(room_id=room_id)
+        if status_param:
+            orders = orders.filter(status=status_param)
+        if order_date:
+            orders = orders.annotate(order_date_only=TruncDate('order_time')).filter(order_date_only=order_date)
+
         serializer = ServiceOrderSerializer(orders, many=True, context={'request': request})
         return Response(serializer.data)
 

@@ -1,0 +1,639 @@
+hypoglycemia
+acute pancreatitis
+infectious gastroenteritis
+marijuana abuse
+bursitis
+injury to the leg
+benign prostatic hyperplasia (bph)
+obstructive sleep apnea (osa)
+vulvodynia
+concussion
+complex regional pain syndrome
+spondylosis
+injury to the arm
+gout
+gastrointestinal hemorrhage
+conjunctivitis due to allergy
+liver disease
+arthritis of the hip
+dental caries
+peripheral nerve disorder
+anxiety
+esophagitis
+cholecystitis
+acute bronchiolitis
+strep throat
+sprain or strain
+nose disorder
+vaginal cyst
+diverticulitis
+fungal infection of the hair
+pneumonia
+spontaneous abortion
+acute bronchitis
+eczema
+cystitis
+spinal stenosis
+noninfectious gastroenteritis
+acute sinusitis
+vaginitis
+problem during pregnancy
+asthma
+panic disorder
+stye
+actinic keratosis
+gum disease
+allergy
+pyelonephritis
+injury to the trunk
+carpal tunnel syndrome
+conjunctivitis
+acute kidney injury
+pyogenic skin infection
+drug reaction
+seasonal allergies (hay fever)
+diaper rash
+heart attack
+hiatal hernia
+hypertensive heart disease
+idiopathic excessive menstruation
+developmental disability
+smoking or tobacco addiction
+osteoarthritis
+fracture of the rib
+threatened pregnancy
+rectal disorder
+sepsis
+angina
+ear drum damage
+hyperemesis gravidarum
+eustachian tube dysfunction (ear disorder)
+chronic back pain
+sebaceous cyst
+multiple sclerosis
+heart failure
+ischemic heart disease
+pulmonary embolism
+hemorrhoids
+otitis externa (swimmer's ear)
+pain after an operation
+brachial neuritis
+cornea infection
+sickle cell crisis
+common cold
+acute stress reaction
+idiopathic irregular menstrual cycle
+chronic constipation
+acute bronchospasm
+seborrheic dermatitis
+chronic obstructive pulmonary disease (copd)
+idiopathic painful menstruation
+croup
+neurosis
+otitis media
+schizophrenia
+contact dermatitis
+appendicitis
+pelvic inflammatory disease
+depression
+degenerative disc disease
+psoriasis
+sinus bradycardia
+gallstone
+herniated disk
+macular degeneration
+temporary or benign blood in urine
+urinary tract infection
+kidney stone
+blepharitis
+chronic pain disorder
+transient ischemic attack
+iron deficiency anemia
+ganglion cyst
+varicocele of the testicles
+bell palsy
+acute otitis media
+chalazion
+tendinitis
+oral thrush (yeast infection)
+lipoma
+sciatica
+chronic otitis media
+diverticulosis
+rheumatoid arthritis
+hyperkalemia
+alcohol withdrawal
+bipolar disorder
+fracture of the leg
+labyrinthitis
+skin polyp
+fibromyalgia
+fungal infection of the skin
+diabetic ketoacidosis
+laryngitis
+mononeuritis
+insect bite
+prostatitis
+conduct disorder
+impetigo
+oral mucosal lesion
+sensorineural hearing loss
+ingrown toe nail
+flu
+stroke
+conductive hearing loss
+viral exanthem
+heart block
+benign vaginal discharge (leukorrhea)
+deviated nasal septum
+chronic sinusitis
+gastroduodenal ulcer
+vaginal yeast infection
+muscle spasm
+pleural effusion
+urinary tract obstruction
+intracerebral hemorrhage
+corneal disorder
+tooth abscess
+seborrheic keratosis
+rosacea
+paroxysmal ventricular tachycardia
+erectile dysfunction
+ear wax impaction
+gastritis
+drug abuse
+psychotic disorder
+chronic glaucoma
+ankylosing spondylitis
+spondylolisthesis
+drug abuse (opioids)
+delirium
+dry eye of unknown cause
+personality disorder
+hemangioma
+fracture of the arm
+conjunctivitis due to virus
+neuralgia
+oppositional disorder
+tooth disorder
+hypokalemia
+skin pigmentation disorder
+inguinal hernia
+skin disorder
+skin cancer
+glaucoma
+epididymitis
+lymphedema
+injury to the shoulder
+sialoadenitis
+breast infection (mastitis)
+parkinson disease
+itching of unknown cause
+irritable bowel syndrome
+postpartum depression
+eating disorder
+herpangina
+attention deficit hyperactivity disorder (adhd)
+balanitis
+autism
+envenomation from spider or animal bite
+hemiplegia
+cataract
+thrombophlebitis
+eye alignment disorder
+pulmonary congestion
+viral warts
+gastroesophageal reflux disease (gerd)
+alcohol abuse
+idiopathic absence of menstruation
+teething syndrome
+choledocholithiasis
+pelvic organ prolapse
+dysthymic disorder
+uterine fibroids
+mitral valve disease
+diabetic peripheral neuropathy
+spondylitis
+joint effusion
+fracture of the facial bones
+lymphadenitis
+onychomycosis
+indigestion
+benign paroxysmal positional vertical (bppv)
+dermatitis due to sun exposure
+bladder disorder
+tonsillitis
+food allergy
+pulmonary hypertension
+osteoporosis
+yeast infection
+injury to the face
+urge incontinence
+endometriosis
+white blood cell disease
+diabetic retinopathy
+paronychia
+abdominal hernia
+urethritis
+hypovolemia
+aortic valve disease
+hyponatremia
+ileus
+obsessive compulsive disorder (ocd)
+intestinal obstruction
+pain disorder affecting the neck
+iridocyclitis
+interstitial lung disease
+ovarian cyst
+acute respiratory distress syndrome (ards)
+shingles (herpes zoster)
+myopia
+adjustment reaction
+callus
+crohn disease
+paroxysmal supraventricular tachycardia
+atrophic skin condition
+molluscum contagiosum
+acne
+ulcerative colitis
+missed abortion
+preeclampsia
+post-traumatic stress disorder (ptsd)
+migraine
+uterine atony
+social phobia
+alopecia
+cranial nerve palsy
+drug abuse (cocaine)
+pilonidal cyst
+peritonitis
+alzheimer disease
+colonic polyp
+cirrhosis
+head and neck cancer
+atrophic vaginitis
+tietze syndrome
+corneal abrasion
+scleroderma
+tinnitus of unknown cause
+torticollis
+vasculitis
+dementia
+restless leg syndrome
+jaw disorder
+venous insufficiency
+temporomandibular joint disorder
+hepatitis due to a toxin
+alcohol intoxication
+sarcoidosis
+tension headache
+induced abortion
+kidney failure
+fluid overload
+fracture of the vertebra
+mononucleosis
+tonsillar hypertrophy
+anemia
+meniere disease
+polycystic ovarian syndrome (pcos)
+premature ventricular contractions (pvcs)
+meningitis
+nasal polyp
+hydronephrosis
+urethral stricture
+lateral epicondylitis (tennis elbow)
+ectopic pregnancy
+hydrocele of the testicle
+anal fissure
+chronic pancreatitis
+abscess of the pharynx
+nerve impingement near the shoulder
+melanoma
+intracranial hemorrhage
+mucositis
+pneumothorax
+athlete's foot
+drug abuse (methamphetamine)
+sickle cell anemia
+cardiac arrest
+trichomonas infection
+cervicitis
+bladder obstruction
+orthostatic hypotension
+intestinal disease
+abscess of nose
+chronic knee pain
+impulse control disorder
+urethral disorder
+head injury
+asperger syndrome
+atrial flutter
+brain cancer
+sick sinus syndrome
+injury of the ankle
+cardiomyopathy
+polycystic kidney disease
+aphthous ulcer
+heat exhaustion
+subconjunctival hemorrhage
+astigmatism
+fracture of the hand
+varicose veins
+ischemia of the bowel
+coronary atherosclerosis
+peripheral arterial disease
+alcoholic liver disease
+acute glaucoma
+substance-related mental disorder
+deep vein thrombosis (dvt)
+arrhythmia
+thoracic aortic aneurysm
+plantar fasciitis
+drug poisoning due to medication
+lyme disease
+benign kidney cyst
+graves disease
+prostate cancer
+bone disorder
+psychosexual disorder
+peritonsillar abscess
+stress incontinence
+pulmonary eosinophilia
+pancreatic cancer
+drug withdrawal
+scoliosis
+headache after lumbar puncture
+female genitalia infection
+osteochondroma
+scabies
+orbital cellulitis
+cold sore
+fracture of the shoulder
+thyroid nodule
+genital herpes
+broken tooth
+overflow incontinence
+osteomyelitis
+narcolepsy
+persistent vomiting of unknown cause
+primary insomnia
+malignant hypertension
+fracture of the pelvis
+trigeminal neuralgia
+essential tremor
+thrombocytopenia
+foreign body in the throat
+bladder cancer
+premature atrial contractions (pacs)
+gynecomastia
+chronic rheumatic fever
+knee ligament or meniscus tear
+intestinal malabsorption
+panic attack
+foreign body in the eye
+cellulitis or abscess of mouth
+injury to the hand
+soft tissue sarcoma
+dislocation of the elbow
+atrial fibrillation
+poisoning due to gas
+hydrocephalus
+lumbago
+pterygium
+gastroparesis
+tracheitis
+myasthenia gravis
+epilepsy
+cerebral palsy
+de quervain disease
+polymyalgia rheumatica
+retinal detachment
+lung cancer
+foreign body in the gastrointestinal tract
+pulmonary fibrosis
+subdural hemorrhage
+presbyopia
+systemic lupus erythematosis (sle)
+thoracic outlet syndrome
+osteochondrosis
+peripheral arterial embolism
+premenstrual tension syndrome
+lymphoma
+lactose intolerance
+stomach cancer
+postoperative infection
+gonorrhea
+male genitalia infection
+perirectal infection
+abdominal aortic aneurysm
+rotator cuff injury
+mastoiditis
+spina bifida
+myositis
+fibroadenoma
+down syndrome
+crushing injury
+poisoning due to analgesics
+pinworm infection
+vulvar disorder
+trigger finger (finger disorder)
+testicular torsion
+pericarditis
+subarachnoid hemorrhage
+ovarian torsion
+hypertension of pregnancy
+retinopathy due to high blood pressure
+atelectasis
+poisoning due to antimicrobial drugs
+hypothyroidism
+endophthalmitis
+scarlet fever
+anemia due to chronic kidney disease
+aplastic anemia
+pityriasis rosea
+poisoning due to sedatives
+hidradenitis suppurativa
+conjunctivitis due to bacteria
+extrapyramidal effect of drugs
+hyperopia
+fracture of the jaw
+dislocation of the shoulder
+phimosis
+open wound of the mouth
+chickenpox
+sjogren syndrome
+carbon monoxide poisoning
+adhesive capsulitis of the shoulder
+cervical cancer
+tic (movement) disorder
+injury to internal organ
+cerebral edema
+parasitic disease
+fracture of the patella
+scar
+menopause
+burn
+celiac disease
+mittelschmerz
+idiopathic nonmenstrual bleeding
+fracture of the ankle
+central retinal artery or vein occlusion
+stricture of the esophagus
+coagulation (bleeding) disorder
+endometrial cancer
+chondromalacia of the patella
+vitamin b12 deficiency
+toxic multinodular goiter
+open wound of the foot
+stenosis of the tear duct
+vocal cord polyp
+drug abuse (barbiturates)
+presbyacusis
+achalasia
+kidney cancer
+injury to the knee
+spermatocele
+hepatic encephalopathy
+liver cancer
+goiter
+metastatic cancer
+foreign body in the ear
+testicular disorder
+nonalcoholic liver disease (nash)
+dissociative disorder
+autonomic nervous system disorder
+premature ovarian failure
+multiple myeloma
+primary kidney disease
+open wound of the ear
+viral hepatitis
+intestinal cancer
+hydatidiform mole
+esophageal cancer
+bone cancer
+encephalitis
+female infertility of unknown cause
+dyshidrosis
+protein deficiency
+neonatal jaundice
+somatization disorder
+chorioretinitis
+scleritis
+vaginismus
+fracture of the neck
+fracture of the skull
+endometrial hyperplasia
+lichen simplex
+erythema multiforme
+chlamydia
+primary immunodeficiency
+amyotrophic lateral sclerosis (als)
+amblyopia
+lice
+fracture of the foot
+ascending cholangitis
+flat feet
+polycythemia vera
+open wound of the neck
+gestational diabetes
+injury to the abdomen
+muscular dystrophy
+atonic bladder
+vitreous degeneration
+atrophy of the corpus cavernosum
+bone spur of the calcaneous
+subacute thyroiditis
+peyronie disease
+guillain barre syndrome
+vitreous hemorrhage
+folate deficiency
+open wound of the lip
+neuropathy due to drugs
+juvenile rheumatoid arthritis
+bunion
+dislocation of the finger
+hyperhidrosis
+hypocalcemia
+tourette syndrome
+trichiasis
+cysticercosis
+salivary gland disorder
+tuberculosis
+allergy to animals
+hormone disorder
+septic arthritis
+hematoma
+pituitary adenoma
+urethral valves
+dislocation of the vertebra
+pregnancy
+pharyngitis
+intertrigo (skin condition)
+metabolic disorder
+hypernatremia
+congenital heart defect
+rhabdomyolysis
+hemolytic anemia
+pituitary disorder
+poisoning due to anticonvulsants
+chronic kidney disease
+injury to the hip
+lewy body dementia
+breast cyst
+acariasis
+neurofibromatosis
+dislocation of the ankle
+syphilis
+parathyroid adenoma
+open wound of the arm
+hemophilia
+thyroid disease
+cyst of the eyelid
+hypercholesterolemia
+hammer toe
+hirsutism
+conversion disorder
+decubitus ulcer
+cystic fibrosis
+dislocation of the wrist
+emphysema
+fracture of the finger
+galactorrhea of unknown cause
+colorectal cancer
+myoclonus
+poisoning due to antidepressants
+open wound of the back
+kidney disease due to longstanding hypertension
+hypercalcemia
+pseudotumor cerebri
+normal pressure hydrocephalus
+breast cancer
+syringomyelia
+adrenal adenoma
+hemarthrosis
+leukemia
+valley fever
+congenital malformation syndrome
+hypothermia
+fibrocystic breast disease
+avascular necrosis
+injury to the spinal cord
+pyloric stenosis
+cervical disorder
+acanthosis nigricans
+optic neuritis
+infection of open wound
+central atherosclerosis
+volvulus
+abscess of the lung
+anal fistula
+cholesteatoma
+thyroid cancer
+anemia of chronic disease
+pseudohypoparathyroidism
+anemia due to malignancy
+mumps
+lung contusion
+ependymoma
+pinguecula
+poisoning due to ethylene glycol

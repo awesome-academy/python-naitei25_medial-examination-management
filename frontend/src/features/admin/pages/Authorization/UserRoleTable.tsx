@@ -30,6 +30,8 @@ export default function UserRoleTable() {
   const [roleFilter, setRoleFilter] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
+  const [verifiedFilter, setVerifiedFilter] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -54,6 +56,9 @@ export default function UserRoleTable() {
     phone: "",
     email: "",
     role: "DOCTOR",
+    department: "",
+    is_active: true,
+    is_verified: false,
   });
 
   // Debounce search term
@@ -83,7 +88,7 @@ export default function UserRoleTable() {
       setLoading(true);
       setError(null);
 
-      // Chỉ gửi đúng tên trường filter mà backend cần (role, department)
+      // Chỉ gửi đúng tên trường filter mà backend cần (role, department, is_active, is_verified)
       const params: {
         page: number;
         limit: number;
@@ -91,6 +96,8 @@ export default function UserRoleTable() {
         role?: string;
         department?: string;
         status?: string;
+        is_active?: string;
+        is_verified?: string;
       } = {
         page: currentPage,
         limit: PAGE_SIZE,
@@ -99,6 +106,8 @@ export default function UserRoleTable() {
       if (roleFilter) params.role = roleFilter;
       if (departmentFilter) params.department = departmentFilter;
       if (statusFilter) params.status = statusFilter;
+      if (activeFilter) params.is_active = activeFilter;
+      if (verifiedFilter) params.is_verified = verifiedFilter;
 
       // Ghi log để kiểm tra filter truyền đi FE
       console.log("Filter params:", params);
@@ -141,6 +150,8 @@ export default function UserRoleTable() {
     roleFilter,
     departmentFilter,
     statusFilter,
+    activeFilter,
+    verifiedFilter,
   ]);
 
   // Load statistics data
@@ -185,6 +196,9 @@ export default function UserRoleTable() {
       phone: user.phone,
       email: user.email,
       role: user.role,
+      department: user.department,
+      is_active: user.status === "Hoạt động",
+      is_verified: user.isVerified,
     });
   };
 
@@ -367,11 +381,21 @@ export default function UserRoleTable() {
     setDepartmentFilter(e.target.value);
     setCurrentPage(1); // Reset page when filter changes
   };
+  const handleActiveFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setActiveFilter(e.target.value);
+    setCurrentPage(1); // Reset page when filter changes
+  };
+  const handleVerifiedFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setVerifiedFilter(e.target.value);
+    setCurrentPage(1); // Reset page when filter changes
+  };
   const handleResetFilters = () => {
     setSearchTerm("");
     setRoleFilter("");
     setDepartmentFilter("");
     setStatusFilter("");
+    setActiveFilter("");
+    setVerifiedFilter("");
     setCurrentPage(1);
   };
 
@@ -410,7 +434,7 @@ export default function UserRoleTable() {
 
       {/* Search and Filter */}
       <div className="mb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-2">
           {/* Search Bar */}
           <SearchInput
             placeholder="Tìm kiếm người dùng..."
@@ -462,6 +486,34 @@ export default function UserRoleTable() {
             </select>
           </div>
 
+          {/* Dropdown for Active Status Filter */}
+          <div className="relative">
+            <select
+              title="Lọc theo trạng thái hoạt động"
+              value={activeFilter}
+              onChange={handleActiveFilterChange}
+              className="h-11 w-full rounded-lg border border-gray-200 bg-white px-4 pr-10 text-sm font-medium text-gray-800 shadow-theme-xs appearance-none focus:border-base-300 focus:outline-none focus:ring-3 focus:ring-base-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90"
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="true">Hoạt động</option>
+              <option value="false">Tạm khóa</option>
+            </select>
+          </div>
+
+          {/* Dropdown for Verified Status Filter */}
+          <div className="relative">
+            <select
+              title="Lọc theo trạng thái xác thực"
+              value={verifiedFilter}
+              onChange={handleVerifiedFilterChange}
+              className="h-11 w-full rounded-lg border border-gray-200 bg-white px-4 pr-10 text-sm font-medium text-gray-800 shadow-theme-xs appearance-none focus:border-base-300 focus:outline-none focus:ring-3 focus:ring-base-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90"
+            >
+              <option value="">Tất cả xác thực</option>
+              <option value="true">Đã xác thực</option>
+              <option value="false">Chưa xác thực</option>
+            </select>
+          </div>
+
           {/* Reset Filter Button */}
           <button
             onClick={handleResetFilters}
@@ -507,7 +559,13 @@ export default function UserRoleTable() {
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
               >
-                Đăng nhập cuối
+                Xác thực
+              </TableCell>
+              <TableCell
+                isHeader
+                className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
+              >
+                Ngày xóa
               </TableCell>
               <TableCell
                 isHeader
@@ -596,8 +654,16 @@ export default function UserRoleTable() {
                       {user.status}
                     </Badge>
                   </TableCell>{" "}
+                  <TableCell className="py-3">
+                    <Badge size="sm" color={user.isVerified ? "success" : "warning"}>
+                      {user.isVerified ? "Đã xác thực" : "Chưa xác thực"}
+                    </Badge>
+                  </TableCell>{" "}
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {user.lastLogin || "Chưa có dữ liệu"}
+                    {user.lastLogin && user.lastLogin !== "Chưa có dữ liệu" 
+                      ? formatDateTime(user.lastLogin)
+                      : "Chưa bị xóa"
+                    }
                   </TableCell>{" "}
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {user.createdAt
@@ -857,26 +923,115 @@ export default function UserRoleTable() {
                 </div>
               </div>
 
-              <div>
-                <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Vai trò <span className="text-red-500">*</span>
-                </label>
-                <select
-                  title="Chọn vai trò"
-                  required
-                  value={updateFormData.role}
-                  onChange={(e) =>
-                    setUpdateFormData((prev) => ({
-                      ...prev,
-                      role: e.target.value as UpdateUserData["role"],
-                    }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
-                >
-                  <option value="ADMIN">Admin</option>
-                  <option value="DOCTOR">Bác sĩ</option>
-                  <option value="PATIENT">Bệnh nhân</option>
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Vai trò <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    title="Chọn vai trò"
+                    required
+                    value={updateFormData.role}
+                    onChange={(e) =>
+                      setUpdateFormData((prev) => ({
+                        ...prev,
+                        role: e.target.value as UpdateUserData["role"],
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="ADMIN">Admin</option>
+                    <option value="DOCTOR">Bác sĩ</option>
+                    <option value="PATIENT">Bệnh nhân</option>
+                  </select>
+                </div>
+                
+                {updateFormData.role !== "PATIENT" && (
+                  <div>
+                    <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Khoa/Phòng ban
+                    </label>
+                    <select
+                      title="Chọn khoa/phòng ban"
+                      value={updateFormData.department || ""}
+                      onChange={(e) =>
+                        setUpdateFormData((prev) => ({
+                          ...prev,
+                          department: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
+                    >
+                      <option value="">Chọn khoa/phòng ban</option>
+                      {updateFormData.role === "ADMIN" ? (
+                        <>
+                          <option value="Quản trị hệ thống">Quản trị hệ thống</option>
+                          <option value="Tài chính">Tài chính</option>
+                          <option value="Tiếp nhận">Tiếp nhận</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="Tim mạch">Tim mạch</option>
+                          <option value="Nội khoa">Nội khoa</option>
+                          <option value="Ngoại khoa">Ngoại khoa</option>
+                          <option value="Sản khoa">Sản khoa</option>
+                          <option value="Nhi khoa">Nhi khoa</option>
+                          <option value="Cơ xương khớp">Cơ xương khớp</option>
+                          <option value="Tiêu hóa">Tiêu hóa</option>
+                          <option value="Thần kinh">Thần kinh</option>
+                          <option value="Da liễu">Da liễu</option>
+                          <option value="Mắt">Mắt</option>
+                          <option value="Tai mũi họng">Tai mũi họng</option>
+                          <option value="Phụ khoa">Phụ khoa</option>
+                          <option value="Khoa Dược">Khoa Dược</option>
+                          <option value="Khoa Y học cổ truyền">Khoa Y học cổ truyền</option>
+                        </>
+                      )}
+                    </select>
+                  </div>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Trạng thái
+                  </label>
+                  <select
+                    title="Chọn trạng thái"
+                    value={updateFormData.is_active ? "active" : "inactive"}
+                    onChange={(e) =>
+                      setUpdateFormData((prev) => ({
+                        ...prev,
+                        is_active: e.target.value === "active",
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Tạm khóa</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Xác thực
+                  </label>
+                  <select
+                    title="Chọn trạng thái xác thực"
+                    value={updateFormData.is_verified ? "verified" : "unverified"}
+                    onChange={(e) =>
+                      setUpdateFormData((prev) => ({
+                        ...prev,
+                        is_verified: e.target.value === "verified",
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="verified">Đã xác thực</option>
+                    <option value="unverified">Chưa xác thực</option>
+                  </select>
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 mt-6">

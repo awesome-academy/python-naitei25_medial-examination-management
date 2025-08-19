@@ -416,7 +416,7 @@ export default function PaymentPage() {
     )
   }
 
-  const isPaid = bill.status === 'S' || bill.status === 'PAID'
+  const isPaid = bill.status === 'S' || bill.status === 'PAID' || bill.status === 'BOOKING_PAID'
   const isCancelled = bill.status === 'CANCELLED' || bill.status === 'C'
 
   const dateText = formatVNDateFromCandidates(

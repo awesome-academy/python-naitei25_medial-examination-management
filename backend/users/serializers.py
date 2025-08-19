@@ -45,11 +45,13 @@ class UserUpdateRequestSerializer(serializers.Serializer):
     )
     password = serializers.CharField(max_length=USER_LENGTH["PASSWORD"], required=False)
     role = serializers.ChoiceField(choices=[(role.value, role.name) for role in UserRole], required=False)
+    is_active = serializers.BooleanField(required=False)
+    is_verified = serializers.BooleanField(required=False)
 
 class UserResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'phone', 'role', 'created_at']
+        fields = ['id', 'created_at', 'updated_at', 'email', 'password', 'phone', 'role', 'is_active', 'is_verified', 'is_deleted', 'deleted_at']
 
 class PagedResponseSerializer(serializers.Serializer):
     content = UserResponseSerializer(many=True)

@@ -7,8 +7,10 @@ import ReturnButton from "../../components/ui/button/ReturnButton"
 import { useEffect, useState } from "react"
 import { patientService } from "../../services/patientService"
 import type { Patient } from "../../types/patient"
+import { useTranslation } from "react-i18next";
 
 export default function PatientDetail() {
+  const { t } = useTranslation();
   const { patientId } = useParams<{ patientId: string }>()
   const [patient, setPatient] = useState<Patient | null>(null)
   const [loading, setLoading] = useState(true)
@@ -17,7 +19,7 @@ export default function PatientDetail() {
   useEffect(() => {
     const fetchPatient = async () => {
       if (!patientId) {
-        setError("Không tìm thấy ID bệnh nhân.")
+        setError(t("patientDetail.page.error.notFoundId"))
         setLoading(false)
         return
       }
@@ -28,7 +30,7 @@ export default function PatientDetail() {
         setPatient(fetchedPatient)
       } catch (err: any) {
         console.error("Failed to fetch patient details:", err)
-        setError(err.message || "Không thể tải thông tin bệnh nhân.")
+        setError(err.message || t("patientDetail.page.error.loadFailed"))
         setPatient(null)
       } finally {
         setLoading(false)
@@ -40,19 +42,19 @@ export default function PatientDetail() {
 
   return (
     <>
-      <PageMeta title="Chi tiết bệnh nhân| Bệnh viện đa khoa Wecare" description="Chi tiết bệnh nhân" />
+      <PageMeta title={t("patientDetail.page.metaTitle")} description={t("patientDetail.page.metaDescription")} />
 
       <div className="flex justify-start items-center mb-6">
         <ReturnButton />
         <h3 className="font-semibold tracking-tight">
-          Bệnh nhân: {patient?.fullName || (loading ? "Đang tải..." : "Không tìm thấy")}
+          {t("patientDetail.page.patient")}: {patient?.fullName || (loading ? t("common.loading") : t("common.notFound"))}
         </h3>
       </div>
 
       {loading && (
         <div className="text-center py-10">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-base-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Đang tải thông tin bệnh nhân...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t("patientDetail.page.loading")}</p>
         </div>
       )}
 

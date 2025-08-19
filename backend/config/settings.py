@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from decouple import config
 from pathlib import Path
 from datetime import timedelta
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -226,11 +227,19 @@ CLOUDINARY = {
     'api_secret': config('CLOUDINARY_API_SECRET'),
 }
 
+cloudinary.config(
+    cloud_name=CLOUDINARY['cloud_name'],
+    api_key=CLOUDINARY['api_key'],
+    api_secret=CLOUDINARY['api_secret'],
+    secure=True
+)
+
 AUTHENTICATION_BACKENDS = [
     'users.backends.EmailPhoneBackend',  
     'django.contrib.auth.backends.ModelBackend',  
 ]
 
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS').split(',')
 
 PAYMENT_CANCEL_URL = config('PAYMENT_CANCEL_URL')

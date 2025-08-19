@@ -12,12 +12,15 @@ import Doctor from "./pages/Doctors/Doctor";
 import Medicines from "./pages/Medicines/Medicines";
 import Services from "./pages/HealthServices/Service";
 import Department from "./pages/Departments/Department";
+import DepartmentDetail from "./pages/Departments/DepartmentDetail";
+import AddDepartment from "./pages/Departments/AddDepartment";
 import InpatientRoom from "./pages/Inpatient/InpatientRoom";
 import MedicalCalendar from "./pages/MedicalExamination/MedicalCalendar";
 import Authorization from "./pages/Authorization/Authorization";
 // import DoctorSchedule from "./pages/Doctors/DoctorSchedule";
 import DoctorSchedule from "./pages/Doctors/inChanging";
 import DoctorDetail from "./pages/Doctors/DoctorDetail";
+import AddDoctor from "./pages/Doctors/AddDoctor";
 
 const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -45,8 +48,8 @@ const AdminApp: React.FC = () => {
             </RequireAdmin>
           }
         >
-          <Route index element={<Home />} />
-          <Route path="dashboard" element={<Home />} />
+          <Route index element={<Patient />} />
+          {/* <Route path="dashboard" element={<Home />} /> */}
 
           {/* Medical Examinations Pages */}
           <Route path="calendar" element={<MedicalCalendar />} />
@@ -58,7 +61,7 @@ const AdminApp: React.FC = () => {
 
           {/* Doctors Page */}
           <Route path="doctors" element={<Doctor />} />
-
+          <Route path="doctors/add" element={<AddDoctor />} />
           <Route path="doctors/schedule/:id" element={<DoctorSchedule />} />
           <Route path="doctors/detail/:doctorId" element={<DoctorDetail />} />
 
@@ -74,13 +77,15 @@ const AdminApp: React.FC = () => {
           {/* Medical Examination Pages */}
 
           {/* Department Page */}
-          {/* <Route path="departments" element={<Department />} /> */}
+          <Route path="departments" element={<Department />} />
+          <Route path="departments/add" element={<AddDepartment />} />
+          <Route path="departments/:id" element={<DepartmentDetail />} />
 
           {/* Authorization Page */}
           <Route path="authorization" element={<Authorization />} />
 
           {/* Others Page */}
-          <Route path="profile" element={<Profile />} />
+          {/* <Route path="profile" element={<Profile />} /> */}
         </Route>
 
         {/* Fallback Route */}

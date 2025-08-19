@@ -698,15 +698,6 @@ function Schedule() {
                                                 </div>
                                             </div>
 
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    {t("fields.department")}
-                                                </label>
-                                                <div className="p-3 bg-gray-50 rounded-lg">
-                                                    {selectedEvent.extendedProps.department}
-                                                </div>
-                                            </div>
-
                                             {selectedEvent.extendedProps.description && (
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -745,13 +736,6 @@ function Schedule() {
                                         </div>
 
                                         <div className="flex justify-end gap-3 pt-4">
-                                            <button
-                                                onClick={handleStartEdit}
-                                                type="button"
-                                                className="px-4 py-2.5 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
-                                            >
-                                                {t("buttons.edit")}
-                                            </button>
                                             <button
                                                 onClick={handleCloseModal}
                                                 type="button"

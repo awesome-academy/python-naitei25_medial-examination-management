@@ -6,6 +6,7 @@ import { Stethoscope, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { departmentService } from "../../../shared/services/departmentService";
+import { useTranslation } from "react-i18next";
 
 interface Department {
   id: number;
@@ -14,6 +15,7 @@ interface Department {
 }
 
 const SpecialtiesPage = () => {
+  const { t } = useTranslation();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -25,7 +27,7 @@ const SpecialtiesPage = () => {
         const data = await departmentService.getDepartments();
         setDepartments(data);
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách khoa:", error);
+        console.error("Error fetching departments:", error);
         setDepartments([]);
       } finally {
         setLoading(false);
@@ -59,9 +61,11 @@ const SpecialtiesPage = () => {
       <section className="relative overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-teal-700 text-white mb-12">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative container mx-auto px-4 py-20 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Chuyên khoa</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            {t("specialties.header.title")}
+          </h1>
           <p className="text-lg text-teal-100 mb-6">
-            Khám phá các chuyên khoa và lựa chọn phù hợp với nhu cầu của bạn
+            {t("specialties.header.subtitle")}
           </p>
         </div>
       </section>
@@ -87,14 +91,14 @@ const SpecialtiesPage = () => {
                 </CardHeader>
                 <CardContent className="px-6 pb-6 flex flex-col flex-grow">
                   <p className="text-gray-600 text-sm mb-6 line-clamp-3 min-h-[60px]">
-                    {dept.description || "Chưa có mô tả"}
+                    {dept.description || t("specialties.noDescription")}
                   </p>
                   <div className="mt-auto">
                     <Button
                       className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 group-hover:shadow-lg transition-all"
                       onClick={() => navigate(`/doctors?department=${dept.id}`)}
                     >
-                      Xem bác sĩ
+                      {t("specialties.actions.viewDoctors")}
                       <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </div>
@@ -104,7 +108,7 @@ const SpecialtiesPage = () => {
           </div>
         ) : (
           <p className="text-center text-gray-600">
-            Không tìm thấy chuyên khoa
+            {t("specialties.empty")}
           </p>
         )}
       </div>

@@ -6,6 +6,7 @@ import type {
   PrescriptionResponse,
   PrescriptionDetailResponse,
 } from "../../../types/pharmacy";
+import { useTranslation } from "react-i18next";
 
 
 interface MedicalRecordProps {
@@ -19,7 +20,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
 
   // Debug: Log the prescription data when component renders
   console.log("MedicalRecord component - prescription data:", prescription)
-
+  const { t } = useTranslation();
   const prescriptionId = prescription.id || null
 
   // Lấy thông tin tổng hợp từ prescription
@@ -73,22 +74,22 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
 
     // Xử lý huyết áp
     if (systolicBloodPressure && diastolicBloodPressure) {
-      parts.push(`Huyết áp: ${systolicBloodPressure}/${diastolicBloodPressure} mmHg`)
+      parts.push(t("medicalRecord.vitalSigns.bp", { sys: systolicBloodPressure || "?", dia: diastolicBloodPressure || "?" }))
     } else if (systolicBloodPressure || diastolicBloodPressure) {
-      parts.push(`Huyết áp: ${systolicBloodPressure || "?"}/${diastolicBloodPressure || "?"} mmHg`)
+      parts.push(t("medicalRecord.vitalSigns.bp", { sys: systolicBloodPressure || "?", dia: diastolicBloodPressure || "?" }))
     }
 
     // Xử lý nhịp tim
     if (heartRate) {
-      parts.push(`Nhịp tim: ${heartRate} bpm`)
+      parts.push(t("medicalRecord.vitalSigns.hr", { hr: heartRate }))
     }
 
     // Xử lý đường huyết
     if (bloodSugar) {
-      parts.push(`Đường huyết: ${bloodSugar} mg/dL`)
+      parts.push(t("medicalRecord.vitalSigns.bs", { bs: bloodSugar }))
     }
 
-    const result = parts.length > 0 ? parts.join(", ") : "Chưa có thông tin sinh hiệu"
+    const result = parts.length > 0 ? parts.join(", ") : t("medicalRecord.noVitalSigns")
     console.log("=== Formatted vital signs result ===", result)
     return result
   }
@@ -96,12 +97,12 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
   // Helper function để format đơn thuốc an toàn
   const formatPrescriptionSummary = () => {
     if (!prescriptionDetails || prescriptionDetails.length === 0) {
-      return "Chưa có đơn thuốc"
+      return t("medicalRecord.noPrescription")
     }
 
     return prescriptionDetails
       .map((detail) => {
-        const medicineName = detail.medicine?.medicineName || "Thuốc không xác định"
+        const medicineName = detail.medicine?.medicineName || t("medicalRecord.unknownMedicine")
         const dosage = detail.dosage || ""
         const frequency = detail.frequency || ""
         const duration = detail.duration || ""
@@ -111,7 +112,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
         if (dosage) parts.push(dosage)
         if (frequency) parts.push(frequency)
         if (duration) parts.push(duration)
-        parts.push(`(SL: ${quantity})`)
+        parts.push(t("medicalRecord.quantityLabel", { quantity }))
 
         return parts.join(" - ")
       })
@@ -123,19 +124,19 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
     console.log("Rendering prescription table with details:", prescriptionDetails)
 
     if (!prescriptionDetails || prescriptionDetails.length === 0) {
-      return <div className="p-4 text-center text-gray-500">Chưa có thông tin đơn thuốc</div>
+      return <div className="p-4 text-center text-gray-500">{t("medicalRecord.noPrescriptionInfo")}</div>
     }
 
     return (
       <table className="w-full text-sm bg-gray-50">
         <thead>
           <tr className="bg-white border-b border-gray-200">
-            <th className="p-2 text-left">Tên thuốc</th>
-            <th className="p-2 text-left">Giá (₫)</th>
-            <th className="p-2 text-left">Liều dùng</th>
-            <th className="p-2 text-left">Hướng dẫn</th>
-            <th className="p-2 text-left">Số lượng</th>
-            <th className="p-2 text-left">Thành tiền (₫)</th>
+            <th className="p-2 text-left">{t("medicalRecord.table.medicineName")}</th>
+            <th className="p-2 text-left">{t("medicalRecord.table.price")}</th>
+            <th className="p-2 text-left">{t("medicalRecord.table.dosage")}</th>
+            <th className="p-2 text-left">{t("medicalRecord.table.instructions")}</th>
+            <th className="p-2 text-left">{t("medicalRecord.table.quantity")}</th>
+            <th className="p-2 text-left">{t("medicalRecord.table.totalPrice")}</th>
           </tr>
         </thead>
         <tbody>
@@ -144,7 +145,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
               `Detail ${detail.detailId}: quantity=${detail.quantity}, medicine=${detail.medicine?.medicineName}`,
             )
 
-            const medicineName = detail.medicine?.medicineName || "Thuốc không xác định"
+            const medicineName = detail.medicine?.medicineName || t("medicalRecord.unknownMedicine")
             const price = detail.medicine?.price || 0
             const dosage = detail.dosage || ""
             const frequency = detail.frequency || ""
@@ -177,7 +178,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
       <div className="flex flex-col md:flex-row gap-4 p-4 justify-between bg-gray-50/50 rounded-lg border-gray-200 border">
         {/* Thông tin bệnh án */}
         <div className="mb-6">
-          <h3 className="text-gray-600 font-semibold">Bệnh án #{prescriptionId || "N/A"}</h3>
+          <h3 className="text-gray-600 font-semibold">{t("medicalRecord.titles")} #{prescriptionId || "N/A"}</h3>
           <span className="text-gray-400 text-sm font-semibold">
             {createdAt ? new Date(createdAt).toLocaleDateString("vi-VN") : ""}
           </span>
@@ -186,19 +187,19 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
         {/* Chi tiết bệnh án */}
         <div className="md:w-[55%]">
           <p className="text-gray-600 truncate">
-            <span className="font-medium text-gray-800">Lưu ý: </span>
-            {note || "Không có ghi chú"}
+            <span className="font-medium text-gray-800">{t("medicalRecord.notice")}</span>
+            {note || t("medicalRecord.noNote")}
           </p>
           <p className="text-gray-600 truncate">
-            <span className="font-medium text-gray-800">Chẩn đoán: </span>
-            {diagnosis || "Chưa có chẩn đoán"}
+            <span className="font-medium text-gray-800">{t("medicalRecord.diagnosis")}</span>
+            {diagnosis || t("medicalRecord.noDiagnosis")}
           </p>
           <p className="text-gray-600 truncate">
-            <span className="font-medium text-gray-800">Sinh hiệu: </span>
+            <span className="font-medium text-gray-800">{t("medicalRecord.vitalSigns.label")}</span>
             {formatVitalSigns()}
           </p>
           <p className="text-gray-600 truncate">
-            <span className="font-medium text-gray-800">Đơn thuốc: </span>
+            <span className="font-medium text-gray-800">{t("medicalRecord.prescription")}</span>
             {formatPrescriptionSummary()}
           </p>
         </div>
@@ -209,7 +210,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
           <button
             className="flex size-10 justify-center items-center gap-1 px-3 py-1 text-xs font-medium text-sky-700 bg-sky-100 rounded-md hover:bg-blue-200 transition-colors"
             onClick={openModal}
-            title="Xem chi tiết"
+            title={t("common.viewDetails")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -225,7 +226,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
           <button
             className="flex size-10 justify-center items-center gap-1 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors"
             onClick={() => prescriptionId && onEdit?.(prescriptionId)}
-            title="Chỉnh sửa bệnh án"
+            title={t("medicalRecord.edit")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -236,7 +237,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
           <button
             className="flex size-10 justify-center items-center gap-1 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors"
             onClick={() => prescriptionId && onDelete?.(prescriptionId)}
-            title="Xóa bệnh án"
+            title={t("medicalRecord.delete")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path
@@ -252,37 +253,20 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({ prescription, onEdit, onD
       {/* Modal khi nhấn vào button xem */}
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[900px] min-w-[300px] p-6 lg:p-10 mb-10">
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-gray-800 mb-6">Bệnh án #{prescriptionId || "N/A"}</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-6">{t("medicalRecord.titles")} #{prescriptionId || "N/A"}</h3>
 
           <div className="space-y-3">
-            <InfoField label="Lý do khám" value={note || "Không có ghi chú"} />
-            <InfoField label="Chẩn đoán" value={diagnosis || "Chưa có chẩn đoán"} />
-            <InfoField label="Sinh hiệu" value={formatVitalSigns()} />
+            <InfoField label={t("medicalRecord.reason")} value={note ||  t("medicalRecord.noNote")}  />
+            <InfoField label={t("medicalRecord.diagnosis")} value={diagnosis || t("medicalRecord.noDiagnosis")} />
+            <InfoField label={t("medicalRecord.vitalSigns.label")} value={formatVitalSigns()} />
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-500">Đơn thuốc</h4>
+            <h4 className="text-sm font-semibold text-gray-500">{t("medicalRecord.prescription")}</h4>
             <div className="overflow-x-auto border bg-gray-50 border-gray-200 rounded-md">
               {renderPrescriptionTable()}
             </div>
           </div>
-        </div>
-
-        <div className="mt-6 w-full">
-          <button
-            className="w-full flex items-center justify-center gap-2 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition"
-            onClick={() => console.log("View Invoice clicked")}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-              <path
-                fillRule="evenodd"
-                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Xem hóa đơn
-          </button>
         </div>
       </Modal>
     </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, Filter, ChevronRight, Stethoscope } from "lucide-react";
+import { Search, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { doctorService } from "../../../shared/services/doctorService";
 import { departmentService } from "../../../shared/services/departmentService";
 import { useAuth } from "../../../shared/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface Doctor {
   id: number;
@@ -24,6 +25,7 @@ interface Doctor {
 }
 
 const DoctorsPage = () => {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -77,7 +79,7 @@ const DoctorsPage = () => {
           }))
         );
       } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu bác sĩ:", error);
+        console.error("Error fetching doctors:", error);
         setDoctors([]);
       } finally {
         setLoading(false);
@@ -112,14 +114,14 @@ const DoctorsPage = () => {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative container mx-auto px-4 py-20 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Danh sách bác sĩ
+            {t("doctors.header.title")}
           </h1>
           <p className="text-lg text-teal-100 mb-6">
-            Tìm kiếm và đặt lịch hẹn với các bác sĩ hàng đầu
+            {t("doctors.header.subtitle")}
           </p>
           <div className="flex justify-center gap-4 max-w-xl mx-auto">
             <Input
-              placeholder="Tìm bác sĩ..."
+              placeholder={t("doctors.search.placeholder")}
               defaultValue={searchQuery || ""}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -144,7 +146,7 @@ const DoctorsPage = () => {
               className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
             >
               <Search className="h-4 w-4 mr-2" />
-              Tìm kiếm
+              {t("doctors.search.button")}
             </Button>
           </div>
         </div>
@@ -171,7 +173,7 @@ const DoctorsPage = () => {
                 </div>
                 <CardHeader className="p-6 text-center">
                   <h3 className="text-xl font-bold text-gray-900">
-                    BS. {doctor.first_name} {doctor.last_name}
+                    {t("doctors.prefix")} {doctor.first_name} {doctor.last_name}
                   </h3>
                   <p className="text-teal-600 font-medium">
                     {doctor.specialization}
@@ -180,7 +182,9 @@ const DoctorsPage = () => {
                 <CardContent className="pt-0">
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Phí khám</span>
+                      <span className="text-gray-600">
+                        {t("doctors.labels.fee")}
+                      </span>
                       <span className="font-bold text-green-600">
                         {doctor.price?.toLocaleString()}đ
                       </span>
@@ -196,7 +200,7 @@ const DoctorsPage = () => {
                       }
                     }}
                   >
-                    Đặt lịch khám
+                    {t("doctors.actions.book")}
                     <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardContent>
@@ -204,7 +208,9 @@ const DoctorsPage = () => {
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-600">Không tìm thấy bác sĩ</p>
+          <p className="text-center text-gray-600">
+            {t("doctors.empty")}
+          </p>
         )}
       </div>
     </div>

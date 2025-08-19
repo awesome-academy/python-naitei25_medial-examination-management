@@ -7,6 +7,7 @@ interface PermissionCategoryProps {
     selectedPermissions: string[];
     isEditing: boolean;
     onTogglePermission?: (permissionId: string) => void;
+    t: (key: string) => string;
 }
 
 export default function PermissionCategory({
@@ -14,7 +15,8 @@ export default function PermissionCategory({
     permissions,
     selectedPermissions,
     isEditing,
-    onTogglePermission
+    onTogglePermission,
+    t
 }: PermissionCategoryProps) {
     return (
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
