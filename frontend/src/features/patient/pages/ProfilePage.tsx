@@ -1,9 +1,86 @@
-import React from 'react'
+"use client"
 
-function ProfilePage() {
+import { useState } from "react"
+import { Card } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PersonalInfoTab } from "../components/common/Profile/PersonalInfoTab"
+import { InsuranceInfoTab } from "../components/common/Profile/InsuranceInfoTab"
+import { EmergencyContactTab } from "../components/common/Profile/EmergencyContactTab"
+import { HealthRecordTab } from "../components/common/Profile/HealthRecordTab"
+import { User, Shield, Phone, Heart } from "lucide-react"
+import { useTranslation } from "react-i18next"
+
+export default function ProfilePage() {
+  const [activeTab, setActiveTab] = useState("personal")
+  const { t } = useTranslation()
+
   return (
-    <div>ProfilePage</div>
+    <div className="space-y-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground mb-2">
+          {t("profile.title")}
+        </h1>
+        <p className="text-muted-foreground">
+          {t("profile.subtitle")}
+        </p>
+      </div>
+
+      <Card className="border shadow-sm">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-lg">
+            <TabsTrigger
+              value="personal"
+              className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            >
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("profile.personalInfo")}</span>
+              <span className="sm:hidden">{t("profile.personalInfoShort")}</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="insurance"
+              className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            >
+              <Shield className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("profile.insurance")}</span>
+              <span className="sm:hidden">{t("profile.insuranceShort")}</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="emergency"
+              className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            >
+              <Phone className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("profile.emergencyContact")}</span>
+              <span className="sm:hidden">{t("profile.emergencyContactShort")}</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="health"
+              className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            >
+              <Heart className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("profile.healthRecord")}</span>
+              <span className="sm:hidden">{t("profile.healthRecordShort")}</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="p-6">
+            <TabsContent value="personal" className="mt-0">
+              <PersonalInfoTab />
+            </TabsContent>
+
+            <TabsContent value="insurance" className="mt-0">
+              <InsuranceInfoTab />
+            </TabsContent>
+
+            <TabsContent value="emergency" className="mt-0">
+              <EmergencyContactTab />
+            </TabsContent>
+
+            <TabsContent value="health" className="mt-0">
+              <HealthRecordTab />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </Card>
+    </div>
   )
 }
-
-export default ProfilePage

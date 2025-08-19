@@ -64,12 +64,12 @@ const AppSidebar: React.FC = () => {
   const basePath = role === "receptionist" ? "/receptionist" : "/admin";
 
   const navItems: NavItem[] = [
-    {
-      icon: <GridIcon />,
-      name: "Tổng quan",
-      path: basePath,
-      roles: ["admin", "receptionist"],
-    },
+    // {
+    //   icon: <GridIcon />,
+    //   name: "Tổng quan",
+    //   path: basePath,
+    //   roles: ["admin", "receptionist"],
+    // },
     {
       name: "Khám bệnh",
       icon: <CalendarIcon />,
@@ -101,12 +101,12 @@ const AppSidebar: React.FC = () => {
       path: `${basePath}/doctors`,
       roles: ["admin"],
     },
-    {
-      icon: <UserCircleIcon />,
-      name: "Hồ sơ",
-      path: `${basePath}/profile`,
-      roles: ["admin", "receptionist"],
-    },
+    // {
+    //   icon: <UserCircleIcon />,
+    //   name: "Hồ sơ",
+    //   path: `${basePath}/profile`,
+    //   roles: ["admin", "receptionist"],
+    // },
   ];
 
   const filteredNavItems = navItems.filter(

@@ -42,12 +42,8 @@ export interface ExaminationRoom {
 
 // Helper function to transform API data to frontend format
 export const transformDepartmentData = (apiDepartment: DepartmentFromAPI, index?: number): Department => {
-  // Generate a safe ID - use departmentId if available, otherwise use index or random string
-  const safeId = apiDepartment.id 
-    ? `KH2025-${String(apiDepartment.id).padStart(3, '0')}`
-    : `KH2025-${index !== undefined ? String(index).padStart(3, '0') : Math.random().toString(36).substr(2, 9)}`;
   return {
-    id: safeId,
+    id: apiDepartment.id,
     name: apiDepartment.department_name || "Khoa chưa có tên",
     head: apiDepartment.headDoctorName || "Chưa cập nhật trưởng khoa",
     team: {

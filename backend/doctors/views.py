@@ -3,18 +3,18 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action, permission_classes as drf_permission_classes
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, JSONParser
 from django.http import Http404
 from django.utils.dateparse import parse_date
 from .models import Doctor, Department, ExaminationRoom, Schedule
-from .serializers import DoctorSerializer, CreateDoctorRequestSerializer, DepartmentSerializer, ExaminationRoomSerializer, ScheduleSerializer
+from .serializers import DoctorSerializer, DoctorPartialUpdateSerializer, CreateDoctorRequestSerializer, DepartmentSerializer, ExaminationRoomSerializer, ScheduleSerializer, DoctorUpdateSerializer
 from .services import DoctorService, DepartmentService, ExaminationRoomService, ScheduleService
 
 logger = logging.getLogger(__name__)
 
 class DoctorViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser]
+    parser_classes = [MultiPartParser, JSONParser]
     
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'search', 'filter', 'get_doctor_by_user_id']:
@@ -52,6 +52,304 @@ class DoctorViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        """
+        PATCH method để cập nhật một số trường cụ thể
+        Hỗ trợ cập nhật cả thông tin doctor và user liên quan
+        """
+        doctor = self.get_object(pk)
+        
+        # Sử dụng DoctorUpdateSerializer mới để xử lý cả doctor và user fields
+        serializer = DoctorUpdateSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            try:
+                from django.db import transaction
+                
+                with transaction.atomic():
+                    # Tách data cho doctor và user
+                    doctor_data = {}
+                    user_data = {}
+                    
+                    # Map các fields từ serializer sang model fields
+                    field_mapping = {
+                        'first_name': 'first_name',
+                        'last_name': 'last_name', 
+                        'identity_number': 'identity_number',
+                        'birthday': 'birthday',
+                        'gender': 'gender',
+                        'address': 'address',
+                        'academic_degree': 'academic_degree',
+                        'specialization': 'specialization',
+                        'type': 'type',
+                        'department_id': 'department_id',
+                        'price': 'price',
+                        'avatar': 'avatar'
+                    }
+                    
+                    # Tách data cho doctor
+                    for serializer_field, model_field in field_mapping.items():
+                        if serializer_field in serializer.validated_data:
+                            doctor_data[model_field] = serializer.validated_data[serializer_field]
+                    
+                    # Tách data cho user
+                    if 'email' in serializer.validated_data:
+                        user_data['email'] = serializer.validated_data['email']
+                    if 'phone' in serializer.validated_data:
+                        user_data['phone'] = serializer.validated_data['phone']
+                    
+                    # Validation: Kiểm tra unique constraint cho email và phone
+                    if user_data:
+                        from users.models import User
+                        
+                        # Kiểm tra email unique (nếu có thay đổi)
+                        if 'email' in user_data and user_data['email']:
+                            existing_user = User.objects.filter(
+                                email=user_data['email'], 
+                                is_deleted=False
+                            ).exclude(id=doctor.user.id).first()
+                            if existing_user:
+                                return Response(
+                                    {"error": f"Email {user_data['email']} đã được sử dụng bởi người dùng khác"}, 
+                                    status=status.HTTP_400_BAD_REQUEST
+                                )
+                        
+                        # Kiểm tra phone unique (nếu có thay đổi)
+                        if 'phone' in user_data and user_data['phone']:
+                            existing_user = User.objects.filter(
+                                phone=user_data['phone'], 
+                                is_deleted=False
+                            ).exclude(id=doctor.user.id).first()
+                            if existing_user:
+                                return Response(
+                                    {"error": f"Số điện thoại {user_data['phone']} đã được sử dụng bởi người dùng khác"}, 
+                                    status=status.HTTP_400_BAD_REQUEST
+                                )
+                        
+                        # Validation: Đảm bảo ít nhất một trong hai trường email hoặc phone phải có giá trị
+                        final_email = user_data.get('email', doctor.user.email)
+                        final_phone = user_data.get('phone', doctor.user.phone)
+                        
+                        if not final_email and not final_phone:
+                            return Response(
+                                {"error": "Ít nhất một trong hai trường email hoặc số điện thoại phải có giá trị"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra department_id nếu có thay đổi
+                    if 'department_id' in doctor_data:
+                        try:
+                            department = Department.objects.get(pk=doctor_data['department_id'])
+                        except Department.DoesNotExist:
+                            return Response(
+                                {"error": f"Khoa với ID {doctor_data['department_id']} không tồn tại"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra identity_number unique (nếu có thay đổi)
+                    if 'identity_number' in doctor_data:
+                        existing_doctor = Doctor.objects.filter(
+                            identity_number=doctor_data['identity_number']
+                        ).exclude(id=doctor.id).first()
+                        if existing_doctor:
+                            return Response(
+                                {"error": f"Số CMND/CCCD {doctor_data['identity_number']} đã được sử dụng bởi bác sĩ khác"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra price không âm (nếu có thay đổi)
+                    if 'price' in doctor_data and doctor_data['price'] is not None:
+                        if doctor_data['price'] < 0:
+                            return Response(
+                                {"error": "Phí khám không được âm"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra birthday không phải ngày trong tương lai (nếu có thay đổi)
+                    if 'birthday' in doctor_data:
+                        from django.utils import timezone
+                        if doctor_data['birthday'] > timezone.now().date():
+                            return Response(
+                                {"error": "Ngày sinh không thể là ngày trong tương lai"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra first_name và last_name không bị để trống
+                    if 'first_name' in doctor_data and not doctor_data['first_name'].strip():
+                        return Response(
+                            {"error": "Tên không được để trống"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    if 'last_name' in doctor_data and not doctor_data['last_name'].strip():
+                        return Response(
+                            {"error": "Họ không được để trống"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra specialization không bị để trống
+                    if 'specialization' in doctor_data and not doctor_data['specialization'].strip():
+                        return Response(
+                            {"error": "Chuyên môn không được để trống"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra address không bị để trống nếu được cung cấp
+                    if 'address' in doctor_data and doctor_data['address'] is not None and not doctor_data['address'].strip():
+                        return Response(
+                            {"error": "Địa chỉ không được để trống"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra email format nếu được cung cấp
+                    if 'email' in user_data and user_data['email']:
+                        import re
+                        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+                        if not re.match(email_pattern, user_data['email']):
+                            return Response(
+                                {"error": "Email không có format hợp lệ"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra phone format nếu được cung cấp
+                    if 'phone' in user_data and user_data['phone']:
+                        import re
+                        phone_pattern = r'^[0-9]{10,11}$'
+                        if not re.match(phone_pattern, user_data['phone']):
+                            return Response(
+                                {"error": "Số điện thoại phải có 10-11 chữ số"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra identity_number format nếu được cung cấp
+                    if 'identity_number' in doctor_data:
+                        import re
+                        identity_pattern = r'^[0-9]{9,12}$'
+                        if not re.match(identity_pattern, doctor_data['identity_number']):
+                            return Response(
+                                {"error": "Số CMND/CCCD phải có 9-12 chữ số"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra price không quá lớn
+                    if 'price' in doctor_data and doctor_data['price'] is not None:
+                        if doctor_data['price'] > 999999999.99:  # Giới hạn 999,999,999.99 VNĐ
+                            return Response(
+                                {"error": "Phí khám không được vượt quá 999,999,999.99 VNĐ"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra birthday không quá sớm
+                    if 'birthday' in doctor_data:
+                        from datetime import date
+                        min_birthday = date(1900, 1, 1)
+                        if doctor_data['birthday'] < min_birthday:
+                            return Response(
+                                {"error": "Ngày sinh không thể trước năm 1900"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Validation: Kiểm tra first_name và last_name không quá dài
+                    if 'first_name' in doctor_data and len(doctor_data['first_name']) > 50:
+                        return Response(
+                            {"error": "Tên không được vượt quá 50 ký tự"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    if 'last_name' in doctor_data and len(doctor_data['last_name']) > 50:
+                        return Response(
+                            {"error": "Họ không được vượt quá 50 ký tự"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra specialization không quá dài
+                    if 'specialization' in doctor_data and len(doctor_data['specialization']) > 200:
+                        return Response(
+                            {"error": "Chuyên môn không được vượt quá 200 ký tự"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra address không quá dài
+                    if 'address' in doctor_data and doctor_data['address'] and len(doctor_data['address']) > 500:
+                        return Response(
+                            {"error": "Địa chỉ không được vượt quá 500 ký tự"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra email không quá dài
+                    if 'email' in user_data and user_data['email'] and len(user_data['email']) > 254:
+                        return Response(
+                            {"error": "Email không được vượt quá 254 ký tự"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra phone không quá dài
+                    if 'phone' in user_data and user_data['phone'] and len(user_data['phone']) > 15:
+                        return Response(
+                            {"error": "Số điện thoại không được vượt quá 15 ký tự"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra identity_number không quá dài
+                    if 'identity_number' in doctor_data and len(doctor_data['identity_number']) > 20:
+                        return Response(
+                            {"error": "Số CMND/CCCD không được vượt quá 20 ký tự"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra avatar không quá dài
+                    if 'avatar' in doctor_data and doctor_data['avatar'] and len(doctor_data['avatar']) > 500:
+                        return Response(
+                            {"error": "Đường dẫn avatar không được vượt quá 500 ký tự"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Validation: Kiểm tra price có đúng số chữ số thập phân
+                    if 'price' in doctor_data and doctor_data['price'] is not None:
+                        price_str = str(doctor_data['price'])
+                        if '.' in price_str:
+                            decimal_part = price_str.split('.')[1]
+                            if len(decimal_part) > 2:
+                                return Response(
+                                    {"error": "Phí khám chỉ được có tối đa 2 chữ số thập phân"}, 
+                                    status=status.HTTP_400_BAD_REQUEST
+                                )
+                        
+                        # Kiểm tra số chữ số nguyên
+                        integer_part = price_str.split('.')[0] if '.' in price_str else price_str
+                        if len(integer_part) > 9:
+                            return Response(
+                                {"error": "Phí khám chỉ được có tối đa 9 chữ số nguyên"}, 
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
+                    # Cập nhật doctor nếu có data
+                    if doctor_data:
+                        logger.info(f"Updating doctor {pk} with data: {doctor_data}")
+                        for field, value in doctor_data.items():
+                            setattr(doctor, field, value)
+                        doctor.save()
+                    
+                    # Cập nhật user nếu có data
+                    if user_data and doctor.user:
+                        logger.info(f"Updating user {doctor.user.id} with data: {user_data}")
+                        for field, value in user_data.items():
+                            setattr(doctor.user, field, value)
+                        doctor.user.save()
+                    
+                    # Trả về doctor đã được cập nhật
+                    updated_doctor = DoctorSerializer(doctor).data
+                    logger.info(f"Successfully updated doctor {pk}")
+                    return Response(updated_doctor)
+                
+            except Exception as e:
+                logger.error(f"Error updating doctor {pk}: {str(e)}")
+                return Response(
+                    {"error": "Có lỗi xảy ra khi cập nhật thông tin bác sĩ"}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):

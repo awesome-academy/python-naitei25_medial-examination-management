@@ -9,8 +9,8 @@ import dayjs from "dayjs"
 const statusMap: { [key: string]: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" } = {
     P: "PENDING",
     C: "CONFIRMED",
-    X: "COMPLETED",
-    H: "CANCELLED",
+    D: "COMPLETED",
+    X: "CANCELLED"
 }
 
 export interface PaginatedResponse<T> {

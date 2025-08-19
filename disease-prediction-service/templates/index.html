@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Disease Prediction Service</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 300;
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 40px;
+      }
+
+      .symptom-section {
+        margin-bottom: 40px;
+      }
+
+      .symptom-section h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+      }
+
+      .symptom-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        background: #f8f9fa;
+      }
+
+      .symptom-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .symptom-item:hover {
+        border-color: #4facfe;
+        box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+      }
+
+      .symptom-item.selected {
+        background: #4facfe;
+        color: white;
+        border-color: #4facfe;
+      }
+
+      .symptom-item input[type="checkbox"] {
+        margin-right: 10px;
+        transform: scale(1.2);
+      }
+
+      .predict-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        font-size: 1.1rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 20px 0;
+      }
+
+      .predict-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .predict-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .result-section {
+        margin-top: 40px;
+        padding: 30px;
+        background: #f8f9fa;
+        border-radius: 15px;
+        display: none;
+      }
+
+      .result-section.show {
+        display: block;
+      }
+
+      .result-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .predicted-disease {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .predicted-disease h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+      }
+
+      .confidence {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .top-predictions {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+      }
+
+      .top-predictions h4 {
+        color: #333;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      .prediction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s ease;
+      }
+
+      .prediction-item:hover {
+        background: #f8f9fa;
+      }
+
+      .prediction-item:last-child {
+        border-bottom: none;
+      }
+
+      .disease-name {
+        font-weight: 500;
+        color: #333;
+      }
+
+      .probability {
+        background: #4facfe;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4facfe;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error {
+        background: #ff6b6b;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+      }
+
+      .selected-symptoms {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+
+      .selected-symptoms h4 {
+        color: #1976d2;
+        margin-bottom: 10px;
+      }
+
+      .symptom-tag {
+        display: inline-block;
+        background: #1976d2;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        margin: 5px;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔬 Disease Prediction Service</h1>
+        <p>Chọn các triệu chứng để dự đoán bệnh</p>
+      </div>
+
+      <div class="content">
+        <div class="symptom-section">
+          <h2>📋 Danh sách triệu chứng</h2>
+          <div class="symptom-grid" id="symptomGrid">
+            <!-- Symptoms will be loaded here -->
+          </div>
+        </div>
+
+        <div
+          class="selected-symptoms"
+          id="selectedSymptoms"
+          style="display: none"
+        >
+          <h4>✅ Triệu chứng đã chọn:</h4>
+          <div id="selectedSymptomsList"></div>
+        </div>
+
+        <button class="predict-btn" id="predictBtn" onclick="predictDisease()">
+          🔍 Dự đoán bệnh
+        </button>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Đang xử lý...</p>
+        </div>
+
+        <div class="result-section" id="resultSection">
+          <div class="result-header">
+            <h2>🎯 Kết quả dự đoán</h2>
+          </div>
+
+          <div class="predicted-disease" id="predictedDisease">
+            <!-- Main prediction will be shown here -->
+          </div>
+
+          <div class="top-predictions">
+            <h4>🏆 Top 5 dự đoán</h4>
+            <div id="topPredictionsList">
+              <!-- Top predictions will be shown here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let selectedSymptoms = [];
+      const symptoms = {{ symptoms | tojson }};
+
+      // Load symptoms into the grid
+      function loadSymptoms() {
+          const grid = document.getElementById('symptomGrid');
+          Object.keys(symptoms).forEach(symptom => {
+              const item = document.createElement('div');
+              item.className = 'symptom-item';
+              item.innerHTML = `
+                  <input type="checkbox" id="${symptom}" onchange="toggleSymptom('${symptom}')">
+                  <label for="${symptom}">${symptoms[symptom]}</label>
+              `;
+              grid.appendChild(item);
+          });
+      }
+
+      // Toggle symptom selection
+      function toggleSymptom(symptom) {
+          const checkbox = document.getElementById(symptom);
+          if (checkbox.checked) {
+              if (!selectedSymptoms.includes(symptom)) {
+                  selectedSymptoms.push(symptom);
+              }
+          } else {
+              selectedSymptoms = selectedSymptoms.filter(s => s !== symptom);
+          }
+
+          updateSelectedSymptomsDisplay();
+          updatePredictButton();
+      }
+
+      // Update selected symptoms display
+      function updateSelectedSymptomsDisplay() {
+          const container = document.getElementById('selectedSymptoms');
+          const list = document.getElementById('selectedSymptomsList');
+
+          if (selectedSymptoms.length > 0) {
+              container.style.display = 'block';
+              list.innerHTML = selectedSymptoms.map(symptom =>
+                  `<span class="symptom-tag">${symptoms[symptom]}</span>`
+              ).join('');
+          } else {
+              container.style.display = 'none';
+          }
+      }
+
+      // Update predict button state
+      function updatePredictButton() {
+          const btn = document.getElementById('predictBtn');
+          btn.disabled = selectedSymptoms.length === 0;
+      }
+
+      // Predict disease
+      async function predictDisease() {
+          if (selectedSymptoms.length === 0) {
+              alert('Vui lòng chọn ít nhất một triệu chứng!');
+              return;
+          }
+
+          // Show loading
+          document.getElementById('loading').style.display = 'block';
+          document.getElementById('resultSection').classList.remove('show');
+
+          try {
+              const response = await fetch('/api/predict', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      symptoms: selectedSymptoms
+                  })
+              });
+
+              const result = await response.json();
+
+              if (response.ok) {
+                  displayResult(result);
+              } else {
+                  throw new Error(result.error || 'Có lỗi xảy ra');
+              }
+          } catch (error) {
+              showError(error.message);
+          } finally {
+              document.getElementById('loading').style.display = 'none';
+          }
+      }
+
+      // Display prediction result
+      function displayResult(result) {
+          const resultSection = document.getElementById('resultSection');
+          const predictedDisease = document.getElementById('predictedDisease');
+          const topPredictionsList = document.getElementById('topPredictionsList');
+
+          // Display main prediction
+          predictedDisease.innerHTML = `
+              <h3>${result.predicted_disease_vn}</h3>
+              <p class="confidence">Độ tin cậy: ${(result.confidence * 100).toFixed(1)}%</p>
+          `;
+
+          // Display top predictions
+          topPredictionsList.innerHTML = result.top_predictions.map(pred => `
+              <div class="prediction-item">
+                  <div>
+                      <div class="disease-name">${pred.disease_vn}</div>
+                      <small style="color: #666;">${pred.disease}</small>
+                  </div>
+                  <span class="probability">${(pred.probability * 100).toFixed(1)}%</span>
+              </div>
+          `).join('');
+
+          resultSection.classList.add('show');
+      }
+
+      // Show error message
+      function showError(message) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'error';
+          errorDiv.textContent = message;
+
+          const content = document.querySelector('.content');
+          content.insertBefore(errorDiv, content.firstChild);
+
+          setTimeout(() => {
+              errorDiv.remove();
+          }, 5000);
+      }
+
+      // Initialize page
+      document.addEventListener('DOMContentLoaded', function() {
+          loadSymptoms();
+          updatePredictButton();
+      });
+    </script>
+  </body>
+</html>

@@ -1,4 +1,3 @@
-import React from 'react';
 import PermissionCategory from './PermissionCategory';
 import type { Role, Permission } from "../../../services/authorizationService";
 
@@ -12,6 +11,7 @@ interface PermissionModalProps {
     onTogglePermission: (permissionId: string) => void;
     onSave: () => void;
     onCancel: () => void;
+    t: (key: string) => string;
 }
 
 export default function PermissionModal({
@@ -23,7 +23,8 @@ export default function PermissionModal({
     onStartEditing,
     onTogglePermission,
     onSave,
-    onCancel
+    onCancel,
+    t
 }: PermissionModalProps) {
     const getPermissionsByCategory = (permissions: string[]) => {
         const categories: { [key: string]: Permission[] } = {};
@@ -47,12 +48,12 @@ export default function PermissionModal({
             <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-                        Quyền của vai trò: {role.name}
+                        {t('permissionsOfRole')}: {role.name}
                     </h3>
                     <button
                         onClick={onClose}
                         className="text-gray-500 hover:text-gray-700 hover:bg-slate-50 rounded-full dark:text-gray-400 dark:hover:text-gray-200 p-2"
-                        title="Đóng"
+                        title={t('close')}
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -69,6 +70,7 @@ export default function PermissionModal({
                             selectedPermissions={currentPermissions}
                             isEditing={isEditing}
                             onTogglePermission={onTogglePermission}
+                            t={t}
                         />
                     ))}
                 </div>
@@ -80,13 +82,13 @@ export default function PermissionModal({
                                 onClick={onCancel}
                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                             >
-                                Hủy
+                                {t('cancel')}
                             </button>
                             <button
                                 onClick={onSave}
                                 className="px-4 py-2 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
                             >
-                                Lưu thay đổi
+                                {t('saveChanges')}
                             </button>
                         </>
                     ) : (
@@ -95,13 +97,13 @@ export default function PermissionModal({
                                 onClick={onClose}
                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                             >
-                                Đóng
+                                {t('close')}
                             </button>
                             <button
                                 onClick={onStartEditing}
                                 className="px-4 py-2 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
                             >
-                                Chỉnh sửa quyền
+                                {t('editPermissions')}
                             </button>
                         </>
                     )}

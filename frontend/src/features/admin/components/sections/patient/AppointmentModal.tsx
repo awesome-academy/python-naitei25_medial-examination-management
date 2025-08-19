@@ -4,6 +4,7 @@ import InfoField from "../../form/InfoField";
 import { Appointment } from "../../../types/appointment";
 import { format } from "date-fns";
 import { appointmentService } from "../../../services/appointmentService";
+import { useTranslation } from "react-i18next";
 
 interface AppointmentModalProps extends Appointment {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export function AppointmentModal({
     symptoms,
   });
 
+  const { t } = useTranslation();
   const formatHHmm = (timeStr: string) => {
     if (!timeStr) return "N/A";
     const parts = timeStr.split(":");
@@ -41,14 +43,14 @@ export function AppointmentModal({
     >
       <div className="space-y-6 mb-10">
         <h3 className="text-xl font-semibold text-gray-800">
-          Lịch khám #{appointmentId}
+          {t("appointment.detail")} #{appointmentId}
         </h3>
         <InfoField
-          label="Ngày"
+          label={t("appointment.confirmation.date")}
           value={format(new Date(createdAt), "dd-MM-yyyy")}
         />
         <InfoField
-          label="Bác sĩ"
+          label={t("appointment.doctor")}
           value={
             doctorInfo
               ? `${doctorInfo.academicDegree}. ${doctorInfo.fullName}`
@@ -56,27 +58,27 @@ export function AppointmentModal({
           }
         />
         <InfoField
-          label="Chuyên khoa"
+          label={t("appointment.specialization")}
           value={doctorInfo?.specialization || ""}
         />
-        <InfoField label="Triệu chứng" value={formData.symptoms} />
+        <InfoField label={t("appointment.confirmation.symptoms")} value={formData.symptoms} />
         <InfoField
-          label="Tình trạng"
+          label={t("appointment.stat")}
           value={
             appointmentStatus === "PENDING"
-              ? "Chờ xác nhận"
+              ? t("appointment.statusPending")
               : appointmentStatus === "COMPLETED"
-              ? "Đã khám"
+              ? t("appointment.statusCompleted")
               : appointmentStatus === "CANCELLED"
-              ? "Đã hủy"
+              ? t("appointment.statusCancelled")
               : appointmentStatus === "CONFIRMED"
-              ? "Đã xác nhận"
-              : "Chưa xác định"
+              ? t("appointment.statusConfirmed")
+              : t("appointment.statusUnknown")
           }
         />
-        <InfoField label="Số thứ tự" value={number} />
+        {/* <InfoField label={t("appointment.number")} value={number} /> */}
         <InfoField
-          label="Khung giờ"
+          label={t("appointment.timeRange")}
           value={`${formatHHmm(slotStart)} - ${formatHHmm(slotEnd)}`}
         />
       </div>
@@ -118,21 +120,21 @@ export function DeleteAppointmentModal({
       onClose={onClose}
       className="max-w-[400px] min-w-[300px] p-6"
     >
-      <h3 className="text-lg font-semibold mb-4 text-red-600">Xác nhận xóa</h3>
-      <p>Bạn có chắc muốn xóa lịch khám #{appointmentId} không?</p>
+      <h3 className="text-lg font-semibold mb-4 text-red-600">{t("appointment.confirmDeleteTitle")}</h3>
+      <p>{t("appointment.confirmDeleteMessage", { id: appointmentId })}</p>
       <div className="flex gap-2 mt-6">
         <button
           className="flex-1 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
           onClick={handleDelete}
           disabled={loading}
         >
-          {loading ? "Đang xóa..." : "Xóa"}
+          {loading ? t("common.deleting") : t("common.delete")}
         </button>
         <button
           className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
           onClick={onClose}
         >
-          Hủy
+          {t("common.cancel")}
         </button>
       </div>
     </Modal>

@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { examinationRoomService } from "../../services/examinationRoomServices"
 import { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import {
@@ -59,14 +60,23 @@ const PatientDetail: React.FC = () => {
     const navigate = useNavigate()
     const [appointment, setAppointment] = useState<Appointment | null>(null)
     const [currentServiceOrder, setCurrentServiceOrder] = useState<ServiceOrder | null>(null)
+    const [roomNote, setRoomNote] = useState<string>("")
+
+    useEffect(() => {
+        const fetchRoomNote = async () => {
+            if (currentServiceOrder?.roomId && !roomNote) {
+                try {
+                    const room = await examinationRoomService.getExaminationRoomById(currentServiceOrder.roomId)
+                    setRoomNote(room.room_note || room.note || "")
+                } catch (e) {
+                    setRoomNote("")
+                }
+            }
+        }
+        fetchRoomNote()
+    }, [currentServiceOrder, roomNote])
 
     const { orderId, appointmentData, serviceOrder } = location.state || {}
-
-    // Debug: Log location.state to check what's being passed
-    console.log("location.state:", location.state)
-    console.log("orderId:", orderId)
-    console.log("appointmentData:", appointmentData)
-    console.log("serviceOrder:", serviceOrder)
 
     const [appointmentNotes, setAppointmentNotes] = useState<AppointmentNote[]>([])
     const [noteText, setNoteText] = useState("")
@@ -74,8 +84,6 @@ const PatientDetail: React.FC = () => {
 
     useEffect(() => {
         if (serviceOrder) {
-            console.log("Setting currentServiceOrder:", serviceOrder)
-            console.log("Setting appointment:", appointmentData)
             setCurrentServiceOrder(serviceOrder)
             setAppointment(appointmentData)
 
@@ -95,15 +103,11 @@ const PatientDetail: React.FC = () => {
                 orderTime: serviceOrder?.orderTime ? dayjs(serviceOrder.orderTime) : null,
                 resultTime: serviceOrder?.resultTime ? dayjs(serviceOrder.resultTime) : null,
             })
-
-            // Debug: Log form values after setting
-            console.log("Form values set:", form.getFieldsValue())
         }
     }, [serviceOrder, appointmentData, form])
 
     const fetchServiceOrder = async () => {
         if (!orderId) {
-            console.log("No orderId provided, cannot fetch service order")
             message.error("Không tìm thấy thông tin đơn xét nghiệm")
             return
         }
@@ -118,13 +122,11 @@ const PatientDetail: React.FC = () => {
         try {
             // Call with both serviceId & orderId only if serviceId exists, else skip
             if (serviceId) {
-                const freshServiceOrder = await getServiceOrderById(serviceId, orderId)
-                console.log("Fetched freshServiceOrder:", freshServiceOrder)
+                const freshServiceOrder = await getServiceOrderById(orderId)
                 setCurrentServiceOrder(freshServiceOrder)
 
                 form.setFieldsValue({
                     serviceName: (freshServiceOrder as any)?.serviceName || "",
-                    // orderStatus may be returned as order_status or status mapping previously, keep existing
                     orderStatus: (freshServiceOrder as any)?.orderStatus,
                     result: (freshServiceOrder as any)?.result
                         ? [
@@ -139,7 +141,6 @@ const PatientDetail: React.FC = () => {
                     orderTime: (freshServiceOrder as any)?.orderTime ? dayjs((freshServiceOrder as any).orderTime) : null,
                     resultTime: (freshServiceOrder as any)?.resultTime ? dayjs((freshServiceOrder as any).resultTime) : null,
                 })
-                console.log("Form values after fetch:", form.getFieldsValue())
             }
         } catch (error) {
             console.error("Error fetching service order:", error)
@@ -151,14 +152,12 @@ const PatientDetail: React.FC = () => {
 
     const fetchNotes = async () => {
         if (!currentServiceOrder?.appointmentId) {
-            console.log("No appointmentId in currentServiceOrder, skipping fetchNotes")
             return
         }
 
         setNotesLoading(true)
         try {
-            const response = await api.get(`/appointments/${currentServiceOrder.appointmentId}/notes`)
-            console.log("Fetched appointment notes:", response.data)
+            const response = await api.get(`/appointment-notes/appointment/${currentServiceOrder.appointmentId}/notes/`)
             setAppointmentNotes(response.data || [])
         } catch (error) {
             console.error("Error fetching notes:", error)
@@ -170,7 +169,6 @@ const PatientDetail: React.FC = () => {
 
     useEffect(() => {
         if (currentServiceOrder) {
-            console.log("currentServiceOrder updated, fetching notes:", currentServiceOrder)
             fetchNotes()
         }
     }, [currentServiceOrder])
@@ -178,10 +176,8 @@ const PatientDetail: React.FC = () => {
     const handleSave = async () => {
         try {
             const values = await form.validateFields()
-            console.log("Form values on save:", values)
 
             if (!currentServiceOrder) {
-                console.log("No currentServiceOrder, cannot save")
                 message.error("Không tìm thấy thông tin đơn xét nghiệm")
                 return
             }
@@ -210,7 +206,6 @@ const PatientDetail: React.FC = () => {
                             },
                         },
                     )
-                    console.log("File upload response:", response.data)
                     // Backend returns { message, data: { ..serializer fields.. } }
                     const uploadedData = (response.data as any)?.data
                     finalResultUrl = uploadedData?.result || uploadedData?.file || finalResultUrl
@@ -230,7 +225,6 @@ const PatientDetail: React.FC = () => {
                     return
                 }
             } else if (isExistingFileRemoved) {
-                console.log("Existing file removed, setting finalResultUrl to empty")
                 finalResultUrl = ""
             }
 
@@ -244,9 +238,7 @@ const PatientDetail: React.FC = () => {
                 resultTime: form.getFieldValue("orderStatus") === "C" && !currentServiceOrder.resultTime ? localDateTime : currentServiceOrder.resultTime,
             }
 
-            console.log("Update data being sent:", updateData)
             const updatedOrder = await updateServiceOrder(currentServiceOrder.serviceId, orderId, updateData as ServiceOrder)
-            console.log("Updated service order:", updatedOrder)
 
             message.success("Cập nhật kết quả xét nghiệm thành công")
             setCurrentServiceOrder(updatedOrder)
@@ -260,14 +252,12 @@ const PatientDetail: React.FC = () => {
 
     const handleDelete = async () => {
         if (!currentServiceOrder) {
-            console.log("No currentServiceOrder, cannot delete")
             message.error("Không tìm thấy thông tin đơn xét nghiệm")
             return
         }
 
         setDeleting(true)
         try {
-            console.log("Deleting service order:", currentServiceOrder.orderId)
             await deleteServiceOrder(currentServiceOrder.serviceId, orderId)
             message.success("Xóa đơn xét nghiệm thành công")
             navigate(-1)
@@ -280,7 +270,6 @@ const PatientDetail: React.FC = () => {
     }
 
     const handleBack = () => {
-        console.log("Navigating back")
         navigate(-1)
     }
 
@@ -329,7 +318,6 @@ const PatientDetail: React.FC = () => {
 
     const handleAddNote = async () => {
         if (!noteText.trim() || !currentServiceOrder?.appointmentId) {
-            console.log("Cannot add note: empty noteText or missing appointmentId", { noteText, appointmentId: currentServiceOrder?.appointmentId })
             return
         }
 
@@ -338,7 +326,6 @@ const PatientDetail: React.FC = () => {
                 content: noteText,
                 noteType: "DOCTOR",
             })
-            console.log("Added note:", response.data)
             setAppointmentNotes([...appointmentNotes, response.data])
             setNoteText("")
             message.success("Thêm ghi chú thành công")
@@ -350,12 +337,10 @@ const PatientDetail: React.FC = () => {
 
     const handleDeleteNote = async (noteId: number) => {
         if (!currentServiceOrder?.appointmentId) {
-            console.log("No appointmentId, cannot delete note")
             return
         }
 
         try {
-            console.log("Deleting note:", noteId)
             await api.delete(`/appointments/${currentServiceOrder.appointmentId}/notes/${noteId}`)
             setAppointmentNotes(appointmentNotes.filter((note) => note.noteId !== noteId))
             message.success("Xóa ghi chú thành công")
@@ -366,13 +351,11 @@ const PatientDetail: React.FC = () => {
     }
 
     const handleRefreshAll = () => {
-        console.log("Refreshing all data")
         fetchServiceOrder()
         fetchNotes()
     }
 
     const handleDownloadFile = (url: string, fileName: string) => {
-        console.log("Downloading file:", { url, fileName })
         const link = document.createElement("a")
         link.href = url
         link.download = fileName
@@ -447,7 +430,16 @@ const PatientDetail: React.FC = () => {
                             </Col>
                             <Col span={12}>
                                 <Form.Item label="Nơi thực hiện">
-                                    <Input value={`Phòng ${currentServiceOrder.roomId}`} disabled style={{ color: "black" }} />
+                                    <Input
+                                        value={
+                                            // Priority: appointmentData.room_note > fetched roomNote > fallback
+                                            appointmentData?.room_note
+                                                || roomNote
+                                                || `Phòng ${currentServiceOrder.roomId}`
+                                        }
+                                        disabled
+                                        style={{ color: "black" }}
+                                    />
                                 </Form.Item>
                             </Col>
                             <Col span={12}>
@@ -594,9 +586,6 @@ const PatientDetail: React.FC = () => {
                     <div className="mt-6">
                         <Tabs defaultActiveKey="1">
                             <TabPane tab="Thông tin bệnh nhân" key="1">
-                                {/* Debug: Log appointment and patientInfo before rendering */}
-                                {console.log("Rendering patient info tab, appointment:", appointment)}
-                                {console.log("patientInfo:", appointment?.patientInfo)}
                                 {appointment?.patientInfo ? (
                                     <div className="p-6 bg-white rounded-2xl border border-gray-200">
                                         <div className="flex flex-row justify-between items-center mb-6">

@@ -4,51 +4,58 @@ import { transformAvailableSlotsToTimeSlots } from '../../../shared/utils/appoin
 import type { 
   Appointment, 
   AvailableSlot,
-  BackendCreateAppointmentPayload 
-} from '../../../shared/types/appointment'
-import type { TimeSlot } from '../../../shared/types'
+  BackendCreateAppointmentPayload,
+} from "../../../shared/types/appointment";
+import type { TimeSlot } from "../../../shared/types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export class PatientAppointmentService {
   async createAppointmentFromBooking(bookingDetails: {
-    doctorId: number
-    patientId: number
-    scheduleId: number
-    selectedDate: string
-    selectedTime: string
-    symptoms: string[]
+    doctorId: number;
+    patientId: number;
+    scheduleId: number;
+    selectedDate: string;
+    selectedTime: string;
+    symptoms: string[];
   }): Promise<Appointment> {
     try {
-      const [startTime, endTime] = this.parseTimeSlot(bookingDetails.selectedTime)
-      
-      const appointmentData: BackendCreateAppointmentPayload = { 
+      const [startTime, endTime] = this.parseTimeSlot(
+        bookingDetails.selectedTime
+      );
+
+      const appointmentData: BackendCreateAppointmentPayload = {
         doctor: bookingDetails.doctorId,
         patient: bookingDetails.patientId,
         schedule: bookingDetails.scheduleId,
         slot_start: startTime,
         slot_end: endTime,
-        symptoms: bookingDetails.symptoms.join(', '),
-        status: 'PENDING' 
-      }
+        symptoms: bookingDetails.symptoms.join(", "),
+        status: "PENDING",
+      };
 
-      const appointment = await appointmentService.createAppointment(appointmentData)
-      return appointmentService.getAppointmentById(appointment.id)
+      const appointment = await appointmentService.createAppointment(
+        appointmentData
+      );
+      return appointmentService.getAppointmentById(appointment.id);
     } catch (error) {
-      console.error('Error creating appointment:', error)
-      throw new Error('Không thể tạo lịch hẹn')
+      console.error("Error creating appointment:", error);
+      throw new Error("Không thể tạo lịch hẹn");
     }
   }
 
-  async getAvailableTimeSlots(doctorId: number, date: string): Promise<{
-    morning: TimeSlot[]
-    afternoon: TimeSlot[]
+  async getAvailableTimeSlots(
+    doctorId: number,
+    date: string
+  ): Promise<{
+    morning: TimeSlot[];
+    afternoon: TimeSlot[];
   }> {
     try {
-      const schedules = await scheduleService.getDoctorSchedules(doctorId, { workDate: date })
-      
+      const schedules = await doctorService.getDoctorSchedule(doctorId, date);
+
       if (schedules.length === 0) {
-        return { morning: [], afternoon: [] }
+        return { morning: [], afternoon: [] };
       }
 
       const schedule = schedules[0]
@@ -75,8 +82,8 @@ export class PatientAppointmentService {
       const availableSlots: AvailableSlot[] = await response.json()
       return transformAvailableSlotsToTimeSlots(availableSlots)
     } catch (error) {
-      console.error('Error fetching available slots:', error)
-      return { morning: [], afternoon: [] }
+      console.error("Error fetching available slots:", error);
+      return { morning: [], afternoon: [] };
     }
   }
 
@@ -84,41 +91,49 @@ export class PatientAppointmentService {
     try {
       await appointmentService.updateAppointment(appointmentId, {
         id: appointmentId,
-        status: 'CANCELLED'
-      })
+        status: "CANCELLED",
+      });
     } catch (error) {
-      console.error('Error cancelling appointment:', error)
-      throw new Error('Không thể hủy lịch hẹn')
+      console.error("Error cancelling appointment:", error);
+      throw new Error("Không thể hủy lịch hẹn");
     }
   }
 
-  async addAppointmentNote(appointmentId: number, content: string, noteType = 'GENERAL'): Promise<void> {
+  async addAppointmentNote(
+    appointmentId: number,
+    content: string,
+    noteType = "GENERAL"
+  ): Promise<void> {
     try {
       await appointmentNoteService.createNote(appointmentId, {
         note_type: noteType,
-        content
-      })
+        content,
+      });
     } catch (error) {
-      console.error('Error adding appointment note:', error)
-      throw new Error('Không thể thêm ghi chú')
+      console.error("Error adding appointment note:", error);
+      throw new Error("Không thể thêm ghi chú");
     }
   }
 
   private parseTimeSlot(timeString: string): [string, string] {
-    const [start, end] = timeString.split(' - ')
-    return [start.trim(), end.trim()]
+    const [start, end] = timeString.split(" - ");
+    return [start.trim(), end.trim()];
   }
 
-  async canBookAppointment(doctorId: number, date: string, time: string): Promise<boolean> {
+  async canBookAppointment(
+    doctorId: number,
+    date: string,
+    time: string
+  ): Promise<boolean> {
     try {
       const availableSlots = await this.getAvailableTimeSlots(doctorId, date)
       const allSlots = [...availableSlots.morning, ...availableSlots.afternoon]
       return allSlots.some(slot => slot.time === time && slot.isAvailable)
     } catch (error) {
-      console.error('Error checking appointment availability:', error)
-      return false
+      console.error("Error checking appointment availability:", error);
+      return false;
     }
   }
 }
 
-export const patientAppointmentService = new PatientAppointmentService()
+export const patientAppointmentService = new PatientAppointmentService();

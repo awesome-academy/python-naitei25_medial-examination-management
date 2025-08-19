@@ -1,4 +1,3 @@
-import React from 'react';
 import { Table, TableBody } from "../../ui/table";
 import Pagination from "../../common/Pagination";
 import RoleTableHeader from './RoleTableHeader';
@@ -13,6 +12,7 @@ interface RoleTableProps {
     totalItems: number;
     onPageChange: (page: number) => void;
     onViewPermissions: (role: Role) => void;
+    t: (key: string) => string;
 }
 
 export default function RoleTable({
@@ -21,18 +21,20 @@ export default function RoleTable({
     totalPages,
     totalItems,
     onPageChange,
-    onViewPermissions
+    onViewPermissions,
+    t
 }: RoleTableProps) {
     return (
         <div className="max-w-full overflow-x-auto">
             <Table>
-                <RoleTableHeader />
+                <RoleTableHeader t={t} />
                 <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                     {roles.map((role) => (
                         <RoleTableRow
                             key={role.id}
                             role={role}
                             onViewPermissions={onViewPermissions}
+                            t={t}
                         />
                     ))}
                 </TableBody>

@@ -123,8 +123,12 @@ class PrescriptionDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_medicine(self, obj):
-        return {'medicine_id': obj.medicine.id, 'medicine_name': obj.medicine.medicine_name, 'price': obj.medicine.price}
-
+        return {
+            'medicine_id': obj.medicine.id,
+            'medicine_name': obj.medicine.medicine_name,
+            'unit': obj.medicine.unit,
+            'price': obj.medicine.price
+        }
 
 class PrescriptionSerializer(serializers.ModelSerializer):
     prescription_details = PrescriptionDetailSerializer(many=True, read_only=True)

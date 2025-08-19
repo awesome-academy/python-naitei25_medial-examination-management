@@ -1,5 +1,6 @@
-import type React from "react";
+"use client"
 
+import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -39,23 +40,23 @@ const AppSidebar: React.FC = () => {
     role === "RECEPTIONIST"
       ? "/receptionist"
       : role === "D"
-      ? `/doctor/${
-          doctorType === "E"
-            ? "examination"
-            : doctorType === "S"
+        ? `/doctor/${doctorType === "E"
+          ? "examination"
+          : doctorType === "S"
             ? "service"
             : ""
         }`
-      : role === "P"
-      ? "/patient"
-      : "/admin";
+        : role === "P"
+          ? "/patient"
+          : "/admin";
 
   const navItems: NavItem[] = [
     {
       icon: <GridIcon />,
       name: t("sidebar.overview"),
       path: `${basePath}/dashboard`,
-      roles: ["A", "D", "P"],
+      roles: ["D", "P"],
+      // roles: ["A", "D", "P"],
     },
     {
       icon: <PatientIcon />,
@@ -64,47 +65,11 @@ const AppSidebar: React.FC = () => {
       roles: ["A", "D"], // Chỉ hiển thị cho bác sĩ loại E
     },
     {
-      // name: t("sidebar.examination"),
-      // icon: <CalendarIcon />,
-      // subItems: [
-      //   {
-          icon: <CalendarIcon />,
-          name: t("sidebar.calendar"),
-          path: `${basePath}/calendar`,
-          roles: ["A"],
-          // pro: false,
-      //   },
-      //   {
-      //     name: t("sidebar.outpatientClinics"),
-      //     path: `${basePath}/outpatient-clinics`,
-      //     pro: false,
-      //   },
-      // ],
-      // roles: ["A", "RECEPTIONIST"],
+      icon: <CalendarIcon />,
+      name: t("sidebar.calendar"),
+      path: `${basePath}/calendar`,
+      roles: ["A"],
     },
-    // {
-    //   name: t("sidebar.inpatient"),
-    //   icon: <InpatientIcon />,
-    //   subItems: [
-    //     {
-    //       name: t("sidebar.inpatientRooms"),
-    //       path: `${basePath}/inpatients-rooms`,
-    //       pro: false,
-    //     },
-    //     {
-    //       name: t("sidebar.inpatientPatients"),
-    //       path: `${basePath}/inpatients`,
-    //       pro: false,
-    //     },
-    //   ],
-    //   roles: ["A", "RECEPTIONIST"],
-    // },
-    // {
-    //   icon: <DepartmentIcon />,
-    //   name: t("sidebar.departments"),
-    //   path: `${basePath}/departments`,
-    //   roles: ["A", "RECEPTIONIST"],
-    // },
     {
       icon: <AdminIcon />,
       name: t("sidebar.authorization"),
@@ -117,18 +82,12 @@ const AppSidebar: React.FC = () => {
       path: `${basePath}/doctors`,
       roles: ["A"],
     },
-    // {
-    //   icon: <CalendarIcon />,
-    //   name: t("sidebar.medicines"),
-    //   path: `${basePath}/medicines`,
-    //   roles: ["A"],
-    // },
-    // {
-    //   icon: <BoxCubeIcon />,
-    //   name: t("sidebar.healthServices"),
-    //   path: `${basePath}/health-services`,
-    //   roles: ["A"],
-    // },
+    {
+      icon: <DepartmentIcon />,
+      name: t("sidebar.departments"),
+      path: `${basePath}/departments`,
+      roles: ["A"],
+    },
     {
       icon: <CalendarIcon />,
       name: t("sidebar.workSchedule"),
@@ -185,7 +144,8 @@ const AppSidebar: React.FC = () => {
       icon: <UserCircleIcon />,
       name: t("sidebar.account"),
       path: `${basePath}/profile`,
-      roles: ["A", "D", "P"],
+      roles: ["D", "P"],
+      // roles: ["A", "D", "P"],
     },
   ];
 
@@ -206,9 +166,18 @@ const AppSidebar: React.FC = () => {
         return location.pathname === path;
       }
 
-      // Xử lý cho các route khác
       if (path === basePath) {
         return location.pathname === path;
+      }
+
+      // Xử lý đặc biệt cho các detail routes
+      const currentPath = location.pathname
+      const searchParams = new URLSearchParams(location.search)
+      const fromParam = searchParams.get("from")
+
+      // Nếu đang ở trang chi tiết prescription, highlight menu prescriptions
+      if (currentPath.match(/\/prescriptions\/\d+$/) && path.endsWith("/prescriptions")) {
+        return true
       }
       return (
         location.pathname === path || location.pathname.startsWith(path + "/")
@@ -231,6 +200,46 @@ const AppSidebar: React.FC = () => {
         });
       }
     });
+
+    // Xử lý đặc biệt cho medical record với from parameter
+    if (
+      activeSubmenuIndex === null &&
+      location.pathname.match(/\/medical-record\/\d+$/)
+    ) {
+      const fromParam = new URLSearchParams(location.search).get("from");
+
+      if (
+        fromParam === "past-appointments" ||
+        fromParam === "upcoming-appointments"
+      ) {
+        const appointmentIndex = filteredNavItems.findIndex(
+          (item) => item.name === t("sidebar.appointments") && item.subItems
+        );
+        if (appointmentIndex !== -1) {
+          activeSubmenuIndex = appointmentIndex;
+        }
+      }
+    }
+
+    // Xử lý đặc biệt cho medical record với from parameter
+    if (
+      activeSubmenuIndex === null &&
+      location.pathname.match(/\/medical-record\/\d+$/)
+    ) {
+      const fromParam = new URLSearchParams(location.search).get("from");
+
+      if (
+        fromParam === "past-appointments" ||
+        fromParam === "upcoming-appointments"
+      ) {
+        const appointmentIndex = filteredNavItems.findIndex(
+          (item) => item.name === t("sidebar.appointments") && item.subItems
+        );
+        if (appointmentIndex !== -1) {
+          activeSubmenuIndex = appointmentIndex;
+        }
+      }
+    }
 
     // Chỉ set submenu active nếu tìm thấy
     if (activeSubmenuIndex !== null) {
@@ -266,22 +275,19 @@ const AppSidebar: React.FC = () => {
             <>
               <button
                 onClick={() => handleSubmenuToggle(index)}
-                className={`menu-item group ${
-                  openSubmenu === index
+                className={`menu-item group ${openSubmenu === index
                     ? "menu-item-active"
                     : "menu-item-inactive"
-                } cursor-pointer w-full ${
-                  !isExpanded && !isHovered
+                  } cursor-pointer w-full ${!isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "lg:justify-start"
-                }`}
+                  }`}
               >
                 <span
-                  className={`menu-item-icon-size ${
-                    openSubmenu === index
+                  className={`menu-item-icon-size ${openSubmenu === index
                       ? "menu-item-icon-active"
                       : "menu-item-icon-inactive"
-                  }`}
+                    }`}
                 >
                   {nav.icon}
                 </span>
@@ -289,9 +295,8 @@ const AppSidebar: React.FC = () => {
                   <>
                     <span className="menu-item-text">{nav.name}</span>
                     <ChevronDownIcon
-                      className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                        openSubmenu === index ? "rotate-180 text-white" : ""
-                      }`}
+                      className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu === index ? "rotate-180 text-white" : ""
+                        }`}
                     />
                   </>
                 )}
@@ -315,32 +320,29 @@ const AppSidebar: React.FC = () => {
                       <li key={subItem.name}>
                         <Link
                           to={subItem.path}
-                          className={`menu-dropdown-item ${
-                            isActive(subItem.path)
+                          className={`menu-dropdown-item ${isActive(subItem.path)
                               ? "menu-dropdown-item-active"
                               : "menu-dropdown-item-inactive"
-                          }`}
+                            }`}
                         >
                           {subItem.name}
                           <span className="flex items-center gap-1 ml-auto">
                             {subItem.new && (
                               <span
-                                className={`ml-auto ${
-                                  isActive(subItem.path)
+                                className={`ml-auto ${isActive(subItem.path)
                                     ? "menu-dropdown-badge-active"
                                     : "menu-dropdown-badge-inactive"
-                                } menu-dropdown-badge`}
+                                  } menu-dropdown-badge`}
                               >
                                 {t("sidebar.new")}
                               </span>
                             )}
                             {subItem.pro && (
                               <span
-                                className={`ml-auto ${
-                                  isActive(subItem.path)
+                                className={`ml-auto ${isActive(subItem.path)
                                     ? "menu-dropdown-badge-active"
                                     : "menu-dropdown-badge-inactive"
-                                } menu-dropdown-badge`}
+                                  } menu-dropdown-badge`}
                               >
                                 {t("sidebar.pro")}
                               </span>
@@ -357,16 +359,14 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 to={nav.path}
-                className={`menu-item group ${
-                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                }`}
+                className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                  }`}
               >
                 <span
-                  className={`menu-item-icon-size ${
-                    isActive(nav.path)
+                  className={`menu-item-icon-size ${isActive(nav.path)
                       ? "menu-item-icon-active"
                       : "menu-item-icon-inactive"
-                  }`}
+                    }`}
                 >
                   {nav.icon}
                 </span>
@@ -390,17 +390,15 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-        }`}
+        className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+          }`}
       >
         <Link to={basePath}>
           <img
             src="/public/images/logo/Logo.png"
             alt="Wecare Logo"
-            className={`transition-all duration-300 ${
-              isExpanded || isHovered || isMobileOpen ? "w-32" : "w-10"
-            }`}
+            className={`transition-all duration-300 ${isExpanded || isHovered || isMobileOpen ? "w-32" : "w-10"
+              }`}
           />
         </Link>
       </div>
@@ -410,11 +408,10 @@ const AppSidebar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
-                }`}
+                  }`}
               >
                 {(isExpanded || isHovered || isMobileOpen) && t("sidebar.menu")}
                 {!isExpanded && !isHovered && !isMobileOpen && (

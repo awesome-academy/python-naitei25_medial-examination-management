@@ -53,15 +53,23 @@ const DoctorHeader: React.FC<DoctorHeaderProps> = ({ doctorId, onBook, isBooking
         <div className="space-y-3">
           <div className="flex items-center space-x-3 text-gray-700">
             <Stethoscope className="h-5 w-5 text-cyan-600" />
-            <p><span className="font-semibold">{t('common.specialization')}:</span> {doctor.specialization}</p>
+            <p>
+              <span className="font-semibold">{t('common.specialization')}:</span>{' '}
+              {doctor.specialization}
+            </p>
           </div>
           <div className="flex items-center space-x-3 text-gray-700">
             <User className="h-5 w-5 text-cyan-600" />
-            <p><span className="font-semibold">{t('common.academicDegree')}:</span> {ACADEMIC_DEGREE_LABELS[doctor.academic_degree] || doctor.academic_degree}</p>
+            <p>
+              <span className="font-semibold">{t('common.academicDegree')}:</span>{' '}
+              {ACADEMIC_DEGREE_LABELS[doctor.academic_degree] || doctor.academic_degree}
+            </p>
           </div>
           <div className="flex items-center space-x-3 text-gray-700">
             <DollarSign className="h-5 w-5 text-cyan-600" />
-            <p><span className="font-semibold">{t('common.price')}:</span> {formatPrice(doctor.price)}</p>
+            <p>
+              <span className="font-semibold">{t('common.price')}:</span> {formatPrice(doctor.price)}
+            </p>
           </div>
         </div>
         {!isBooking && (

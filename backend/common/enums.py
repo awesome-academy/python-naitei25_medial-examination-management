@@ -53,6 +53,7 @@ class NoteType(Enum):
 
 class PaymentStatus(Enum):
     PAID = "P"
+    BOOKING_PAID = "B"
     UNPAID = "U"
 
 class PaymentMethod(Enum):
