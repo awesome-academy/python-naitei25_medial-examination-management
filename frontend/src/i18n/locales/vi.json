@@ -818,6 +818,7 @@
     "save": "Lưu bệnh án",
     "error": {
       "selectAppointment": "Vui lòng chọn cuộc hẹn",
+      "requiredFollowUpDate": "Ngày tái khám là bắt buộc nếu cần tái khám",
       "diagnosisRequired": "Chẩn đoán là bắt buộc",
       "systolicRange": "Huyết áp tâm thu phải từ 80-200 mmHg",
       "diastolicRange": "Huyết áp tâm trương phải từ 40-120 mmHg",
@@ -2070,5 +2071,8 @@
     "headLabel": "Trưởng phòng",
     "headPlaceholder": "Nhập tên trưởng phòng",
     "createButton": "Tạo phòng ban"
+  },
+  "success": {
+    "examinationCompleted": "Hoàn thành khám bệnh!"
   }
 }

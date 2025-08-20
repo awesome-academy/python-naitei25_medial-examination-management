@@ -254,7 +254,7 @@
     "fullNameMinLength": "Full name must be at least 2 characters!",
     "fullNameMaxLength": "Full name cannot exceed 50 characters!",
     "fullNamePattern": "Full name can only contain letters and spaces!",
-    "required": "is required",
+    "required": "This field is required",
     "emailRequired": "Email is required",
     "emailInvalid": "Invalid email format",
     "phoneRequired": "Phone number is required",
@@ -781,6 +781,7 @@
     "save": "Save medical record",
     "error": {
       "selectAppointment": "Please select an appointment",
+      "requiredFollowUpDate": "Follow-up date is required if follow-up is needed",
       "diagnosisRequired": "Diagnosis is required",
       "systolicRange": "Systolic blood pressure must be 80-200 mmHg",
       "diastolicRange": "Diastolic blood pressure must be 40-120 mmHg",
@@ -2067,5 +2068,8 @@
     "headLabel": "Head of Department",
     "headPlaceholder": "Enter head doctor's name",
     "createButton": "Create Department"
+  },
+  "success": {
+    "examinationCompleted": "Examination completed successfully!"
   }
 }
