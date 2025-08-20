@@ -269,9 +269,8 @@ const ServicePatients: React.FC = () => {
 
     const handleViewServiceOrder = (record: ServiceOrder) => {
         const appointment = appointmentsData[record.appointmentId]
-        navigate("/doctor/service/patient/detail", {
+        navigate(`/doctor/service/patient/detail/${record.orderId}`, {
             state: {
-                orderId: record.orderId,
                 roomId: record.roomId,
                 appointmentData: appointment,
                 serviceOrder: record,

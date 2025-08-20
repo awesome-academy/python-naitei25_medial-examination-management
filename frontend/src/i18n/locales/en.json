@@ -651,7 +651,7 @@
   "prescriptionDetail": {
     "prescriptionTitle": "Prescription #{{id}}",
     "prescriptionSubtitle": "Detailed prescription information and usage instructions",
-    "diagnosis": "Diagnosis: ",
+    "diagnosis": "Diagnosis",
     "noDiagnosis": "No specific diagnosis",
     "prescriptionDate": "Prescription Date",
     "overview": "Overview",
@@ -697,7 +697,7 @@
     "doctorNotes": "Doctor's Notes",
     "prescription": "Prescription",
     "prescriptionDate": "Prescription Date",
-    "diagnosis": "Diagnosis: ",
+    "diagnosis": "Diagnosis",
     "followUpAppointment": "Follow-up Appointment",
     "status": "Status",
     "patientName": "Patient Name",
@@ -2092,5 +2092,9 @@
   },
   "success": {
     "examinationCompleted": "Examination completed successfully!"
+  },
+  "confirm": {
+    "deleteServiceOrderTitle": "Delete Service Order",
+    "deleteServiceOrderDesc": "Are you sure you want to delete this service order?"
   }
 }

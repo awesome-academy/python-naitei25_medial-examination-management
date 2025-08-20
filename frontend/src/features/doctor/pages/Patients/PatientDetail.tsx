@@ -20,6 +20,7 @@ import {
     Select,
     Tag,
     Tooltip,
+    Popconfirm,
 } from "antd"
 import {
     PlusOutlined,
@@ -31,6 +32,9 @@ import {
     CloseOutlined,
     MedicineBoxOutlined,
     UserOutlined,
+    SaveOutlined,
+    ExperimentOutlined,
+    DeleteOutlined
 } from "@ant-design/icons"
 import { PrescriptionModal } from "../../components/PrecriptionModal"
 import { ServiceOrderModal } from "../../components/ServiceOrderModal"
@@ -47,6 +51,7 @@ import { appointmentService } from "../../services/appointmentService"
 import { stringToDate, dateToString } from "../../services/dateHelpServices"
 import { useTranslation } from "react-i18next"
 import { getAppointmentStatusColor } from "../../services/appointmentService"
+import { getServiceOrderById, updateServiceOrder, deleteServiceOrder } from "../../services/serviceOrderService"
 
 const { Title, Text } = Typography
 const { TabPane } = Tabs
@@ -252,6 +257,19 @@ const PatientDetail: React.FC = () => {
         }
 
         deleteAppointmentNote(noteId)
+    }
+
+    // Xóa service order
+    const handleDeleteServiceOrder = async (orderId: number, appointmentId: number) => {
+        try {
+            await deleteServiceOrder(orderId)
+            message.success(t("success.deleteServiceOrder"))
+            if (appointmentId) {
+                await refreshAll(appointmentId)
+            }
+        } catch (error) {
+            message.error(t("errors.deleteServiceOrderFailed"))
+        }
     }
 
     const handleViewPrescriptionHistory = (prescription: Prescription) => {
@@ -676,8 +694,8 @@ const PatientDetail: React.FC = () => {
                                             ) : (
                                                 <div className="space-y-4">
                                                     {serviceOrders.map((order) => (
-                                                        <div key={order.orderId} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
-                                                            <div>
+                                                        <div key={order.orderId} className="border border-gray-200 rounded-lg p-4 flex items-center">
+                                                            <div className="flex-1">
                                                                 <p className="text-sm font-medium">{t("labels.serviceName")}: {order.service_name || t("labels.notSpecified")}</p>
                                                                 <p className="text-sm text-gray-500">{t("labels.room")}: {order.room_id || t("labels.notSpecified")}</p>
                                                                 {order.orderTime && (
@@ -709,20 +727,36 @@ const PatientDetail: React.FC = () => {
                                                                                     document.body.removeChild(link)
                                                                                 }}
                                                                             >
-                                                                                {t("buttons.download")}
+                                                                                {t("common.download")}
                                                                             </Button>
                                                                         </div>
                                                                     </div>
                                                                 )}
                                                                 <p className="text-sm text-gray-500 mt-1">
-                                                                    {t("labels.status")}: {order.status === "C" ? t("status.completed") : t("status.pending")}
+                                                                    {t("labels.status")}: {order.order_status === "C" ? t("status.completed") : t("status.pending")}
                                                                 </p>
                                                             </div>
-                                                            <Button
-                                                                type="text"
-                                                                icon={<EyeOutlined />}
-                                                                onClick={() => handleViewTestResult(order)}
-                                                            />
+                                                            <div className="flex items-center space-x-2 ml-4">
+                                                                <Button
+                                                                    type="text"
+                                                                    icon={<EyeOutlined />}
+                                                                    onClick={() => handleViewTestResult(order)}
+                                                                />
+                                                                <Popconfirm
+                                                                    title={t("confirm.deleteServiceOrderTitle")}
+                                                                    description={t("confirm.deleteServiceOrderDesc")}
+                                                                    okText={t("common.delete")}
+                                                                    cancelText={t("common.cancel")}
+                                                                    okButtonProps={{ danger: true }}
+                                                                    onConfirm={() => handleDeleteServiceOrder(order.order_id, order.appointment_id)}
+                                                                >
+                                                                    <Button
+                                                                        size="small"
+                                                                        danger
+                                                                        icon={<DeleteOutlined />}
+                                                                    />
+                                                                </Popconfirm>
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -811,7 +845,7 @@ const PatientDetail: React.FC = () => {
                                                                 <div className="flex-1">
                                                                     <p className="text-sm font-medium">{t("labels.prescription")} #{pres.id}</p>
                                                                     <p className="text-xs text-gray-500">{t("labels.prescriptionDate")}: {formatDate(pres.created_at)}</p>
-                                                                    <p className="text-xs text-gray-500">{t("labels.diagnosis")}{pres.diagnosis || t("labels.noDiagnosis")}</p>
+                                                                    <p className="text-xs text-gray-500">{t("labels.diagnosis")}: {pres.diagnosis || t("labels.noDiagnosis")}</p>
                                                                 </div>
                                                                 <Button
                                                                     type="text"

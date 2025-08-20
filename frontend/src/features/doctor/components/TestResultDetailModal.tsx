@@ -187,20 +187,47 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
 
         <Card title={<div style={{ color: "#036672" }}>{t("titles.result")}</div>} className="mt-4">
           <Form form={form} layout="vertical" onFinish={handleSave}>
-            <Form.Item
-              name="result"
-              rules={[]}
-            >
-              <TextArea
-                rows={8}
-                readOnly
-              />
-            </Form.Item>
+            {serviceOrder.order_status === "C" && (
+              <Form.Item>
+                <div className="flex items-center">
+                  <span className="text-blue-600 mr-2">📄</span>
+                  <span className="font-medium text-blue-800">
+                    {`${serviceOrder.order_id || ''}_${serviceOrder.serviceName || serviceOrder.service_name || 'result'}.pdf`}
+                  </span>
+                  {serviceOrder.result && (
+                    <>
+                      <Button
+                        size="small"
+                        type="link"
+                        onClick={() => window.open(serviceOrder.result, "_blank")}
+                        style={{ marginLeft: 8 }}
+                      >
+                        {t("buttons.viewPDF") || "Xem"}
+                      </Button>
+                      <Button
+                        size="small"
+                        type="link"
+                        onClick={() => {
+                          const link = document.createElement("a");
+                          link.href = serviceOrder.result;
+                          link.download = `${serviceOrder.orderId || ''}_${serviceOrder.serviceName || serviceOrder.service_name || 'result'}.pdf`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                      >
+                        {t("common.download") || "Tải xuống"}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </Form.Item>
+            )}
 
             {serviceOrder.order_status === "O" && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                 <Text type="warning">
-                  <strong>{t("labels.note")}</strong> {t("messages.testPending")}
+                  <strong>{t("labels.note")}:</strong> {t("messages.testPending")}
                 </Text>
               </div>
             )}
@@ -208,7 +235,7 @@ export const TestResultDetailModal: React.FC<TestResultDetailModalProps> = ({
             {serviceOrder.order_status === "C" && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                 <Text type="success">
-                  <strong>{t("status.completed")}</strong> {t("messages.testResultUpdatedAt")} {formatDateTime(serviceOrder.result_time)}
+                  <strong>{t("status.completed")}:</strong> {t("messages.testResultUpdatedAt")} {formatDateTime(serviceOrder.result_time)}
                 </Text>
               </div>
             )}

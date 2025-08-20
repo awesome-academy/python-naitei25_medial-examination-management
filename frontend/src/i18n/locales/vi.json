@@ -786,7 +786,7 @@
     "noServices": "Không tìm thấy dịch vụ.",
     "viewPrescription": "Xem đơn thuốc",
     "title": "Chi tiết Hồ sơ Khám bệnh",
-    "diagnosis": "Chẩn đoán: ",
+    "diagnosis": "Chẩn đoán",
     "bloodPressure": "Huyết áp",
     "heartRate": "Nhịp tim",
     "bloodSugar": "Đường huyết",
@@ -2095,5 +2095,9 @@
   },
   "success": {
     "examinationCompleted": "Hoàn thành khám bệnh!"
+  },
+"confirm": {
+    "deleteServiceOrderTitle": "Xóa đơn dịch vụ",
+    "deleteServiceOrderDesc": "Bạn có chắc chắn muốn xóa đơn dịch vụ này không?"
   }
 }

@@ -157,7 +157,7 @@ export const ServiceOrderModal: React.FC<ModalProps> = ({ isOpen, onClose, appoi
       key: "roomId",
       render: (roomId: number | null, record: MedicalOrderItem, index: number) => (
         <Select
-          placeholder={t("serviceOrder.placeholders.selectRoom")}
+          placeholder={t("placeholders.selectRoom")}
           style={{ width: '100%' }}
           value={roomId === undefined ? null : roomId}
           onChange={(value) => handleRoomChange(index, value)}
