@@ -165,7 +165,10 @@
     "serviceName": "Service Name",
     "insurance": "Insurance",
     "insuranceCovered": "Insurance Covered",
-    "noStaffInfo": "No staff information available"
+    "noStaffInfo": "No staff information available",
+    "prev": "Previous",
+    "next": "Next",
+    "page": "Page"
   },
   "navigation": {
     "home": "Home",
@@ -1319,7 +1322,16 @@
     "actions": {
       "book": "Book Appointment"
     },
-    "empty": "No doctors found"
+    "empty": "No doctors found",
+    "sort": {
+      "name": "Sort by Name",
+      "price": "Sort by Price (VND)",
+      "asc": "Price: Low to High",
+      "desc": "Price: High to Low"
+    },
+    "filter": {
+      "specialization": "Filter by specialization"
+    }
   },
   "home": {
     "hero": {
@@ -1338,7 +1350,8 @@
     },
     "actions": {
       "book": "Book Appointment",
-      "viewAllDoctors": "View all doctors"
+      "viewAllDoctors": "View all doctors",
+      "viewAllSpecialties": "View all specialties"
     },
     "emptyDoctors": "No doctors found",
     "specialties": {
@@ -1386,7 +1399,15 @@
     "actions": {
       "viewDoctors": "View Doctors"
     },
-    "empty": "No specialties found"
+    "empty": "No specialties found",
+    "sort": {
+      "name": "Sort by name",
+      "asc": "Ascending",
+      "desc": "Descending"
+    },
+    "filter": {
+      "name": "Filter by specialty name"
+    }
   },
   "appointment": {
     "title": "Book Appointment",
