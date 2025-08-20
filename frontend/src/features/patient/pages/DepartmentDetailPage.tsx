@@ -22,6 +22,9 @@ const DepartmentDetailPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'none'>('none');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   const { data: department, loading: deptLoading, error: deptError } = useApi(
     () => departmentService.getDepartmentById(Number(id)),
     [id]
@@ -50,12 +53,13 @@ const DepartmentDetailPage: React.FC = () => {
     return result;
   }, [doctors, searchQuery, sortOrder]);
 
+  // 👉 Pagination logic
+  const totalPages = Math.ceil(filteredAndSortedDoctors.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentDoctors = filteredAndSortedDoctors.slice(startIndex, startIndex + itemsPerPage);
+
   const handleDoctorClick = (doctorId: number) => {
     navigate(`/patient/doctors/${doctorId}`);
-  };
-
-  const handleSearch = () => {
-    // Search is handled by filtering, no need for navigation
   };
 
   const handleBack = () => {
@@ -94,7 +98,7 @@ const DepartmentDetailPage: React.FC = () => {
       <SearchBar
         value={searchQuery}
         onChange={setSearchQuery}
-        onSearch={handleSearch}
+        onSearch={() => {}}
         placeholder={t('common.searchDoctorsPlaceholder')}
         className="w-full max-w-2xl"
       />
@@ -139,17 +143,49 @@ const DepartmentDetailPage: React.FC = () => {
       </p>
 
       {/* Doctors Grid */}
-      {filteredAndSortedDoctors.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAndSortedDoctors.map((doctor) => (
-            <DoctorCard
-              key={doctor.id}
-              doctor={doctor}
-              onClick={handleDoctorClick}
-              className="hover:shadow-lg transition-shadow duration-200"
-            />
-          ))}
-        </div>
+      {currentDoctors.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {currentDoctors.map((doctor) => (
+              <DoctorCard
+                key={doctor.id}
+                doctor={doctor}
+                onClick={handleDoctorClick}
+                className="hover:shadow-lg transition-shadow duration-200"
+              />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="flex justify-center mt-10 gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              {t("common.prev")}
+            </Button>
+
+            {/* page numbers */}
+            {Array.from({ length: totalPages }, (_, i) => (
+              <Button
+                key={i + 1}
+                variant={currentPage === i + 1 ? "default" : "outline"}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </Button>
+            ))}
+
+            <Button
+              variant="outline"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              {t("common.next")}
+            </Button>
+          </div>
+        </>
       ) : (
         <div className="text-center py-8 bg-white rounded-lg shadow-md">
           <p className="text-gray-600 mb-4">

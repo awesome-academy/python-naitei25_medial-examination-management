@@ -1,11 +1,7 @@
-import { api } from './api'; // Giữ nguyên import này theo cấu trúc của bạn
-import { storage } from '../utils/storage';
-import { LocalStorageKeys } from '../constants/storageKeys';
-import { patientService } from './patientService';
-import type { Appointment } from '../types/appointment'; 
+import { api } from './api';
+import type { Bill } from '../types/payment';
 
 const paymentService = {
-  // Cập nhật hàm để nhận 'price' thay vì 'consultationFee'
   async createBillFromAppointment(appointmentId: number, patientId: number, price: number) {
     if (isNaN(price) || price <= 0) {
       throw new Error('Giá khám không hợp lệ hoặc bằng 0');
@@ -36,6 +32,20 @@ const paymentService = {
     }
   },
 
+  async getBillByAppointmentId(appointmentId: number): Promise<Bill | null> {
+    try {
+      const response = await api.get(`/bills/`, {
+        params: { appointment_id: appointmentId }
+      });
+      console.log('Bill response:', response.data);
+      // Giả sử API trả về danh sách, lấy bill đầu tiên hoặc null nếu không có
+      return response.data.content?.[0] || null;
+    } catch (error: any) {
+      console.error('Lỗi khi lấy hóa đơn theo appointment:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   async createPaymentLink(billId: number) {
     try {
       const response = await api.post(`/transactions/create-payment/${billId}/`);
@@ -46,19 +56,14 @@ const paymentService = {
     }
   },
 
-  // ĐÃ SỬA ĐỔI Ở ĐÂY: Sử dụng orderCode trong URL path nếu có
   async getPaymentInfo(billId: number, orderCode?: string) {
     try {
       let endpoint: string;
       if (orderCode) {
-        // Nếu có orderCode (từ callback của PayOS), sử dụng nó trong đường dẫn
         endpoint = `/transactions/payment-info/${orderCode}/`;
       } else {
-        // Ngược lại, sử dụng billId (ví dụ: khi tra cứu hóa đơn trực tiếp)
         endpoint = `/transactions/payment-info/${billId}/`;
       }
-      
-      // Không cần query params nếu định danh đã nằm trong đường dẫn
       const response = await api.get(endpoint);
       console.log('Payment info response:', response.data);
       return response.data;
@@ -68,12 +73,11 @@ const paymentService = {
     }
   },
 
-  // Đã sửa: Thay đổi billId thành orderCode và sử dụng orderCode trong URL path
   async updatePaymentStatus(orderCode: string, status: 'success' | 'cancel', paymentData?: any) {
     try {
       const endpoint = status === 'success' 
-        ? `/transactions/${orderCode}/success/` // Sử dụng orderCode trực tiếp
-        : `/transactions/${orderCode}/cancel/`; // Sử dụng orderCode trực tiếp
+        ? `/transactions/${orderCode}/success/`
+        : `/transactions/${orderCode}/cancel/`;
       const payload = {
         orderCode: paymentData?.orderCode,
         status: paymentData?.status,

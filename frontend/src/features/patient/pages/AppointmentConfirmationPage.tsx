@@ -141,9 +141,27 @@ const AppointmentConfirmationPage: React.FC = () => {
     }
   }, [appointment, doctorDetails, patientDetails, t]);
 
-  const handleBackToDoctor = () => {
-    navigate(`/patient/doctors/${doctorId}`);
-  };
+const handleBackToDoctor = () => {
+  let symptoms: string[] = [];
+  let note = "";
+  if (appointment?.symptoms) {
+    const [symptomsStr, noteStr] = appointment.symptoms.split("; Note: ");
+    symptoms = symptomsStr ? symptomsStr.split(", ").filter(Boolean) : [];
+    note = noteStr || "";
+  }
+
+const appointmentForm = {
+  date: appointmentDateFromUrl || new Date().toISOString().split("T")[0],
+  session: appointment?.schedule?.shift || "M",
+  time: appointment?.slot_start ? appointment.slot_start.substring(0, 5) : "",
+  symptoms,
+  note,
+};
+
+  navigate(`/patient/departments/doctors/${doctorId}?book=true`, {
+    state: { appointmentForm, appointmentId }, // Đảm bảo truyền appointmentId
+  });
+};
 
   if (loading) {
     return <LoadingSpinner message={t("appointment.confirmation.loading")} />;

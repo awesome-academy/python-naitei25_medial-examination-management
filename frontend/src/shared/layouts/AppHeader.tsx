@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router"
 import { useSidebar } from "../context/SidebarContext"
-import NotificationDropdown from "../components/layouts/NotificationDropdown"
 import UserDropdown from "../components/layouts/UserDropdown"
 import LanguageSwitcher from "../components/common/LanguageSwitcher"
 
@@ -133,7 +132,6 @@ const AppHeader: React.FC = () => {
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
             <LanguageSwitcher />
-            <NotificationDropdown />
           </div>
           <UserDropdown />
         </div>

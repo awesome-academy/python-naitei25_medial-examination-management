@@ -8,7 +8,7 @@ import { doctorService } from "../../../../shared/services/doctorService";
 import { patientService } from "../../../../shared/services/patientService";
 import { appointmentService } from "../../../../shared/services/appointmentService";
 import { useAuth } from "../../../../shared/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { message } from "antd";
 import LoadingSpinner from "../../../../shared/components/common/LoadingSpinner";
 import ErrorMessage from "../../../../shared/components/common/ErrorMessage";
@@ -24,8 +24,10 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
   const { t } = useTranslation();
   const { getCurrentUserId } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const userId = getCurrentUserId();
   const [patientId, setPatientId] = useState<number | null>(null);
+  const [appointmentId, setAppointmentId] = useState<number | null>(null);
   const [appointmentForm, setAppointmentForm] = useState({
     date: new Date().toISOString().split("T")[0],
     session: "M",
@@ -50,6 +52,15 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
     { value: "M", label: t("appointment.morning") },
     { value: "A", label: t("appointment.afternoon") },
   ];
+
+  useEffect(() => {
+    if (location.state?.appointmentForm) {
+      setAppointmentForm(location.state.appointmentForm);
+    }
+    if (location.state?.appointmentId) {
+      setAppointmentId(location.state.appointmentId);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     if (userId) {
@@ -90,24 +101,46 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
     if (appointmentForm.date && schedules.length > 0) {
       setLoadingSlots(true);
       setError(null);
+
       const schedule = schedules.find(
         (s) =>
           s.shift === appointmentForm.session &&
           s.work_date === appointmentForm.date
       );
+
       if (schedule) {
         doctorService
           .getAvailableTimeSlots(schedule.id, appointmentForm.date)
           .then((data) => {
-            const filteredSlots = (data?.timeSlots || []).filter(
+            let filteredSlots = (data?.timeSlots || []).filter(
               (slot) => slot.available
             );
-            setAvailableSlots(filteredSlots);
+
+            // 🔑 Nếu slot đã chọn không còn available thì vẫn giữ lại để hiển thị
             if (
-              !filteredSlots.some((slot) => slot.time === appointmentForm.time)
+              appointmentForm.time &&
+              !filteredSlots.some((s) => s.time === appointmentForm.time)
             ) {
-              handleInputChange("time", filteredSlots[0]?.time || "");
+              filteredSlots = [
+                ...filteredSlots,
+                { time: appointmentForm.time, available: false },
+              ];
             }
+
+            setAvailableSlots(filteredSlots);
+
+            // giữ nguyên time cũ nếu vẫn còn
+            if (
+              appointmentForm.time &&
+              filteredSlots.some((slot) => slot.time === appointmentForm.time)
+            ) {
+              // do nothing
+            } else if (filteredSlots.length > 0) {
+              handleInputChange("time", filteredSlots[0].time);
+            } else {
+              handleInputChange("time", "");
+            }
+
             setLoadingSlots(false);
           })
           .catch((err) => {
@@ -117,6 +150,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
           });
       } else {
         setAvailableSlots([]);
+        handleInputChange("time", "");
         setLoadingSlots(false);
       }
     }
@@ -126,7 +160,6 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
     setAppointmentForm((prev) => ({
       ...prev,
       [field]: value,
-      ...(field !== "time" ? { time: "" } : {}),
     }));
   };
 
@@ -210,7 +243,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
 
       setTimeout(() => {
         navigate(
-          `/patient/appointments/confirm?doctorId=${doctorId}&date=${appointmentForm.date}&appointmentId=${appointment.id}`
+          `/patient/departments/appointments/confirm?doctorId=${doctorId}&date=${appointmentForm.date}&appointmentId=${appointment.id}`,
+          { state: { appointmentForm, appointmentId: appointment.id } }
         );
       }, 500);
     } catch (error: any) {
@@ -323,16 +357,18 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
                     );
                     const isPastSlot = isToday && slotDateTime <= now;
 
+                    const isSelected = appointmentForm.time === slot.time;
+
                     return (
                       <button
                         key={slot.time}
                         type="button"
-                        disabled={isPastSlot}
+                        disabled={isPastSlot && !isSelected}
                         onClick={() => handleInputChange("time", slot.time)}
                         className={`px-4 py-2 rounded-lg border transition ${
-                          isPastSlot
+                          isPastSlot && !isSelected
                             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                            : appointmentForm.time === slot.time
+                            : isSelected
                             ? "bg-cyan-600 text-white"
                             : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
                         }`}
@@ -388,23 +424,12 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
           </div>
 
           {/* Buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              type="submit"
-              className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 rounded-lg w-full"
-            >
-              {t("appointment.submit")}
-            </Button>
-            <Button
-              type="button"
-              onClick={() =>
-                navigate(`/patient/departments/${doctorId}/doctors`)
-              }
-              className="bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold py-2 rounded-lg w-full"
-            >
-              {t("appointment.cancel")}
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 rounded-lg w-full"
+          >
+            {t("appointment.submit")}
+          </Button>
         </form>
       </CardContent>
     </Card>

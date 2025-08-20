@@ -186,22 +186,26 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
 
 class AppointmentCreateSerializer(serializers.ModelSerializer):
+    symptoms = serializers.CharField(required=False, allow_blank=True)
+    note = serializers.CharField(required=False, allow_blank=True)
     class Meta:
         model = Appointment
         fields = [
             'id',
             'slot_start', 'slot_end', 'schedule',
-            'symptoms',
+            'symptoms', 'note',
             'doctor', 'patient'
         ]
         read_only_fields = ['id']
 
 
 class AppointmentUpdateSerializer(serializers.ModelSerializer):
+    symptoms = serializers.CharField(required=False, allow_blank=True)
+    note = serializers.CharField(required=False, allow_blank=True)
     class Meta:
         model = Appointment
         fields = [
-            'id', 'doctor', 'patient', 'schedule', 'symptoms',
+            'id', 'doctor', 'patient', 'schedule', 'symptoms', 'note',
             'status', 'slot_start', 'slot_end'
         ]
 

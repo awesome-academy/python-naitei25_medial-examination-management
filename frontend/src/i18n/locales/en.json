@@ -168,7 +168,11 @@
     "noStaffInfo": "No staff information available",
     "prev": "Previous",
     "next": "Next",
-    "page": "Page"
+    "page": "Page",
+    "sort": "Sort",
+    "sortAZ": "Name A → Z",
+    "sortZA": "Name Z → A",
+    "pageInfo": "Showing {{end}} of {{total}} departments"
   },
   "navigation": {
     "home": "Home",

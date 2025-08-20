@@ -22,7 +22,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
   };
 
   const goToBooking = () => {
-    navigate(`/patient/doctors/${doctor.id}?book=true`);
+    navigate(`/patient/departments/doctors/${doctor.id}?book=true`);
   };
 
   return (

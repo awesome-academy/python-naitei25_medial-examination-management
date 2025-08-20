@@ -161,7 +161,11 @@
     "noStaffInfo": "Không có thông tin nhân viên",
     "prev": "Trước",
     "next": "Sau",
-    "page": "Trang"
+    "page": "Trang",
+    "sort": "Sắp xếp",
+    "sortAZ": "Tên A → Z",
+    "sortZA": "Tên Z → A",
+    "pageInfo": "Hiển thị {{end}} trên tổng số {{total}} phòng ban"
   },
   "navigation": {
     "home": "Trang chủ",

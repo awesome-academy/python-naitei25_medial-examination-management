@@ -8,7 +8,6 @@ import LoadingSpinner from "../../../shared/components/common/LoadingSpinner"
 import ErrorMessage from "../../../shared/components/common/ErrorMessage"
 import { Button } from "@/components/ui/button"
 import {
-  ChevronLeft,
   Pill,
   Download,
   Calendar,
@@ -23,8 +22,6 @@ import {
   Timer,
   Scale,
   StickyNote,
-  PrinterIcon as Print,
-  Share2,
 } from "lucide-react"
 
 interface PrescriptionDetail {
@@ -77,7 +74,6 @@ const PrescriptionDetailPage: React.FC = () => {
     fetchPrescription()
   }, [id, t])
 
-  const handleBack = () => navigate(-1)
   const handleDownloadPdf = async () => {
     if (!id) return
     try {
@@ -88,28 +84,6 @@ const PrescriptionDetailPage: React.FC = () => {
     }
   }
 
-  const handlePrint = () => {
-    window.print()
-  }
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: t("prescriptionDetail.shareTitle", { id: prescription?.id }),
-          text: t("prescriptionDetail.shareText", { id: prescription?.id }),
-          url: window.location.href,
-        })
-      } catch (err) {
-        console.log("Error sharing:", err)
-      }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href)
-      alert(t("prescriptionDetail.linkCopied"))
-    }
-  }
-
   if (loading) return <LoadingSpinner size="lg" message={t("common.loading")} />
   if (error) return <ErrorMessage message={error} />
   if (!prescription) return <ErrorMessage message={t("common.noData")} />
@@ -117,28 +91,6 @@ const PrescriptionDetailPage: React.FC = () => {
   return (
     <div className="min-h-screen">
       <div className="space-y-6 max-w-6xl mx-auto">
-        {/* Header Actions */}
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 rounded-lg transition-all duration-200"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span>{t("common.goBack")}</span>
-          </Button>
-
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={handleDownloadPdf}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors duration-200"
-            >
-              <Download className="w-4 h-4" />
-              <span>{t("common.downloadPdf")}</span>
-            </Button>
-          </div>
-        </div>
-
         {/* Prescription Header */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-lg">
@@ -275,9 +227,7 @@ const PrescriptionDetailPage: React.FC = () => {
                       <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Clock className="w-4 h-4 text-orange-600" />
-                          <span className="text-sm font-medium text-orange-900">
-                            {t("prescriptionDetail.frequency")}
-                          </span>
+                          <span className="text-sm font-medium text-orange-900">{t("prescriptionDetail.frequency")}</span>
                         </div>
                         <p className="text-orange-800 font-bold text-lg">
                           {detail.frequency || t("prescriptionDetail.notSpecified")}
@@ -299,9 +249,7 @@ const PrescriptionDetailPage: React.FC = () => {
                       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Hash className="w-4 h-4 text-purple-600" />
-                          <span className="text-sm font-medium text-purple-900">
-                            {t("prescriptionDetail.quantity")}
-                          </span>
+                          <span className="text-sm font-medium text-purple-900">{t("prescriptionDetail.quantity")}</span>
                         </div>
                         <p className="text-purple-800 font-bold text-lg">
                           {detail.quantity} {detail.unit || t("prescriptionDetail.unit")}
@@ -311,7 +259,6 @@ const PrescriptionDetailPage: React.FC = () => {
 
                     {/* Additional Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Unit */}
                       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Scale className="w-4 h-4 text-gray-600" />
@@ -322,7 +269,6 @@ const PrescriptionDetailPage: React.FC = () => {
                         </p>
                       </div>
 
-                      {/* Notes */}
                       {detail.prescription_notes && (
                         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                           <div className="flex items-center gap-2 mb-2">
@@ -331,7 +277,9 @@ const PrescriptionDetailPage: React.FC = () => {
                               {t("prescriptionDetail.specialNotes")}
                             </span>
                           </div>
-                          <p className="text-yellow-800 font-medium leading-relaxed">{detail.prescription_notes}</p>
+                          <p className="text-yellow-800 font-medium leading-relaxed">
+                            {detail.prescription_notes}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -345,29 +293,34 @@ const PrescriptionDetailPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="text-blue-800 text-sm space-y-1">
-                        <p>
-                          • {t("prescriptionDetail.dosageLabel")}: {detail.dosage}
-                        </p>
-                        <p>
-                          • {t("prescriptionDetail.frequencyLabel")}: {detail.frequency}
-                        </p>
-                        <p>
-                          • {t("prescriptionDetail.durationLabel")}: {detail.duration}
-                        </p>
-                        <p>
-                          • {t("prescriptionDetail.totalQuantityLabel")}: {detail.quantity} {detail.unit}
-                        </p>
+                        <p>• {t("prescriptionDetail.dosageLabel")}: {detail.dosage}</p>
+                        <p>• {t("prescriptionDetail.frequencyLabel")}: {detail.frequency}</p>
+                        <p>• {t("prescriptionDetail.durationLabel")}: {detail.duration}</p>
+                        <p>• {t("prescriptionDetail.totalQuantityLabel")}: {detail.quantity} {detail.unit}</p>
                       </div>
                     </div>
                   </div>
                 ))}
+
+                {/* Download Button ở cuối */}
+                <div className="flex justify-center mt-6">
+                  <Button
+                    onClick={handleDownloadPdf}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm hover:bg-blue-700 rounded-lg transition-colors duration-200"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>{t("common.downloadPdf")}</span>
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Pill className="w-8 h-8 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">{t("prescriptionDetail.noMedicines")}</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {t("prescriptionDetail.noMedicines")}
+                </h3>
                 <p className="text-gray-600">{t("prescriptionDetail.noMedicinesText")}</p>
               </div>
             )}

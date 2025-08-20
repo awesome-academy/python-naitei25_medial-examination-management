@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -11,14 +11,12 @@ import {
   HorizontaLDots,
   UserCircleIcon,
   PatientIcon,
-  InpatientIcon,
   DepartmentIcon,
   AdminIcon,
   DoctorIcon,
   BoxCubeIcon,
 } from "../../assets/icons";
 import { useSidebar } from "../context/SidebarContext";
-import LanguageSwitcher from "../components/common/LanguageSwitcher";
 
 type NavItem = {
   name: string;
@@ -35,20 +33,20 @@ const AppSidebar: React.FC = () => {
   const role = localStorage.getItem("authRole") || "";
   const doctorType = localStorage.getItem("doctorType") || "";
 
-  // Cập nhật basePath để khớp với routing structure
   const basePath =
     role === "RECEPTIONIST"
       ? "/receptionist"
       : role === "D"
-        ? `/doctor/${doctorType === "E"
-          ? "examination"
-          : doctorType === "S"
+      ? `/doctor/${
+          doctorType === "E"
+            ? "examination"
+            : doctorType === "S"
             ? "service"
             : ""
         }`
-        : role === "P"
-          ? "/patient"
-          : "/admin";
+      : role === "P"
+      ? "/patient"
+      : "/admin";
 
   const navItems: NavItem[] = [
     {
@@ -56,13 +54,12 @@ const AppSidebar: React.FC = () => {
       name: t("sidebar.overview"),
       path: `${basePath}/dashboard`,
       roles: ["D", "P"],
-      // roles: ["A", "D", "P"],
     },
     {
       icon: <PatientIcon />,
       name: t("sidebar.patients"),
       path: `${basePath}/patients`,
-      roles: ["A", "D"], // Chỉ hiển thị cho bác sĩ loại E
+      roles: ["A", "D"],
     },
     {
       icon: <CalendarIcon />,
@@ -83,7 +80,7 @@ const AppSidebar: React.FC = () => {
       roles: ["A"],
     },
     {
-      icon: <DepartmentIcon />,
+      icon: <CalendarIcon />,
       name: t("sidebar.departments"),
       path: `${basePath}/departments`,
       roles: ["A"],
@@ -97,7 +94,7 @@ const AppSidebar: React.FC = () => {
     {
       icon: <CalendarIcon />,
       name: t("sidebar.bookAppointment"),
-      path: `${basePath}/book-appointment`,
+      path: `${basePath}/departments`,
       roles: ["P"],
     },
     {
@@ -122,30 +119,16 @@ const AppSidebar: React.FC = () => {
       roles: ["P"],
     },
     {
-      name: t("sidebar.lookup"),
       icon: <DoctorIcon />,
-      subItems: [
-        {
-          name: t("sidebar.drugLookup"),
-          path: `${basePath}/drug-lookup`,
-          pro: false,
-        },
-        {
-          name: t("sidebar.aiDiagnosis"),
-          path: `${basePath}/ai-diagnosis`,
-          pro: false,
-          new: true,
-        },
-      ],
+      name: t("sidebar.aiDiagnosis"),
+      path: `${basePath}/ai-diagnosis`,
       roles: ["P"],
     },
-    // Profile item - khớp với PatientApp
     {
       icon: <UserCircleIcon />,
       name: t("sidebar.account"),
       path: `${basePath}/profile`,
       roles: ["D", "P"],
-      // roles: ["A", "D", "P"],
     },
   ];
 
@@ -161,36 +144,46 @@ const AppSidebar: React.FC = () => {
 
   const isActive = useCallback(
     (path: string) => {
-      // Xử lý đặc biệt cho dashboard route
+      const currentPath = location.pathname;
+
       if (path.endsWith("/dashboard")) {
-        return location.pathname === path;
+        return currentPath === path;
       }
 
       if (path === basePath) {
-        return location.pathname === path;
+        return currentPath === path;
       }
 
-      // Xử lý đặc biệt cho các detail routes
-      const currentPath = location.pathname
-      const searchParams = new URLSearchParams(location.search)
-      const fromParam = searchParams.get("from")
-
-      // Nếu đang ở trang chi tiết prescription, highlight menu prescriptions
-      if (currentPath.match(/\/prescriptions\/\d+$/) && path.endsWith("/prescriptions")) {
-        return true
+      // 🔹 Nếu là book-appointment thì chỉ active khi path EXACT match
+      if (path.endsWith("/book-appointment")) {
+        return currentPath === path;
       }
-      return (
-        location.pathname === path || location.pathname.startsWith(path + "/")
-      );
+
+      // 🔹 Nếu là departments thì active cả khi vào chi tiết doctors trong department
+      if (path.endsWith("/departments")) {
+        return (
+          currentPath === path ||
+          currentPath.startsWith(`${basePath}/departments/`)
+        );
+      }
+
+      // Xử lý prescriptions detail
+      if (
+        currentPath.match(/\/prescriptions\/\d+$/) &&
+        path.endsWith("/prescriptions")
+      ) {
+        return true;
+      }
+
+      // Mặc định: so sánh path hoặc path prefix
+      return currentPath === path || currentPath.startsWith(path + "/");
     },
     [location.pathname, basePath]
   );
 
-  // Đơn giản hóa useEffect để chỉ xử lý auto-open submenu khi có route active
   useEffect(() => {
     let activeSubmenuIndex: number | null = null;
 
-    // Tìm submenu có item active
     filteredNavItems.forEach((nav, index) => {
       if (nav.subItems) {
         nav.subItems.forEach((subItem) => {
@@ -201,7 +194,6 @@ const AppSidebar: React.FC = () => {
       }
     });
 
-    // Xử lý đặc biệt cho medical record với from parameter
     if (
       activeSubmenuIndex === null &&
       location.pathname.match(/\/medical-record\/\d+$/)
@@ -221,7 +213,6 @@ const AppSidebar: React.FC = () => {
       }
     }
 
-    // Xử lý đặc biệt cho medical record với from parameter
     if (
       activeSubmenuIndex === null &&
       location.pathname.match(/\/medical-record\/\d+$/)
@@ -241,13 +232,11 @@ const AppSidebar: React.FC = () => {
       }
     }
 
-    // Chỉ set submenu active nếu tìm thấy
     if (activeSubmenuIndex !== null) {
       setOpenSubmenu(activeSubmenuIndex);
     }
   }, [location.pathname, filteredNavItems, isActive]);
 
-  // Tính toán chiều cao submenu
   useEffect(() => {
     if (openSubmenu !== null) {
       if (subMenuRefs.current[openSubmenu]) {
@@ -260,9 +249,8 @@ const AppSidebar: React.FC = () => {
   }, [openSubmenu]);
 
   const handleSubmenuToggle = (index: number) => {
-    console.log("Toggle submenu:", index, "Current open:", openSubmenu); // Debug log
+    console.log("Toggle submenu:", index, "Current open:", openSubmenu);
     setOpenSubmenu((prevOpen) => {
-      // Nếu đang mở cùng submenu thì đóng, nếu không thì mở submenu mới
       return prevOpen === index ? null : index;
     });
   };
@@ -275,19 +263,22 @@ const AppSidebar: React.FC = () => {
             <>
               <button
                 onClick={() => handleSubmenuToggle(index)}
-                className={`menu-item group ${openSubmenu === index
+                className={`menu-item group ${
+                  openSubmenu === index
                     ? "menu-item-active"
                     : "menu-item-inactive"
-                  } cursor-pointer w-full ${!isExpanded && !isHovered
+                } cursor-pointer w-full ${
+                  !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "lg:justify-start"
-                  }`}
+                }`}
               >
                 <span
-                  className={`menu-item-icon-size ${openSubmenu === index
+                  className={`menu-item-icon-size ${
+                    openSubmenu === index
                       ? "menu-item-icon-active"
                       : "menu-item-icon-inactive"
-                    }`}
+                  }`}
                 >
                   {nav.icon}
                 </span>
@@ -295,8 +286,9 @@ const AppSidebar: React.FC = () => {
                   <>
                     <span className="menu-item-text">{nav.name}</span>
                     <ChevronDownIcon
-                      className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu === index ? "rotate-180 text-white" : ""
-                        }`}
+                      className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                        openSubmenu === index ? "rotate-180 text-white" : ""
+                      }`}
                     />
                   </>
                 )}
@@ -320,29 +312,32 @@ const AppSidebar: React.FC = () => {
                       <li key={subItem.name}>
                         <Link
                           to={subItem.path}
-                          className={`menu-dropdown-item ${isActive(subItem.path)
+                          className={`menu-dropdown-item ${
+                            isActive(subItem.path)
                               ? "menu-dropdown-item-active"
                               : "menu-dropdown-item-inactive"
-                            }`}
+                          }`}
                         >
                           {subItem.name}
                           <span className="flex items-center gap-1 ml-auto">
                             {subItem.new && (
                               <span
-                                className={`ml-auto ${isActive(subItem.path)
+                                className={`ml-auto ${
+                                  isActive(subItem.path)
                                     ? "menu-dropdown-badge-active"
                                     : "menu-dropdown-badge-inactive"
-                                  } menu-dropdown-badge`}
+                                } menu-dropdown-badge`}
                               >
                                 {t("sidebar.new")}
                               </span>
                             )}
                             {subItem.pro && (
                               <span
-                                className={`ml-auto ${isActive(subItem.path)
+                                className={`ml-auto ${
+                                  isActive(subItem.path)
                                     ? "menu-dropdown-badge-active"
                                     : "menu-dropdown-badge-inactive"
-                                  } menu-dropdown-badge`}
+                                } menu-dropdown-badge`}
                               >
                                 {t("sidebar.pro")}
                               </span>
@@ -359,14 +354,16 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 to={nav.path}
-                className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                  }`}
+                className={`menu-item group ${
+                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                }`}
               >
                 <span
-                  className={`menu-item-icon-size ${isActive(nav.path)
+                  className={`menu-item-icon-size ${
+                    isActive(nav.path)
                       ? "menu-item-icon-active"
                       : "menu-item-icon-inactive"
-                    }`}
+                  }`}
                 >
                   {nav.icon}
                 </span>
@@ -390,15 +387,17 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-          }`}
+        className={`py-8 flex ${
+          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+        }`}
       >
         <Link to={basePath}>
           <img
             src="/public/images/logo/Logo.png"
             alt="Wecare Logo"
-            className={`transition-all duration-300 ${isExpanded || isHovered || isMobileOpen ? "w-32" : "w-10"
-              }`}
+            className={`transition-all duration-300 ${
+              isExpanded || isHovered || isMobileOpen ? "w-32" : "w-10"
+            }`}
           />
         </Link>
       </div>
@@ -408,10 +407,11 @@ const AppSidebar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                  !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
-                  }`}
+                }`}
               >
                 {(isExpanded || isHovered || isMobileOpen) && t("sidebar.menu")}
                 {!isExpanded && !isHovered && !isMobileOpen && (

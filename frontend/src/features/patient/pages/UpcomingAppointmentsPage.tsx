@@ -171,31 +171,31 @@ const UpcomingAppointmentsPage: React.FC = () => {
     const statusConfig = {
       PENDING: {
         className: "bg-yellow-100 text-yellow-800 border-yellow-200",
-        icon: <AlertCircleIcon className="w-4 h-4" />,
+        icon: <AlertCircleIcon className="w-3 h-3" />,
       },
       CONFIRMED: {
         className: "bg-green-100 text-green-800 border-green-200",
-        icon: <CheckCircleIcon className="w-4 h-4" />,
+        icon: <CheckCircleIcon className="w-3 h-3" />,
       },
       CANCELLED: {
         className: "bg-red-100 text-red-800 border-red-200",
-        icon: <XCircleIcon className="w-4 h-4" />,
+        icon: <XCircleIcon className="w-3 h-3" />,
       },
       COMPLETED: {
         className: "bg-blue-100 text-blue-800 border-blue-200",
-        icon: <CheckCircleIcon className="w-4 h-4" />,
+        icon: <CheckCircleIcon className="w-3 h-3" />,
       },
       IN_PROGRESS: {
         className: "bg-purple-100 text-purple-800 border-purple-200",
-        icon: <ClockIcon className="w-4 h-4" />,
+        icon: <ClockIcon className="w-3 h-3" />,
       },
       NO_SHOW: {
         className: "bg-gray-100 text-gray-800 border-gray-200",
-        icon: <XCircleIcon className="w-4 h-4" />,
+        icon: <XCircleIcon className="w-3 h-3" />,
       },
       UNKNOWN: {
         className: "bg-gray-100 text-gray-800 border-gray-200",
-        icon: <AlertCircleIcon className="w-4 h-4" />,
+        icon: <AlertCircleIcon className="w-3 h-3" />,
       },
     }
 
@@ -203,7 +203,7 @@ const UpcomingAppointmentsPage: React.FC = () => {
 
     return (
       <span
-        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${config.className}`}
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${config.className}`}
       >
         {config.icon}
         {t(labelKey)}
@@ -264,7 +264,7 @@ const UpcomingAppointmentsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <div className="p-6 max-w-7xl mx-auto">
+        <div className="p-4 max-w-7xl mx-auto">
           <LoadingSpinner size="lg" message={t("upcomingAppointments.loadingMessage")} />
         </div>
       </div>
@@ -273,24 +273,24 @@ const UpcomingAppointmentsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-4 max-w-7xl mx-auto space-y-4">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="bg-white rounded-lg shadow-sm border p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CalendarIcon className="w-6 h-6 text-green-600" />
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <CalendarIcon className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-semibold text-gray-900">{t("upcomingAppointments.title")}</h1>
-                <p className="text-gray-600">
+                <h1 className="text-xl font-semibold text-gray-900">{t("upcomingAppointments.title")}</h1>
+                <p className="text-sm text-gray-600">
                   {t("upcomingAppointments.subtitle", { count: filteredAndSortedAppointments.length })}
                 </p>
               </div>
             </div>
             <Link
               to="/patient/book-appointment"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+              className="bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-sm"
             >
               {t("upcomingAppointments.bookNew")}
             </Link>
@@ -298,18 +298,18 @@ const UpcomingAppointmentsPage: React.FC = () => {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex flex-col lg:flex-row gap-4">
+        <div className="bg-white rounded-lg shadow-sm border p-4">
+          <div className="flex flex-col lg:flex-row gap-3">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
                   placeholder={t("upcomingAppointments.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
               </div>
             </div>
@@ -317,7 +317,7 @@ const UpcomingAppointmentsPage: React.FC = () => {
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              className="flex items-center gap-1 px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm"
             >
               <Filter className="w-4 h-4" />
               <span>{t("upcomingAppointments.filters")}</span>
@@ -327,17 +327,17 @@ const UpcomingAppointmentsPage: React.FC = () => {
 
           {/* Expanded Filters */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Status Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     {t("upcomingAppointments.statusFilter")}
                   </label>
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   >
                     <option value="all">{t("upcomingAppointments.allStatuses")}</option>
                     <option value="P">{t("upcomingAppointments.pending")}</option>
@@ -348,13 +348,13 @@ const UpcomingAppointmentsPage: React.FC = () => {
 
                 {/* Date Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     {t("upcomingAppointments.timeFilter")}
                   </label>
                   <select
                     value={dateFilter}
                     onChange={(e) => setDateFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   >
                     <option value="all">{t("upcomingAppointments.allTimes")}</option>
                     <option value="today">{t("upcomingAppointments.today")}</option>
@@ -365,13 +365,13 @@ const UpcomingAppointmentsPage: React.FC = () => {
 
                 {/* Sort Field */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     {t("upcomingAppointments.sortBy")}
                   </label>
                   <select
                     value={sortField}
                     onChange={(e) => setSortField(e.target.value as SortField)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   >
                     <option value="date">{t("upcomingAppointments.appointmentDate")}</option>
                     <option value="doctor">{t("upcomingAppointments.doctorName")}</option>
@@ -382,12 +382,12 @@ const UpcomingAppointmentsPage: React.FC = () => {
 
                 {/* Sort Order */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     {t("upcomingAppointments.sortOrder")}
                   </label>
                   <button
                     onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                    className="w-full flex items-center justify-center gap-1 px-2 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm"
                   >
                     {sortOrder === "asc" ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
                     <span>
@@ -401,8 +401,8 @@ const UpcomingAppointmentsPage: React.FC = () => {
         </div>
 
         {/* Results Summary */}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
+        <div className="flex items-center justify-between text-sm">
+          <div className="text-gray-600">
             {t("upcomingAppointments.showing", {
               start: startIndex + 1,
               end: Math.min(endIndex, filteredAndSortedAppointments.length),
@@ -410,45 +410,45 @@ const UpcomingAppointmentsPage: React.FC = () => {
             })}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">{t("upcomingAppointments.itemsPerPage")}</span>
+            <span className="text-gray-600">{t("upcomingAppointments.itemsPerPage")}</span>
             <select
               value={itemsPerPage}
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value))
                 setCurrentPage(1)
               }}
-              className="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
+              <option value={6}>6</option>
+              <option value={12}>12</option>
+              <option value={24}>24</option>
+              <option value={60}>60</option>
             </select>
           </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
             <div className="flex items-center gap-2">
-              <XCircleIcon className="w-5 h-5 text-red-500" />
-              <span className="text-red-700 font-medium">{error}</span>
+              <XCircleIcon className="w-4 h-4 text-red-500" />
+              <span className="text-red-700 font-medium text-sm">{error}</span>
             </div>
           </div>
         )}
 
         {/* Content */}
         {currentAppointments.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <CalendarIcon className="w-8 h-8 text-gray-400" />
+          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <CalendarIcon className="w-6 h-6 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-base font-medium text-gray-900 mb-2">
               {filteredAndSortedAppointments.length === 0
                 ? t("upcomingAppointments.noAppointments")
                 : t("upcomingAppointments.noResults")}
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm text-gray-600 mb-4">
               {filteredAndSortedAppointments.length === 0
                 ? t("upcomingAppointments.noAppointmentsText")
                 : t("upcomingAppointments.noResultsText")}
@@ -456,7 +456,7 @@ const UpcomingAppointmentsPage: React.FC = () => {
             {filteredAndSortedAppointments.length === 0 && (
               <Link
                 to="/patient/book-appointment"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-sm"
               >
                 <CalendarIcon className="w-4 h-4" />
                 {t("upcomingAppointments.bookAppointment")}
@@ -465,17 +465,17 @@ const UpcomingAppointmentsPage: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {currentAppointments.map((appointment) => (
                 <div
                   key={appointment.id}
                   className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200"
                 >
-                  <div className="p-6">
+                  <div className="p-4">
                     {/* Header */}
-                    <div className="flex items-start justify-between mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
                           {appointment.doctorInfo?.avatar ? (
                             <img
                               src={appointment.doctorInfo.avatar || "/placeholder.svg"}
@@ -483,43 +483,43 @@ const UpcomingAppointmentsPage: React.FC = () => {
                                 firstName: appointment.doctorInfo.fullName?.split(" ")[0],
                                 lastName: appointment.doctorInfo.fullName?.split(" ").slice(1).join(" "),
                               })}
-                              className="w-12 h-12 object-cover"
+                              className="w-10 h-10 object-cover"
                             />
                           ) : (
-                            <UserIcon className="w-6 h-6 text-blue-600" />
+                            <UserIcon className="w-5 h-5 text-blue-600" />
                           )}
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-base font-semibold text-gray-900">
                             {t("common.doctorTitle", { firstName: "BS.", lastName: appointment.doctorInfo?.fullName })}
                           </h3>
-                          <p className="text-sm text-gray-600">{appointment.doctorInfo?.specialization}</p>
+                          <p className="text-xs text-gray-600">{appointment.doctorInfo?.specialization}</p>
                         </div>
                       </div>
                       <div className="text-right">
                         {getStatusBadge(appointment.status)}
-                        <div className="text-lg font-semibold text-blue-600 mt-2">
+                        <div className="text-base font-semibold text-blue-600 mt-1">
                           {Number(appointment.doctorInfo?.price).toLocaleString("vi-VN")}đ
                         </div>
                       </div>
                     </div>
 
                     {/* Appointment Details */}
-                    <div className="grid md:grid-cols-2 gap-4 mb-6">
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                        <CalendarIcon className="w-5 h-5 text-blue-600" />
+                    <div className="grid grid-cols-1 gap-3 mb-4">
+                      <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                        <CalendarIcon className="w-4 h-4 text-blue-600" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-xs font-medium text-gray-900">
                             {formatDate(appointment.schedule?.work_date || "")}
                           </p>
                           <p className="text-xs text-gray-600">{t("upcomingAppointments.examDate")}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <ClockIcon className="w-5 h-5 text-green-600" />
+                      <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
+                        <ClockIcon className="w-4 h-4 text-green-600" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-xs font-medium text-gray-900">
                             {formatTime(appointment.slot_start || "")} - {formatTime(appointment.slot_end || "")}
                           </p>
                           <p className="text-xs text-gray-600">
@@ -531,10 +531,10 @@ const UpcomingAppointmentsPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg md:col-span-2">
-                        <MapPinIcon className="w-5 h-5 text-purple-600" />
+                      <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-lg">
+                        <MapPinIcon className="w-4 h-4 text-purple-600" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{appointment.schedule?.location}</p>
+                          <p className="text-xs font-medium text-gray-900">{appointment.schedule?.location}</p>
                           <p className="text-xs text-gray-600">
                             {t("upcomingAppointments.floor")} {appointment.schedule?.floor},{" "}
                             {appointment.schedule?.building}
@@ -546,16 +546,16 @@ const UpcomingAppointmentsPage: React.FC = () => {
 
                     {/* Symptoms */}
                     {appointment.symptoms && (
-                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <h4 className="text-sm font-medium text-yellow-800 mb-1">
+                      <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <h4 className="text-xs font-medium text-yellow-800 mb-1">
                           {t("upcomingAppointments.symptoms")}:
                         </h4>
-                        <p className="text-sm text-yellow-900">{appointment.symptoms}</p>
+                        <p className="text-xs text-yellow-900">{appointment.symptoms}</p>
                       </div>
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-200">
                       <div className="text-xs text-gray-500">
                         {t("upcomingAppointments.bookedOn")}: {formatDateTime(appointment.createdAt)}
                       </div>
@@ -572,7 +572,7 @@ const UpcomingAppointmentsPage: React.FC = () => {
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="px-2 py-1 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     {t("upcomingAppointments.previous")}
                   </button>
@@ -580,14 +580,14 @@ const UpcomingAppointmentsPage: React.FC = () => {
                   <div className="flex space-x-1">
                     {getPageNumbers().map((page, index) =>
                       page === "..." ? (
-                        <span key={index} className="px-3 py-2 text-sm text-gray-500">
+                        <span key={index} className="px-2 py-1 text-sm text-gray-500">
                           ...
                         </span>
                       ) : (
                         <button
                           key={index}
                           onClick={() => setCurrentPage(page as number)}
-                          className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                          className={`px-2 py-1 text-sm font-medium rounded-md transition-colors duration-200 ${
                             currentPage === page ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-gray-100"
                           }`}
                         >
@@ -600,7 +600,7 @@ const UpcomingAppointmentsPage: React.FC = () => {
                   <button
                     onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="px-2 py-1 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     {t("upcomingAppointments.next")}
                   </button>

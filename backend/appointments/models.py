@@ -9,7 +9,9 @@ class Appointment(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.RESTRICT)
     patient = models.ForeignKey(Patient, on_delete=models.RESTRICT)
     schedule = models.ForeignKey(Schedule, on_delete=models.RESTRICT)
-    symptoms = models.TextField()
+    symptoms = models.TextField(blank=True, null=True)
+    note = models.TextField(blank=True, null=True)
+
     
     slot_start = models.TimeField(null=True, blank=True)
     slot_end = models.TimeField(null=True, blank=True)

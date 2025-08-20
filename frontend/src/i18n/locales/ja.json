@@ -161,7 +161,11 @@
     "noStaffInfo": "スタッフ情報はありません",
     "prev": "前へ",
     "next": "次へ",
-    "page": "ページ"
+    "page": "ページ",
+    "sort": "並び替え",
+    "sortAZ": "名前 A → Z",
+    "sortZA": "名前 Z → A",
+    "pageInfo": "全 {{total}} 部門のうち {{end}} を表示中"
   },
   "navigation": {
     "home": "ホーム",

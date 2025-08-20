@@ -175,12 +175,7 @@ export function PersonalInfoTab() {
       </CardHeader>
       <CardContent>
         <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
-          <TabsList>
-            <TabsTrigger value="basic">{t("personalInfo.basicInfo")}</TabsTrigger>
-            {/* <TabsTrigger value="contact">{t("personalInfo.contactInfo")}</TabsTrigger> */}
-            <TabsTrigger value="address">{t("personalInfo.addressInfo")}</TabsTrigger>
-          </TabsList>
-          <div className="mt-4">
+          <div className="">
             {isEditing ? (
               <div className="flex justify-end gap-2">
                 <Button onClick={handleSave} disabled={loading}>
@@ -198,6 +193,7 @@ export function PersonalInfoTab() {
           </div>
           {activeSubTab === "basic" && (
             <div className="grid gap-4 py-4">
+              {/* Avatar */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="avatar" className="text-right">{t("personalInfo.avatar")}</Label>
                 <div className="col-span-3">
@@ -218,6 +214,8 @@ export function PersonalInfoTab() {
                   )}
                 </div>
               </div>
+
+              {/* Basic fields */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="first_name" className="text-right">{t("personalInfo.firstName")}</Label>
                 <Input
@@ -286,38 +284,8 @@ export function PersonalInfoTab() {
                   className="col-span-3"
                 />
               </div>
-            </div>
-          )}
-          {activeSubTab === "contact" && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">{t("personalInfo.email")}</Label>
-                <Input
-                  id="email"
-                  value={personalInfo.email}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, email: e.target.value })
-                  }
-                  disabled={!isEditing || loading}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="phone" className="text-right">{t("personalInfo.phone")}</Label>
-                <Input
-                  id="phone"
-                  value={personalInfo.phone}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, phone: e.target.value })
-                  }
-                  disabled={!isEditing || loading}
-                  className="col-span-3"
-                />
-              </div>
-            </div>
-          )}
-          {activeSubTab === "address" && (
-            <div className="grid gap-4 py-4">
+
+              {/* Address moved here */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="address" className="text-right">{t("personalInfo.address")}</Label>
                 <Textarea
@@ -325,42 +293,6 @@ export function PersonalInfoTab() {
                   value={personalInfo.address}
                   onChange={(e) =>
                     setPersonalInfo({ ...personalInfo, address: e.target.value })
-                  }
-                  disabled={!isEditing || loading}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="city" className="text-right">{t("personalInfo.city")}</Label>
-                <Input
-                  id="city"
-                  value={personalInfo.city}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, city: e.target.value })
-                  }
-                  disabled={!isEditing || loading}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="district" className="text-right">{t("personalInfo.district")}</Label>
-                <Input
-                  id="district"
-                  value={personalInfo.district}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, district: e.target.value })
-                  }
-                  disabled={!isEditing || loading}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="ward" className="text-right">{t("personalInfo.ward")}</Label>
-                <Input
-                  id="ward"
-                  value={personalInfo.ward}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, ward: e.target.value })
                   }
                   disabled={!isEditing || loading}
                   className="col-span-3"

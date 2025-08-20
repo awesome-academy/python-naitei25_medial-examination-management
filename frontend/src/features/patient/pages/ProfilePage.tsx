@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PersonalInfoTab } from "../components/common/Profile/PersonalInfoTab"
-import { InsuranceInfoTab } from "../components/common/Profile/InsuranceInfoTab"
 import { EmergencyContactTab } from "../components/common/Profile/EmergencyContactTab"
 import { HealthRecordTab } from "../components/common/Profile/HealthRecordTab"
 import { User, Shield, Phone, Heart } from "lucide-react"
@@ -37,14 +36,6 @@ export default function ProfilePage() {
               <span className="sm:hidden">{t("profile.personalInfoShort")}</span>
             </TabsTrigger>
             <TabsTrigger
-              value="insurance"
-              className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-            >
-              <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline">{t("profile.insurance")}</span>
-              <span className="sm:hidden">{t("profile.insuranceShort")}</span>
-            </TabsTrigger>
-            <TabsTrigger
               value="emergency"
               className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
@@ -65,10 +56,6 @@ export default function ProfilePage() {
           <div className="p-6">
             <TabsContent value="personal" className="mt-0">
               <PersonalInfoTab />
-            </TabsContent>
-
-            <TabsContent value="insurance" className="mt-0">
-              <InsuranceInfoTab />
             </TabsContent>
 
             <TabsContent value="emergency" className="mt-0">
