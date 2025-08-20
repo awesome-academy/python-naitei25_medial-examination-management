@@ -158,7 +158,10 @@
     "serviceName": "サービス名",
     "insurance": "保険",
     "insuranceCovered": "保険適用",
-    "noStaffInfo": "スタッフ情報はありません"
+    "noStaffInfo": "スタッフ情報はありません",
+    "prev": "前へ",
+    "next": "次へ",
+    "page": "ページ"
   },
   "navigation": {
     "home": "ホーム",
@@ -1303,7 +1306,16 @@
     "actions": {
       "book": "予約する"
     },
-    "empty": "医師が見つかりません"
+    "empty": "医師が見つかりません",
+    "sort": {
+      "name": "名前順に並べ替え",
+      "price": "料金順に並べ替え",
+      "asc": "昇順",
+      "desc": "降順"
+    },
+    "filter": {
+      "specialization": "専門分野で絞り込む"
+    }
   },
   "home": {
     "hero": {
@@ -1322,7 +1334,8 @@
     },
     "actions": {
       "book": "予約する",
-      "viewAllDoctors": "すべての医師を見る"
+      "viewAllDoctors": "すべての医師を見る",
+      "viewAllSpecialties": "すべての診療科を見る"
     },
     "emptyDoctors": "医師が見つかりません",
     "specialties": {
@@ -1370,7 +1383,15 @@
     "actions": {
       "viewDoctors": "医師を見る"
     },
-    "empty": "診療科が見つかりません"
+    "empty": "診療科が見つかりません",
+    "sort": {
+      "name": "名前順に並べ替え",
+      "asc": "昇順",
+      "desc": "降順"
+    },
+    "filter": {
+      "name": "専門科名で絞り込む"
+    }
   },
   "appointment": {
     "title": "予約をする",

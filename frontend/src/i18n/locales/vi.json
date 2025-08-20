@@ -158,7 +158,10 @@
     "serviceName": "Tên dịch vụ",
     "insurance": "Bảo hiểm",
     "insuranceCovered": "Bảo hiểm chi trả",
-    "noStaffInfo": "Không có thông tin nhân viên"
+    "noStaffInfo": "Không có thông tin nhân viên",
+    "prev": "Trước",
+    "next": "Sau",
+    "page": "Trang"
   },
   "navigation": {
     "home": "Trang chủ",
@@ -1310,7 +1313,16 @@
     "actions": {
       "book": "Đặt lịch khám"
     },
-    "empty": "Không tìm thấy bác sĩ"
+    "empty": "Không tìm thấy bác sĩ",
+    "sort": {
+      "name": "Sắp xếp theo tên",
+      "price": "Sắp xếp theo giá",
+      "asc": "Tăng dần",
+      "desc": "Giảm dần"
+    },
+    "filter": {
+      "specialization": "Lọc theo chuyên khoa"
+    }
   },
   "home": {
     "hero": {
@@ -1329,7 +1341,8 @@
     },
     "actions": {
       "book": "Đặt lịch khám",
-      "viewAllDoctors": "Xem tất cả bác sĩ"
+      "viewAllDoctors": "Xem tất cả bác sĩ",
+      "viewAllSpecialties": "Xem tất cả chuyên khoa"
     },
     "emptyDoctors": "Không tìm thấy bác sĩ",
     "specialties": {
@@ -1377,7 +1390,15 @@
     "actions": {
       "viewDoctors": "Xem bác sĩ"
     },
-    "empty": "Không tìm thấy chuyên khoa"
+    "empty": "Không tìm thấy chuyên khoa",
+    "sort": {
+      "name": "Sắp xếp theo tên",
+      "asc": "Tăng dần",
+      "desc": "Giảm dần"
+    },
+    "filter": {
+      "name": "Lọc theo tên chuyên khoa"
+    }
   },
   "appointment": {
     "title": "Đặt lịch hẹn",

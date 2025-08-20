@@ -180,7 +180,10 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredDoctors.length > 0 ? (
               featuredDoctors.map((doctor) => (
-                <Card key={doctor.id} className="group hover:shadow-xl transition-all border-0 overflow-hidden">
+                <Card
+                  key={doctor.id}
+                  className="group hover:shadow-xl transition-all border-0 overflow-hidden"
+                >
                   <div className="relative h-48 overflow-hidden">
                     <img
                       src={doctor.avatar || "/placeholder-doctor.jpg"}
@@ -193,20 +196,33 @@ const HomePage: React.FC = () => {
                   </div>
                   <CardHeader className="p-6 text-center">
                     <h3 className="text-xl font-bold text-gray-900">
-                      {t("home.doctorPrefix")} {doctor.first_name} {doctor.last_name}
+                      {t("home.doctorPrefix")} {doctor.first_name}{" "}
+                      {doctor.last_name}
                     </h3>
-                    <p className="text-teal-600 font-medium">{doctor.specialization}</p>
+                    <p className="text-teal-600 font-medium">
+                      {doctor.specialization}
+                    </p>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="space-y-3 mb-6">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">{t("home.labels.fee")}</span>
-                        <span className="font-bold text-green-600">{doctor.price?.toLocaleString()}đ</span>
+                        <span className="text-gray-600">
+                          {t("home.labels.fee")}
+                        </span>
+                        <span className="font-bold text-green-600">
+                          {doctor.price?.toLocaleString()}đ
+                        </span>
                       </div>
                     </div>
                     <Button
                       className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 group-hover:shadow-lg transition-all"
-                      onClick={() => console.log(`Booking doctor ${doctor.id}`)}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          navigate("/auth/patient-login");
+                        } else {
+                          navigate(`/booking/${doctor.id}`);
+                        }
+                      }}
                     >
                       {t("home.actions.book")}
                       <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -215,7 +231,9 @@ const HomePage: React.FC = () => {
                 </Card>
               ))
             ) : (
-              <p className="text-center text-gray-600 col-span-3">{t("home.emptyDoctors")}</p>
+              <p className="text-center text-gray-600 col-span-3">
+                {t("home.emptyDoctors")}
+              </p>
             )}
           </div>
           <div className="text-center mt-12">
@@ -243,31 +261,54 @@ const HomePage: React.FC = () => {
               {t("home.specialties.subtitle")}
             </p>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {specialties.length > 0 ? (
-              specialties.map((specialty) => (
+              specialties.slice(0, 4).map((specialty) => (
                 <Card
                   key={specialty.id}
                   className="p-6 hover:shadow-lg transition-all cursor-pointer group"
-                  onClick={() => navigate(`/doctors?department=${specialty.id}`)}
+                  onClick={() =>
+                    navigate(`/doctors?department=${specialty.id}`)
+                  }
                 >
                   <div className="flex items-center gap-4">
                     <div className="p-3 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 text-white">
                       <Stethoscope className="h-6 w-6" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900">{specialty.department_name}</h3>
+                      <h3 className="font-bold text-gray-900">
+                        {specialty.department_name}
+                      </h3>
                       <p className="text-sm text-gray-600">
-                        {specialty.doctorCount} {t("home.specialties.doctorCount")}
+                        {specialty.doctorCount}{" "}
+                        {t("home.specialties.doctorCount")}
                       </p>
                     </div>
                   </div>
                 </Card>
               ))
             ) : (
-              <p className="text-center text-gray-600 col-span-4">{t("home.emptySpecialties")}</p>
+              <p className="text-center text-gray-600 col-span-4">
+                {t("home.emptySpecialties")}
+              </p>
             )}
           </div>
+
+          {/* 👉 Nút Xem thêm */}
+          {specialties.length > 4 && (
+            <div className="text-center mt-12">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-2 border-teal-600 text-teal-600 hover:bg-teal-600 hover:text-white bg-transparent"
+                onClick={() => navigate("/specialties")}
+              >
+                {t("home.actions.viewAllSpecialties")}
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -275,59 +316,32 @@ const HomePage: React.FC = () => {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t("home.features.title")}</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">{t("home.features.subtitle")}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              {t("home.features.title")}
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              {t("home.features.subtitle")}
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {["safe", "booking", "support"].map((key) => (
-              <Card key={key} className="text-center p-8 border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <Card
+                key={key}
+                className="text-center p-8 border-0 shadow-lg hover:shadow-xl transition-shadow"
+              >
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white mb-6">
                   {key === "safe" && <Shield className="h-8 w-8" />}
                   {key === "booking" && <Clock className="h-8 w-8" />}
                   {key === "support" && <Phone className="h-8 w-8" />}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{t(`home.features.items.${key}.title`)}</h3>
-                <p className="text-gray-600 leading-relaxed">{t(`home.features.items.${key}.description`)}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  {t(`home.features.items.${key}.title`)}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {t(`home.features.items.${key}.description`)}
+                </p>
               </Card>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 bg-gradient-to-r from-teal-600 to-emerald-700 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">{t("home.cta.title")}</h2>
-            <p className="text-lg mb-10 text-teal-100">{t("home.cta.subtitle")}</p>
-            {!isAuthenticated ? (
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-white text-teal-600 hover:bg-gray-100 shadow-lg"
-                  onClick={() => navigate("/auth/login")}
-                >
-                  {t("home.cta.login")}
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-teal-600 bg-transparent"
-                  onClick={() => navigate("/auth/register")}
-                >
-                  {t("home.cta.register")}
-                </Button>
-              </div>
-            ) : (
-              <Button
-                size="lg"
-                className="bg-white text-teal-600 hover:bg-gray-100 shadow-lg"
-                onClick={() => navigate("/patient/dashboard")}
-              >
-                {t("home.cta.dashboard")}
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            )}
           </div>
         </div>
       </section>
