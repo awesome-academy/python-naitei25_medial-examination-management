@@ -24,7 +24,6 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
   patientInfo,
 }) => {
   // Map patientInfo to ensure all fields for PDF
-  console.log("Patient Info:", patientInfo)
   const pdfPatientInfo = patientInfo
     ? {
       ...patientInfo,
@@ -82,7 +81,6 @@ export const PrescriptionHistoryModal: React.FC<PrescriptionHistoryModalProps> =
       key: "medicineName",
       render: (_: any, record: any) => {
         const med = record.medicine || {}
-        console.log("Medicine record:", med)
         const medName = med.medicineName || med.medicine_name || med.name || "—"
         const category = med.category
         const price = typeof med.price === "number" ? med.price : Number(med.price) || 0

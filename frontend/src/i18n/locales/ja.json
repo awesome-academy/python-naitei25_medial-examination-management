@@ -776,6 +776,7 @@
     "save": "診療記録を保存",
     "error": {
       "selectAppointment": "予約を選択してください",
+      "requiredFollowUpDate": "再診日が必要です",
       "diagnosisRequired": "診断は必須です",
       "systolicRange": "収縮期血圧は80-200 mmHgでなければなりません",
       "diastolicRange": "拡張期血圧は40-120 mmHgでなければなりません",
@@ -2063,5 +2064,8 @@
     "headLabel": "部門長",
     "headPlaceholder": "部門長の名前を入力してください",
     "createButton": "部門を作成"
+  },
+  "success": {
+    "examinationCompleted": "検査が正常に完了しました！"
   }
 }

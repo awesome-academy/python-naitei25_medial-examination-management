@@ -43,7 +43,7 @@ export const pharmacyService = {
   // Sửa toa thuốc theo prescriptionId
   async updatePrescription(prescriptionId: number, prescriptionData: Partial<Prescription>): Promise<Prescription> {
     try {
-      const response = await api.put(`/pharmacy/prescriptions/${prescriptionId}`, prescriptionData)
+      const response = await api.put(`/prescriptions/${prescriptionId}/`, prescriptionData)
       return response.data
     } catch (error) {
       console.error(`[${new Date().toLocaleString("vi-VN")}] Error updating prescription ${prescriptionId}:`, error)
@@ -54,7 +54,7 @@ export const pharmacyService = {
   // Xóa toa thuốc theo prescriptionId
   async deletePrescription(prescriptionId: number): Promise<void> {
     try {
-      await api.delete(`/pharmacy/prescriptions/${prescriptionId}`)
+      await api.delete(`/prescriptions/${prescriptionId}`)
     } catch (error) {
       console.error(`[${new Date().toLocaleString("vi-VN")}] Error deleting prescription ${prescriptionId}:`, error)
       throw new Error("Không thể xóa toa thuốc")
