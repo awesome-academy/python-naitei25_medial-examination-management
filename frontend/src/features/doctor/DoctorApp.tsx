@@ -71,7 +71,7 @@ const DoctorApp: React.FC = () => {
                     <Route path="schedule" element={<Schedule />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="patients" element={<ServicePatient />} />
-                    <Route path="patient/detail" element={<ServicePatientDetail />} />
+                    <Route path="patient/detail/:orderId" element={<ServicePatientDetail />} />
                 </Route>
 
                 <Route

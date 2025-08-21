@@ -75,9 +75,9 @@ export const updateServiceOrder = async (
   }
 }
 
-export const deleteServiceOrder = async (serviceId: number, orderId: number): Promise<string> => {
+export const deleteServiceOrder = async (orderId: number): Promise<string> => {
   try {
-    const response = await api.delete(`/appointments/services/${serviceId}/service-orders/${orderId}`)
+    const response = await api.delete(`/service-orders/${orderId}/`)
     return response.data || "Đơn dịch vụ đã xóa thành công"
   } catch (error) {
     console.error("Lỗi khi xóa đơn dịch vụ:", error)

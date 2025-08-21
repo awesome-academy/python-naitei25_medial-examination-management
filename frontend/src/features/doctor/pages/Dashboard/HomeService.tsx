@@ -167,8 +167,8 @@ const HomeService: React.FC = () => {
       key: "orderStatus", 
       render: (status: string) => {
         const statusConfig = {
-          O: { color: "#b45309", bgColor: "#fef3c7", text: t("statuses.ordered") },
-          C: { color: "#15803d", bgColor: "#d1fae5", text: t("statuses.completed") },
+          O: { color: "#b45309", bgColor: "#fef3c7", text: t("status.ordered") },
+          C: { color: "#15803d", bgColor: "#d1fae5", text: t("status.completed") },
         };
         const config = statusConfig[status as keyof typeof statusConfig] || {
           color: "#6b7280",

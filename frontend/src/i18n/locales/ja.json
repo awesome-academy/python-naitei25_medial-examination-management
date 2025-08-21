@@ -744,7 +744,7 @@
     "noServices": "サービスが見つかりません。",
     "viewPrescription": "処方箋を見る",
     "title": "診療記録の詳細",
-    "diagnosis": "診断: ",
+    "diagnosis": "診断",
     "bloodPressure": "血圧",
     "heartRate": "心拍数",
     "bloodSugar": "血糖値",
@@ -2088,5 +2088,9 @@
   },
   "success": {
     "examinationCompleted": "検査が正常に完了しました！"
+  },
+  "confirm": {
+    "deleteServiceOrderTitle": "サービスオーダーの削除",
+    "deleteServiceOrderDesc": "このサービスオーダーを削除してもよろしいですか？"
   }
 }
