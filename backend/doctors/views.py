@@ -583,3 +583,6 @@ class ScheduleViewSet(viewsets.ViewSet):
         )
         serializer = ScheduleSerializer(schedules, many=True)
         return Response(serializer.data)
+
+
+

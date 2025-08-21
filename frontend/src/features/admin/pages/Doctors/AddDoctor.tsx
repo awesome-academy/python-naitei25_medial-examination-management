@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ChevronDown, Upload, X } from "lucide-react";
 import { doctorService } from "../../services/doctorService";
 import { departmentService } from "../../../../shared/services/departmentService";
@@ -18,6 +19,7 @@ interface Department {
 
 const AddDoctor: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -67,7 +69,7 @@ const AddDoctor: React.FC = () => {
         }
       } catch (err) {
         console.error("Error fetching departments:", err);
-        setError("Không thể tải danh sách khoa");
+        setError(t("doctors.add.messages.loadDepartmentError"));
       }
     };
 
@@ -119,14 +121,14 @@ const AddDoctor: React.FC = () => {
       // STEP 2: If there are ANY validation errors, show modal and STOP
       if (Object.keys(validationErrors).length > 0) {
         const fieldNames: { [key: string]: string } = {
-          phone: "Số điện thoại",
-          email: "Email",
-          password: "Mật khẩu",
-          fullName: "Họ tên",
-          identityNumber: "Số CMND/CCCD",
-          birthday: "Ngày sinh",
-          specialization: "Chuyên môn",
-          department: "Khoa",
+          phone: t("doctors.add.fieldNames.phone"),
+          email: t("doctors.add.fieldNames.email"),
+          password: t("doctors.add.fieldNames.password"),
+          fullName: t("doctors.add.fieldNames.fullName"),
+          identityNumber: t("doctors.add.fieldNames.identityNumber"),
+          birthday: t("doctors.add.fieldNames.birthday"),
+          specialization: t("doctors.add.fieldNames.specialization"),
+          department: t("doctors.add.fieldNames.department"),
         };
 
         const errorList = Object.entries(validationErrors)
@@ -134,7 +136,7 @@ const AddDoctor: React.FC = () => {
           .join("\n");
 
         console.log("❌ Validation failed:", validationErrors);
-        setError("Vui lòng sửa các lỗi sau trước khi tạo bác sĩ:");
+        setError(t("doctors.add.messages.validationError"));
         setErrorDetails(errorList);
         setShowErrorModal(true);
         return; // STOP HERE - DO NOT send any request to server
@@ -173,7 +175,7 @@ const AddDoctor: React.FC = () => {
       await doctorService.createDoctor(doctorData);
 
       console.log("🎉 Doctor created successfully!");
-      setSuccess("Tạo bác sĩ mới thành công!");
+      setSuccess(t("doctors.add.messages.createSuccess"));
 
       // Auto navigate after 2 seconds
       setTimeout(() => {
@@ -182,7 +184,7 @@ const AddDoctor: React.FC = () => {
     } catch (err: unknown) {
       console.error("Error creating doctor:", err);
 
-      let errorMessage = "Không thể tạo bác sĩ mới. Vui lòng thử lại.";
+      let errorMessage = t("doctors.add.messages.createError");
       let details = "";
 
       // Enhanced error logging and message extraction
@@ -202,29 +204,27 @@ const AddDoctor: React.FC = () => {
             responseData.message &&
             responseData.message.includes("Số điện thoại đã được sử dụng")
           ) {
-            errorMessage = "Số điện thoại đã được sử dụng";
-            details =
-              "Số điện thoại này đã được đăng ký cho một tài khoản khác. Vui lòng sử dụng số điện thoại khác.";
+            errorMessage = t("doctors.add.messages.phoneExists");
+            details = t("doctors.add.messages.phoneExistsDetail");
           } else if (
             responseData.message &&
             responseData.message.includes(
               "value too long for type character varying(255)"
             )
           ) {
-            errorMessage = "Lỗi dữ liệu quá dài";
-            details =
-              "Dữ liệu ảnh đại diện quá lớn. Vui lòng chọn ảnh có kích thước nhỏ hơn hoặc bỏ qua việc upload ảnh.";
+            errorMessage = t("doctors.add.messages.dataTooLong");
+            details = t("doctors.add.messages.dataTooLongDetail");
           } else if (responseData.error) {
-            errorMessage = "Lỗi từ server";
+            errorMessage = t("doctors.add.messages.serverError");
             details = responseData.error;
           } else if (responseData.message) {
-            errorMessage = "Lỗi từ server";
+            errorMessage = t("doctors.add.messages.serverError");
             details = responseData.message;
           }
         }
       } else if (err instanceof Error) {
         console.error("Error message:", err.message);
-        errorMessage = "Lỗi hệ thống";
+        errorMessage = t("doctors.add.messages.systemError");
         details = err.message;
       }
 
@@ -243,7 +243,7 @@ const AddDoctor: React.FC = () => {
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return "Email không hợp lệ";
+      return t("doctors.add.validation.emailInvalid");
     }
 
     return null;
@@ -255,7 +255,7 @@ const AddDoctor: React.FC = () => {
     // Vietnamese phone number validation
     const phoneRegex = /^(\+84|84|0)[1-9][0-9]{8,9}$/;
     if (!phoneRegex.test(phone)) {
-      return "Số điện thoại không hợp lệ";
+      return t("doctors.add.validation.phoneInvalid");
     }
 
     return null;
@@ -267,7 +267,7 @@ const AddDoctor: React.FC = () => {
     // CMND (9 digits) or CCCD (12 digits)
     const idRegex = /^(\d{9}|\d{12})$/;
     if (!idRegex.test(identityNumber)) {
-      return "Số CMND/CCCD phải có 9 hoặc 12 chữ số";
+      return t("doctors.add.validation.identityInvalid");
     }
 
     return null;
@@ -327,39 +327,41 @@ const AddDoctor: React.FC = () => {
 
     // Required fields validation
     if (!formData.phone.trim()) {
-      errors.phone = "Số điện thoại không được để trống";
+      errors.phone = t("doctors.add.validation.phoneRequired");
     } else {
       const phoneError = await validatePhone(formData.phone);
       if (phoneError) errors.phone = phoneError;
     }
 
     if (!formData.password.trim()) {
-      errors.password = "Mật khẩu không được để trống";
+      errors.password = t("doctors.add.validation.passwordRequired");
     } else if (formData.password.length < 6) {
-      errors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+      errors.password = t("doctors.add.validation.passwordMinLength");
     }
 
     if (!formData.fullName.trim()) {
-      errors.fullName = "Họ tên không được để trống";
+      errors.fullName = t("doctors.add.validation.fullNameRequired");
     }
 
     if (!formData.identityNumber.trim()) {
-      errors.identityNumber = "Số CMND/CCCD không được để trống";
+      errors.identityNumber = t("doctors.add.validation.identityRequired");
     } else {
       const idError = validateIdentityNumber(formData.identityNumber);
       if (idError) errors.identityNumber = idError;
     }
 
     if (!formData.birthday) {
-      errors.birthday = "Ngày sinh không được để trống";
+      errors.birthday = t("doctors.add.validation.birthdayRequired");
     }
 
     if (!formData.specialization.trim()) {
-      errors.specialization = "Chuyên môn không được để trống";
+      errors.specialization = t(
+        "doctors.add.validation.specializationRequired"
+      );
     }
 
     if (formData.departmentId === 0) {
-      errors.department = "Vui lòng chọn khoa";
+      errors.department = t("doctors.add.validation.departmentRequired");
     }
 
     // Optional email validation
@@ -384,7 +386,7 @@ const AddDoctor: React.FC = () => {
           <div className="flex items-center space-x-4">
             <ReturnButton />
             <h1 className="text-xl font-semibold text-gray-900">
-              Thêm bác sĩ mới
+              {t("doctors.add.pageTitle")}
             </h1>
           </div>
         </div>
@@ -445,10 +447,10 @@ const AddDoctor: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <div>
                   <h2 className="text-lg font-semibold text-base-900">
-                    Thông tin tài khoản
+                    {t("doctors.add.accountInfo.title")}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Thông tin đăng nhập và liên hệ
+                    {t("doctors.add.accountInfo.description")}
                   </p>
                 </div>
               </div>
@@ -459,7 +461,7 @@ const AddDoctor: React.FC = () => {
                 {/* Avatar Section */}
                 <div className="flex flex-col items-center">
                   <label className="block font-medium text-base-700 mb-3">
-                    Ảnh đại diện
+                    {t("doctors.add.accountInfo.avatar")}
                   </label>
                   <div className="flex flex-col items-center space-y-1">
                     {/* Avatar Preview with Upload Overlay */}
@@ -475,7 +477,7 @@ const AddDoctor: React.FC = () => {
                           <div className="flex flex-col items-center text-gray-400 group-hover:text-base-500 transition-colors">
                             <Upload className="h-6 w-6 mb-1" />
                             <span className="text-xs font-medium text-center">
-                              Thêm ảnh
+                              {t("doctors.add.accountInfo.addPhoto")}
                             </span>
                           </div>
                         )}
@@ -486,7 +488,7 @@ const AddDoctor: React.FC = () => {
                           <label className="cursor-pointer flex flex-col items-center text-white">
                             <Upload className="h-5 w-5 mb-1" />
                             <span className="text-xs font-medium">
-                              Thay đổi
+                              {t("doctors.add.accountInfo.changePhoto")}
                             </span>
                             <input
                               type="file"
@@ -514,7 +516,7 @@ const AddDoctor: React.FC = () => {
                           type="button"
                           onClick={removeAvatar}
                           className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors"
-                          title="Xóa ảnh"
+                          title={t("doctors.add.accountInfo.removePhoto")}
                         >
                           ×
                         </button>
@@ -534,7 +536,8 @@ const AddDoctor: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block font-medium text-base-700 mb-2">
-                        Số điện thoại <span className="text-red-500">*</span>
+                        {t("doctors.add.accountInfo.phone")}{" "}
+                        <span className="text-red-500">*</span>
                       </label>{" "}
                       <input
                         type="tel"
@@ -542,7 +545,9 @@ const AddDoctor: React.FC = () => {
                         value={formData.phone}
                         onChange={handleInputChangeWithValidation}
                         className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
-                        placeholder="0912345678"
+                        placeholder={t(
+                          "doctors.add.accountInfo.phonePlaceholder"
+                        )}
                         required
                       />
                       {fieldErrors.phone && (
@@ -552,13 +557,13 @@ const AddDoctor: React.FC = () => {
                       )}
                       {validating.phone && (
                         <p className="mt-1 text-sm text-blue-600">
-                          Đang kiểm tra...
+                          {t("doctors.add.validation.checking")}
                         </p>
                       )}
                     </div>
                     <div>
                       <label className="block font-medium text-base-700 mb-2">
-                        Email
+                        {t("doctors.add.accountInfo.email")}
                       </label>{" "}
                       <input
                         type="email"
@@ -566,7 +571,9 @@ const AddDoctor: React.FC = () => {
                         value={formData.email}
                         onChange={handleInputChangeWithValidation}
                         className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
-                        placeholder="doctor@wecare.com"
+                        placeholder={t(
+                          "doctors.add.accountInfo.emailPlaceholder"
+                        )}
                       />
                       {fieldErrors.email && (
                         <p className="mt-1 text-sm text-red-600">
@@ -575,13 +582,14 @@ const AddDoctor: React.FC = () => {
                       )}
                       {validating.email && (
                         <p className="mt-1 text-sm text-blue-600">
-                          Đang kiểm tra...
+                          {t("doctors.add.validation.checking")}
                         </p>
                       )}
                     </div>
                     <div className="md:col-span-2">
                       <label className="block font-medium text-base-700 mb-2">
-                        Mật khẩu <span className="text-red-500">*</span>
+                        {t("doctors.add.accountInfo.password")}{" "}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="password"
@@ -589,7 +597,9 @@ const AddDoctor: React.FC = () => {
                         value={formData.password}
                         onChange={handleInputChange}
                         className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
-                        placeholder="Nhập mật khẩu"
+                        placeholder={t(
+                          "doctors.add.accountInfo.passwordPlaceholder"
+                        )}
                         required
                       />
                     </div>
@@ -604,10 +614,10 @@ const AddDoctor: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <div>
                   <h2 className="text-lg font-semibold text-base-900">
-                    Thông tin cá nhân
+                    {t("doctors.add.personalInfo.title")}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Thông tin cơ bản của bác sĩ
+                    {t("doctors.add.personalInfo.description")}
                   </p>
                 </div>
               </div>
@@ -617,7 +627,8 @@ const AddDoctor: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block font-medium text-base-700 mb-2">
-                    Họ và tên <span className="text-red-500">*</span>
+                    {t("doctors.add.personalInfo.fullName")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -625,14 +636,17 @@ const AddDoctor: React.FC = () => {
                     value={formData.fullName}
                     onChange={handleInputChange}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
-                    placeholder="Nguyễn Văn A"
+                    placeholder={t(
+                      "doctors.add.personalInfo.fullNamePlaceholder"
+                    )}
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block font-medium text-base-700 mb-2">
-                    Số CMND/CCCD <span className="text-red-500">*</span>
+                    {t("doctors.add.personalInfo.identityNumber")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>{" "}
                   <input
                     type="text"
@@ -640,7 +654,9 @@ const AddDoctor: React.FC = () => {
                     value={formData.identityNumber}
                     onChange={handleInputChangeWithValidation}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
-                    placeholder="123456789012"
+                    placeholder={t(
+                      "doctors.add.personalInfo.identityNumberPlaceholder"
+                    )}
                     required
                   />
                   {fieldErrors.identityNumber && (
@@ -652,7 +668,8 @@ const AddDoctor: React.FC = () => {
 
                 <div>
                   <label className="block font-medium text-base-700 mb-2">
-                    Ngày sinh <span className="text-red-500">*</span>
+                    {t("doctors.add.personalInfo.birthday")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
@@ -666,7 +683,8 @@ const AddDoctor: React.FC = () => {
 
                 <div>
                   <label className="block font-medium text-base-700 mb-2">
-                    Giới tính <span className="text-red-500">*</span>
+                    {t("doctors.add.personalInfo.gender")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <select
@@ -676,8 +694,12 @@ const AddDoctor: React.FC = () => {
                       className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 appearance-none transition-colors outline-0"
                       required
                     >
-                      <option value="MALE">Nam</option>
-                      <option value="FEMALE">Nữ</option>
+                      <option value="MALE">
+                        {t("doctors.add.personalInfo.male")}
+                      </option>
+                      <option value="FEMALE">
+                        {t("doctors.add.personalInfo.female")}
+                      </option>
                     </select>
                     <ChevronDown className="absolute right-3 top-3.5 h-5 w-5 text-gray-400 pointer-events-none" />
                   </div>
@@ -685,7 +707,7 @@ const AddDoctor: React.FC = () => {
 
                 <div className="md:col-span-2">
                   <label className="block font-medium text-base-700 mb-2">
-                    Địa chỉ
+                    {t("doctors.add.personalInfo.address")}
                   </label>
                   <textarea
                     name="address"
@@ -693,7 +715,9 @@ const AddDoctor: React.FC = () => {
                     onChange={handleInputChange}
                     rows={3}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
-                    placeholder="Nhập địa chỉ đầy đủ"
+                    placeholder={t(
+                      "doctors.add.personalInfo.addressPlaceholder"
+                    )}
                   />
                 </div>
               </div>{" "}
@@ -705,10 +729,10 @@ const AddDoctor: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <div>
                   <h2 className="text-lg font-semibold text-base-900">
-                    Thông tin khoa
+                    {t("doctors.add.professionalInfo.title")}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Khoa làm việc của bác sĩ
+                    {t("doctors.add.professionalInfo.description")}
                   </p>
                 </div>
               </div>
@@ -717,7 +741,8 @@ const AddDoctor: React.FC = () => {
             <div className="px-6 py-6">
               <div>
                 <label className="block font-medium text-base-700 mb-2">
-                  Khoa <span className="text-red-500">*</span>
+                  {t("doctors.add.professionalInfo.department")}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -725,10 +750,11 @@ const AddDoctor: React.FC = () => {
                     value={formData.departmentId}
                     onChange={handleInputChange}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 appearance-none transition-colors outline-0"
-                    outline-0
                     required
                   >
-                    <option value={0}>Chọn khoa</option>
+                    <option value={0}>
+                      {t("doctors.add.professionalInfo.selectDepartment")}
+                    </option>
                     {departments.map((dept) => (
                       <option key={dept.departmentId} value={dept.departmentId}>
                         {dept.departmentName}
@@ -746,10 +772,10 @@ const AddDoctor: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <div>
                   <h2 className="text-lg font-semibold text-base-900">
-                    Thông tin chuyên môn
+                    {t("doctors.add.professionalInfo.title")}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Trình độ và chuyên ngành của bác sĩ
+                    {t("doctors.add.professionalInfo.description")}
                   </p>
                 </div>
               </div>
@@ -759,7 +785,8 @@ const AddDoctor: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block font-medium text-base-700 mb-2">
-                    Học hàm học vị <span className="text-red-500">*</span>
+                    {t("doctors.add.professionalInfo.academicDegree")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <select
@@ -772,7 +799,7 @@ const AddDoctor: React.FC = () => {
                       {" "}
                       {Object.entries(ACADEMIC_DEGREE_LABELS).map(
                         ([key, label]) => (
-                          <option key={key} value={label}>
+                          <option key={key} value={key}>
                             {label}
                           </option>
                         )
@@ -784,7 +811,8 @@ const AddDoctor: React.FC = () => {
 
                 <div>
                   <label className="block font-medium text-base-700 mb-2">
-                    Chuyên môn <span className="text-red-500">*</span>
+                    {t("doctors.add.professionalInfo.specialization")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -792,14 +820,17 @@ const AddDoctor: React.FC = () => {
                     value={formData.specialization}
                     onChange={handleInputChange}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
-                    placeholder="Tim mạch, Nội khoa, ..."
+                    placeholder={t(
+                      "doctors.add.professionalInfo.specializationPlaceholder"
+                    )}
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block font-medium text-base-700 mb-2">
-                    Loại bác sĩ <span className="text-red-500">*</span>
+                    {t("doctors.add.professionalInfo.type")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <select
@@ -809,8 +840,12 @@ const AddDoctor: React.FC = () => {
                       className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 appearance-none transition-colors outline-0"
                       required
                     >
-                      <option value="EXAMINATION">Khám bệnh</option>
-                      <option value="SERVICE">Dịch vụ</option>
+                      <option value="EXAMINATION">
+                        {t("doctors.add.professionalInfo.examination")}
+                      </option>
+                      <option value="SERVICE">
+                        {t("doctors.add.professionalInfo.service")}
+                      </option>
                     </select>
                     <ChevronDown className="absolute right-3 top-3.5 h-5 w-5 text-gray-400 pointer-events-none" />
                   </div>
@@ -818,7 +853,7 @@ const AddDoctor: React.FC = () => {
 
                 <div>
                   <label className="block font-medium text-base-700 mb-2">
-                    Phí khám (VNĐ)
+                    {t("doctors.add.professionalInfo.consultationFee")}
                   </label>
                   <input
                     type="number"
@@ -843,7 +878,7 @@ const AddDoctor: React.FC = () => {
                 className="px-6 py-[10px] border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 disabled={loading}
               >
-                Hủy
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
@@ -853,10 +888,10 @@ const AddDoctor: React.FC = () => {
                 {loading ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Đang tạo...</span>
+                    <span>{t("common.processing")}</span>
                   </div>
                 ) : (
-                  "Tạo bác sĩ"
+                  t("doctors.add.title")
                 )}
               </button>
             </div>
@@ -886,7 +921,7 @@ const AddDoctor: React.FC = () => {
               </div>
               <div className="ml-3">
                 <h3 className="text-lg font-medium text-gray-900">
-                  {error || "Có lỗi xảy ra"}
+                  {error || t("common.error")}
                 </h3>
               </div>
             </div>
@@ -907,7 +942,7 @@ const AddDoctor: React.FC = () => {
                 }}
                 className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Đóng
+                {t("authorization.close")}
               </button>
               <button
                 type="button"
@@ -919,7 +954,7 @@ const AddDoctor: React.FC = () => {
                 }}
                 className="px-4 py-2 bg-base-600 text-white rounded-lg hover:bg-base-700 transition-colors"
               >
-                Thử lại
+                {t("authorization.retry")}
               </button>
             </div>
           </div>

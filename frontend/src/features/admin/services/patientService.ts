@@ -112,6 +112,9 @@ const mapPatientToBackend = (patientData: any): any => {
   if (patientData.email !== undefined) backendData.email = patientData.email;
   if (patientData.height !== undefined) backendData.height = patientData.height;
   if (patientData.weight !== undefined) backendData.weight = patientData.weight;
+  if (patientData.password !== undefined) backendData.password = patientData.password;
+  if (patientData.first_name !== undefined) backendData.first_name = patientData.first_name;
+  if (patientData.last_name !== undefined) backendData.last_name = patientData.last_name;
 
   // Map emergency contacts
   if (patientData.emergencyContactDtos) {
