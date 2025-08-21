@@ -32,7 +32,7 @@ class DoctorService:
                 raise ValueError(_("Email hoặc số điện thoại là bắt buộc"))
             user = UserService().add_user(user_data)
             doctor = Doctor.objects.create(
-                user_id=user['userId'],
+                user_id=user['id'],
                 department_id=data['department_id'],
                 identity_number=data['identity_number'],
                 first_name=data['first_name'],
@@ -57,8 +57,22 @@ class DoctorService:
         return doctor
 
     def delete_doctor(self, doctor_id):
+        """Delete doctor and also soft delete the associated user"""
         doctor = get_object_or_404(Doctor, pk=doctor_id)
-        doctor.delete()
+        try:
+            with transaction.atomic():
+                # Get the associated user before deleting doctor
+                user = doctor.user
+                
+                # Hard delete doctor record
+                doctor.delete()
+                
+                # Soft delete the associated user
+                if user:
+                    user.soft_delete()
+                    
+        except Exception as e:
+            raise Exception(f"Không thể xóa bác sĩ: {str(e)}")
 
     def find_by_identity_number(self, identity_number):
         return Doctor.objects.filter(identity_number=identity_number).first()

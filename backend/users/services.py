@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.core.mail import send_mail
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, connection
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from django.utils.translation import gettext as _
 from .models import User
 from patients.models import Patient 
+from doctors.models import Doctor
 from common.enums import UserRole, Gender
 from common.constants import COMMON_LENGTH
 
@@ -188,7 +189,6 @@ class ResetTokenService:
             'expires': datetime.now() + timedelta(minutes=10)
         }
         
-        print(f"Generated reset token: {token} for user {user.id}")
         return token
 
     @staticmethod
@@ -247,14 +247,12 @@ class OtpService:
             'expires': datetime.now() + timedelta(minutes=10)
         }
         
-        print(f"Sent OTP {otp} to {email}, expires at {OtpService.otp_storage[email]['expires']}")
 
     @staticmethod
     def validate_otp_by_email(email, user_input_otp):
         OtpService._cleanup_expired_otps()
         
         otp_data = OtpService.otp_storage.get(email)
-        print(f"Validating OTP for email {email}: input={user_input_otp}, stored={otp_data}")
     
         if not otp_data:
             return {'resetToken': _('OTP đã hết hạn hoặc không tồn tại')}
@@ -346,18 +344,11 @@ class UserService:
     def force_delete_user(self, user_id):
         user = get_object_or_404(User, id=user_id)  
         
-        if hasattr(user, 'patient') and user.patient:
-            user.patient.delete()
-        
-        try:
-            if hasattr(user, 'doctor') and user.doctor:
-                user.doctor.delete()
-        except:
-            pass
-                
-        user.delete()  
-        return {"message": _("Xóa người dùng và tất cả dữ liệu liên quan thành công (hard delete)")}
+        user.soft_delete()
+        return {"message": _("Xóa người dùng thành công (soft delete)")}
 
+    @transaction.atomic
+    
     @transaction.atomic
     def restore_user(self, user_id):
         user = get_object_or_404(User, id=user_id, is_deleted=True)

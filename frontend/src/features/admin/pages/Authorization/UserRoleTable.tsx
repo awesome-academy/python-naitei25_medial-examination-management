@@ -17,6 +17,7 @@ import {
   CreateUserData,
   UpdateUserData,
 } from "../../services/authorizationService";
+import { useTranslation } from "react-i18next";
 
 const PAGE_SIZE = 10;
 
@@ -24,6 +25,7 @@ const PAGE_SIZE = 10;
 console.log("PAGE_SIZE constant:", PAGE_SIZE);
 
 export default function UserRoleTable() {
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -45,6 +47,7 @@ export default function UserRoleTable() {
 
   // Form states
   const [formLoading, setFormLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null); // Track which user is being deleted
   const [createFormData, setCreateFormData] = useState<CreateUserData>({
     phone: "",
     email: "",
@@ -192,6 +195,7 @@ export default function UserRoleTable() {
     setSelectedUser(user);
     setShowEditModal(true);
     // Pre-fill form with current user data
+    console.log("User role:", user.role); // Debug log
     setUpdateFormData({
       phone: user.phone,
       email: user.email,
@@ -211,11 +215,11 @@ export default function UserRoleTable() {
 
       // Validate required fields
       if (!createFormData.phone.trim()) {
-        alert("Số điện thoại là bắt buộc!");
+        alert(t("authorization.phoneRequired"));
         return;
       }
       if (!createFormData.password.trim()) {
-        alert("Mật khẩu là bắt buộc!");
+        alert(t("authorization.passwordRequired"));
         return;
       }
 
@@ -223,7 +227,7 @@ export default function UserRoleTable() {
       await userService.createUser(createFormData);
 
       // Success
-      alert("Tạo người dùng thành công!");
+      alert(t("authorization.userCreatedSuccess"));
       setShowCreateModal(false);
       await loadUsers(); // Reload data
 
@@ -239,7 +243,7 @@ export default function UserRoleTable() {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Có lỗi xảy ra khi tạo người dùng";
+          : t("authorization.cannotCreateUser");
       alert("Lỗi: " + errorMessage);
     } finally {
       setFormLoading(false);
@@ -257,13 +261,13 @@ export default function UserRoleTable() {
 
       // Use email instead of ID for updating
       if (!selectedUser.email) {
-        throw new Error("Email không hợp lệ để cập nhật người dùng");
+        throw new Error(t("authorization.invalidEmail"));
       }
 
       await userService.updateUserByEmail(selectedUser.email, updateFormData);
 
       // Success
-      alert("Cập nhật người dùng thành công!");
+      alert(t("authorization.userUpdatedSuccess"));
       setShowEditModal(false);
       await loadUsers(); // Reload data
     } catch (error: unknown) {
@@ -271,7 +275,7 @@ export default function UserRoleTable() {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Có lỗi xảy ra khi cập nhật người dùng";
+          : t("authorization.cannotUpdateUser");
       alert("Lỗi: " + errorMessage);
     } finally {
       setFormLoading(false);
@@ -280,24 +284,52 @@ export default function UserRoleTable() {
   const handleDeleteUser = async (user: User) => {
     // Validate that user has a valid email
     if (!user.email) {
-      alert("Không thể xóa người dùng: Email không hợp lệ!");
+      alert(t("authorization.invalidUserEmail"));
       console.error("Invalid user email for deletion:", user);
       return;
     }
 
+    const roleText = getRoleDisplayName(user.role);
+    const relatedDataText =
+      user.role === "PATIENT"
+        ? t("authorization.patientInfo")
+        : user.role === "DOCTOR"
+        ? t("authorization.doctorInfo")
+        : t("authorization.relatedData");
+
     if (
       confirm(
-        `Bạn có chắc chắn muốn xóa người dùng ${user.user.name} (${user.email})?`
+        t("authorization.hardDeleteWarning", {
+          name: user.user.name,
+          email: user.email,
+          role: roleText,
+          relatedData: relatedDataText,
+        })
       )
     ) {
       try {
-        console.log("Deleting user by email:", user.email);
-        await userService.deleteUserByEmail(user.email);
+        setDeleteLoading(user.email);
+        console.log("Hard deleting user by email:", user.email);
+        // Perform hard delete which removes user and all related records
+        await userService.forceDeleteUserByEmail(user.email);
         await loadUsers(); // Reload data
-        alert("Xóa người dùng thành công!");
+
+        // Show success message
+        const successMessage = t("authorization.deleteSuccess", {
+          name: user.user.name,
+          relatedData: relatedDataText,
+        });
+        alert(successMessage);
+
+        // Reset search and filters if the deleted user was the last one on current page
+        if (users.length === 1 && currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+        }
       } catch (error) {
-        alert("Không thể xóa người dùng. Vui lòng thử lại!");
-        console.error("Error deleting user:", error);
+        alert(t("authorization.deleteError"));
+        console.error("Error hard deleting user:", error);
+      } finally {
+        setDeleteLoading(null);
       }
     }
   };
@@ -330,13 +362,13 @@ export default function UserRoleTable() {
   const getRoleDisplayName = (role: string) => {
     switch (role?.toUpperCase()) {
       case "ADMIN":
-        return "Admin";
+        return t("authorization.admin");
       case "DOCTOR":
-        return "Bác sĩ";
+        return t("authorization.doctor");
       case "PATIENT":
-        return "Bệnh nhân";
+        return t("authorization.patient");
       default:
-        return role || "Chưa xác định";
+        return role || t("authorization.unknown");
     }
   };
 
@@ -356,9 +388,9 @@ export default function UserRoleTable() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Hoạt động":
+      case t("authorization.active"):
         return "success";
-      case "Tạm khóa":
+      case t("authorization.inactive"):
         return "error";
       case "Chờ xác thực":
         return "warning";
@@ -381,11 +413,15 @@ export default function UserRoleTable() {
     setDepartmentFilter(e.target.value);
     setCurrentPage(1); // Reset page when filter changes
   };
-  const handleActiveFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleActiveFilterChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setActiveFilter(e.target.value);
     setCurrentPage(1); // Reset page when filter changes
   };
-  const handleVerifiedFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleVerifiedFilterChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setVerifiedFilter(e.target.value);
     setCurrentPage(1); // Reset page when filter changes
   };
@@ -406,10 +442,10 @@ export default function UserRoleTable() {
         {" "}
         <div className="flex justify-start items-center pt-5">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Danh sách người dùng
+            {t("authorization.userList")}
           </h2>
           <span className="ml-5 text-sm bg-base-600/20 text-base-600 py-1 px-4 rounded-full font-bold">
-            {totalItems} người dùng
+            {totalItems} {t("authorization.usersCount")}
           </span>
         </div>
         {/* Action buttons */}
@@ -420,14 +456,14 @@ export default function UserRoleTable() {
             disabled={loading}
           >
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-            Làm mới
+            {t("authorization.refresh")}
           </button>
           <button
             onClick={handleCreateUser}
             className="flex items-center gap-2 px-4 py-2 bg-base-500 text-white rounded-lg hover:bg-base-600 transition-colors text-sm font-medium"
           >
             <UserPlus size={16} />
-            Thêm người dùng
+            {t("authorization.addUser")}
           </button>
         </div>
       </div>
@@ -437,7 +473,7 @@ export default function UserRoleTable() {
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-2">
           {/* Search Bar */}
           <SearchInput
-            placeholder="Tìm kiếm người dùng..."
+            placeholder={t("authorization.searchUsers")}
             value={searchTerm}
             onChange={handleSearchChange}
           />
@@ -445,72 +481,80 @@ export default function UserRoleTable() {
           {/* Dropdown for Role Filter */}
           <div className="relative">
             <select
-              title="Lọc theo vai trò"
+              title={t("authorization.role")}
               value={roleFilter}
               onChange={handleRoleFilterChange}
               className="h-11 w-full rounded-lg border border-gray-200 bg-white px-4 pr-10 text-sm font-medium text-gray-800 shadow-theme-xs appearance-none focus:border-base-300 focus:outline-none focus:ring-3 focus:ring-base-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90"
             >
-              <option value="">Tất cả vai trò</option>
-              <option value="ADMIN">Admin</option>
-              <option value="DOCTOR">Bác sĩ</option>
-              <option value="PATIENT">Bệnh nhân</option>
+              <option value="">{t("authorization.allRoles")}</option>
+              <option value="ADMIN">{t("authorization.admin")}</option>
+              <option value="DOCTOR">{t("authorization.doctor")}</option>
+              <option value="PATIENT">{t("authorization.patient")}</option>
             </select>
           </div>
 
           {/* Dropdown for Department Filter */}
           <div className="relative">
             <select
-              title="Lọc theo khoa"
+              title={t("authorization.department")}
               value={departmentFilter}
               onChange={handleDepartmentFilterChange}
               className="h-11 w-full rounded-lg border border-gray-200 bg-white px-4 pr-10 text-sm font-medium text-gray-800 shadow-theme-xs appearance-none focus:border-base-300 focus:outline-none focus:ring-3 focus:ring-base-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90"
             >
-              <option value="">Tất cả khoa</option>
-              <option value="Quản trị hệ thống">Quản trị hệ thống</option>
-              <option value="Tim mạch">Tim mạch</option>
-              <option value="Nội khoa">Nội khoa</option>
-              <option value="Ngoại khoa">Ngoại khoa</option>
-              <option value="Sản khoa">Sản khoa</option>
-              <option value="Nhi khoa">Nhi khoa</option>
-              <option value="Cơ xương khớp">Cơ xương khớp</option>
-              <option value="Tiêu hóa">Tiêu hóa</option>
-              <option value="Thần kinh">Thần kinh</option>
-              <option value="Da liễu">Da liễu</option>
-              <option value="Mắt">Mắt</option>
-              <option value="Tai mũi họng">Tai mũi họng</option>
-              <option value="Phụ khoa">Phụ khoa</option>
-              <option value="Khoa Dược">Khoa Dược</option>
-              <option value="Tiếp nhận">Tiếp nhận</option>
-              <option value="Tài chính">Tài chính</option>
-              <option value="Bệnh nhân">Bệnh nhân</option>
+              <option value="">{t("authorization.allDepartments")}</option>
+              <option value="Quản trị hệ thống">
+                {t("authorization.adminRole")}
+              </option>
+              <option value="Tim mạch">{t("authorization.cardiology")}</option>
+              <option value="Nội khoa">
+                {t("authorization.internalMedicine")}
+              </option>
+              <option value="Ngoại khoa">{t("authorization.surgery")}</option>
+              <option value="Sản khoa">{t("authorization.obstetrics")}</option>
+              <option value="Nhi khoa">{t("authorization.pediatrics")}</option>
+              <option value="Cơ xương khớp">
+                {t("authorization.orthopedics")}
+              </option>
+              <option value="Tiêu hóa">
+                {t("authorization.gastroenterology")}
+              </option>
+              <option value="Thần kinh">{t("authorization.neurology")}</option>
+              <option value="Da liễu">{t("authorization.dermatology")}</option>
+              <option value="Mắt">{t("authorization.ophthalmology")}</option>
+              <option value="Tai mũi họng">{t("authorization.ent")}</option>
+              <option value="Phụ khoa">{t("authorization.gynecology")}</option>
+              <option value="Khoa Dược">{t("authorization.pharmacy")}</option>
+              <option value="Tiếp nhận">{t("authorization.reception")}</option>
+              <option value="Tài chính">{t("authorization.finance")}</option>
+              <option value="Bệnh nhân">{t("authorization.patient")}</option>
             </select>
           </div>
 
           {/* Dropdown for Active Status Filter */}
           <div className="relative">
             <select
-              title="Lọc theo trạng thái hoạt động"
+              title={t("authorization.status")}
               value={activeFilter}
               onChange={handleActiveFilterChange}
               className="h-11 w-full rounded-lg border border-gray-200 bg-white px-4 pr-10 text-sm font-medium text-gray-800 shadow-theme-xs appearance-none focus:border-base-300 focus:outline-none focus:ring-3 focus:ring-base-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90"
             >
-              <option value="">Tất cả trạng thái</option>
-              <option value="true">Hoạt động</option>
-              <option value="false">Tạm khóa</option>
+              <option value="">{t("authorization.allStatuses")}</option>
+              <option value="true">{t("authorization.active")}</option>
+              <option value="false">{t("authorization.inactive")}</option>
             </select>
           </div>
 
           {/* Dropdown for Verified Status Filter */}
           <div className="relative">
             <select
-              title="Lọc theo trạng thái xác thực"
+              title={t("authorization.authentication")}
               value={verifiedFilter}
               onChange={handleVerifiedFilterChange}
               className="h-11 w-full rounded-lg border border-gray-200 bg-white px-4 pr-10 text-sm font-medium text-gray-800 shadow-theme-xs appearance-none focus:border-base-300 focus:outline-none focus:ring-3 focus:ring-base-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90"
             >
-              <option value="">Tất cả xác thực</option>
-              <option value="true">Đã xác thực</option>
-              <option value="false">Chưa xác thực</option>
+              <option value="">{t("authorization.allAuthentication")}</option>
+              <option value="true">{t("authorization.verified")}</option>
+              <option value="false">{t("authorization.unverified")}</option>
             </select>
           </div>
 
@@ -521,7 +565,7 @@ export default function UserRoleTable() {
             className="h-11 w-full rounded-lg bg-base-700 text-white text-sm font-medium shadow-theme-xs hover:bg-base-600 focus:outline-hidden focus:ring-3 focus:ring-base-600/50 flex items-center justify-center gap-2"
           >
             <Settings size={16} />
-            Đặt lại bộ lọc
+            {t("authorization.resetFilters")}
           </button>
         </div>
       </div>
@@ -535,49 +579,49 @@ export default function UserRoleTable() {
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
               >
-                Người dùng
+                {t("authorization.user")}
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
               >
-                Vai trò
+                {t("authorization.role")}
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
               >
-                Khoa/Phòng ban
+                {t("authorization.department")}
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
               >
-                Trạng thái
+                {t("authorization.status")}
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
               >
-                Xác thực
+                {t("authorization.authentication")}
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
               >
-                Ngày xóa
+                {t("authorization.deletionDate")}
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
               >
-                Ngày tạo
+                {t("authorization.creationDate")}
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-sm dark:text-gray-400"
               >
-                Thao tác
+                {t("authorization.operations")}
               </TableCell>
             </TableRow>
           </TableHeader>{" "}
@@ -588,7 +632,9 @@ export default function UserRoleTable() {
                 <TableCell className="py-8 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-base-600"></div>
-                    <span className="text-gray-500">Đang tải dữ liệu...</span>
+                    <span className="text-gray-500">
+                      {t("authorization.loadingData")}
+                    </span>
                   </div>
                 </TableCell>
               </TableRow>
@@ -601,7 +647,7 @@ export default function UserRoleTable() {
                       onClick={handleRefresh}
                       className="mt-2 text-sm underline hover:no-underline"
                     >
-                      Thử lại
+                      {t("authorization.retry")}
                     </button>
                   </div>
                 </TableCell>
@@ -610,7 +656,7 @@ export default function UserRoleTable() {
               <TableRow>
                 <TableCell className="py-8 text-center">
                   <span className="text-gray-500">
-                    Không có dữ liệu người dùng
+                    {t("authorization.noUserData")}
                   </span>
                 </TableCell>
               </TableRow>
@@ -651,24 +697,30 @@ export default function UserRoleTable() {
                   </TableCell>
                   <TableCell className="py-3">
                     <Badge size="sm" color={getStatusColor(user.status)}>
-                      {user.status}
+                      {user.status === "Hoạt động"
+                        ? t("authorization.active")
+                        : t("authorization.inactive")}
                     </Badge>
                   </TableCell>{" "}
                   <TableCell className="py-3">
-                    <Badge size="sm" color={user.isVerified ? "success" : "warning"}>
-                      {user.isVerified ? "Đã xác thực" : "Chưa xác thực"}
+                    <Badge
+                      size="sm"
+                      color={user.isVerified ? "success" : "warning"}
+                    >
+                      {user.isVerified
+                        ? t("authorization.verified")
+                        : t("authorization.unverified")}
                     </Badge>
                   </TableCell>{" "}
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {user.lastLogin && user.lastLogin !== "Chưa có dữ liệu" 
+                    {user.lastLogin && user.lastLogin !== "Chưa có dữ liệu"
                       ? formatDateTime(user.lastLogin)
-                      : "Chưa bị xóa"
-                    }
+                      : t("authorization.notDeleted")}
                   </TableCell>{" "}
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {user.createdAt
                       ? formatDateTime(user.createdAt)
-                      : "Chưa có dữ liệu"}
+                      : t("authorization.noData")}
                   </TableCell>
                   <TableCell className="py-3">
                     {" "}
@@ -676,18 +728,25 @@ export default function UserRoleTable() {
                       <button
                         onClick={() => handleEditUser(user)}
                         className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors dark:bg-slate-900/30 dark:text-slate-400 dark:hover:bg-slate-900/50"
-                        title="Chỉnh sửa người dùng"
+                        title={t("authorization.editUser")}
                       >
                         <Edit size={14} />
-                        Sửa
+                        {t("authorization.edit")}
                       </button>
                       <button
                         onClick={() => handleDeleteUser(user)}
-                        className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
-                        title="Xóa người dùng"
+                        disabled={deleteLoading === user.email}
+                        className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={t("authorization.deleteUser")}
                       >
-                        <Trash size={14} />
-                        Xóa
+                        {deleteLoading === user.email ? (
+                          <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <Trash size={14} />
+                        )}
+                        {deleteLoading === user.email
+                          ? t("authorization.deleting")
+                          : t("authorization.delete")}
                       </button>
                     </div>
                   </TableCell>
@@ -717,12 +776,12 @@ export default function UserRoleTable() {
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-                Thêm người dùng mới
+                {t("authorization.createNewUser")}
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                title="Đóng"
+                title={t("authorization.close")}
               >
                 <svg
                   className="w-6 h-6"
@@ -743,7 +802,8 @@ export default function UserRoleTable() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Số điện thoại <span className="text-red-500">*</span>
+                    {t("authorization.phoneNumber")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -756,12 +816,12 @@ export default function UserRoleTable() {
                       }))
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                    placeholder="Nhập số điện thoại..."
+                    placeholder={t("authorization.enterPhone")}
                   />
                 </div>
                 <div>
                   <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email
+                    {t("common.email")}
                   </label>
                   <input
                     type="email"
@@ -773,17 +833,18 @@ export default function UserRoleTable() {
                       }))
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                    placeholder="Nhập email..."
+                    placeholder={t("authorization.enterEmail")}
                   />
                 </div>
               </div>{" "}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Vai trò <span className="text-red-500">*</span>
+                    {t("authorization.role")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <select
-                    title="Chọn vai trò"
+                    title={t("authorization.role")}
                     required
                     value={createFormData.role}
                     onChange={(e) =>
@@ -794,14 +855,17 @@ export default function UserRoleTable() {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
                   >
-                    <option value="ADMIN">Admin</option>
-                    <option value="DOCTOR">Bác sĩ</option>
-                    <option value="PATIENT">Bệnh nhân</option>
+                    <option value="ADMIN">{t("authorization.admin")}</option>
+                    <option value="DOCTOR">{t("authorization.doctor")}</option>
+                    <option value="PATIENT">
+                      {t("authorization.patient")}
+                    </option>
                   </select>
                 </div>{" "}
                 <div>
                   <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Mật khẩu <span className="text-red-500">*</span>
+                    {t("authorization.password")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="password"
@@ -814,7 +878,7 @@ export default function UserRoleTable() {
                       }))
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                    placeholder="Nhập mật khẩu..."
+                    placeholder={t("authorization.enterPassword")}
                   />
                 </div>{" "}
               </div>
@@ -828,7 +892,7 @@ export default function UserRoleTable() {
                   htmlFor="sendEmail"
                   className="text-sm text-gray-700 dark:text-gray-300"
                 >
-                  Gửi email thông báo đến người dùng
+                  {t("authorization.sendEmailNotification")}
                 </label>
               </div>{" "}
               <div className="flex justify-end gap-3 mt-6">
@@ -838,7 +902,7 @@ export default function UserRoleTable() {
                   disabled={formLoading}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
-                  Hủy
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -848,7 +912,9 @@ export default function UserRoleTable() {
                   {formLoading && (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   )}
-                  {formLoading ? "Đang tạo..." : "Tạo người dùng"}
+                  {formLoading
+                    ? t("common.processing")
+                    : t("authorization.addUser")}
                 </button>
               </div>
             </form>
@@ -862,12 +928,12 @@ export default function UserRoleTable() {
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-                Chỉnh sửa người dùng: {selectedUser.user.name}
+                {t("authorization.editUser")}: {selectedUser.user.name}
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                title="Đóng"
+                title={t("authorization.close")}
               >
                 <svg
                   className="w-6 h-6"
@@ -888,7 +954,8 @@ export default function UserRoleTable() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Số điện thoại <span className="text-red-500">*</span>
+                    {t("authorization.phoneNumber")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -901,12 +968,12 @@ export default function UserRoleTable() {
                       }))
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                    placeholder="Nhập số điện thoại..."
+                    placeholder={t("authorization.enterPhone")}
                   />
                 </div>
                 <div>
                   <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email
+                    {t("common.email")}
                   </label>
                   <input
                     type="email"
@@ -918,7 +985,7 @@ export default function UserRoleTable() {
                       }))
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 outline-0"
-                    placeholder="Nhập email..."
+                    placeholder={t("authorization.enterEmail")}
                   />
                 </div>
               </div>
@@ -926,33 +993,31 @@ export default function UserRoleTable() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Vai trò <span className="text-red-500">*</span>
+                    {t("authorization.role")}
                   </label>
-                  <select
-                    title="Chọn vai trò"
-                    required
-                    value={updateFormData.role}
-                    onChange={(e) =>
-                      setUpdateFormData((prev) => ({
-                        ...prev,
-                        role: e.target.value as UpdateUserData["role"],
-                      }))
+                  <input
+                    type="text"
+                    value={
+                      updateFormData.role
+                        ? getRoleDisplayName(updateFormData.role)
+                        : t("authorization.unknown")
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
-                  >
-                    <option value="ADMIN">Admin</option>
-                    <option value="DOCTOR">Bác sĩ</option>
-                    <option value="PATIENT">Bệnh nhân</option>
-                  </select>
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
+                    placeholder={t("authorization.roleCannotChange")}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t("authorization.cannotChangeRole")}
+                  </p>
                 </div>
-                
+
                 {updateFormData.role !== "PATIENT" && (
                   <div>
                     <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Khoa/Phòng ban
+                      {t("authorization.department")}
                     </label>
                     <select
-                      title="Chọn khoa/phòng ban"
+                      title={t("authorization.selectDepartment")}
                       value={updateFormData.department || ""}
                       onChange={(e) =>
                         setUpdateFormData((prev) => ({
@@ -962,43 +1027,79 @@ export default function UserRoleTable() {
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
                     >
-                      <option value="">Chọn khoa/phòng ban</option>
+                      <option value="">
+                        {t("authorization.selectDepartment")}
+                      </option>
                       {updateFormData.role === "ADMIN" ? (
                         <>
-                          <option value="Quản trị hệ thống">Quản trị hệ thống</option>
-                          <option value="Tài chính">Tài chính</option>
-                          <option value="Tiếp nhận">Tiếp nhận</option>
+                          <option value="Quản trị hệ thống">
+                            {t("authorization.adminRole")}
+                          </option>
+                          <option value="Tài chính">
+                            {t("authorization.finance")}
+                          </option>
+                          <option value="Tiếp nhận">
+                            {t("authorization.reception")}
+                          </option>
                         </>
                       ) : (
                         <>
-                          <option value="Tim mạch">Tim mạch</option>
-                          <option value="Nội khoa">Nội khoa</option>
-                          <option value="Ngoại khoa">Ngoại khoa</option>
-                          <option value="Sản khoa">Sản khoa</option>
-                          <option value="Nhi khoa">Nhi khoa</option>
-                          <option value="Cơ xương khớp">Cơ xương khớp</option>
-                          <option value="Tiêu hóa">Tiêu hóa</option>
-                          <option value="Thần kinh">Thần kinh</option>
-                          <option value="Da liễu">Da liễu</option>
-                          <option value="Mắt">Mắt</option>
-                          <option value="Tai mũi họng">Tai mũi họng</option>
-                          <option value="Phụ khoa">Phụ khoa</option>
-                          <option value="Khoa Dược">Khoa Dược</option>
-                          <option value="Khoa Y học cổ truyền">Khoa Y học cổ truyền</option>
+                          <option value="Tim mạch">
+                            {t("authorization.cardiology")}
+                          </option>
+                          <option value="Nội khoa">
+                            {t("authorization.internalMedicine")}
+                          </option>
+                          <option value="Ngoại khoa">
+                            {t("authorization.surgery")}
+                          </option>
+                          <option value="Sản khoa">
+                            {t("authorization.obstetrics")}
+                          </option>
+                          <option value="Nhi khoa">
+                            {t("authorization.pediatrics")}
+                          </option>
+                          <option value="Cơ xương khớp">
+                            {t("authorization.orthopedics")}
+                          </option>
+                          <option value="Tiêu hóa">
+                            {t("authorization.gastroenterology")}
+                          </option>
+                          <option value="Thần kinh">
+                            {t("authorization.neurology")}
+                          </option>
+                          <option value="Da liễu">
+                            {t("authorization.dermatology")}
+                          </option>
+                          <option value="Mắt">
+                            {t("authorization.ophthalmology")}
+                          </option>
+                          <option value="Tai mũi họng">
+                            {t("authorization.ent")}
+                          </option>
+                          <option value="Phụ khoa">
+                            {t("authorization.gynecology")}
+                          </option>
+                          <option value="Khoa Dược">
+                            {t("authorization.pharmacy")}
+                          </option>
+                          <option value="Khoa Y học cổ truyền">
+                            {t("authorization.traditionalMedicine")}
+                          </option>
                         </>
                       )}
                     </select>
                   </div>
                 )}
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Trạng thái
+                    {t("authorization.status")}
                   </label>
                   <select
-                    title="Chọn trạng thái"
+                    title={t("authorization.selectStatus")}
                     value={updateFormData.is_active ? "active" : "inactive"}
                     onChange={(e) =>
                       setUpdateFormData((prev) => ({
@@ -1008,18 +1109,22 @@ export default function UserRoleTable() {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
                   >
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Tạm khóa</option>
+                    <option value="active">{t("authorization.active")}</option>
+                    <option value="inactive">
+                      {t("authorization.inactive")}
+                    </option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Xác thực
+                    {t("authorization.authentication")}
                   </label>
                   <select
-                    title="Chọn trạng thái xác thực"
-                    value={updateFormData.is_verified ? "verified" : "unverified"}
+                    title={t("authorization.selectAuthentication")}
+                    value={
+                      updateFormData.is_verified ? "verified" : "unverified"
+                    }
                     onChange={(e) =>
                       setUpdateFormData((prev) => ({
                         ...prev,
@@ -1028,8 +1133,12 @@ export default function UserRoleTable() {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 dark:bg-gray-800 outline-0 dark:border-gray-600 dark:text-white"
                   >
-                    <option value="verified">Đã xác thực</option>
-                    <option value="unverified">Chưa xác thực</option>
+                    <option value="verified">
+                      {t("authorization.verified")}
+                    </option>
+                    <option value="unverified">
+                      {t("authorization.unverified")}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -1041,7 +1150,7 @@ export default function UserRoleTable() {
                   disabled={formLoading}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
-                  Hủy
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -1070,7 +1179,9 @@ export default function UserRoleTable() {
                       ></path>
                     </svg>
                   )}
-                  {formLoading ? "Đang lưu..." : "Lưu thay đổi"}
+                  {formLoading
+                    ? t("common.processing")
+                    : t("authorization.saveChanges")}
                 </button>
               </div>
             </form>

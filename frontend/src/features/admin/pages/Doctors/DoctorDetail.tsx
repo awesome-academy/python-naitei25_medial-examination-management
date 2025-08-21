@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { doctorService } from "../../../../shared/services/doctorService";
 import { userService } from "../../../../shared/services/userService";
 import PageMeta from "../../components/common/PageMeta";
@@ -22,6 +23,7 @@ interface DoctorDetailData extends Doctor {
 
 export default function DoctorDetail() {
   const { doctorId } = useParams();
+  const { t } = useTranslation();
   const {
     isOpen: isEditOpen,
     openModal: openEditModal,
@@ -237,7 +239,7 @@ export default function DoctorDetail() {
 
       // Kiểm tra xem có thay đổi gì không
       if (Object.keys(updateData).length === 0) {
-        alert("Không có thay đổi nào để cập nhật!");
+        alert(t("doctors.detail.saveSuccess"));
         closeEditModal();
         return;
       }
@@ -251,7 +253,7 @@ export default function DoctorDetail() {
       console.log("Doctor updated successfully:", updatedDoctor);
 
       // Hiển thị thông báo thành công
-      alert("Cập nhật thông tin bác sĩ thành công!");
+      alert(t("doctors.detail.saveSuccess"));
       closeEditModal();
 
       // Refresh data từ server
@@ -264,7 +266,7 @@ export default function DoctorDetail() {
         console.error("Response status:", (error as any).response.status);
       }
 
-      alert("Có lỗi xảy ra khi cập nhật thông tin bác sĩ. Vui lòng thử lại.");
+      alert(t("doctors.detail.saveError"));
     } finally {
       setSaving(false);
     }
@@ -274,14 +276,16 @@ export default function DoctorDetail() {
     return (
       <div className="text-center py-10">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-base-600 mx-auto mb-4"></div>
-        <p className="text-gray-600 dark:text-gray-400">Đang tải dữ liệu...</p>
+        <p className="text-gray-600 dark:text-gray-400">
+          {t("common.loading")}
+        </p>
       </div>
     );
   if (!doctorData)
     return (
       <div className="text-center py-10">
         <p className="text-gray-600 dark:text-gray-400">
-          Không tìm thấy bác sĩ
+          {t("common.noDataFound")}
         </p>
       </div>
     );
@@ -289,8 +293,8 @@ export default function DoctorDetail() {
   return (
     <div className="min-h-screen">
       <PageMeta
-        title={`${doctorData.fullName} | Hồ sơ Bác sĩ`}
-        description={`Thông tin chi tiết về ${doctorData.fullName} - ${doctorData.specialization}`}
+        title={t("doctors.detail.pageTitle")}
+        description={t("doctors.detail.pageDescription")}
       />
 
       {/* Header */}
@@ -299,14 +303,14 @@ export default function DoctorDetail() {
           <div className="flex items-center space-x-4">
             <ReturnButton />
             <h1 className="text-xl font-semibold text-gray-900">
-              Hồ sơ bác sĩ: {doctorData.fullName}
+              {t("doctors.detail.title")}
             </h1>
           </div>
           <button
             onClick={openEditModal}
             className="px-6 py-[10px] bg-base-600 text-white rounded-lg hover:bg-base-700 font-medium transition-colors"
           >
-            Chỉnh sửa
+            {t("doctors.detail.edit")}
           </button>
         </div>
       </div>
@@ -319,10 +323,10 @@ export default function DoctorDetail() {
               <div className="flex items-center space-x-3">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Thông tin tài khoản
+                    {t("doctors.detail.accountInfo")}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Thông tin đăng nhập và liên hệ
+                    {t("doctors.detail.accountInfo")}
                   </p>
                 </div>
               </div>
@@ -333,7 +337,7 @@ export default function DoctorDetail() {
                 {/* Avatar Section */}
                 <div className="flex flex-col items-center">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Ảnh đại diện
+                    {t("common.avatar")}
                   </label>
                   <div className="size-30 rounded-xl border-2 border-gray-300 overflow-hidden bg-gray-50 flex items-center justify-center">
                     <img
@@ -349,7 +353,7 @@ export default function DoctorDetail() {
                   <div className="grid grid-row gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Số điện thoại
+                        {t("authorization.phoneNumber")}
                       </label>
                       <input
                         type="tel"
@@ -360,7 +364,7 @@ export default function DoctorDetail() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email
+                        {t("common.email")}
                       </label>
                       <input
                         type="email"
@@ -381,10 +385,10 @@ export default function DoctorDetail() {
               <div className="flex items-center space-x-3">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Thông tin cá nhân
+                    {t("doctors.detail.personalInfo.title")}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Thông tin cơ bản của bác sĩ
+                    {t("doctors.detail.personalInfo.description")}
                   </p>
                 </div>
               </div>
@@ -394,7 +398,7 @@ export default function DoctorDetail() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mã bác sĩ
+                    {t("common.doctorId")}
                   </label>
                   <input
                     type="text"
@@ -406,7 +410,7 @@ export default function DoctorDetail() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Họ và tên
+                    {t("doctors.detail.personalInfo.fullName")}
                   </label>
                   <input
                     type="text"
@@ -418,7 +422,7 @@ export default function DoctorDetail() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Số CMND/CCCD
+                    {t("doctors.detail.personalInfo.identityNumber")}
                   </label>
                   <input
                     type="text"
@@ -430,7 +434,7 @@ export default function DoctorDetail() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ngày sinh
+                    {t("doctors.detail.personalInfo.birthday")}
                   </label>
                   <input
                     type="date"
@@ -442,16 +446,16 @@ export default function DoctorDetail() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Giới tính
+                    {t("doctors.detail.personalInfo.gender")}
                   </label>
                   <input
                     type="text"
                     value={
                       doctorData.gender === "MALE"
-                        ? "Nam"
+                        ? t("doctors.detail.personalInfo.genderMale")
                         : doctorData.gender === "FEMALE"
-                        ? "Nữ"
-                        : "Khác"
+                        ? t("doctors.detail.personalInfo.genderFemale")
+                        : t("doctors.detail.personalInfo.genderOther")
                     }
                     disabled
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
@@ -460,7 +464,7 @@ export default function DoctorDetail() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Địa chỉ
+                    {t("doctors.detail.personalInfo.address")}
                   </label>
                   <textarea
                     value={doctorData.ress}
@@ -479,10 +483,10 @@ export default function DoctorDetail() {
               <div className="flex items-center space-x-3">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Thông tin chuyên môn
+                    {t("doctors.detail.professionalInfo.title")}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Trình độ, chuyên ngành và khoa làm việc của bác sĩ
+                    {t("doctors.detail.professionalInfo.description")}
                   </p>
                 </div>
               </div>
@@ -492,7 +496,7 @@ export default function DoctorDetail() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Khoa
+                    {t("doctors.detail.professionalInfo.department")}
                   </label>
                   <input
                     type="text"
@@ -504,7 +508,7 @@ export default function DoctorDetail() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Học hàm học vị
+                    {t("doctors.detail.professionalInfo.academicDegree")}
                   </label>
                   <input
                     type="text"
@@ -520,7 +524,7 @@ export default function DoctorDetail() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Chuyên môn
+                    {t("doctors.detail.professionalInfo.specialization")}
                   </label>
                   <input
                     type="text"
@@ -532,14 +536,14 @@ export default function DoctorDetail() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Loại bác sĩ
+                    {t("doctors.detail.professionalInfo.type")}
                   </label>
                   <input
                     type="text"
                     value={
                       doctorData.type === "EXAMINATION"
-                        ? "Khám bệnh"
-                        : "Dịch vụ"
+                        ? t("doctors.detail.professionalInfo.typeExamination")
+                        : t("doctors.detail.professionalInfo.typeService")
                     }
                     disabled
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
@@ -548,7 +552,7 @@ export default function DoctorDetail() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phí khám (VNĐ)
+                    {t("doctors.detail.professionalInfo.consultationFee")}
                   </label>
                   <input
                     type="text"
@@ -577,10 +581,10 @@ export default function DoctorDetail() {
         <div className="relative w-full p-6 overflow-y-auto custom-scrollbar bg-white rounded-2xl max-h-[80vh]">
           <div className="mb-6">
             <h4 className="mb-2 text-lg font-semibold text-gray-900">
-              Chỉnh sửa thông tin bác sĩ
+              {t("doctors.detail.editModal.title")}
             </h4>
             <p className="text-sm text-gray-500">
-              Cập nhật thông tin chi tiết của bác sĩ.
+              {t("doctors.detail.editModal.description")}
             </p>
           </div>
 
@@ -588,12 +592,12 @@ export default function DoctorDetail() {
             {/* Personal Information */}
             <div>
               <h5 className="text-base font-medium text-gray-900 mb-4">
-                Thông tin cá nhân
+                {t("doctors.detail.editModal.personalInfoTitle")}
               </h5>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mã bác sĩ
+                    {t("common.doctorId")}
                   </label>
                   <input
                     type="text"
@@ -604,31 +608,31 @@ export default function DoctorDetail() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Số điện thoại
+                    {t("authorization.phoneNumber")}
                   </label>
                   <input
                     type="tel"
                     name="phone"
                     defaultValue={doctorData.phone || ""}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
-                    placeholder="Nhập số điện thoại"
+                    placeholder={t("doctors.detail.editModal.phonePlaceholder")}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
+                    {t("common.email")}
                   </label>
                   <input
                     type="email"
                     name="email"
                     defaultValue={doctorData.email || ""}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
-                    placeholder="Nhập email (không bắt buộc)"
+                    placeholder={t("doctors.detail.editModal.emailPlaceholder")}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Họ và tên
+                    {t("doctors.detail.personalInfo.fullName")}
                   </label>
                   <input
                     type="text"
@@ -639,7 +643,7 @@ export default function DoctorDetail() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Số CMND/CCCD
+                    {t("doctors.detail.personalInfo.identityNumber")}
                   </label>
                   <input
                     type="text"
@@ -650,7 +654,7 @@ export default function DoctorDetail() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ngày sinh
+                    {t("doctors.detail.personalInfo.birthday")}
                   </label>
                   <input
                     type="date"
@@ -661,21 +665,27 @@ export default function DoctorDetail() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Giới tính
+                    {t("doctors.detail.personalInfo.gender")}
                   </label>
                   <select
                     name="gender"
                     defaultValue={doctorData.gender}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
                   >
-                    <option value="MALE">Nam</option>
-                    <option value="FEMALE">Nữ</option>
-                    <option value="OTHER">Khác</option>
+                    <option value="MALE">
+                      {t("doctors.detail.personalInfo.genderMale")}
+                    </option>
+                    <option value="FEMALE">
+                      {t("doctors.detail.personalInfo.genderFemale")}
+                    </option>
+                    <option value="OTHER">
+                      {t("doctors.detail.personalInfo.genderOther")}
+                    </option>
                   </select>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Địa chỉ
+                    {t("doctors.detail.personalInfo.address")}
                   </label>
                   <textarea
                     name="ress"
@@ -690,19 +700,23 @@ export default function DoctorDetail() {
             {/* Professional Information */}
             <div>
               <h5 className="text-base font-medium text-gray-900 mb-4">
-                Thông tin chuyên môn
+                {t("doctors.detail.editModal.professionalInfoTitle")}
               </h5>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Khoa
+                    {t("doctors.detail.professionalInfo.department")}
                   </label>
                   <select
                     name="departmentId"
                     defaultValue={doctorData.departmentId}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
                   >
-                    <option value="">-- Chọn khoa --</option>
+                    <option value="">
+                      {t(
+                        "doctors.detail.editModal.departmentSelectPlaceholder"
+                      )}
+                    </option>
                     {/* The departments state was removed, so this loop will not work as intended.
                         This part of the code will need to be refactored if department selection is required. */}
                     {/* For now, we'll just show a placeholder or remove if not needed */}
@@ -713,7 +727,7 @@ export default function DoctorDetail() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Học hàm học vị
+                    {t("doctors.detail.professionalInfo.academicDegree")}
                   </label>
                   <select
                     name="academicDegree"
@@ -731,7 +745,7 @@ export default function DoctorDetail() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Chuyên môn
+                    {t("doctors.detail.professionalInfo.specialization")}
                   </label>
                   <input
                     type="text"
@@ -742,20 +756,24 @@ export default function DoctorDetail() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Loại bác sĩ
+                    {t("doctors.detail.professionalInfo.type")}
                   </label>
                   <select
                     name="type"
                     defaultValue={doctorData.type}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-base-500/20 focus:border-base-500 transition-colors outline-0"
                   >
-                    <option value="EXAMINATION">Khám bệnh</option>
-                    <option value="SERVICE">Dịch vụ</option>
+                    <option value="EXAMINATION">
+                      {t("doctors.detail.professionalInfo.typeExamination")}
+                    </option>
+                    <option value="SERVICE">
+                      {t("doctors.detail.professionalInfo.typeService")}
+                    </option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phí khám (VNĐ)
+                    {t("doctors.detail.professionalInfo.consultationFee")}
                   </label>
                   <input
                     type="number"
@@ -773,7 +791,7 @@ export default function DoctorDetail() {
                 onClick={closeEditModal}
                 className="px-6 py-[10px] border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
               >
-                Hủy
+                {t("doctors.detail.editModal.cancelButton")}
               </button>
               <button
                 type="button"
@@ -781,7 +799,9 @@ export default function DoctorDetail() {
                 disabled={saving}
                 className="px-6 py-[10px] bg-base-600 text-white rounded-lg hover:bg-base-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? "Đang lưu..." : "Lưu thay đổi"}
+                {saving
+                  ? t("doctors.detail.editModal.savingButton")
+                  : t("doctors.detail.editModal.saveButton")}
               </button>
             </div>
           </form>

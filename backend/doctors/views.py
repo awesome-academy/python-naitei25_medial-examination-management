@@ -583,3 +583,37 @@ class ScheduleViewSet(viewsets.ViewSet):
         )
         serializer = ScheduleSerializer(schedules, many=True)
         return Response(serializer.data)
+
+
+@drf_permission_classes((IsAuthenticated,))
+def update_doctor_schedule(request, doctor_id, schedule_id):
+    """
+    PUT endpoint để cập nhật schedule của doctor
+    URL: /api/v1/doctors/{doctor_id}/schedules/{schedule_id}/
+    """
+    if request.method == 'PUT':
+        try:
+            # Kiểm tra schedule có tồn tại và thuộc về doctor không
+            schedule = Schedule.objects.get(pk=schedule_id, doctor_id=doctor_id)
+            
+            # Sử dụng serializer để validate và update
+            serializer = ScheduleSerializer(schedule, data=request.data, partial=True)
+            if serializer.is_valid():
+                # Sử dụng service để update
+                updated_schedule = ScheduleService().update_schedule(doctor_id, schedule_id, serializer.validated_data)
+                return Response(ScheduleSerializer(updated_schedule).data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Schedule.DoesNotExist:
+            return Response(
+                {"error": "Schedule không tồn tại hoặc không thuộc về doctor này"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.error(f"Error updating schedule {schedule_id} for doctor {doctor_id}: {str(e)}")
+            return Response(
+                {"error": "Có lỗi xảy ra khi cập nhật lịch làm việc"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    return Response({"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

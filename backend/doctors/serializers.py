@@ -96,6 +96,7 @@ class CreateDoctorRequestSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=[(d.value, d.name) for d in DoctorType])
     department_id = serializers.IntegerField(required=True)
     email = serializers.EmailField(max_length=USER_LENGTH["EMAIL"], required=False)
+    phone = serializers.CharField(max_length=USER_LENGTH["PHONE"], required=False)
     avatar = serializers.CharField(max_length=DOCTOR_LENGTH["AVATAR"], required=False, allow_blank=True, allow_null=True)
     price = serializers.DecimalField(max_digits=DECIMAL_MAX_DIGITS, decimal_places=DECIMAL_DECIMAL_PLACES, required=False, allow_null=True)
 

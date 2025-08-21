@@ -93,7 +93,23 @@ export default function RolePermissionTable() {
   };
 
   const handleSavePermissions = () => {
-    // TODO: Call API to update permissions for the selected role
+    if (selectedRole) {
+      // Update the selected role's permissions with the edited permissions
+      const updatedRole = { ...selectedRole, permissions: [...editingPermissions] };
+      setSelectedRole(updatedRole);
+      
+      // Update the role in the roles array
+      setRoles(prevRoles => 
+        prevRoles.map(role => 
+          role.id === selectedRole.id 
+            ? { ...role, permissions: [...editingPermissions] }
+            : role
+        )
+      );
+      
+      // TODO: Call API to update permissions for the selected role
+      // await roleService.updateRolePermissions(selectedRole.id, editingPermissions);
+    }
     setIsEditingPermissions(false);
   };
 
@@ -142,17 +158,11 @@ export default function RolePermissionTable() {
           permissionsData={permissionsData}
           isEditing={isEditingPermissions}
           editingPermissions={editingPermissions}
-          onClose={() => setSelectedRole(null)}
-          onStartEditing={() => {
-            setIsEditingPermissions(true);
-            setEditingPermissions([...selectedRole.permissions]);
-          }}
+          onClose={handleCloseModal}
+          onStartEditing={handleStartEditingPermissions}
           onTogglePermission={handleTogglePermission}
           onSave={handleSavePermissions}
-          onCancel={() => {
-            setIsEditingPermissions(false);
-            setEditingPermissions([]);
-          }}
+          onCancel={handleCancelEditingPermissions}
           t={t}
         />
       )}
