@@ -7,8 +7,9 @@ from patients.models import Patient
 from doctors.models import Doctor
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from common.constants import HOSPITAL_INFO
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from io import BytesIO
@@ -188,15 +189,15 @@ class PharmacyService:
         
         pdf_dto = {
             'patient_id': patient.id,
-            'patient_name': f"{patient.last_name} {patient.first_name}",
-            'patient_gender': patient.gender,
+            'patient_name': f"{patient.first_name} {patient.last_name}",
+            'patient_gender': "Nữ" if patient.gender == "F" else "Nam",
             'patient_birthday': patient.birthday,
             'patient_phone': patient.user.phone,
             'patient_email': patient.user.email,
             'patient_address': patient.address or '',
             'patient_identity_number': patient.identity_number,
             'patient_insurance_number': patient.insurance_number,
-            'doctor_name': f"{doctor.last_name} {doctor.first_name}",
+            'doctor_name': f"{doctor.first_name} {doctor.last_name}",
             'doctor_specialization': doctor.specialization,
             'doctor_academic_degree': doctor.academic_degree or '',
             'doctor_department': getattr(doctor, 'department', ''),
@@ -223,15 +224,23 @@ class PharmacyService:
         }
 
         buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=20, bottomMargin=20, leftMargin=30, rightMargin=30)
         elements = []
         styles = getSampleStyleSheet()
-        title_style = styles['Heading1']
-        title_style.alignment = 1  # Center
-        title_style.fontName = 'NotoSans'  # Use the registered Vietnamese font
+
+        # Hospital Header
+        header_style = ParagraphStyle(name='Header', fontName='NotoSans', fontSize=12, alignment=1, spaceAfter=10)
+        elements.append(Paragraph(HOSPITAL_INFO["NAME"], header_style))
+        elements.append(Paragraph(f"Địa chỉ: {HOSPITAL_INFO['ADDRESS']}", header_style))
+        elements.append(Paragraph(f"Điện thoại: {HOSPITAL_INFO['PHONE']} | Email: {HOSPITAL_INFO['EMAIL']}", header_style))
+        elements.append(Spacer(1, 12))
+
+        # Prescription Title
+        title_style = ParagraphStyle(name='Title', fontName='NotoSans', fontSize=16, alignment=1, spaceAfter=20)
         elements.append(Paragraph(_("ĐƠN THUỐC"), title_style))
 
-        # Thông tin bệnh nhân
+        # Patient Information
+        elements.append(Paragraph(_("Thông tin bệnh nhân"), styles['Heading3'].clone('SectionHeader', fontName='NotoSans', spaceAfter=8)))
         data = [
             [_('Họ và tên:'), pdf_dto['patient_name']],
             [_('Giới tính:'), pdf_dto['patient_gender']],
@@ -240,25 +249,33 @@ class PharmacyService:
             [_('Email:'), pdf_dto['patient_email']],
             [_('Địa chỉ:'), pdf_dto['patient_address']],
             [_('CMND/CCCD:'), pdf_dto['patient_identity_number']],
-            [_('Số BHYT:'), pdf_dto['patient_insurance_number']]
+            [_('Số BHYT:'), pdf_dto['patient_insurance_number']],
+            [_('Ngày kê đơn:'), pdf_dto['prescription_date'].strftime('%d/%m/%Y')]
         ]
-        table = Table(data, colWidths=[150, 350])
+        table = Table(data, colWidths=[150, 380])
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'NotoSans'),  # Use Vietnamese font for headers
-            ('FONTNAME', (0, 1), (-1, -1), 'NotoSans'),  # Use Vietnamese font for data
-            ('FONTSIZE', (0, 0), (-1, 0), 12),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ('FONTNAME', (0, 0), (-1, -1), 'NotoSans'),
+            ('FONTSIZE', (0, 0), (0, -1), 11),  # Left column (labels) slightly larger
+            ('FONTSIZE', (1, 0), (1, -1), 10),  # Right column (data)
+            ('TEXTCOLOR', (0, 0), (0, -1), colors.black),
+            ('TEXTCOLOR', (1, 0), (1, -1), colors.black),
+            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+            ('BACKGROUND', (1, 0), (1, -1), colors.white),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ]))
         elements.append(table)
+        elements.append(Spacer(1, 12))
 
-        # Thông tin khám bệnh
+        # Medical Examination Information
+        elements.append(Paragraph(_("Thông tin khám bệnh"), styles['Heading3'].clone('SectionHeader', fontName='NotoSans', spaceAfter=8)))
         data = [
             [_('Chẩn đoán:'), pdf_dto['diagnosis']],
             [_('Huyết áp:'), f"{pdf_dto['systolic_blood_pressure']}/{pdf_dto['diastolic_blood_pressure']} mmHg"],
@@ -267,63 +284,78 @@ class PharmacyService:
         ]
         if pdf_dto['note']:
             data.append([_('Ghi chú:'), pdf_dto['note']])
-        table = Table(data, colWidths=[150, 350])
+        table = Table(data, colWidths=[150, 380])
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'NotoSans'),  # Use Vietnamese font for headers
-            ('FONTNAME', (0, 1), (-1, -1), 'NotoSans'),  # Use Vietnamese font for data
-            ('FONTSIZE', (0, 0), (-1, 0), 12),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ('FONTNAME', (0, 0), (-1, -1), 'NotoSans'),
+            ('FONTSIZE', (0, 0), (0, -1), 11),
+            ('FONTSIZE', (1, 0), (1, -1), 10),
+            ('TEXTCOLOR', (0, 0), (0, -1), colors.black),
+            ('TEXTCOLOR', (1, 0), (1, -1), colors.black),
+            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+            ('BACKGROUND', (1, 0), (1, -1), colors.white),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ]))
         elements.append(table)
+        elements.append(Spacer(1, 12))
 
-        # Chi tiết đơn thuốc
+        # Prescription Details
+        elements.append(Paragraph(_("Chi tiết đơn thuốc"), styles['Heading3'].clone('SectionHeader', fontName='NotoSans', spaceAfter=8)))
         data = [[_('STT'), _('Tên thuốc'), _('Đơn vị'), _('Liều dùng'), _('Tần suất'), _('Thời gian'), _('Số lượng')]]
         for i, detail in enumerate(pdf_dto['prescription_details'], 1):
             data.append([
                 str(i), detail['medicine_name'], detail['unit'], detail['dosage'],
                 detail['frequency'], detail['duration'], str(detail['quantity'])
             ])
-        table = Table(data, colWidths=[50, 100, 70, 80, 80, 80, 80])
+        table = Table(data, colWidths=[40, 120, 60, 80, 95, 80, 60])
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'NotoSans'),  # Use Vietnamese font for headers
-            ('FONTNAME', (0, 1), (-1, -1), 'NotoSans'),  # Use Vietnamese font for data
-            ('FONTSIZE', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('FONTNAME', (0, 0), (-1, -1), 'NotoSans'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
             ('FONTSIZE', (0, 1), (-1, -1), 10),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ]))
         elements.append(table)
+        elements.append(Spacer(1, 12))
 
-        # Thông tin tái khám
+        # Follow-up Information
         if pdf_dto['follow_up'] and pdf_dto['follow_up_date']:
-            follow_up_style = styles['Normal'].clone('FollowUpStyle')
-            follow_up_style.fontName = 'NotoSans'  # Use Vietnamese font
+            follow_up_style = ParagraphStyle(name='FollowUp', fontName='NotoSans', fontSize=10, spaceBefore=10)
             elements.append(Paragraph(_("Lịch tái khám: {date}").format(date=pdf_dto['follow_up_date'].strftime('%d/%m/%Y')), follow_up_style))
+        elements.append(Spacer(1, 12))
 
-        # Thông tin bác sĩ
-        doctor_style = ParagraphStyle(name='RightAlign', parent=styles['Normal'], alignment=2)
-        doctor_style.fontName = 'NotoSans'  # Use Vietnamese font
+        # Doctor Information
+        doctor_style = ParagraphStyle(name='Doctor', fontName='NotoSans', fontSize=10, alignment=2, spaceBefore=20)
         elements.append(Paragraph(_("Bác sĩ kê đơn"), doctor_style))
-        doctor_name_style = ParagraphStyle(name='RightAlignBold', parent=styles['Normal'], alignment=2)
-        doctor_name_style.fontName = 'NotoSans'  # Use Vietnamese font
+        doctor_name_style = ParagraphStyle(name='DoctorName', fontName='NotoSans', fontSize=12, fontWeight='bold', alignment=2, spaceBefore=5)
         elements.append(Paragraph(pdf_dto['doctor_name'], doctor_name_style))
-        doctor_info_style = ParagraphStyle(name='RightAlign', parent=styles['Normal'], alignment=2)
-        doctor_info_style.fontName = 'NotoSans'  # Use Vietnamese font
         doctor_info = pdf_dto['doctor_specialization']
+        if pdf_dto['doctor_academic_degree']:
+            doctor_info += f", {pdf_dto['doctor_academic_degree']}"
         if pdf_dto['doctor_department']:
             doctor_info += f" - {pdf_dto['doctor_department']}"
-        elements.append(Paragraph(doctor_info, doctor_info_style))
+        elements.append(Paragraph(doctor_info, doctor_style))
+
+        # Footer
+        footer_style = ParagraphStyle(name='Footer', fontName='NotoSans', fontSize=9, alignment=1, spaceBefore=20)
+        elements.append(Paragraph("Vui lòng mang đơn thuốc này khi tái khám. Thuốc chỉ được cấp theo đơn.", footer_style))
 
         doc.build(elements)
         buffer.seek(0)

@@ -1,4 +1,13 @@
 # ======================
+# Hospital Info
+# ======================
+HOSPITAL_INFO = {
+    "NAME": "PHÒNG KHÁM ĐA KHOA QUỐC TẾ WECARE",
+    "ADDRESS": "Số 1 Hàn Thuyên, Thủ Đức, Thành phố Hồ Chí Minh",
+    "PHONE": "(024) 1234 5678",
+    "EMAIL": "wecare@hospital.com.vn",
+}
+# ======================
 # Numeric constraints
 # ======================
 DECIMAL_MAX_DIGITS = 10
