@@ -26,22 +26,19 @@ export default function PermissionModal({
     onCancel,
     t
 }: PermissionModalProps) {
-    const getPermissionsByCategory = (permissions: string[]) => {
+    const getAllPermissionsByCategory = () => {
         const categories: { [key: string]: Permission[] } = {};
-        permissions.forEach((permId) => {
-            const permission = permissionsData.find((p) => p.id === permId);
-            if (permission) {
-                if (!categories[permission.category]) {
-                    categories[permission.category] = [];
-                }
-                categories[permission.category].push(permission);
+        permissionsData.forEach((permission) => {
+            if (!categories[permission.category]) {
+                categories[permission.category] = [];
             }
+            categories[permission.category].push(permission);
         });
         return categories;
     };
 
     const currentPermissions = isEditing ? editingPermissions : role.permissions;
-    const categorizedPermissions = getPermissionsByCategory(currentPermissions);
+    const categorizedPermissions = getAllPermissionsByCategory();
 
     return (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50 p-10 overflow-hidden">

@@ -82,6 +82,50 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
     def get_room_note(self, obj):
         return obj.room.note if obj.room else ""
+    
+    def is_valid(self, raise_exception=False):
+        ok = super().is_valid(raise_exception=False)
+        if not ok:
+            if raise_exception:
+                raise serializers.ValidationError(self.errors)
+            return False
+
+        inst = getattr(self, "instance", None)
+        vd = self.validated_data
+
+        # Lấy giá trị hiệu lực (ưu tiên dữ liệu mới, thiếu thì lấy từ instance)
+        doctor = vd.get("doctor", getattr(inst, "doctor", None))
+        work_date = vd.get("work_date", getattr(inst, "work_date", None))
+        start_time = vd.get("start_time", getattr(inst, "start_time", None))
+        end_time = vd.get("end_time", getattr(inst, "end_time", None))
+
+        errors = {}
+
+        # Chỉ check khi đủ 4 trường
+        if doctor and work_date and start_time and end_time:
+            # Ràng buộc cơ bản
+            if start_time >= end_time:
+                errors["time"] = ["Giờ bắt đầu phải nhỏ hơn giờ kết thúc."]
+
+            overlap = Schedule.objects.filter(
+                doctor=doctor,
+                work_date=work_date,
+                start_time__lt=end_time,   # new_end > exist_start
+                end_time__gt=start_time,   # new_start < exist_end
+            )
+            if inst:
+                overlap = overlap.exclude(pk=inst.pk)
+            if overlap.exists():
+                errors["overlap"] = ["Trùng giờ với lịch khác của bác sĩ trong ngày."]
+
+        if errors:
+            if raise_exception:
+                raise serializers.ValidationError(errors)
+            # gắn lỗi vào serializer và trả False
+            self._errors.update(errors) if hasattr(self, "_errors") else setattr(self, "_errors", errors)
+            return False
+
+        return True
 
 class CreateDoctorRequestSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=USER_LENGTH["PASSWORD"], required=True)
@@ -96,6 +140,7 @@ class CreateDoctorRequestSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=[(d.value, d.name) for d in DoctorType])
     department_id = serializers.IntegerField(required=True)
     email = serializers.EmailField(max_length=USER_LENGTH["EMAIL"], required=False)
+    phone = serializers.CharField(max_length=USER_LENGTH["PHONE"], required=False)
     avatar = serializers.CharField(max_length=DOCTOR_LENGTH["AVATAR"], required=False, allow_blank=True, allow_null=True)
     price = serializers.DecimalField(max_digits=DECIMAL_MAX_DIGITS, decimal_places=DECIMAL_DECIMAL_PLACES, required=False, allow_null=True)
 

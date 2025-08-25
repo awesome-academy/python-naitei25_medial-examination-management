@@ -159,6 +159,17 @@ class UserViewSet(viewsets.ViewSet):
         result = UserService().force_delete_user(pk)
         return Response(result, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['delete'], url_path='hard-delete')
+    def hard_delete_user(self, request, pk=None):
+        if request.user.role != UserRole.ADMIN.value:
+            return Response({"error": _("Chỉ Admin mới có quyền hard delete user")}, 
+                            status=status.HTTP_403_FORBIDDEN)
+        try:
+            result = UserService().force_delete_user(pk)
+            return Response(result, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=True, methods=['put'], url_path='change-password')
     def change_password(self, request, pk=None):
         if request.user.id != int(pk) and request.user.role != UserRole.ADMIN.value:

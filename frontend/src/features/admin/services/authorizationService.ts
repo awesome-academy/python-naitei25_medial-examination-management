@@ -1,5 +1,6 @@
 import { api } from "../../../shared/services/api";
 import { doctorService } from "./doctorService";
+import { patientService } from "./patientService";
 
 // Error response interface for type safety
 interface ApiErrorResponse {
@@ -143,8 +144,10 @@ export const permissionsData: Permission[] = [
   { id: "patient_view", name: "Xem bệnh nhân", category: "Bệnh nhân" },
   { id: "patient_create", name: "Tạo bệnh nhân", category: "Bệnh nhân" },
   { id: "patient_edit", name: "Sửa bệnh nhân", category: "Bệnh nhân" },
+  { id: "patient_delete", name: "Xóa bệnh nhân", category: "Bệnh nhân" },
   { id: "doctor_view", name: "Xem bác sĩ", category: "Bác sĩ" },
   { id: "doctor_create", name: "Tạo bác sĩ", category: "Bác sĩ" },
+  { id: "doctor_edit", name: "Sửa bác sĩ", category: "Bác sĩ" },
   { id: "appointment_view", name: "Xem lịch hẹn", category: "Lịch hẹn" },
   { id: "appointment_create", name: "Tạo lịch hẹn", category: "Lịch hẹn" },
   { id: "medicine_view", name: "Xem thuốc", category: "Kho thuốc" },
@@ -300,8 +303,6 @@ const getMockRolesWithUserCount = (): Role[] => {
         "appointment_create",
         "medicine_view",
         "medicine_manage",
-        "finance_view",
-        "finance_manage",
         "user_manage",
         "role_manage",
       ],
@@ -513,28 +514,43 @@ export const userService = {
           if (role === "DOCTOR") {
             try {
               let doctorData;
-              
+
               // Try to fetch by user ID first, fallback to email if ID is missing
               if (backendUser.id && backendUser.id !== 0) {
-                console.log(`🔍 [DEBUG] Fetching doctor data for user ID: ${backendUser.id}`);
-                doctorData = await doctorService.getDoctorByUserId(backendUser.id);
+                console.log(
+                  `🔍 [DEBUG] Fetching doctor data for user ID: ${backendUser.id}`
+                );
+                doctorData = await doctorService.getDoctorByUserId(
+                  backendUser.id
+                );
               } else if (backendUser.email) {
-                console.log(`🔍 [DEBUG] User ID missing, fetching doctor data by email: ${backendUser.email}`);
-                doctorData = await doctorService.getDoctorByEmail(backendUser.email);
+                console.log(
+                  `🔍 [DEBUG] User ID missing, fetching doctor data by email: ${backendUser.email}`
+                );
+                doctorData = await doctorService.getDoctorByEmail(
+                  backendUser.email
+                );
               } else {
-                throw new Error("No user ID or email available to fetch doctor data");
+                throw new Error(
+                  "No user ID or email available to fetch doctor data"
+                );
               }
-              
+
               console.log(`✅ [DEBUG] Doctor data received:`, doctorData);
               console.log(`🏥 [DEBUG] Department data:`, doctorData.department);
-              console.log(`📋 [DEBUG] Department name:`, doctorData.departmentName);
-              
+              console.log(
+                `📋 [DEBUG] Department name:`,
+                doctorData.departmentName
+              );
+
               if (doctorData.departmentName) {
                 department = doctorData.departmentName;
                 console.log(`✅ [DEBUG] Set department to: ${department}`);
               } else {
                 department = "Chưa phân khoa";
-                console.log(`⚠️ [DEBUG] No department name found, set to: ${department}`);
+                console.log(
+                  `⚠️ [DEBUG] No department name found, set to: ${department}`
+                );
               }
               if (doctorData.fullName) {
                 displayName = doctorData.fullName;
@@ -550,6 +566,66 @@ export const userService = {
                 doctorError
               );
               department = "Chưa phân khoa";
+            }
+          }
+
+          // Fetch actual patient data for patients
+          if (role === "PATIENT") {
+            try {
+              let patientData;
+
+              // Get all patients and find the one matching this user
+              const allPatients = await patientService.getAllPatients();
+              console.log(`🔍 [DEBUG] Fetched ${allPatients.length} patients`);
+
+              // Try to find patient by user ID first, then by email
+              if (backendUser.id && backendUser.id !== 0) {
+                console.log(
+                  `🔍 [DEBUG] Looking for patient with user ID: ${backendUser.id}`
+                );
+                patientData = allPatients.find(
+                  (p) => p.userId === backendUser.id
+                );
+              }
+
+              if (!patientData && backendUser.email) {
+                console.log(
+                  `🔍 [DEBUG] Patient not found by user ID, looking by email: ${backendUser.email}`
+                );
+                patientData = allPatients.find(
+                  (p) => p.email === backendUser.email
+                );
+              }
+
+              if (patientData) {
+                console.log(`✅ [DEBUG] Patient data found:`, patientData);
+
+                if (patientData.fullName) {
+                  displayName = patientData.fullName;
+                  console.log(
+                    `✅ [DEBUG] Set patient display name to: ${displayName}`
+                  );
+                }
+
+                if (patientData.avatar) {
+                  userAvatar = patientData.avatar;
+                  console.log(
+                    `✅ [DEBUG] Set patient avatar to: ${userAvatar}`
+                  );
+                }
+              } else {
+                console.log(
+                  `⚠️ [DEBUG] No patient data found for user ${
+                    backendUser.id || backendUser.email
+                  }`
+                );
+              }
+            } catch (patientError) {
+              console.warn(
+                `⚠️ [DEBUG] Could not fetch patient data:`,
+                patientError
+              );
+              // Keep the email-based display name as fallback
             }
           }
 
@@ -634,7 +710,9 @@ export const userService = {
       // Fetch actual department data for doctors
       if (role === "DOCTOR") {
         try {
-          const doctorData = await doctorService.getDoctorByUserId(backendUser.id);
+          const doctorData = await doctorService.getDoctorByUserId(
+            backendUser.id
+          );
           if (doctorData.departmentName) {
             department = doctorData.departmentName;
           } else {
@@ -647,7 +725,10 @@ export const userService = {
             userAvatar = doctorData.avatar;
           }
         } catch (doctorError) {
-          console.warn(`⚠️ [DEBUG] Could not fetch doctor data for user ${backendUser.id}:`, doctorError);
+          console.warn(
+            `⚠️ [DEBUG] Could not fetch doctor data for user ${backendUser.id}:`,
+            doctorError
+          );
           department = "Chưa phân khoa";
         }
       }
@@ -767,7 +848,7 @@ export const userService = {
       console.log("🌐 [DEBUG] Sending update to backend:", backendUserData);
       console.log("🔍 [DEBUG] Update URL:", `/users/${id}/edit_user/`);
       console.log("🔍 [DEBUG] Original userData:", userData);
-      
+
       const response = await api.put(
         `/users/${id}/edit_user/`,
         backendUserData
@@ -965,6 +1046,48 @@ export const userService = {
         error
       );
       let errorMessage = "Cannot force delete user in backend";
+      const errorResponse = error as ApiErrorResponse;
+      if (errorResponse.response?.data) {
+        if (typeof errorResponse.response.data === "string") {
+          errorMessage = errorResponse.response.data;
+        } else if (errorResponse.response.data.message) {
+          errorMessage = errorResponse.response.data.message;
+        } else {
+          errorMessage = JSON.stringify(errorResponse.response.data);
+        }
+      } else if (errorResponse.message) {
+        errorMessage = errorResponse.message;
+      }
+      throw new Error(errorMessage);
+    }
+  },
+
+  forceDeleteUserByEmail: async (email: string): Promise<void> => {
+    setDevelopmentAuth();
+    try {
+      console.log("🔍 [DEBUG] Getting user ID for email:", email);
+
+      // First, get user ID from email
+      const userResponse = await api.get(
+        `/users/get_user_by_email/?email=${encodeURIComponent(email)}`
+      );
+      const userId = userResponse.data.id;
+
+      console.log("✅ [DEBUG] Found user ID:", userId, "for email:", email);
+
+      // Use backend hard delete which handles all associated records (doctor/patient) and hard deletes user
+      console.log(
+        "🗑️ [DEBUG] Hard deleting user and all associated records:",
+        userId
+      );
+      const deleteResponse = await api.delete(`/users/${userId}/hard-delete/`);
+      console.log(
+        "✅ [DEBUG] User and all associated records hard deleted successfully:",
+        deleteResponse.data
+      );
+    } catch (error: unknown) {
+      console.error("❌ [DEBUG] Failed to hard delete user by email:", error);
+      let errorMessage = "Cannot hard delete user in backend";
       const errorResponse = error as ApiErrorResponse;
       if (errorResponse.response?.data) {
         if (typeof errorResponse.response.data === "string") {
