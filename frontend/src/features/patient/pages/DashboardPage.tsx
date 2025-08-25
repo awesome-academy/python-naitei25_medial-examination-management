@@ -300,13 +300,13 @@ const DashboardPage: React.FC = () => {
                 <div className="text-center py-8">
                   <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <p className="text-gray-600">
-                    {t("dashboard.noAppointments")}
+                    {t("dashboard.appointments.empty")}
                   </p>
                   <button
                     onClick={() => navigate("/patient/book-appointment")}
                     className="mt-2 text-cyan-600 hover:text-cyan-700 font-medium"
                   >
-                    {t("dashboard.bookNow")}
+                    {t("dashboard.actions.bookNow")}
                   </button>
                 </div>
               )}
@@ -317,7 +317,7 @@ const DashboardPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">
-                {t("dashboard.quickActions")}
+                {t("dashboard.quickActions.title")}
               </h3>
             </div>
             <div className="p-6">
@@ -331,10 +331,10 @@ const DashboardPage: React.FC = () => {
                   </div>
                   <div className="ml-4 text-left">
                     <p className="font-semibold text-gray-900">
-                      {t("dashboard.findDoctor")}
+                      {t("dashboard.quickActions.findDoctor")}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {t("dashboard.findDoctorDesc")}
+                      {t("dashboard.quickActions.findDoctorSubtitle")}
                     </p>
                   </div>
                 </button>
@@ -348,10 +348,10 @@ const DashboardPage: React.FC = () => {
                   </div>
                   <div className="ml-4 text-left">
                     <p className="font-semibold text-gray-900">
-                      {t("dashboard.myAppointments")}
+                      {t("dashboard.quickActions.myAppointments")}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {t("dashboard.myAppointmentsDesc")}
+                      {t("dashboard.quickActions.myAppointmentsSubtitle")}
                     </p>
                   </div>
                 </button>

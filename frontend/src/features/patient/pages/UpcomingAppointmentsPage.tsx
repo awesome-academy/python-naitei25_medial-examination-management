@@ -32,13 +32,10 @@ const UpcomingAppointmentsPage: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [cancellingId, setCancellingId] = useState<number | null>(null)
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
 
-  // Search and filter state
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [dateFilter, setDateFilter] = useState<string>("all")
@@ -62,7 +59,6 @@ const UpcomingAppointmentsPage: React.FC = () => {
     }
   }
 
-  // Filter and sort appointments
   const filteredAndSortedAppointments = useMemo(() => {
     const filtered = appointments.filter((appointment) => {
       const searchMatch =
@@ -141,29 +137,6 @@ const UpcomingAppointmentsPage: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, statusFilter, dateFilter, sortField, sortOrder])
-
-  const handleCancelAppointment = async (appointmentId: number) => {
-    if (!window.confirm(t("upcomingAppointments.confirmCancel"))) return
-    try {
-      setCancellingId(appointmentId)
-      await appointmentService.cancelAppointment(appointmentId, t("upcomingAppointments.cancelReason"))
-      await fetchUpcomingAppointments()
-    } catch (err: any) {
-      alert(t("upcomingAppointments.cancelError") + ": " + err.message)
-    } finally {
-      setCancellingId(null)
-    }
-  }
-
-  const handlePayment = async (appointment: Appointment) => {
-    try {
-      const bill = await paymentService.createBillFromAppointment(appointment)
-      const paymentLink = await paymentService.createPaymentLink(bill.id)
-      window.open(paymentLink.checkoutUrl, "_blank")
-    } catch (err: any) {
-      alert(t("upcomingAppointments.paymentError") + ": " + err.message)
-    }
-  }
 
   const getStatusBadge = (statusCode: string) => {
     const { key, labelKey } = mapAppointmentStatus(statusCode)
@@ -455,7 +428,7 @@ const UpcomingAppointmentsPage: React.FC = () => {
             </p>
             {filteredAndSortedAppointments.length === 0 && (
               <Link
-                to="/patient/book-appointment"
+                to="/patient/departments"
                 className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-sm"
               >
                 <CalendarIcon className="w-4 h-4" />

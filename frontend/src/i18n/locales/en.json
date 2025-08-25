@@ -1028,6 +1028,7 @@
   },
   "dashboard": {
     "welcome": "Welcome",
+    "noAppointment": "",
     "overviewToday": "This is an overview of your activities today",
     "totalAppointments": "Total Appointments",
     "total": "Total",

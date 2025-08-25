@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import React from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { useTranslation } from "react-i18next"
-import { prescriptionService } from "../../../shared/services/prescriptionService"
-import LoadingSpinner from "../../../shared/components/common/LoadingSpinner"
-import ErrorMessage from "../../../shared/components/common/ErrorMessage"
-import { Button } from "@/components/ui/button"
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { prescriptionService } from "../../../shared/services/prescriptionService";
+import LoadingSpinner from "../../../shared/components/common/LoadingSpinner";
+import ErrorMessage from "../../../shared/components/common/ErrorMessage";
+import { Button } from "@/components/ui/button";
 import {
   Pill,
   Download,
@@ -22,71 +22,81 @@ import {
   Timer,
   Scale,
   StickyNote,
-} from "lucide-react"
+} from "lucide-react";
 
 interface PrescriptionDetail {
-  id: number
-  prescription: number
-  medicine: { medicine_id: number; medicine_name: string }
-  dosage: string
-  frequency: string
-  duration: string
-  quantity: number
-  prescription_notes?: string
-  created_at: string
-  unit?: string
+  id: number;
+  prescription: number;
+  medicine: { medicine_id: number; medicine_name: string };
+  dosage: string;
+  frequency: string;
+  duration: string;
+  quantity: number;
+  prescription_notes?: string;
+  created_at: string;
+  unit?: string;
 }
 
 interface Prescription {
-  id: number
-  diagnosis: string
-  created_at: string
-  prescription_details: PrescriptionDetail[]
+  id: number;
+  diagnosis: string;
+  created_at: string;
+  prescription_details: PrescriptionDetail[];
 }
 
 const PrescriptionDetailPage: React.FC = () => {
-  const { t } = useTranslation()
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
+  const { t } = useTranslation();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
-  const [prescription, setPrescription] = React.useState<Prescription | null>(null)
-  const [loading, setLoading] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
+  const [prescription, setPrescription] = React.useState<Prescription | null>(
+    null
+  );
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const fetchPrescription = async () => {
       if (!id) {
-        setError(t("common.noPrescriptionId"))
-        setLoading(false)
-        return
+        setError(t("common.noPrescriptionId"));
+        setLoading(false);
+        return;
       }
       try {
-        setLoading(true)
-        const data = await prescriptionService.getPrescriptionById(Number(id))
-        console.log("Prescription Data:", data)
-        setPrescription(data)
+        setLoading(true);
+        const data = await prescriptionService.getPrescriptionById(Number(id));
+        console.log("Prescription Data:", data);
+        setPrescription(data);
       } catch (err: any) {
-        setError(err.message || t("common.error"))
+        setError(err.message || t("common.error"));
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchPrescription()
-  }, [id, t])
+    };
+    fetchPrescription();
+  }, [id, t]);
+
+  const handleViewMedicalRecord = () => {
+    if (!prescription) return;
+    navigate(`/patient/medical-record/${prescription.id}?from=prescriptions`);
+  };
 
   const handleDownloadPdf = async () => {
-    if (!id) return
+    if (!id) return;
     try {
-      const pdfUrl = await prescriptionService.downloadPrescriptionPdf(Number(id))
-      window.open(pdfUrl, "_blank")
+      const pdfUrl = await prescriptionService.downloadPrescriptionPdf(
+        Number(id)
+      );
+      window.open(pdfUrl, "_blank");
     } catch (err) {
-      setError(t("common.downloadFailed"))
+      setError(t("common.downloadFailed"));
     }
-  }
+  };
 
-  if (loading) return <LoadingSpinner size="lg" message={t("common.loading")} />
-  if (error) return <ErrorMessage message={error} />
-  if (!prescription) return <ErrorMessage message={t("common.noData")} />
+  if (loading)
+    return <LoadingSpinner size="lg" message={t("common.loading")} />;
+  if (error) return <ErrorMessage message={error} />;
+  if (!prescription) return <ErrorMessage message={t("common.noData")} />;
 
   return (
     <div className="min-h-screen">
@@ -100,9 +110,13 @@ const PrescriptionDetailPage: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold">
-                  {t("prescriptionDetail.prescriptionTitle", { id: prescription.id })}
+                  {t("prescriptionDetail.prescriptionTitle", {
+                    id: prescription.id,
+                  })}
                 </h1>
-                <p className="text-blue-100 mt-1">{t("prescriptionDetail.prescriptionSubtitle")}</p>
+                <p className="text-blue-100 mt-1">
+                  {t("prescriptionDetail.prescriptionSubtitle")}
+                </p>
               </div>
             </div>
           </div>
@@ -115,10 +129,13 @@ const PrescriptionDetailPage: React.FC = () => {
                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                     <Stethoscope className="w-4 h-4 text-blue-600" />
                   </div>
-                  <h3 className="font-semibold text-blue-900">{t("prescriptionDetail.diagnosis")}</h3>
+                  <h3 className="font-semibold text-blue-900">
+                    {t("prescriptionDetail.diagnosis")}
+                  </h3>
                 </div>
                 <p className="text-blue-800 font-medium leading-relaxed">
-                  {prescription.diagnosis || t("prescriptionDetail.noDiagnosis")}
+                  {prescription.diagnosis ||
+                    t("prescriptionDetail.noDiagnosis")}
                 </p>
               </div>
 
@@ -129,15 +146,20 @@ const PrescriptionDetailPage: React.FC = () => {
                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                       <Calendar className="w-4 h-4 text-green-600" />
                     </div>
-                    <h3 className="font-semibold text-green-900">{t("prescriptionDetail.prescriptionDate")}</h3>
+                    <h3 className="font-semibold text-green-900">
+                      {t("prescriptionDetail.prescriptionDate")}
+                    </h3>
                   </div>
                   <p className="text-green-800 font-medium">
-                    {new Date(prescription.created_at).toLocaleDateString("vi-VN", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
+                    {new Date(prescription.created_at).toLocaleDateString(
+                      "vi-VN",
+                      {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
                   </p>
                 </div>
 
@@ -146,10 +168,14 @@ const PrescriptionDetailPage: React.FC = () => {
                     <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
                       <Package className="w-4 h-4 text-purple-600" />
                     </div>
-                    <h3 className="font-semibold text-purple-900">{t("prescriptionDetail.overview")}</h3>
+                    <h3 className="font-semibold text-purple-900">
+                      {t("prescriptionDetail.overview")}
+                    </h3>
                   </div>
                   <p className="text-purple-800 font-medium">
-                    {t("prescriptionDetail.medicineCount", { count: prescription.prescription_details.length })}
+                    {t("prescriptionDetail.medicineCount", {
+                      count: prescription.prescription_details.length,
+                    })}
                   </p>
                 </div>
               </div>
@@ -162,8 +188,12 @@ const PrescriptionDetailPage: React.FC = () => {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-semibold text-amber-900 mb-1">{t("prescriptionDetail.importantNotice")}</h3>
-              <p className="text-amber-800 text-sm leading-relaxed">{t("prescriptionDetail.importantNoticeText")}</p>
+              <h3 className="font-semibold text-amber-900 mb-1">
+                {t("prescriptionDetail.importantNotice")}
+              </h3>
+              <p className="text-amber-800 text-sm leading-relaxed">
+                {t("prescriptionDetail.importantNoticeText")}
+              </p>
             </div>
           </div>
         </div>
@@ -176,8 +206,12 @@ const PrescriptionDetailPage: React.FC = () => {
                 <Pill className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">{t("prescriptionDetail.medicineListTitle")}</h2>
-                <p className="text-green-100 mt-1">{t("prescriptionDetail.medicineListSubtitle")}</p>
+                <h2 className="text-xl font-bold">
+                  {t("prescriptionDetail.medicineListTitle")}
+                </h2>
+                <p className="text-green-100 mt-1">
+                  {t("prescriptionDetail.medicineListSubtitle")}
+                </p>
               </div>
             </div>
           </div>
@@ -197,15 +231,20 @@ const PrescriptionDetailPage: React.FC = () => {
                           {index + 1}
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-gray-900">{detail.medicine.medicine_name}</h3>
+                          <h3 className="text-xl font-bold text-gray-900">
+                            {detail.medicine.medicine_name}
+                          </h3>
                           <p className="text-gray-600 text-sm mt-1">
-                            {t("prescriptionDetail.medicineCode")}: {detail.medicine.medicine_id}
+                            {t("prescriptionDetail.medicineCode")}:{" "}
+                            {detail.medicine.medicine_id}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                          {t("prescriptionDetail.medicineNumber", { number: index + 1 })}
+                          {t("prescriptionDetail.medicineNumber", {
+                            number: index + 1,
+                          })}
                         </div>
                       </div>
                     </div>
@@ -216,10 +255,13 @@ const PrescriptionDetailPage: React.FC = () => {
                       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Droplets className="w-4 h-4 text-red-600" />
-                          <span className="text-sm font-medium text-red-900">{t("prescriptionDetail.dosage")}</span>
+                          <span className="text-sm font-medium text-red-900">
+                            {t("prescriptionDetail.dosage")}
+                          </span>
                         </div>
                         <p className="text-red-800 font-bold text-lg">
-                          {detail.dosage || t("prescriptionDetail.notSpecified")}
+                          {detail.dosage ||
+                            t("prescriptionDetail.notSpecified")}
                         </p>
                       </div>
 
@@ -227,10 +269,13 @@ const PrescriptionDetailPage: React.FC = () => {
                       <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Clock className="w-4 h-4 text-orange-600" />
-                          <span className="text-sm font-medium text-orange-900">{t("prescriptionDetail.frequency")}</span>
+                          <span className="text-sm font-medium text-orange-900">
+                            {t("prescriptionDetail.frequency")}
+                          </span>
                         </div>
                         <p className="text-orange-800 font-bold text-lg">
-                          {detail.frequency || t("prescriptionDetail.notSpecified")}
+                          {detail.frequency ||
+                            t("prescriptionDetail.notSpecified")}
                         </p>
                       </div>
 
@@ -238,10 +283,13 @@ const PrescriptionDetailPage: React.FC = () => {
                       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Timer className="w-4 h-4 text-green-600" />
-                          <span className="text-sm font-medium text-green-900">{t("prescriptionDetail.duration")}</span>
+                          <span className="text-sm font-medium text-green-900">
+                            {t("prescriptionDetail.duration")}
+                          </span>
                         </div>
                         <p className="text-green-800 font-bold text-lg">
-                          {detail.duration || t("prescriptionDetail.notSpecified")}
+                          {detail.duration ||
+                            t("prescriptionDetail.notSpecified")}
                         </p>
                       </div>
 
@@ -249,10 +297,13 @@ const PrescriptionDetailPage: React.FC = () => {
                       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Hash className="w-4 h-4 text-purple-600" />
-                          <span className="text-sm font-medium text-purple-900">{t("prescriptionDetail.quantity")}</span>
+                          <span className="text-sm font-medium text-purple-900">
+                            {t("prescriptionDetail.quantity")}
+                          </span>
                         </div>
                         <p className="text-purple-800 font-bold text-lg">
-                          {detail.quantity} {detail.unit || t("prescriptionDetail.unit")}
+                          {detail.quantity}{" "}
+                          {detail.unit || t("prescriptionDetail.unit")}
                         </p>
                       </div>
                     </div>
@@ -262,7 +313,9 @@ const PrescriptionDetailPage: React.FC = () => {
                       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Scale className="w-4 h-4 text-gray-600" />
-                          <span className="text-sm font-medium text-gray-900">{t("prescriptionDetail.unit")}</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {t("prescriptionDetail.unit")}
+                          </span>
                         </div>
                         <p className="text-gray-800 font-medium">
                           {detail.unit || t("prescriptionDetail.notSpecified")}
@@ -293,23 +346,44 @@ const PrescriptionDetailPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="text-blue-800 text-sm space-y-1">
-                        <p>• {t("prescriptionDetail.dosageLabel")}: {detail.dosage}</p>
-                        <p>• {t("prescriptionDetail.frequencyLabel")}: {detail.frequency}</p>
-                        <p>• {t("prescriptionDetail.durationLabel")}: {detail.duration}</p>
-                        <p>• {t("prescriptionDetail.totalQuantityLabel")}: {detail.quantity} {detail.unit}</p>
+                        <p>
+                          • {t("prescriptionDetail.dosageLabel")}:{" "}
+                          {detail.dosage}
+                        </p>
+                        <p>
+                          • {t("prescriptionDetail.frequencyLabel")}:{" "}
+                          {detail.frequency}
+                        </p>
+                        <p>
+                          • {t("prescriptionDetail.durationLabel")}:{" "}
+                          {detail.duration}
+                        </p>
+                        <p>
+                          • {t("prescriptionDetail.totalQuantityLabel")}:{" "}
+                          {detail.quantity} {detail.unit}
+                        </p>
                       </div>
                     </div>
                   </div>
                 ))}
 
                 {/* Download Button ở cuối */}
-                <div className="flex justify-center mt-6">
+                <div className="flex justify-center mt-6 gap-3">
                   <Button
                     onClick={handleDownloadPdf}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm hover:bg-blue-700 rounded-lg transition-colors duration-200"
                   >
                     <Download className="w-4 h-4" />
                     <span>{t("common.downloadPdf")}</span>
+                  </Button>
+
+                  {/* Nút sang lịch khám */}
+                  <Button
+                    onClick={handleViewMedicalRecord}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm hover:bg-green-700 rounded-lg transition-colors duration-200"
+                  >
+                    <Stethoscope className="w-4 h-4" />
+                    <span>{t("pastAppointments.viewMedicalRecord")}</span>
                   </Button>
                 </div>
               </div>
@@ -321,7 +395,9 @@ const PrescriptionDetailPage: React.FC = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   {t("prescriptionDetail.noMedicines")}
                 </h3>
-                <p className="text-gray-600">{t("prescriptionDetail.noMedicinesText")}</p>
+                <p className="text-gray-600">
+                  {t("prescriptionDetail.noMedicinesText")}
+                </p>
               </div>
             )}
           </div>
@@ -332,19 +408,24 @@ const PrescriptionDetailPage: React.FC = () => {
           <div className="text-center space-y-2">
             <p className="text-gray-600 text-sm">
               {t("prescriptionDetail.createdOn", {
-                date: new Date(prescription.created_at).toLocaleDateString("vi-VN", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                }),
+                date: new Date(prescription.created_at).toLocaleDateString(
+                  "vi-VN",
+                  {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }
+                ),
               })}
             </p>
-            <p className="text-gray-500 text-xs">{t("prescriptionDetail.keepPrescription")}</p>
+            <p className="text-gray-500 text-xs">
+              {t("prescriptionDetail.keepPrescription")}
+            </p>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PrescriptionDetailPage
+export default PrescriptionDetailPage;
