@@ -89,25 +89,26 @@ export const scheduleService = {
 
   // Cập nhật lịch làm việc hiện có
   async updateSchedule(
-    doctorId: number,
+    doctorId: number, // giữ để tương thích, không dùng
     scheduleId: number,
     scheduleData: Partial<CreateScheduleRequest>,
   ): Promise<ScheduleResponse> {
     try {
-      const payload: Partial<any> = {}
-      if (scheduleData.doctor !== undefined) payload.doctor = scheduleData.doctor // Changed from doctor_id
-      if (scheduleData.room !== undefined) payload.room = scheduleData.room // Changed from room_id
-      if (scheduleData.work_date !== undefined) payload.work_date = scheduleData.work_date
-      if (scheduleData.start_time !== undefined) payload.start_time = scheduleData.start_time
-      if (scheduleData.end_time !== undefined) payload.end_time = scheduleData.end_time
-      if (scheduleData.shift !== undefined) payload.shift = scheduleData.shift
-
-      const response = await api.put<ScheduleResponse>(`/doctors/${doctorId}/schedules/${scheduleId}/`, payload)
-      console.log(`✅ Successfully updated schedule:`, response.data)
-      return response.data
+      const payload: Partial<any> = {
+        doctor: scheduleData.doctor,
+        room: scheduleData.room,
+        work_date: scheduleData.work_date,
+        start_time: scheduleData.start_time,
+        end_time: scheduleData.end_time,
+        shift: scheduleData.shift,
+      };
+  
+      const response = await api.put<ScheduleResponse>(`/schedules/${scheduleId}/`, payload);
+      console.log("✅ Successfully updated schedule:", response.data);
+      return response.data;
     } catch (error) {
-      console.error(`❌ Error updating schedule ${scheduleId}:`, error)
-      throw new Error(`Không thể cập nhật lịch làm việc`)
+      console.error(`❌ Error updating schedule ${scheduleId}:`, error);
+      throw new Error("Không thể cập nhật lịch làm việc");
     }
   },
 
