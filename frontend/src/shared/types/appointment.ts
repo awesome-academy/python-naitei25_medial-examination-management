@@ -28,7 +28,7 @@ export interface Appointment {
   // Removed appointmentDate and appointmentTime as they are derived from schedule and slot_start/slot_end
   status: string // Changed to string to match backend single-character status (e.g., 'C', 'P')
   symptoms?: string
-  notes?: string
+  note?: string
   diagnosis?: string
   treatment?: string
   prescription?: string
@@ -68,7 +68,7 @@ export interface CreateAppointmentPayload {
   appointmentDate: string
   appointmentTime: string
   symptoms?: string
-  notes?: string
+  note?: string
 }
 
 export interface BackendCreateAppointmentPayload {
@@ -79,6 +79,7 @@ export interface BackendCreateAppointmentPayload {
   slot_end: string
   symptoms: string
   status: string
+  note: string
 }
 
 export interface UpdateAppointmentPayload {
@@ -86,7 +87,7 @@ export interface UpdateAppointmentPayload {
   appointmentTime?: string
   status?: AppointmentStatus
   symptoms?: string
-  notes?: string
+  note?: string
   diagnosis?: string
   treatment?: string
   prescription?: string

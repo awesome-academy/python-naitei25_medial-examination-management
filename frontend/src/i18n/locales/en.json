@@ -678,7 +678,8 @@
     "retry": "Retry",
     "close": "Close",
     "edit": "Edit",
-    "viewPDF": "View PDF"
+    "viewPDF": "View PDF",
+    "editPrescription": "Edit Prescription"
   },
   "stats": {
     "totalAppointments": "Total Appointments",
@@ -1785,7 +1786,8 @@
       "incompleteInfo": "Unable to load complete appointment details.",
       "processing": "Processing...",
       "confirmAndPay": "Confirm and Pay",
-      "workingTime": "Working hours: {{start}} - {{end}}"
+      "workingTime": "Working hours: {{start}} - {{end}}",
+      "note": "Note"
     },
     "status": {
       "pending": "Pending",

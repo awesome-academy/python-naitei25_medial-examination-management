@@ -147,19 +147,17 @@ const AppSidebar: React.FC = () => {
       const currentPath = location.pathname;
 
       if (path.endsWith("/dashboard")) {
-        return currentPath === path;
+        return currentPath === path || currentPath === basePath;
       }
 
       if (path === basePath) {
         return currentPath === path;
       }
 
-      // 🔹 Nếu là book-appointment thì chỉ active khi path EXACT match
       if (path.endsWith("/book-appointment")) {
         return currentPath === path;
       }
 
-      // 🔹 Nếu là departments thì active cả khi vào chi tiết doctors trong department
       if (path.endsWith("/departments")) {
         return (
           currentPath === path ||
@@ -167,7 +165,6 @@ const AppSidebar: React.FC = () => {
         );
       }
 
-      // Xử lý prescriptions detail
       if (
         currentPath.match(/\/prescriptions\/\d+$/) &&
         path.endsWith("/prescriptions")
@@ -175,7 +172,13 @@ const AppSidebar: React.FC = () => {
         return true;
       }
 
-      // Mặc định: so sánh path hoặc path prefix
+      if (
+        currentPath.match(/\/patient\/detail(\/\d+)?$/) &&
+        path.endsWith("/patients")
+      ) {
+        return true;
+      }
+
       return currentPath === path || currentPath.startsWith(path + "/");
     },
     [location.pathname, basePath]
