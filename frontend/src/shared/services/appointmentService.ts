@@ -6,6 +6,7 @@ import type {
   AppointmentNote,
   AppointmentFilter,
   BackendCreateAppointmentPayload,
+  CreateAppointmentPayload,
 } from "../types/appointment"; // Import BackendCreateAppointmentPayload
 import type { PaginatedResponse } from "../types/api";
 
@@ -63,17 +64,38 @@ export const appointmentService = {
   },
 
   // Create new appointment
-  async createAppointment(
-    payload: BackendCreateAppointmentPayload
-  ): Promise<Appointment> {
-    // Đã sửa kiểu payload
-    try {
-      const response = await api.post<Appointment>("/appointments/", payload);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(handleApiError(error, false));
-    }
-  },
+async createAppointment(
+  payload: CreateAppointmentPayload & {
+    doctor: number;   // 🔥 dùng đúng field
+    patient: number;
+    schedule: number;
+    slot_start: string;
+    slot_end: string;
+  }
+): Promise<Appointment> {
+  try {
+    const backendPayload: BackendCreateAppointmentPayload = {
+      doctor: payload.doctor,     // ✅ fix
+      patient: payload.patient,   // ✅ fix
+      schedule: payload.schedule, // ✅ fix
+      slot_start: payload.slot_start,
+      slot_end: payload.slot_end,
+      symptoms: payload.symptoms || "",
+      status: "P",   // ✅ fix enum, đúng với backend
+      note: payload.note || "",
+    };
+
+    console.log("Payload gửi API:", backendPayload);
+
+    const response = await api.post<Appointment>(
+      "/appointments/",
+      backendPayload
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(handleApiError(error, false));
+  }
+},
 
   // Update appointment
   async updateAppointment(

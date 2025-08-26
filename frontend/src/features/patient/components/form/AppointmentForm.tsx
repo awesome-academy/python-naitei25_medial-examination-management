@@ -232,10 +232,14 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ doctorId }) => {
         slot_start: appointmentForm.time,
         slot_end: calculateSlotEnd(appointmentForm.time),
         symptoms:
-          appointmentForm.symptoms.join(", ") +
-          (appointmentForm.note ? `; Note: ${appointmentForm.note}` : ""),
-        status: "PENDING",
+          appointmentForm.symptoms.length > 0
+            ? appointmentForm.symptoms.join(", ")
+            : "",
+        note: appointmentForm.note,
+        status: "P",
       };
+
+      console.log("Payload gửi lên:", payload);
 
       const appointment = await appointmentService.createAppointment(payload);
 

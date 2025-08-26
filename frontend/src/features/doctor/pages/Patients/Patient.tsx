@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Table, Input, DatePicker, Button, Avatar, Space, Card, Select, Tooltip, Empty, Tag } from "antd"
 import {
     EditOutlined,
@@ -11,7 +11,6 @@ import {
     ClearOutlined,
     CalendarOutlined,
     ClockCircleOutlined,
-    EnvironmentOutlined,
     UserOutlined,
 } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
@@ -43,17 +42,14 @@ const Patient: React.FC = () => {
         refreshAppointments,
     } = useAppointmentContext()
 
-    // Handle viewing patient details
     const handleViewPatient = (id: number) => {
         navigate(`/doctor/examination/patient/detail`, { state: { appointmentId: id } })
     }
 
-    // Handle refresh action
     const handleRefresh = () => {
         refreshAppointments()
     }
 
-    // Handle date filter change
     const handleDateChange = (date: Dayjs | null, dateString: string | string[]) => {
         if (date) {
             const isoDate = date.format("YYYY-MM-DD")
@@ -65,34 +61,26 @@ const Patient: React.FC = () => {
         }
     }
 
-    // Handle shift filter change
     const handleShiftFilterChange = (value: string) => {
         console.log("Updating shift filter:", value)
         updateFilters({ shift: value === "all" ? undefined : value })
     }
 
-    // Handle status filter change
     const handleStatusFilterChange = (value: string) => {
         console.log("Updating status filter:", value)
         updateFilters({ appointmentStatus: value === "all" ? undefined : value })
     }
 
-    // Handle local search change
     const handleLocalSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLocalSearch(e.target.value)
     }
 
-    // Handle clearing all filters
     const handleClearFilters = () => {
-        // Clear date
         clearDateFilter()
-        // Reset shift and status to 'all' by unsetting their values
         updateFilters({ shift: undefined, appointmentStatus: undefined })
-        // Clear local search input
         setLocalSearch("")
     }
 
-    // Get status badge with color
     const getStatusBadge = (appointmentStatus: string) => {
         const { color, bgColor } = getAppointmentStatusColor(appointmentStatus)
         return (
@@ -112,7 +100,6 @@ const Patient: React.FC = () => {
         )
     }
 
-    // Get shift label using translation
     const getShiftLabel = (shift: string) => {
         const shiftLabels = {
             M: t("shifts.morning"),
@@ -123,7 +110,6 @@ const Patient: React.FC = () => {
         return shiftLabels[shift as keyof typeof shiftLabels] || shift
     }
 
-    // Filter appointments based on local search
     const filteredAppointments = appointments.filter((appointment) => {
         if (!localSearch) return true
         const searchLower = localSearch.toLowerCase()
@@ -135,7 +121,6 @@ const Patient: React.FC = () => {
         )
     })
 
-    // Sort appointments by status
     const statusOrder = ["C", "P", "D", "X"]
     const sortedAppointments = [...filteredAppointments].sort((a, b) => {
         const aIndex = statusOrder.indexOf(a.status)
@@ -143,7 +128,6 @@ const Patient: React.FC = () => {
         return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex)
     })
 
-    // Define table columns
     const columns = [
         {
             title: t("table.no"),
@@ -254,8 +238,8 @@ const Patient: React.FC = () => {
     ]
 
     return (
-        <div style={{ background: "#f8fafc", minHeight: "100vh" }}>
-            <div style={{ padding: "24px" }}>
+        <div style={{ minHeight: "100vh" }}>
+            <div style={{ }}>
                 {/* Header */}
                 <div style={{ marginBottom: "24px" }}>
                     <h1

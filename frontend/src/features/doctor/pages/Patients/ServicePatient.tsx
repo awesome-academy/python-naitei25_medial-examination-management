@@ -168,6 +168,7 @@ const ServicePatients: React.FC = () => {
 
             setServiceOrders(filteredOrders);
             setAppointmentsData(appointmentsMap);
+            
         } catch (err: any) {
             console.error("Error in fetchServiceOrders:", err.response?.data || err.message);
             setError(t("errors.fetchServiceOrders"));
@@ -445,8 +446,8 @@ const ServicePatients: React.FC = () => {
     ]
 
     return (
-        <div style={{ background: "#f0f9ff", minHeight: "100vh" }}>
-            <div style={{ padding: "24px" }}>
+        <div style={{ minHeight: "100vh" }}>
+            <div style={{ }}>
                 {/* Header */}
                 <div style={{ marginBottom: "24px" }}>
                     <h1 style={{ fontSize: "28px", fontWeight: "bold", color: "#111827", margin: 0, marginBottom: "8px" }}>
