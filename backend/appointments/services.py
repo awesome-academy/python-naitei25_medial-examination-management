@@ -254,6 +254,7 @@ class AppointmentService:
                 patient=data["patient"],
                 schedule=schedule,
                 symptoms=data["symptoms"],
+                note=data.get("note", ""),
                 slot_start=data["slot_start"],
                 slot_end=data["slot_end"],
                 status=AppointmentStatus.PENDING.value,

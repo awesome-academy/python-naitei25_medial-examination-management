@@ -188,12 +188,13 @@ class ScheduleSerializer(serializers.ModelSerializer):
 class AppointmentCreateSerializer(serializers.ModelSerializer):
     symptoms = serializers.CharField(required=False, allow_blank=True)
     note = serializers.CharField(required=False, allow_blank=True)
+    status = serializers.CharField(required=False)
     class Meta:
         model = Appointment
         fields = [
             'id',
             'slot_start', 'slot_end', 'schedule',
-            'symptoms', 'note',
+            'symptoms', 'note',  'status',
             'doctor', 'patient'
         ]
         read_only_fields = ['id']
@@ -244,8 +245,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
     patientInfo = PatientSerializer(source='patient', read_only=True)
     doctorInfo = DoctorSerializer(source='doctor', read_only=True)
     schedule = ScheduleSerializer()
-    appointment_notes = AppointmentNoteSerializer(many=True, read_only=True, source='appointmentnote_set')
-    service_orders = ServiceOrderSerializer(many=True, read_only=True, source='serviceorder_set')
+    note = serializers.CharField(required=False, allow_blank=True)
+    appointment_notes = AppointmentNoteSerializer(many=True, read_only=True)
+    service_orders = ServiceOrderSerializer(many=True, read_only=True, source='service_order')
 
     class Meta:
         model = Appointment
@@ -255,6 +257,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'patientId',
             'schedule',
             'symptoms',
+            'note',
             'slotStart',
             'slotEnd',
             'appointmentStatus',
@@ -272,11 +275,12 @@ class AppointmentDetailSerializer(serializers.ModelSerializer):
     doctorInfo = DoctorSerializer(source='doctor', read_only=True)
     schedule = ScheduleSerializer()
     appointmentNotes = serializers.SerializerMethodField()
+    note = serializers.CharField(read_only=True)
 
     class Meta:
         model = Appointment
         fields = [
-            'id', 'doctor', 'schedule', 'symptoms',
+            'id', 'doctor', 'schedule', 'symptoms', 'note',
             'slot_start', 'slot_end', 'status', 'created_at',
             'patientInfo', 'doctorInfo', 'appointmentNotes',
         ]
@@ -289,11 +293,12 @@ class AppointmentDetailSerializer(serializers.ModelSerializer):
 class AppointmentDoctorViewSerializer(serializers.ModelSerializer):
     patientInfo = PatientSerializer(source='patient', read_only=True)
     schedule = ScheduleSerializer()
+    note = serializers.CharField(read_only=True)
 
     class Meta:
         model = Appointment
         fields = [
-            'id', 'patient_id', 'patientInfo', 'symptoms',
+            'id', 'patient_id', 'patientInfo', 'symptoms', 'note',
             'schedule', 'status', 'created_at'
         ]
 
@@ -304,12 +309,13 @@ class AppointmentPatientViewSerializer(serializers.ModelSerializer):
     doctorId = serializers.IntegerField(source='doctor.id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     prescriptionId = serializers.SerializerMethodField()
+    note = serializers.CharField(read_only=True)
 
     class Meta:
         model = Appointment
         fields = [
             'id', 'doctorId', 'doctorInfo', 'schedule',
-            'symptoms', 'slot_start', 'slot_end',
+            'symptoms', 'note', 'slot_start', 'slot_end',
             'status', 'createdAt', 'prescriptionId'
         ]
 

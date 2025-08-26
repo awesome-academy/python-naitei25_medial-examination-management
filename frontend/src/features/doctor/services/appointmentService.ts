@@ -159,7 +159,7 @@ export const appointmentService = {
   },
 
   async updateAppointmentNotes(appointmentId: number, notes: string): Promise<Appointment> {
-    const response = await api.patch(`/appointments/${appointmentId}/notes`, { notes })
+    const response = await api.patch(`/appointments/${appointmentId}/note`, { notes })
     return response.data
   },
 

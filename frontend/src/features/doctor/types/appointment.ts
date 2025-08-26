@@ -7,6 +7,7 @@ export interface Appointment {
   patientId: number
   patientInfo: Patient | null // Có thể null
   symptoms: string
+  note?: string
   number: number
   schedule: Schedule
   appointmentStatus: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "PENDING_TEST_RESULT" | "IN_PROGRESS"
