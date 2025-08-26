@@ -22,6 +22,8 @@ class PharmacyService:
 
     def create_prescription(self, data):
         with transaction.atomic():
+            if Prescription.objects.filter(appointment_id=data['appointment_id'], is_deleted=False).exists():
+                raise ValueError(_("Đã tồn tại đơn thuốc cho lịch khám này"))
             prescription = Prescription(
                 appointment_id=data['appointment_id'],
                 patient_id=data['patient_id'],

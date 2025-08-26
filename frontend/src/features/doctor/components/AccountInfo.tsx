@@ -561,13 +561,9 @@ const AccountInfo = () => {
   const currentAvatarUrl = previewImage || profile?.avatar || profile?.profileImage
 
   return (
-    <div className="bg-white px-5 py-3 rounded-2xl">
+    <div className="bg-white rounded-2xl">
       <div className="flex justify-between items-center mb-6">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-xl font-semibold">{t("navigation.profile")}</h2>
-          <p className="text-gray-600">{t("navigation.profilePublicInfo")}</p>
-        </div>
-        <div className="flex gap-2">
+        <div className="flex">
           {!editMode ? (
             <Button type="primary" icon={<EditOutlined />} onClick={handleEdit}>
               {t("common.edit")}

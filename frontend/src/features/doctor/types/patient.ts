@@ -32,6 +32,7 @@ export interface PatientDetail {
   patientId: string
   patientInfo: PatientInfo
   symptoms: string
+  note?: string
   number: number
   slotStart: string
   slotEnd: string

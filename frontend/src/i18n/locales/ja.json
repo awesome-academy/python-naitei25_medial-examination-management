@@ -666,7 +666,8 @@
     "retry": "再試行",
     "close": "閉じる",
     "edit": "編集",
-    "viewPDF": "PDFを表示"
+    "viewPDF": "PDFを表示",
+    "editPrescription": "処方箋を編集"
   },
   "stats": {
     "totalAppointments": "総予約数",
@@ -1766,7 +1767,8 @@
       "incompleteInfo": "予約情報を完全に読み込めませんでした。",
       "processing": "処理中...",
       "confirmAndPay": "確認して支払う",
-      "workingTime": "勤務時間: {{start}} - {{end}}"
+      "workingTime": "勤務時間: {{start}} - {{end}}",
+      "note": "備考"
     },
     "status": {
       "pending": "保留中",

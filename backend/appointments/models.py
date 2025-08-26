@@ -1,6 +1,6 @@
 from django.db import models
 from core.models import BaseModel
-from doctors.models import Doctor, Schedule, ExaminationRoom, Schedule
+from doctors.models import Doctor, Schedule, ExaminationRoom
 from patients.models import Patient
 from common.enums import AppointmentStatus, NoteType, OrderStatus, ServiceType
 from common.constants import SERVICE_LENGTH, COMMON_LENGTH, DECIMAL_MAX_DIGITS, DECIMAL_DECIMAL_PLACES, ENUM_LENGTH

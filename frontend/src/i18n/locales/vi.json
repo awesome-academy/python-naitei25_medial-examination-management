@@ -665,7 +665,8 @@
     "retry": "Thử lại",
     "close": "Đóng",
     "edit": "Chỉnh sửa",
-    "viewPDF": "Xem PDF"
+    "viewPDF": "Xem PDF",
+    "editPrescription": "Chỉnh sửa đơn thuốc"
   },
   "stats": {
     "totalAppointments": "Tổng số cuộc hẹn",
@@ -1774,7 +1775,8 @@
       "incompleteInfo": "Không thể tải đầy đủ thông tin cuộc hẹn.",
       "processing": "Đang xử lý...",
       "confirmAndPay": "Xác nhận và thanh toán",
-      "workingTime": "Thời gian làm việc: {{start}} - {{end}}"
+      "workingTime": "Thời gian làm việc: {{start}} - {{end}}",
+      "note": "Ghi chú"
     },
     "status": {
       "pending": "Đang chờ",
