@@ -70,7 +70,7 @@ const AppointmentConfirmationPage: React.FC = () => {
           id: appointmentId,
           status: "P" as AppointmentStatus,
           symptoms: "",
-          notes: "",
+          note: "",
           appointmentDate: "",
           appointmentTime: "",
           doctorId: doctorId,
@@ -141,27 +141,29 @@ const AppointmentConfirmationPage: React.FC = () => {
     }
   }, [appointment, doctorDetails, patientDetails, t]);
 
-const handleBackToDoctor = () => {
-  let symptoms: string[] = [];
-  let note = "";
-  if (appointment?.symptoms) {
-    const [symptomsStr, noteStr] = appointment.symptoms.split("; Note: ");
-    symptoms = symptomsStr ? symptomsStr.split(", ").filter(Boolean) : [];
-    note = noteStr || "";
-  }
+  const handleBackToDoctor = () => {
+    let symptoms: string[] = [];
+    let note = "";
+    if (appointment?.symptoms) {
+      const [symptomsStr, noteStr] = appointment.symptoms.split("; Note: ");
+      symptoms = symptomsStr ? symptomsStr.split(", ").filter(Boolean) : [];
+      note = noteStr || "";
+    }
 
-const appointmentForm = {
-  date: appointmentDateFromUrl || new Date().toISOString().split("T")[0],
-  session: appointment?.schedule?.shift || "M",
-  time: appointment?.slot_start ? appointment.slot_start.substring(0, 5) : "",
-  symptoms,
-  note,
-};
+    const appointmentForm = {
+      date: appointmentDateFromUrl || new Date().toISOString().split("T")[0],
+      session: appointment?.schedule?.shift || "M",
+      time: appointment?.slot_start
+        ? appointment.slot_start.substring(0, 5)
+        : "",
+      symptoms: appointment?.symptoms ? appointment.symptoms.split(", ") : [],
+      note: appointment?.notes || "",
+    };
 
-  navigate(`/patient/departments/doctors/${doctorId}?book=true`, {
-    state: { appointmentForm, appointmentId }, // Đảm bảo truyền appointmentId
-  });
-};
+    navigate(`/patient/departments/doctors/${doctorId}?book=true`, {
+      state: { appointmentForm, appointmentId }, // Đảm bảo truyền appointmentId
+    });
+  };
 
   if (loading) {
     return <LoadingSpinner message={t("appointment.confirmation.loading")} />;
@@ -313,13 +315,16 @@ const appointmentForm = {
               </div>
             </div>
             {appointment.symptoms && (
-              <div className="mt-4">
-                <span className="font-medium text-gray-600">
-                  {t("appointment.confirmation.symptoms")}:
-                </span>
-                <p className="text-gray-900 mt-2 p-3 bg-blue-50 rounded-lg">
-                  {appointment.symptoms}
-                </p>
+              <div>
+                <span>{t("appointment.confirmation.symptoms")}:</span>
+                <p>{appointment.symptoms}</p>
+              </div>
+            )}
+
+            {appointment.note && (
+              <div>
+                <span>{t("appointment.confirmation.note")}:</span>
+                <p>{appointment.note}</p>
               </div>
             )}
             {appointment.schedule && (

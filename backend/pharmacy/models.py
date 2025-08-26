@@ -42,7 +42,7 @@ class Medicine(BaseModel):
 
 
 class Prescription(BaseModel):
-    appointment = models.ForeignKey(Appointment, on_delete=models.RESTRICT)
+    appointment = models.ForeignKey(Appointment, on_delete=models.RESTRICT, unique=True)
     patient = models.ForeignKey(Patient, on_delete=models.RESTRICT)
     follow_up_date = models.DateField(blank=True, null=True)
     is_follow_up = models.BooleanField(default=False)
@@ -54,6 +54,11 @@ class Prescription(BaseModel):
     note = models.CharField(max_length=PHARMACY_LENGTH["PRESCRIPTION_NOTE"], blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['appointment'], name='unique_prescription_per_appointment')
+        ]
+    
     def __str__(self):
         return f"Prescription {self.prescription_id} for Patient {self.patient_id}"
 

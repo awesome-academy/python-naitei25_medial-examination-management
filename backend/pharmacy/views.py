@@ -99,8 +99,10 @@ class PrescriptionViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'], url_path='appointment/(?P<appointment_id>\d+)')
     def get_prescriptions_by_appointment_id(self, request, appointment_id=None):
-        prescriptions = PharmacyService().get_prescriptions_by_appointment_id(appointment_id)
-        serializer = PrescriptionSerializer(prescriptions, many=True)
+        prescription = Prescription.objects.filter(appointment_id=appointment_id, is_deleted=False).first()
+        if not prescription:
+            return Response({}, status=status.HTTP_200_OK)
+        serializer = PrescriptionSerializer(prescription)
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='pdf')
