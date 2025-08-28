@@ -11,6 +11,9 @@ from users.services import UserService
 from common.enums import UserRole, AppointmentStatus
 from common.constants import SCHEDULE_DEFAULTS
 from django.utils.translation import gettext_lazy as _
+from django.db.models import ProtectedError, RestrictedError
+from rest_framework.exceptions import ValidationError
+from django.utils.translation import gettext as _
 
 
 class DoctorService:
@@ -124,9 +127,32 @@ class DepartmentService:
         department.save()
         return department
 
-    def delete_department(self, department_id):
+    def delete_department(self, department_id):        
         department = self.get_department_by_id(department_id)
-        department.delete()
+        
+        # Kiểm tra các bác sĩ trong khoa
+        doctors_count = Doctor.objects.filter(department_id=department_id).count()
+        if doctors_count > 0:
+            raise ValidationError(
+                _("Không thể xóa khoa này vì còn %(count)d bác sĩ đang làm việc trong khoa. "
+                  "Vui lòng chuyển các bác sĩ sang khoa khác trước khi xóa.") % {'count': doctors_count}
+            )
+        
+        # Kiểm tra các phòng khám trong khoa
+        rooms_count = ExaminationRoom.objects.filter(department_id=department_id).count()
+        if rooms_count > 0:
+            raise ValidationError(
+                _("Không thể xóa khoa này vì còn %(count)d phòng khám thuộc khoa. "
+                  "Vui lòng xóa các phòng khám trước khi xóa khoa.") % {'count': rooms_count}
+            )
+        
+        try:
+            department.delete()
+        except (ProtectedError, RestrictedError) as e:
+            raise ValidationError(
+                _("Không thể xóa khoa này vì còn dữ liệu liên quan. "
+                  "Vui lòng xóa tất cả dữ liệu liên quan trước khi xóa khoa.")
+            )
 
     def get_doctors_by_department_id(self, department_id):
         return Doctor.objects.filter(department_id=department_id).order_by('last_name', 'first_name')

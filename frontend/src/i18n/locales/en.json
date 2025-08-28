@@ -119,8 +119,45 @@
     "deleteError": "❌ Cannot delete user. Please try again!",
     "invalidUserEmail": "Cannot delete user: Invalid email!"
   },
+ "dialogs": {
+      "deleteDepartment": {
+        "title": "Confirm department deletion",
+        "description": "Are you sure you want to delete the \"{{name}}\" department? This action cannot be undone.",
+        "success": "Department deleted successfully!",
+        "errorTitle": "Unable to delete department"
+      }
+    },
+  "department": {
+    "edit": {
+      "title": "Edit department: {{name}}"
+    },
+    "name": "Department name",
+    "headDoctor": "Head doctor",
+    "headDoctorPlaceholder": "Select head doctor",
+    "phoneNumber": "Phone number",
+    "email": "Email",
+    "description": "Description"
+  },
   "common": {
+    "back": "Back",
+    "required": "Required",
+    "detailTitle": "{{name}} details",
+    "editTitle": "Edit",
+    "deleteTitle": "Delete",
+    "gotIt": "Got it",
+    "doctors": "Doctors",
+    "services": "Services",
     "welcome": "Welcome",
+    "unnamed": "Unnamed",
+    "siteName": "Wecare General Hospital",
+    "seo": {
+      "department": {
+        "title": "{{name}} | {{site}}",
+        "description": "{{name}} department details"
+      }
+    },
+    "phoneNumberPlaceholder": "Enter phone number",
+    "emailPlaceholder": "Enter email",
     "hello": "Hello",
     "goodbye": "Goodbye",
     "yes": "Yes",

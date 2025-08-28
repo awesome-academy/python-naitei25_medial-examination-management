@@ -6,10 +6,26 @@ import ReturnButton from "../../components/ui/button/ReturnButton";
 import { departmentService } from "../../services/departmentService";
 import { DoctorSelectModal } from "../../components/sections/doctor/DoctorSelectModal";
 import { scheduleService } from "../../services/scheduleService";
-import { Modal, Button } from "antd";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 dayjs.extend(isSameOrAfter);
+import { App as AntdApp} from "antd";
+import {
+  Spin,
+  Space,
+  Button,
+  Modal,
+  message,
+  Popconfirm,
+} from "antd";
+import {
+  UserOutlined,
+  CalendarOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
+
 
 interface Doctor {
   doctorId: number;
@@ -19,6 +35,7 @@ interface Doctor {
   avatar?: string;
   isAvailable?: boolean;
   departmentId?: number;
+  insurance_covered: boolean;
 }
 
 interface Service {
@@ -55,6 +72,66 @@ const DepartmentDetail: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const { message } = AntdApp.useApp();  
+
+  // Function to fetch head doctor's contact information
+  const fetchHeadDoctorContact = async (doctorId: number) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/v1/doctors/${doctorId}/`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const doctorData = await response.json();
+      setHeadDoctorContact({
+        email: doctorData.user?.email || "",
+        phone: doctorData.user?.phone || "",
+      });
+    } catch (error) {
+      console.error("Error fetching head doctor contact:", error);
+      setHeadDoctorContact({});
+    }
+  };
+
+  // bóc lỗi từ BE (mảng/string/object)
+  const extractErrorText = (err: any): string => {
+    const d = err?.response?.data;
+    if (!d) return err?.message || "Có lỗi xảy ra.";
+    if (Array.isArray(d)) return d.join("\n");
+    if (typeof d === "string") return d;
+    return d.detail || d.error || d.message || JSON.stringify(d);
+  };
+  
+  const handleDelete = async (deptId: string) => {
+    try {
+      setDeleteLoading(true);
+      const res = await departmentService.deleteDepartment(deptId);
+      message.success("Xóa khoa thành công!");
+      console.log("Delete response:", res);
+    } catch (error: any) {
+      const text = extractErrorText(error);
+      console.error("Delete error:", error);
+  
+      if (text.includes("\n")) {
+        Modal.error({
+          title: "Không thể xóa khoa",
+          content: (
+            <div style={{ whiteSpace: "pre-line" }}>
+              {text}
+            </div>
+          ),
+          okText: "Đã hiểu",
+          centered: true,
+        });
+      } else {
+        message.error(text);
+      }
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const [loading, setLoading] = useState(true);
   const [warning, setWarning] = useState<{ open: boolean; date?: string }>({ open: false });
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +140,7 @@ const DepartmentDetail: React.FC = () => {
   const [isDoctorModalOpen, setDoctorModalOpen] = useState(false);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [headDoctorContact, setHeadDoctorContact] = useState<{email?: string, phone?: string}>({});
   const [stats, setStats] = useState<DepartmentStats>({
     totalPatients: 0,
     todayPatients: 0,
@@ -115,6 +193,11 @@ const DepartmentDetail: React.FC = () => {
                 (firstDoctor.first_name && firstDoctor.last_name
                   ? `${firstDoctor.first_name} ${firstDoctor.last_name}`
                   : prev.headDoctorName);
+              
+              // Fetch head doctor's contact info
+              if (firstDoctor.id || firstDoctor.doctorId) {
+                fetchHeadDoctorContact(firstDoctor.id || firstDoctor.doctorId);
+              }
             }
             return {
               ...prev,
@@ -294,14 +377,14 @@ const DepartmentDetail: React.FC = () => {
                       {t("common.phone")}
                     </span>
                     <span>
-                      {department.phoneNumber || t("common.notAvailable")}
+                      {headDoctorContact.phone || t("common.notAvailable")}
                     </span>
                   </div>
                   <div className="flex">
                     <span className="font-medium w-32 text-gray-600">
                       {t("common.email")}
                     </span>
-                    <span>{department.email || t("common.notAvailable")}</span>
+                    <span>{headDoctorContact.email || t("common.notAvailable")}</span>
                   </div>
                 </div>
               </div>
@@ -544,15 +627,75 @@ const DepartmentDetail: React.FC = () => {
     <>
       {" "}
       <PageMeta
-        title={`${department.departmentName} | Bệnh viện Đa khoa Trung tâm`}
-        description={`Thông tin chi tiết về ${department.departmentName}`}
+        title={t("seo.department.title", {
+          name: department?.department_name ?? t("common.unnamed"),
+          site: t("seo.siteName"),
+        })}
+        description={t("seo.department.description", {
+          name: department?.department_name ?? t("common.unnamed"),
+        })}
       />
       <div className="mb-6">
-        <div className="flex items-center mb-4">
-          <ReturnButton />
-          <h2 className="text-xl font-semibold">
-            Chi tiết khoa: {department.departmentName}
-          </h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <ReturnButton />
+            <h2 className="text-xl font-semibold">
+              {t("common.detailTitle", { name: department?.department_name ?? "" })}
+            </h2>
+          </div>
+          <Space>
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              onClick={() => navigate(`/admin/departments/${id}/edit`)}
+            >
+              {t("common.edit")}
+            </Button>
+            <Popconfirm
+            title={t("dialogs.deleteDepartment.title")}
+            description={t("dialogs.deleteDepartment.description", {
+              name: department?.department_name ?? t("department.unnamed"),
+            })}
+            okText={t("common.delete")}
+            okType="danger"
+            cancelText={t("common.cancel")}
+            okButtonProps={{ loading: deleteLoading }}
+            onConfirm={async () => {
+              try {
+                setDeleteLoading(true);
+                const res = await departmentService.deleteDepartment(id!);
+                console.log("Delete response:", res);
+                message.success(t("dialogs.deleteDepartment.success"));
+                navigate("/admin/departments");
+              } catch (err: any) {
+                console.error("Delete error:", err);
+                const text = extractErrorText(err);
+                if (text.includes("\n")) {
+                  Modal.error({
+                    title: t("dialogs.deleteDepartment.errorTitle"),
+                    content: <div style={{ whiteSpace: "pre-line" }}>{text}</div>,
+                    okText: t("common.gotIt"),
+                    centered: true,
+                  });
+                } else {
+                  message.error(text);
+                }
+              } finally {
+                setDeleteLoading(false);
+              }
+            }}
+          >
+            <Button
+              type="primary"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={(e) => e.stopPropagation()}
+              disabled={deleteLoading}
+            >
+              {t("common.delete")}
+            </Button>
+          </Popconfirm>
+          </Space>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
@@ -565,7 +708,7 @@ const DepartmentDetail: React.FC = () => {
                   : "text-gray-500 hover:text-gray-700"
                   }`}
               >
-                Tổng quan
+                {t("common.overview")}
               </button>
             </li>{" "}
             <li className="mr-2">
@@ -576,7 +719,19 @@ const DepartmentDetail: React.FC = () => {
                   : "text-gray-500 hover:text-gray-700"
                   }`}
               >
-                Bác sĩ & Nhân viên
+                {t("common.doctors")}
+              </button>
+            </li>
+            <li className="mr-2">
+              <button
+                onClick={() => setActiveTab("services")}
+                className={`inline-block py-3 px-4 text-sm font-medium ${
+                  activeTab === "services"
+                    ? "border-b-2 border-base-600 text-base-600"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {t("common.services")}
               </button>
             </li>
           </ul>

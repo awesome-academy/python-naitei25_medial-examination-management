@@ -119,7 +119,44 @@
     "deleteError": "❌ Không thể xóa người dùng. Vui lòng thử lại!",
     "invalidUserEmail": "Không thể xóa người dùng: Email không hợp lệ!"
   },
+  "dialogs": {
+    "deleteDepartment": {
+      "title": "Xác nhận xóa khoa",
+      "description": "Bạn có chắc chắn muốn xóa khoa \"{{name}}\"? Hành động này không thể hoàn tác.",
+      "success": "Xóa khoa thành công!",
+      "errorTitle": "Không thể xóa khoa"
+    }
+  },
+  "department": {
+    "edit": {
+      "title": "Chỉnh sửa khoa: {{name}}"
+    },
+    "name": "Tên khoa",
+    "headDoctor": "Bác sĩ trưởng",
+    "headDoctorPlaceholder": "Chọn bác sĩ trưởng",
+    "phoneNumber": "Số điện thoại",
+    "email": "Email",
+    "description": "Mô tả"
+  },
   "common": {
+    "back": "Quay lại",
+    "detailTitle": "Chi tiết {{name}}",
+    "required": "Bắt buộc",
+    "editTitle": "Chỉnh sửa",
+    "deleteTitle": "Xóa",
+    "gotIt": "Đã hiểu",
+    "doctors": "Bác sĩ",
+    "services": "Dịch vụ",
+    "unnamed": "Chưa đặt tên",
+    "siteName": "Bệnh viện đa khoa Wecare",
+    "seo": {
+      "department": {
+        "title": "{{name}} | {{site}}",
+        "description": "Thông tin chi tiết về khoa {{name}} "
+      }
+    },
+    "phoneNumberPlaceholder": "Nhập số điện thoại",
+    "emailPlaceholder": "Nhập email",
     "welcome": "Chào mừng",
     "hello": "Xin chào",
     "goodbye": "Tạm biệt",
